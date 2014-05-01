@@ -27,8 +27,8 @@
 	                        <div class="message"><spring:message code="search_networks.loading_message"/></div>
 	                    </div>
 	                    
-	                 <fieldset id="networks_section">
-	                    <legend><spring:message code='search_networks.title'/><span id="networks_section_error"></span></legend>
+	                 <div id="networks_section">
+	                    <label class="title"><spring:message code='search_networks.title'/><span id="networks_section_error"></span></label>
 	                    <table id="network_toggle" cellspacing="0" cellpadding="0">
 	                        <tr>
 	                            <td width="100%">
@@ -63,13 +63,13 @@
 	                            </tr></table>
 	                        </div>
 	                    </div>
-	                </fieldset>
+	                </div>
 	               
 	            </div>
 
 	            <div class="line">
-	                <fieldset>
-	                    <legend><spring:message code='weighting.title'/></legend>
+	                <div>
+	                    <label class="title"><spring:message code='weighting.title'/></label>
 	                    
 	                   	<div class="network_weighting_group">
 							
@@ -136,12 +136,12 @@
 		                   		
 						</div>
 	                    
-	                </fieldset>
+	                </div>
 	            </div>
 	
 	            <div class="line">
-	                <fieldset>
-	                    <legend><spring:message code='results_number.title'/></legend>
+	                <div>
+	                    <label class="title"><spring:message code='results_number.title'/></label>
 	                    <div>
 	                        <spring:message code='results.number.phrase.start'/>
 	                        <select id="threshold" name="threshold" size="1">
@@ -162,7 +162,7 @@
 	                        <select id="attrthreshold" name="attrThreshold" size="1">
 	                        	<c:forEach var="th" items="0,10,20,50,100" varStatus="iteration">
 	                        		<c:choose>
-		                        		<c:when test="${ (empty params.attributeResultsSize && th == 20) || (params.attributeResultsSize == th) }">
+		                        		<c:when test="${ (empty params.attributeResultsSize && th == 10) || (params.attributeResultsSize == th) }">
 		                        			<option value="${th}" selected="selected">${th}</option>
 		                        		</c:when>
 		                        		<c:otherwise>
@@ -174,7 +174,7 @@
 	                        
 	                        <spring:message code='results.number.phrase.end'/>
 	                    </div>
-	                </fieldset>
+	                </div>
 	            </div>
 	        </div>
         </div>

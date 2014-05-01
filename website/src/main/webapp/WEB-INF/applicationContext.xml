@@ -15,6 +15,22 @@
      	 http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring/ehcache-spring-1.1.xsd
          ">
 
+    <!-- allow loading of configurations values from local property files -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="false"/>
+        <property name="ignoreResourceNotFound" value="true"/>
+        <property name="order" value="1"/>
+        <property name="locations">
+            <list> <!-- later files in list override earlier. can use e.g. ${user.home} or  ${var:default} -->
+                <value>/WEB-INF/classes/ApplicationConfig.properties</value>
+                <!-- can also use e.g.:
+                  <value>classpath:/WEB-INF/config.properties</value>
+                  <value>file:config.properties</value>
+                 -->
+            </list>
+        </property>
+    </bean>
+
 	<!-- i18n -->
 
 	<bean id="localeResolver"
@@ -129,7 +145,7 @@
 		<property name="networkDao" ref="networkDao" />
 	</bean>
 
-	<bean id="emailService" class="org.genemania.service.impl.EmailServiceImpl">
+	<bean id="emailService" class="org.genemania.service.impl.EmailServiceImpl" init-method="init">
 		<property name="mailSender" ref="mailSender" />
 		<property name="mailMessage" ref="mailMessage" />
 	</bean>
@@ -151,47 +167,27 @@
 
 	<!-- JMS -->
 
-	<bean id="mqRequestsQueue" class="org.apache.activemq.command.ActiveMQQueue">
-		<constructor-arg value="${genemaniaMqRequests}" />
-	</bean>
-	<bean id="mqRepliesQueue" class="org.apache.activemq.command.ActiveMQQueue">
-		<constructor-arg value="${genemaniaMqReplies}" />
-	</bean>
-	<bean id="mqStatsQueue" class="org.apache.activemq.command.ActiveMQQueue">
-		<constructor-arg value="${genemaniaMqStats}" />
-	</bean>
-	<bean id="jmsConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory"  destroy-method="stop">
-		<constructor-arg value="${brokerUrl}" />
-	</bean>
-	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-		<property name="connectionFactory">
-			<bean class="org.springframework.jms.connection.SingleConnectionFactory">
-				<property name="targetConnectionFactory" ref="jmsConnectionFactory" />
-			</bean>
-		</property>
-	</bean>
-	<bean id="engineConnector" class="org.genemania.connector.JmsEngineConnector">
+	<bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${brokerUrl}" />
+    </bean>
+
+    <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+        <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    </bean>
+
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="pooledConnectionFactory" />
+    </bean>
+
+ 	<bean id="engineConnector" class="org.genemania.connector.JmsEngineConnector">
 		<property name="jmsTemplate" ref="jmsTemplate" />
-		<property name="requestQueue" ref="mqRequestsQueue" />
-		<property name="replyQueue" ref="mqRepliesQueue" />
-		<property name="statsQueue" ref="mqStatsQueue" />
-		<property name="connectionFactory" ref="jmsConnectionFactory" />
+        <property name="requestQueueName" value="${genemaniaMqRequests}" />
+        <property name="responseQueueName" value="${genemaniaMqReplies}" />
 		<property name="organismDao" ref="organismDao" />
 		<property name="nodeDao" ref="nodeDao" />
 		<property name="networkDao" ref="networkDao" />
-	</bean>
-	<bean id="jmsMessageListener"
-		class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
-		<constructor-arg>
-			<bean class="org.genemania.connector.JmsEngineConnector" />
-		</constructor-arg>
-	</bean>
-	<bean id="jmsContainer"
-		class="org.springframework.jms.listener.DefaultMessageListenerContainer">
-		<property name="connectionFactory" ref="jmsConnectionFactory" />
-		<property name="messageListener" ref="jmsMessageListener" />
-		<property name="destination" ref="mqRepliesQueue" />
-		<property name="sessionTransacted" value="true" />
+        <property name="timeoutMillis" value="${engineTimeoutMillis}" />
+        <property name="messageExpirationMillis" value="${messageExpirationMillis}" />
 	</bean>
 
 	<!-- should be last -->

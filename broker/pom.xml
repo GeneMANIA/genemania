@@ -4,7 +4,7 @@
 	<groupId>org.genemania</groupId>
 	<artifactId>genemania-broker</artifactId>
 	<packaging>jar</packaging>
-	<version>3.1.1</version>
+	<version>3.1.2.7</version>
 	<name>GeneManiaBroker</name>
 	<url>genemania.org</url>
 	<repositories>
@@ -18,17 +18,17 @@
 		<dependency>
 			<groupId>org.genemania</groupId>
 			<artifactId>genemania-common</artifactId>
-			<version>3.1.1</version>
+			<version>3.1.2.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.genemania</groupId>
 			<artifactId>genemania-engine</artifactId>
-			<version>3.1.1</version>
+			<version>3.1.2.7</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.9</version>
+			<version>1.2.17</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-configuration</groupId>
@@ -42,13 +42,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-core</artifactId>
-			<version>5.4.2</version>
+			<artifactId>activemq-all</artifactId>
+			<version>5.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-pool</artifactId>
-			<version>5.4.2</version>
+			<version>5.9.0</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -105,7 +105,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<genemaniaCacheDir>${HOME}/genemania/genemania-data/cache</genemaniaCacheDir>
+				<genemaniaCacheDir>${env.HOME}/genemania/genemania-data/cache</genemaniaCacheDir>
 				<mqRequestsQueueName>gm_requests</mqRequestsQueueName>
 				<mqRepliesQueueName>gm_replies</mqRepliesQueueName>
 			</properties>

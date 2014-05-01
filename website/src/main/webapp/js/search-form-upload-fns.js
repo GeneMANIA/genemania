@@ -58,7 +58,7 @@ function showUploadProgress(networkName) {
 	$(".query_network_group[group=0][organism="+org+"]").click();
 }
 
-function showUploadCompleted(data) {
+function showUploadCompleted(data, error) {
 
 	var name = $(".uploading_query_network").attr("name");
 	var organism = $(".uploading_query_network").attr("organism");

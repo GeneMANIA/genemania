@@ -4,7 +4,7 @@
 	<groupId>org.genemania</groupId>
 	<artifactId>genemania-website</artifactId>
 	<packaging>war</packaging>
-	<version>3.1.2</version>
+	<version>3.1.2.7</version>
 	<name>GeneMANIA</name>
 	<url>http://genemania.org</url>
 	<properties>
@@ -29,7 +29,7 @@
 		<repository>
 			<id>genemania_maven_repo</id>
 			<name>GeneMANIA Maven Project Repository</name>
-			<url>http://server4.baderlab.med.utoronto.ca/genemania_maven_repo/</url>
+			<url>http://genemania.org/mvn</url>
 		</repository>
 		<repository>
 			<id>repository.jboss.org</id>
@@ -144,13 +144,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-core</artifactId>
-			<version>5.4.2</version>
+			<artifactId>activemq-all</artifactId>
+			<version>5.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-pool</artifactId>
-			<version>5.4.2</version>
+			<version>5.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
@@ -176,17 +176,17 @@
 		<dependency>
 			<groupId>org.genemania</groupId>
 			<artifactId>genemania-common</artifactId>
-			<version>3.1.1</version>
+			<version>3.1.2.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.genemania</groupId>
 			<artifactId>genemania-engine</artifactId>
-			<version>3.1.1</version>
+			<version>3.1.2.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.genemania</groupId>
 			<artifactId>genemania-broker</artifactId>
-			<version>3.1.1</version>
+			<version>3.1.2.7</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.el</groupId>
@@ -214,6 +214,27 @@
 		<finalName>genemania</finalName>
 
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0-alpha-2</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>local.properties</file>
+							</files>
+							<!-- if we want to ignore local.properties, uncomment the next
+							     line. but we normally require email.password configured there -->
+							<!-- <quiet>true</quiet> -->
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>com.samaxes.maven</groupId>
 				<artifactId>maven-minify-plugin</artifactId>
@@ -255,10 +276,37 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<ant target="minify">
-									<property name="debug.extension" value="${version}"/>
-									<property name="deploy.dir" value="target/genemania"/>
-								</ant>
+								<property name="debug.extension" value="${version}"/>
+								<property name="deploy.dir" value="target/genemania"/>
+
+								<property name="web.src.dir" value="src/main/webapp"/>
+								<property name="resources.dir" value="src/main/resources"/>
+
+								<copy todir="${deploy.dir}/i18n">
+									<fileset dir="${resources.dir}" includes="**/messages*.properties"/>
+								</copy>
+
+								<delete failonerror="false">
+									<fileset dir="${deploy.dir}/js" includes="script.*.js"/>
+								</delete>
+								<concat destfile="${deploy.dir}/js/script.${debug.extension}.js" append="true">
+									<fileset dir="${web.src.dir}/js/plugins" includes="jquery-*.js"/>
+									<fileset dir="${web.src.dir}/js/plugins" includes="**/*.js" excludes="jquery-*.js" />
+									<fileset dir="${web.src.dir}/js/cytoweb" includes="**/*.js" />
+									<fileset dir="${web.src.dir}/js/init" includes="**/*.js" />
+									<fileset dir="${web.src.dir}/js/graph" includes="**/*.js" />
+									<fileset dir="${web.src.dir}/js" includes="**/*.js" excludes="plugins/**,cytoweb/**,init/**,graph/**" />
+								</concat>
+								<delete failonerror="false">
+									<fileset dir="${deploy.dir}/css" includes="style.*.css"/>
+								</delete>
+								<concat destfile="${deploy.dir}/css/style.${debug.extension}.css" append="true">
+									<fileset dir="${web.src.dir}/css" includes="jquery/custom-theme/jquery-ui.custom.css"/>
+									<fileset dir="${web.src.dir}/css/jquery" includes="**/*.css" excludes="custom-theme/**" />
+									<fileset dir="${web.src.dir}/css" includes="main.css"/>
+								</concat>
+								<copy file="${web.src.dir}/css/main.ie.css" tofile="${deploy.dir}/css/main.ie.${debug.extension}.css" />
+								<copy file="${web.src.dir}/css/noscript.css" tofile="${deploy.dir}/css/noscript.${debug.extension}.css" />
 							</tasks>
 						</configuration>
 					</execution>
@@ -414,18 +462,17 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<genemaniaGeneIndexDir>${HOME}/genemania/genemania-data/index</genemaniaGeneIndexDir>
+				<genemaniaGeneIndexDir>${env.HOME}/genemania/genemania-data/index</genemaniaGeneIndexDir>
 				<genemaniaDbHost>localhost</genemaniaDbHost>
 				<genemaniaDbName>genemania</genemaniaDbName>
-				<genemaniaGraphCacheDir>${HOME}/genemania/apache-tomcat/webapps/genemania/WEB-INF/classes</genemaniaGraphCacheDir>
+				<genemaniaGraphCacheDir>${env.HOME}/genemania/apache-tomcat/webapps/genemania/WEB-INF/classes</genemaniaGraphCacheDir>
 				<genemaniaHost>http://localhost:8080/genemania</genemaniaHost>
-				<deployDir>${HOME}/genemania/apache-tomcat/webapps/genemania</deployDir>
+				<deployDir>${env.HOME}/genemania/apache-tomcat/webapps/genemania</deployDir>
 				<GA_ACCT_NR>GOOGLE_ANALYTICS_TOKEN_GOES_HERE</GA_ACCT_NR>
-				<brokerUrl>tcp://localhost:61616</brokerUrl>
+                <brokerUrl>failover://(tcp://localhost:61616)?timeout=600000</brokerUrl>
 				<genemaniaMqRequests>gm_requests</genemaniaMqRequests>
 				<genemaniaMqReplies>gm_replies</genemaniaMqReplies>
-				<genemaniaMqStats>gm_stats</genemaniaMqStats>
-				<sahiTestsWorkingDirectory>${HOME}/genemania/qa</sahiTestsWorkingDirectory>
+				<sahiTestsWorkingDirectory>${env.HOME}/genemania/qa</sahiTestsWorkingDirectory>
 				<emailRecipient>genemania.local@gmail.com</emailRecipient>
 			</properties>
 		</profile>

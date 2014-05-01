@@ -102,7 +102,11 @@ function makeNetworkHtml(organism, group, network, error, types){
             				( network.metadata.interactionCount > 0 ?
             						'<p>' + $.i18n("search_networks.info.error") + '</p>'
             					:
-            						'<p>' + $.i18n("search_networks.info.no_interactions") + '</p>'
+            						( ("" + error).toLowerCase() == "method not allowed" ?
+            								'<p>' + $.i18n("search_networks.info.too_big_file") + '  You may be interested in trying the <a href="http://pages.genemania.org/plugin/">GeneMANIA plugin</a> for Cytoscape, which supports large files.' + '</p>'
+            							:
+            								'<p>' + $.i18n("search_networks.info.no_interactions") + '</p>'
+            						)
             				)
             			:
             				''

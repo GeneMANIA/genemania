@@ -12,15 +12,31 @@ $(function(){
 	// autocomplete setup
 	
     var species = new Array();
+    var alias = new Array();
+    var species_structs = [];
     $("#species_select > option").each(function(){
-        species.push( $.trim($(this).text()) );
+        var name = $.trim( $(this).text() );
+        var alias = $.trim( $(this).attr("alias") );
+        var id = parseInt( $(this).attr('value') );
+
+        species_structs.push({
+            name: name,
+            alias: alias,
+            id: id
+        });
     });
 
-    var alias = new Array();
-    $("#species_select > option").each(function(i){
-        var str = $(this).attr("alias");
-    	alias.push( $.trim(str) );
+    species_structs.sort(function(a, b){
+        return a.id - b.id;
     });
+
+    for( var i = 0; i < species_structs.length; i++ ){
+        var struct = species_structs[i];
+
+        species.push( struct.name );
+        alias.push( struct.name );
+    }
+
     
     var speciesAndAliases = new Array();
     for(var i in species) {
@@ -120,21 +136,27 @@ $(function(){
         	val = null;
         }
         
-//        console.log("--");
-//        console.log(val);
+//     console.log("--");
+//     console.log(val);
         
         if( !val  || val == "" ) {
-//        	console.log("grab from select on empty");
+//     	console.log("grab from select on empty");
             resetSpeciesToSelectBoxVal();
         } else if( validSpecies(val) ) {
-//        	console.log("set value to select on valid species");
-            $("#species_select").val( getIdForSpecies(val) ).trigger("change");
+//     	console.log("set value to select on valid species");
+            $("#species_select").val( getIdForSpecies(val) )
+//          console.log(val)
+//          console.log(getIdForSpecies(val));
+
+            setTimeout(function(){ $("#species_select").trigger('change') }, 10);
         } else if( validAlias(val) ) {
-//        	console.log("set value to select on valid alias");
+//     	console.log("set value to select on valid alias");
             $("#species_text").val( getSpeciesFromAlias(val) );
-			$("#species_select").val( getIdForAlias(val) ).trigger("change");
+			$("#species_select").val( getIdForAlias(val) );
+
+            setTimeout(function(){ $("#species_select").trigger('change') }, 10);
         } else {
-//        	console.log("grab from select on invalid");
+//     	console.log("grab from select on invalid");
         	resetSpeciesToSelectBoxVal();
         }
         

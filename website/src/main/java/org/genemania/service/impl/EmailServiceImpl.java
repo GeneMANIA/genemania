@@ -1,5 +1,6 @@
 package org.genemania.service.impl;
 
+import org.apache.log4j.Logger;
 import org.genemania.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
@@ -12,6 +13,8 @@ public class EmailServiceImpl implements EmailService {
 
 	@Autowired
 	private SimpleMailMessage mailMessage;
+
+	protected Logger logger = Logger.getLogger(getClass());
 
 	@Override
 	public void sendEmail(String message) {
@@ -33,7 +36,8 @@ public class EmailServiceImpl implements EmailService {
 			String from) {
 		SimpleMailMessage msg = new SimpleMailMessage(this.mailMessage);
 		msg.setSubject(subject);
-		msg.setText("The following message was sent on behalf of " + name + " (" + from + ") by the GeneMANIA mailer\n--\n" + message);
+		msg.setText("The following message was sent on behalf of " + name
+				+ " (" + from + ") by the GeneMANIA mailer\n--\n" + message);
 		msg.setFrom(from);
 		mailSender.send(msg);
 	}
@@ -52,6 +56,15 @@ public class EmailServiceImpl implements EmailService {
 
 	public void setMailMessage(SimpleMailMessage message) {
 		this.mailMessage = message;
+	}
+
+	// test the email sending
+	public void init() {
+		try {
+			this.sendEmail("This is a test of the email system on init of the GeneMANIA webserver.");
+		} catch (Exception e) {
+			logger.error("The test of the email system on init failed.", e);
+		}
 	}
 
 }
