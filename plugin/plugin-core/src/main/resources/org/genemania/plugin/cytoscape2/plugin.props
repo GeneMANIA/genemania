@@ -1,0 +1,8 @@
+pluginName=GeneMANIA
+pluginDescription=GeneMANIA helps you predict the function of your favourite genes and gene sets.<br>The interface is backed by powerful analysis software and a large data warehouse containing extensive amounts of existing functional genomics data. The data warehouse supporting our interface will be kept current using low-maintenance, automated data collection software that we have developed.
+pluginVersion=${cytoscapeVersion}
+cytoscapeVersion=2.6,2.7,2.8
+pluginCategory=Network generation
+pluginAuthorsInstitutions=GeneMANIA Team:University of Toronto
+releaseDate=${releaseDate}
+projectUrl=http://www.genemania.org/

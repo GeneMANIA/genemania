@@ -1,0 +1,1 @@
+jQuery.fn.reverse = [].reverse;

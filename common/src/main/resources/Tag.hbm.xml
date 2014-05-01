@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.genemania.domain">
+    <class name="Tag" table="TAGS">
+        <id name="id" type="long" column="ID">
+            <generator class="native"/>
+        </id>
+        <property name="name" type="string" length="128"/>
+    </class>
+</hibernate-mapping>

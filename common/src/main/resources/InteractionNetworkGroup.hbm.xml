@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.genemania.domain">
+    <class name="InteractionNetworkGroup" table="NETWORK_GROUPS">
+        <id name="id" type="long" column="ID">
+            <generator class="native"/>
+        </id>
+        <property name="name" type="string" column="NAME" length="255"/>
+        <property name="code" type="string" column="CODE" length="10"/>
+        <property name="description" type="string" column="DESCRIPTION"/>
+        <bag name="interactionNetworks" table="NETWORKS" lazy="true" cascade="all,delete-orphan">
+			<key column="GROUP_ID"/>
+			<one-to-many class="org.genemania.domain.InteractionNetwork"/>
+        </bag>
+    </class>
+</hibernate-mapping>

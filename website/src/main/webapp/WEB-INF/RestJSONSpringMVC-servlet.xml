@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:oxm="http://www.springframework.org/schema/oxm"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/oxm
+  		http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd">
+	
+    <!-- Enable annotation scanning. -->
+    <context:component-scan base-package="org.genemania.controller.rest" />
+
+    <bean id="marshallingHttpMessageConverter"
+        class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+    </bean>
+
+    <!-- Required for REST services in order to bind the return value to the ResponseBody. -->
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        <property name="messageConverters">
+            <util:list id="beanList">
+                <ref bean="marshallingHttpMessageConverter" />
+            </util:list>
+        </property>
+    </bean>
+
+    <!-- Should be defined last! -->
+    <mvc:annotation-driven />
+
+</beans>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.genemania.domain">
+    <class name="Node" table="NODES">
+        <id name="id" type="long" column="ID">
+            <generator class="native"/>
+        </id>
+        <property name="name" type="string" column="NAME" length="100"/>
+        <bag name="genes" lazy="true">
+			<key column="NODE_ID"/>
+			<one-to-many class="Gene"/>
+        </bag>
+        <many-to-one name="geneData" class="GeneData" column="GENE_DATA_ID"/>
+    </class>
+</hibernate-mapping>

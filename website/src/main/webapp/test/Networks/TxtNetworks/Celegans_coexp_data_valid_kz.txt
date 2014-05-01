@@ -1,0 +1,9 @@
+Gene1	Gene2	Pearson Correlation coefficient
+npl-4.1	npl-4.2	0.99688196
+rpn-10	rpn-11	0.994708214
+pas-2	pas-4	0.991946965
+nspc-20	nspc-9	0.991571777
+gsp-3	gsp-4	0.991323506
+nspc-2	nspc-20	0.991267875
+rpn-5	rpn-6	0.990424822
+R04B5.5	R04B5.6	0.990266744

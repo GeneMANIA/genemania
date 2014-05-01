@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>GeneMANIA Cytoscape Plugin</title>
+        <!--<base href="http://www.genemania.org"/>-->
+        <link rel="stylesheet" type="text/css" href="/css/jquery/custom-theme/jquery-ui-1.7.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/css/main.css" />
+        <link rel="shortcut icon" href="/img/favicon.ico" />
+        <style>
+        #info_content li li {
+            font-size: 100%;
+        }
+        </style>
+    </head>
+    <body>
+        <div id="page">
+            <div id="info_page">
+                <div id="info_header" class="line">
+                    <div class="slice">
+                        <a href="/">
+                        <div id="logo_small"></div>
+                        </a>
+                    </div>
+                </div>
+                <div id="info_content" class="line"><h1>GeneMANIA Cytoscape Plugin</h1>
+
+<p>
+The GeneMANIA Cytoscape plugin brings fast gene function prediction capabilities to the desktop. GeneMANIA identifies the most related genes to a query gene set using a guilt-by-association approach. The plugin uses a large database of functional interaction networks from multiple organisms and each related gene is traceable to the source network used to make the prediction. Users may add their own interaction networks and expression profile data to complement or override the default data. The plugin follows the look and feel of the GeneMANIA website, but provides more features for power-users:
+</p>
+
+<ul>
+<li>Number of query genes is limited only by the amount of memory available</li>
+<li>Powerful <a href="tools.html">command line tools</a> to automate basic and advanced analysis not available via the website</li>
+<li>Users can add their own organisms</li>
+<li>Integration with the popular Cytoscape network visualization and analysis platform so Cytoscape networks can be imported into GeneMANIA and GeneMANIA results can be used in other Cytoscape analysis. Also, results can be saved in Cytoscape session files for later work, backup or sharing with colleagues.</li>
+</ul>
+
+<p>
+<b>GeneMANIA Cytoscape plugin: fast gene function predictions on the desktop.</b><br /> 
+					Montojo J, Zuberi K, Rodriguez H, Kazi F, Wright G, Donaldson SL, Morris Q, Bader GD (2010)<br /> 
+					<a href="http://dx.crossref.org/10.1093%2Fbioinformatics%2Fbtq562" class="external_link">Bioinformatics 26: 22. </a><br /> 
+					<a href="http://www.ncbi.nlm.nih.gov/pubmed/20926419" class="external_link">Full Article</a> (<a href="http://bioinformatics.oxfordjournals.org/content/26/22/2927.full.pdf+html">PDF</a>)
+</p>
+
+<h2>Minimum System Requirements</h2>
+<ul>
+    <li>Java 1.5+ JVM (1.6 is required for Cytoscape 2.8+)<br/>
+        <strong>Note</strong>: Queries that use more than 1.5 GB of RAM require Cytoscape to be launched with a 64-bit JVM
+    </li>
+    <li><a href="http://www.cytoscape.org/" class="external_link" >Cytoscape</a> 2.6.3+, 2.7+, or 2.8+ (does not work with 3.0 yet)</li>
+    <li>2 GB RAM</li>
+</ul>
+
+<h2>Installation Instructions</h2>
+<ol>
+    <li><a class="external_link" href="http://cytoscape.wodaklab.org/wiki/How_to_increase_memory_for_Cytoscape">Adjust the amount of memory allocated to Cytoscape</a> to at least 1.5GB</li>
+    <li>In Cytoscape, go to <em>Plugins » Manage Plugins</em>.</li>
+    <li>Under <em>Available for Install » Network Inference</em>, select <em>GeneMANIA</em>.</li>
+    <li><em>Click Install</em>.</li>
+</ol>
+                    
+<h2>Development Snapshot Installation Instructions</h2>
+<p><strong>Note:</strong> If you have already installed an official GeneMANIA release, you need to remove it before you can install a development snapshot.</p>
+<ol>
+    <li><a class="external_link" href="http://cytoscape.wodaklab.org/wiki/How_to_increase_memory_for_Cytoscape">Adjust the amount of memory allocated to Cytoscape</a> to at least 1.5GB</li>
+    <li>In Cytoscape, go to <em>Plugins » Manage Plugins</em>.</li>
+    <li>Click <em>Change Download Site</em>.</li>
+    <li>Click <em>Edit Sites</em>.</li>
+    <li>Click <em>Add</em>.</li>
+    <li>Under <em>Name</em>, type: <code>GeneMANIA</code>.</li>
+    <li>Under <em>URL</em>, type: <code>http://www.genemania.org/plugin/plugins-dev.xml</code>.</li>
+    <li>Click <em>Ok</em> until you get back to the plugin selection page.</li>
+    <li>Under <em>Available for Install » Network Inference</em>, select <em>GeneMANIA</em>.</li>
+    <li><em>Click Install</em>.</li>
+</ol>
+                    
+<p>GeneMANIA is actively developed at the <a href="http://www.utoronto.ca/" class="external_link" target="_blank">University of Toronto</a>, in the <a href="http://tdccbr.med.utoronto.ca/" class="external_link" target="_blank">Donnelly Centre for Cellular and Biomolecular Research</a>, in the labs of <a href="http://www.baderlab.org/" class="external_link" target="_blank">Gary Bader</a>
+     and <a href="http://morrislab.med.utoronto.ca/" class="external_link" target="_blank">Quaid Morris</a>, with input from an independent <a href="http://www.genemania.org/pages/people.jsf#advisoryBoard">scientific advisory board</a>. GeneMANIA development is funded by <a href="http://www.genomecanada.ca/" class="external_link" target="_blank">Genome Canada</a>, through the <a href="http://www.ontariogenomics.ca/" class="external_link" target="_blank">Ontario Genomics Institute</a>
+     (2007-OGI-TD-05).
+</p>
+
+                </div>
+                <div id="info_content" class="line">
+                    <form action="http://groups.google.com/group/genemania-announce/boxsubscribe">
+                        <p>Subscribe to <a href="http://groups.google.com/group/genemania-announce" class="external_link" target="_blank">genemania-announce</a>
+                            
+</p>
+                        <div>
+                            <label>Email:</label>
+                             <input type="text" name="email" class="widget" />
+                             <input type="submit" name="sub" value="Subscribe" class="widget" />
+                            
+</div>
+                    </form>
+                </div>
+                <div id="info_copyright" class="line">
+                    <div class="line logo">
+                        <a href="http://tdccbr.med.utoronto.ca/" target="_blank">
+                            <img src="../img/logo/ccbr_logo.jpg" />
+                        </a>
+                         <a href="http://www.genomecanada.ca/" target="_blank">
+                            <img src="../img/logo/genome_canada_logo.jpg" />
+                        </a>
+                         <a href="http://www.ontariogenomics.ca/" target="_blank">
+                            <img src="../img/logo/ogi_logo.jpg" />
+                        </a>
+                        
+</div>
+                    <div class="line">© University of Toronto 2010
+</div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

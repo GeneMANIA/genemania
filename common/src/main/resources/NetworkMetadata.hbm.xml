@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.genemania.domain">
+    <class name="NetworkMetadata" table="NETWORK_METADATA">
+        <id name="id" type="long" column="ID">
+            <generator class="native"/>
+        </id>
+        <property name="source" type="string"/>
+        <property name="reference" type="string"/>
+        <property name="pubmedId" type="string"/>
+        <property name="authors" type="string" length="512"/>
+        <property name="publicationName" type="string"/>
+        <property name="yearPublished" type="string"/>
+<!--        <property name="dateDownloaded" type="date"/>-->
+        <property name="processingDescription" type="string"/>
+        <property name="networkType" type="string"/>
+        <property name="alias" type="string"/>
+        <property name="interactionCount" type="long"/>
+        <property name="dynamicRange" type="string"/>
+        <property name="edgeWeightDistribution" type="string"/>
+        <property name="accessStats" type="long"/>
+        <property name="comment" type="string" length="4096"/>
+        <property name="other" type="string"/>
+        <property name="title" type="string" length="512"/>
+        <property name="url" type="string"/>
+        <property name="sourceUrl" type="string"/>
+    </class>
+</hibernate-mapping>

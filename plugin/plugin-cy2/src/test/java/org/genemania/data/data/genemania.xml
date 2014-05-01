@@ -1,0 +1,11 @@
+<genemania>
+    <data-version>dummy</data-version>
+    <access-mode>direct</access-mode>
+    <connection>
+        <driver>com.mysql.jdbc.Driver</driver>
+        <url>jdbc:mysql://localhost:3306/genemania</url>
+        <dialect>org.hibernate.dialect.MySQLDialect</dialect>
+        <username>genemania</username>
+        <password>password</password>
+    </connection>
+</genemania>

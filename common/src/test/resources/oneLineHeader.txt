@@ -1,0 +1,3 @@
+Interacting Protein #1	Interacting Protein #2	Confidence Score
+TFC3	TFC1	0.989
+TFC3	TFC6	0.989

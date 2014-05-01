@@ -1,0 +1,23 @@
+.ui-browserupdate-icon { display: block; float: left; height: 64px; width: 64px; position: relative; margin: 0 0.5em 0 0 ; }
+.ui-browserupdate-icon.chrome { background-image: url("../img/browser/chrome.png"); }
+.ui-browserupdate-icon.firefox { background-image: url("../img/browser/firefox.png"); }
+.ui-browserupdate-icon.safari { background-image: url("../img/browser/safari.png"); }
+.ui-browserupdate-icon.msie { background-image: url("../img/browser/ie.png"); }
+.ui-browserupdate-icon .ui-browserupdate-name { text-shadow: 0 0 2px #000; font-weight: bold; padding: 4px; width: 50px; left: 50%; margin-left: -30px; margin-top: -1em; position: absolute; text-decoration: none; color: #fff; top: 100%; text-align: center; background: #000; background: rgba(0, 0, 0, 0.5); border-radius: 1em; }
+
+.ui-browserupdate-out-of-date { margin-bottom: 1em; }
+.ui-browserupdate-notification { position: absolute; left: 0; top: 0; z-index: 999; height: 100%; width: 100%; }
+.ui-browserupdate-background { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #000; filter: alpha(opacity=90);
+	-webkit-transition: 0.25s opacity;
+	-moz-transition: 0.25s opacity;
+	background: rgba(0, 0, 0, 0.7);
+	background: -webkit-radial-gradient(rgba(127, 127, 127, 0.5), rgba(127, 127, 127, 0.5) 35%, rgba(0, 0, 0, 0.7));
+	background: -moz-radial-gradient(rgba(127, 127, 127, 0.5), rgba(127, 127, 127, 0.5) 35%, rgba(0, 0, 0, 0.7));
+	opacity: 0.9; }
+.ui-browserupdate-message { background: #fff; border-radius: 16px; padding: 1.5em; max-width: 400px; padding-bottom: 3em; }
+.ui-browserupdate-update-message { font-size: 2em; text-decoration: underline; }
+.ui-browserupdate-versions { font-size: 0.85em; display: block; margin-right: 1em; margin-left: 64px; padding-left: 0.5em; }
+.ui-browserupdate-versions em { font-weight: bold; font-style: normal; }
+.ui-browserupdate-versions + .ui-browserupdate-versions { margin-left: 0; }
+.ui-browserupdate-alternative { margin-top: 2em; border-top: 1px solid #cacaca; padding-top: 1em; }
+.ui-browserupdate-notification a { text-decoration: none; }

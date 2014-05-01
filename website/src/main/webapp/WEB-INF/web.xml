@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="GeneMANIA" version="2.4"
+	xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+	<!-- Meta data -->
+	<display-name>GeneMANIA</display-name>
+	<description>GeneMANIA Web Site</description>
+
+	<!-- UrlRewriteFilter -->
+	<filter>
+		<filter-name>UrlRewriteFilter</filter-name>
+		<filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>UrlRewriteFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- Spring MVC Configuration -->
+	<servlet>
+		<servlet-name>SpringMVC</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet>
+		<servlet-name>RestJSONSpringMVC</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>SpringMVC</servlet-name>
+		<url-pattern>/public-html/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>RestJSONSpringMVC</servlet-name>
+		<url-pattern>/json/*</url-pattern>
+	</servlet-mapping>
+
+
+
+	<!-- Spring Context Configuration -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+	</listener>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/applicationContext*.xml</param-value>
+	</context-param>
+
+	<!-- Error pages -->
+	<error-page>
+		<error-code>404</error-code>
+		<location>/public-html/http_error?type=404</location>
+	</error-page>
+
+	<error-page>
+		<error-code>405</error-code>
+		<location>/public-html/http_error?type=405</location>
+	</error-page>
+
+	<error-page>
+		<error-code>400</error-code>
+		<location>/public-html/http_error?type=400</location>
+	</error-page>
+
+	<error-page>
+		<error-code>500</error-code>
+		<location>/public-html/http_error?type=500</location>
+	</error-page>
+	
+	<error-page>
+		<exception-type>java.lang.Exception</exception-type>
+		<location>/public-html/http_error?type=500</location>
+	</error-page>
+
+
+	<!-- Define a security constraint on this application -->
+	
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Test Page (alias)</web-resource-name>
+			<url-pattern>/tests</url-pattern>
+		</web-resource-collection>
+		<web-resource-collection>
+			<web-resource-name>Test Page</web-resource-name>
+			<url-pattern>/tests.do</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+	
+			<!-- This role is not in the default user directory -->
+			<role-name>user</role-name>
+		</auth-constraint>
+	</security-constraint>
+			
+	<!-- Define the login configuration for this application -->
+	<login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>Tomcat Manager Application</realm-name>
+	</login-config>
+	
+	<!-- Security roles referenced by this web application  -->
+	<security-role>
+		<description>The role that is required to run GeneMANIA tests</description>
+		<role-name>user</role-name>
+	</security-role>
+	
+
+</web-app>

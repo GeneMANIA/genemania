@@ -1,0 +1,35 @@
+/* basic styling */
+.ui-menu-item { border: 1px solid transparent; border-top-color: transparent !important; border-bottom-color: transparent !important; width: 100%; float: left; clear: both;  background: #f0f0f0;  border-right: #ccc solid 1px; border-left: #ccc solid 1px; color: #474d5a; }
+.ui-menu-item.ui-menu-item-new-section { border-top: 1px solid #dadada !important; }
+.ui-menu-item-first { border-top: #ccc solid 1px !important; border-left: #ccc solid 1px; border-right: #ccc solid 1px;}
+.ui-menu-item-last { border-bottom: #ccc solid 1px !important; border-left !important: #ccc solid 1px; border-right: #ccc solid 1px;}
+.ui-state-active.ui-menu-item {}
+.ui-state-active.ui-menu-item-first {border-top-width: 1px;}
+.ui-state-active.ui-menu-item-last {border-bottom-width: 1px;}
+.ui-tabs-nav.ui-menu-bar  {text-align: left;}
+.ui-menu-item label { padding-left: 2em; padding-right: 2em; }
+.ui-tabs-nav .ui-state-default.ui-menu-title { margin-left: 0.5em; margin-right: 0.5em; padding-left: 0.5em; padding-right: 0.5em;}
+.ui-menu-item, .ui-menu-title label { cursor: pointer;  }
+.ui-sub-menu { margin-left: -3px; }
+.ui-top-menu { opacity: 0.95; margin-left: -7px; }
+
+/* menu title modifications */
+.ui-menu-title.ui-state-default {background: transparent; border-color: transparent; }
+.ui-menu-title.ui-state-active {border-color: transparent; background: #474d5a; }
+
+/* icons */
+.ui-menu-check-icon { height: 12px; width: 12px; background-repeat: no-repeat; background-color: transparent; border: 0px !important; background-image: url("../img/check/grey/check.png"); opacity: 0; }
+.ui-menu-check-icon.ui-state-active { background-color: transparent; border: 0 !important; background-image: none; }
+.ui-menu-checked { opacity: 100; }
+.ui-state-active.ui-menu-checked { background-image: url("../img/check/light_grey/check.png"); }
+
+.ui-menu-parent-icon { height: 12px; width: 12px;  background-image: url("../img/arrow/parent.png"); background-repeat: no-repeat; background-color: transparent; border: 0px;}
+.ui-state-active.ui-menu-parent-icon { background-image: url("../img/arrow/parent_highlight.png"); background-color: transparent; border: 0px;}
+
+.ui-menu-item.ui-state-disabled { border-left-color: #ccc !important; border-right-color: #ccc !important; border-top-color: transparent !important; border-bottom-color: transparent !important; background: #f0f0f0 !important; color: #a0a0a0 !important; cursor: default !important; }
+.ui-menu-item.ui-state-disabled.ui-menu-item-new-section { border-top-color: #dadada !important; }
+.ui-menu-item.ui-state-disabled.ui-menu-item-first { border-top: #ccc solid 1px !important; }
+.ui-menu-item.ui-state-disabled.ui-menu-item-last { border-bottom: #ccc solid 1px !important; }
+
+.ui-menu-check-icon { filter:alpha(opacity=0); }
+.ui-menu-checked { filter: none; }

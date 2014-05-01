@@ -1,0 +1,54 @@
+^DATABASE = Geo
+!Database_name = Gene Expression Omnibus (GEO)
+!Database_institute = NCBI NLM NIH
+!Database_web_link = http://www.ncbi.nlm.nih.gov/projects/geo
+!Database_email = geo@ncbi.nlm.nih.gov
+!Database_ref = Nucleic Acids Res. 2005 Jan 1;33 Database Issue:D562-6
+^DATASET = GDS3198
+!dataset_title = Abf1 DNA-binding mutant
+!dataset_description = Analysis of temperature sensitive Abf1 mutant cells subjected to a temperature of 37 degrees C to dissociate the mutant protein from its DNA binding sites. Results provide insight into the contribution of this general regulatory factor to transcription genome-wide.
+!dataset_type = gene expression array-based
+!dataset_pubmed_id = 17158163
+!dataset_platform = GPL90
+!dataset_platform_organism = Saccharomyces cerevisiae
+!dataset_platform_technology_type = in situ oligonucleotide
+!dataset_feature_count = 9335
+!dataset_sample_organism = Saccharomyces cerevisiae
+!dataset_sample_type = RNA
+!dataset_channel_count = 1
+!dataset_sample_count = 6
+!dataset_value_type = count
+!dataset_reference_series = GSE6073
+!dataset_order = none
+!dataset_update_date = Mar 19 2008
+^SUBSET = GDS3198_1
+!subset_dataset_id = GDS3198
+!subset_description = wild type
+!subset_sample_id = GSM140786,GSM140800,GSM140801
+!subset_type = genotype/variation
+^SUBSET = GDS3198_2
+!subset_dataset_id = GDS3198
+!subset_description = Abf1 mutant
+!subset_sample_id = GSM140802,GSM140803,GSM140804
+!subset_type = genotype/variation
+^DATASET = GDS3198
+#ID_REF = Platform reference identifier
+#IDENTIFIER = identifier
+#GSM140786 = Value for GSM140786: Abf1 wt 37 C rep1; src: Abf1 wild type control
+#GSM140800 = Value for GSM140800: Abf1 wt 37 C rep2; src: Abf1 wild type control
+#GSM140801 = Value for GSM140801: Abf1 wt 37C rep3; src: Abf1 wild type control
+#GSM140802 = Value for GSM140802: Abf1 ts 37 C rep1; src: Abf1 ts mutant
+#GSM140803 = Value for GSM140803: Abf1 ts 37 C rep2; src: Abf1 ts mutant
+#GSM140804 = Value for GSM140804: Abf1 ts 37 C rep3; src: Abf1 ts mutant
+!dataset_table_begin
+ID_REF	IDENTIFIER	GSM140786	GSM140800	GSM140801	GSM140802	GSM140803	GSM140804
+10000_at	YLR331C	24.600	24.800	2.800	28.500	31.900	23.900
+10001_at	MID2	1725.400	1485.400	1723.000	1891.900	1236.700	1572.500
+10002_i_at	RPS25B	3201.000	3320.100	3851.900	4330.000	4849.700	4194.800
+10003_f_at	RPS25B	17057.900	17186.000	16283.100	20828.800	15609.400	15060.700
+10004_at	YLR334C	6.100	1.300	8.300	26.400	1.700	4.700
+10005_at	NUP2	1815.100	2001.300	2139.900	2296.400	1932.000	2066.600
+10006_at	SGD1	879.600	715.500	1364.900	1109.700	568.200	1035.900
+10007_at	VRP1	836.100	872.100	1035.700	493.200	1270.800	1249.000
+10008_at	YLR338W	27.300	37.500	33.300	41.400	54.400	15.000
+10009_at	YLR339C	31.100	178.000	20.000	27.700	258.400	52.300

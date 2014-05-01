@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.genemania.domain">
+    <class name="GeneNamingSource" table="GENE_NAMING_SOURCES">
+        <id name="id" type="long" column="ID">
+            <generator class="native"/>
+        </id>
+		<property name="name" type="string" column="NAME" length="100" not-null="false"/>
+		<property name="rank" type="byte" column="RANK" not-null="false"/>
+		<property name="shortName" type="string" column="SHORT_NAME" not-null="false"/>
+    </class>
+</hibernate-mapping>

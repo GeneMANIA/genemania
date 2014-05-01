@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:ehcache="http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/context
+         http://www.springframework.org/schema/context/spring-context-3.0.xsd
+         http://www.springframework.org/schema/mvc
+		 http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+         http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring
+     	 http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring/ehcache-spring-1.1.xsd
+         ">
+
+	<!-- i18n -->
+
+	<bean id="localeResolver"
+		class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+		<property name="defaultLocale" value="en" />
+	</bean>
+
+	<!-- email -->
+
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.gmail.com" />
+		<property name="port" value="587" />
+		<property name="username" value="genemania.mailer@gmail.com" />
+		<property name="password" value="${emailPassword}" />
+		<property name="javaMailProperties">
+			<props>
+				<!-- Use SMTP-AUTH to authenticate to SMTP server -->
+				<prop key="mail.smtp.auth">true</prop>
+				<!-- Use TLS to encrypt communication with SMTP server -->
+				<prop key="mail.smtp.starttls.enable">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="mailMessage" class="org.springframework.mail.SimpleMailMessage">
+		<property name="from">
+			<value>genemania.mailer@gmail.com</value>
+		</property>
+		<property name="to">
+			<value>${emailRecipient}</value>
+		</property>
+		<property name="subject">
+			<value>Mail from GeneMANIA mailer</value>
+		</property>
+	</bean>
+
+	<!-- ehcache set up -->
+
+	<ehcache:annotation-driven cache-manager="ehCacheManager"
+		default-cache-key-generator="defaultCacheKeyGenerator" />
+
+	<bean id="ehCacheManager"
+		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" />
+
+	<bean id="defaultCacheKeyGenerator"
+		class="com.googlecode.ehcache.annotations.key.StringCacheKeyGenerator" />
+
+	<!-- Version definition -->
+
+	<bean id="appVersion" class="java.lang.String">
+		<constructor-arg>
+			<value>${version}</value>
+		</constructor-arg>
+	</bean>
+
+	<!-- Controller definitions -->
+
+	<bean id="i18nController" class="org.genemania.controller.rest.I18nController">
+		<property name="localeResolver" ref="localeResolver" />
+	</bean>
+
+	<bean id="versionController" class="org.genemania.controller.rest.VersionController">
+		<property name="appVersion" ref="appVersion" />
+	</bean>
+
+	<!-- Service definitions -->
+
+	<bean id="attributeService" class="org.genemania.service.impl.AttributeServiceImpl">
+		<property name="attributeDao" ref="attributeDao" />
+	</bean>
+	
+	<bean id="attributeGroupService" class="org.genemania.service.impl.AttributeGroupServiceImpl">
+		<property name="attributeGroupDao" ref="attributeGroupDao" />
+	</bean>
+
+	<bean id="networkGroupService" class="org.genemania.service.impl.NetworkGroupServiceImpl">
+		<property name="networkGroupDao" ref="networkGroupDao" />
+		<property name="networkService" ref="networkService" />
+	</bean>
+
+	<bean id="geneService" class="org.genemania.service.impl.GeneServiceImpl">
+		<property name="geneDao" ref="geneDao" />
+		<property name="organismDao" ref="organismDao" />
+	</bean>
+
+	<bean id="organismService" class="org.genemania.service.impl.OrganismServiceImpl">
+		<property name="organismDao" ref="organismDao" />
+	</bean>
+
+	<bean id="searchService" class="org.genemania.service.impl.SearchServiceImpl">
+		<property name="engineConnector" ref="engineConnector" />
+		<property name="geneDao" ref="geneDao" />
+		<property name="attributeGroupService" ref="attributeGroupService" />
+		<property name="networkGroupService" ref="networkGroupService" />
+		<property name="networkService" ref="networkService" />
+		<property name="attributeDao" ref="attributeDao" />
+	</bean>
+
+	<bean id="uploadNetworkService" class="org.genemania.service.impl.UploadNetworkServiceImpl">
+		<property name="engineConnector" ref="engineConnector" />
+		<property name="organismDao" ref="organismDao" />
+		<property name="networkDao" ref="networkDao" />
+		<property name="networkService" ref="networkService" />
+	</bean>
+
+	<bean id="statsService" class="org.genemania.service.impl.StatsServiceImpl">
+		<property name="statsDao" ref="statsDao" />
+	</bean>
+
+	<bean id="networkService" class="org.genemania.service.impl.NetworkServiceImpl">
+		<property name="organismDao" ref="organismDao" />
+		<property name="networkDao" ref="networkDao" />
+	</bean>
+
+	<bean id="emailService" class="org.genemania.service.impl.EmailServiceImpl">
+		<property name="mailSender" ref="mailSender" />
+		<property name="mailMessage" ref="mailMessage" />
+	</bean>
+
+	<bean id="visualizationDataService" class="org.genemania.service.impl.VisualizationDataServiceImpl">
+	</bean>
+
+
+	<!-- DAO definitions -->
+
+	<bean id="organismDao" class="org.genemania.dao.impl.LuceneOrganismDao" />
+	<bean id="networkDao" class="org.genemania.dao.impl.LuceneNetworkDao" />
+	<bean id="statsDao" class="org.genemania.dao.impl.LuceneStatsDao" />
+	<bean id="networkGroupDao" class="org.genemania.dao.impl.LuceneNetworkGroupDao" />
+	<bean id="nodeDao" class="org.genemania.dao.impl.LuceneNodeDao" />
+	<bean id="geneDao" class="org.genemania.dao.impl.LuceneGeneDao" />
+	<bean id="attributeGroupDao" class="org.genemania.dao.impl.LuceneAttributeGroupDao" />
+	<bean id="attributeDao" class="org.genemania.dao.impl.LuceneAttributeDao" />
+
+	<!-- JMS -->
+
+	<bean id="mqRequestsQueue" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg value="${genemaniaMqRequests}" />
+	</bean>
+	<bean id="mqRepliesQueue" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg value="${genemaniaMqReplies}" />
+	</bean>
+	<bean id="mqStatsQueue" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg value="${genemaniaMqStats}" />
+	</bean>
+	<bean id="jmsConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory"  destroy-method="stop">
+		<constructor-arg value="${brokerUrl}" />
+	</bean>
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory">
+			<bean class="org.springframework.jms.connection.SingleConnectionFactory">
+				<property name="targetConnectionFactory" ref="jmsConnectionFactory" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="engineConnector" class="org.genemania.connector.JmsEngineConnector">
+		<property name="jmsTemplate" ref="jmsTemplate" />
+		<property name="requestQueue" ref="mqRequestsQueue" />
+		<property name="replyQueue" ref="mqRepliesQueue" />
+		<property name="statsQueue" ref="mqStatsQueue" />
+		<property name="connectionFactory" ref="jmsConnectionFactory" />
+		<property name="organismDao" ref="organismDao" />
+		<property name="nodeDao" ref="nodeDao" />
+		<property name="networkDao" ref="networkDao" />
+	</bean>
+	<bean id="jmsMessageListener"
+		class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+		<constructor-arg>
+			<bean class="org.genemania.connector.JmsEngineConnector" />
+		</constructor-arg>
+	</bean>
+	<bean id="jmsContainer"
+		class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="connectionFactory" ref="jmsConnectionFactory" />
+		<property name="messageListener" ref="jmsMessageListener" />
+		<property name="destination" ref="mqRepliesQueue" />
+		<property name="sessionTransacted" value="true" />
+	</bean>
+
+	<!-- should be last -->
+	<mvc:annotation-driven />
+</beans>

@@ -1,0 +1,39 @@
+body { font-size: 75% !important; } 
+
+.ui-effects-transfer {filter:alpha(opacity=20)}
+/*#header { filter: shadow(color=#333333, direction=180); } */
+.input_error { filter: glow(color=#ff0000, strength=128); }
+input[type=text].widget { padding: 0.25em 0 0.25em 0; }
+input[type=button].widget, input[type=submit].widget, button.widget { padding-left: 0.1em; padding-right: 0.1em;  }
+#fndBtn { padding-left: 0.1em !important; padding-right: 0.1em !important; }
+
+.advanced_options_toggle { margin-right: 0.5em; }
+
+#networkDescriptionPanel, .query_network_info, .user_network_info { width: 32em; }
+
+#networks_section_loading { margin-top: 1.75em; margin-bottom: -2em; }
+
+#userNetworksContainer .ellipsis { width: 350px !important }
+
+#header #advanced_options { padding-top: 0px; margin-top: 0.7em;  }
+input[disabled], button[disabled] { filter:alpha(opacity=40); }
+#uploadBtn { cursor: pointer;  }
+
+.network_weighting_group { max-width: 33%; }
+
+.network_weighting_group p { padding-left: .25em; }
+.network_weighting_group { padding-right: 0.5em; }
+#results_page {  }
+#overlay { filter:alpha(opacity=0); }
+.qtip .ui-state-disabled { filter:alpha(opacity=50) }
+
+.advanced_options_toggle { margin-top: 0; }
+
+#species_select { border: 1px solid #cacaca; }
+#announcements { padding-top: 2em; }
+
+.ui-tabs-nav { margin-bottom: -2px !important; }
+
+#networks_section_loading { margin-top: 16px !important; }
+
+#gene_area { line-height: 1.2; /* workaround since ie8 can't calculate line height */ }

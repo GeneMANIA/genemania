@@ -1,0 +1,43 @@
+<assembly>
+    <id>distribution</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory></outputDirectory>
+            <outputFileNameMapping></outputFileNameMapping>
+            <unpack>true</unpack>
+            <scope>runtime</scope>
+            <excludes>
+                <exclude>cytoscape:cytoscape</exclude>
+                <exclude>cytoscape:cytoscape-task</exclude>
+                <exclude>cytoscape:giny</exclude>
+                <exclude>commons-httpclient:commons-httpclient</exclude>
+                <exclude>javax.persistence:persistence-api</exclude>
+                <exclude>org.aopalliance:*</exclude>
+                <exclude>org.springframework:*</exclude>
+            </excludes>
+        </dependencySet>
+    </dependencySets>
+    
+    <fileSets>
+        <!-- See ticket #1450 -->
+        <fileSet>
+            <directory>target/dependencies/ticket-1450</directory>
+            <outputDirectory>/compatibility/1450</outputDirectory>
+            <includes>
+                <include>no/uib/cipr/**/*</include>
+            </includes>
+        </fileSet>
+        <!-- See ticket #1472 -->
+        <fileSet>
+            <directory>target/dependencies/ticket-1472</directory>
+            <outputDirectory>/compatibility/1472</outputDirectory>
+            <includes>
+                <include>no/uib/cipr/**/*</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

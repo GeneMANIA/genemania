@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.genemania.domain">
+    <class name="InteractionNetwork" table="NETWORKS">
+        <id name="id" type="long" column="ID">
+            <generator class="native"/>
+        </id>
+        <property name="name" type="string" column="NAME" length="255"/>
+        <many-to-one name="metadata" class="NetworkMetadata" column="METADATA_ID" lazy="false"/>
+        <property name="description" type="string" column="DESCRIPTION" length="5120"/> <!-- deprecated -->
+        <property name="defaultSelected" type="boolean">
+            <column name="DEFAULT_SELECTED" sql-type="smallint"/>
+        </property>
+        <bag name="interactions" table="INTERACTIONS" lazy="true" cascade="all,delete-orphan">
+			<key column="NETWORK_ID"/>
+			<one-to-many class="org.genemania.domain.Interaction"/>
+        </bag>
+		<bag name="tags" table="NETWORK_TAG_ASSOC">
+		    <key column="NETWORK_ID"/>
+		    <many-to-many column="TAG_ID" class="Tag"/>
+		</bag>
+    </class>
+</hibernate-mapping>

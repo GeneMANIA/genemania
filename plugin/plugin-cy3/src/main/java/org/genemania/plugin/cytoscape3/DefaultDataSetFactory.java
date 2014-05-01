@@ -1,0 +1,42 @@
+/**
+ * This file is part of GeneMANIA.
+ * Copyright (C) 2008-2011 University of Toronto.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+package org.genemania.plugin.cytoscape3;
+
+import org.genemania.plugin.FileUtils;
+import org.genemania.plugin.cytoscape.CytoscapeUtils;
+import org.genemania.plugin.data.DataSetManager;
+import org.genemania.plugin.data.lucene.LuceneDataSetFactory;
+import org.genemania.plugin.task.TaskDispatcher;
+import org.genemania.plugin.view.util.UiUtils;
+
+/**
+ * TODO: This class exists because Felix's classloader can't seem to create
+ * a LuceneDataSetFactory as a bean within this bundle.
+ */
+public class DefaultDataSetFactory<NETWORK, NODE, EDGE> extends
+		LuceneDataSetFactory<NETWORK, NODE, EDGE> {
+
+	public DefaultDataSetFactory(DataSetManager dataSetManager,
+			UiUtils uiUtils, FileUtils fileUtils,
+			CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			TaskDispatcher taskDispatcher) {
+		super(dataSetManager, uiUtils, fileUtils, cytoscapeUtils, taskDispatcher);
+	}
+
+}

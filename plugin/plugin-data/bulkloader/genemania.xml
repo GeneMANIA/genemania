@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<genemania>
+    <type>org.genemania.data.lucene.LuceneDataSet</type>
+    <data-version>custom</data-version>
+    <access-mode>compact</access-mode>
+</genemania>

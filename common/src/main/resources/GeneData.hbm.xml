@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.genemania.domain">
+    <class name="GeneData" table="GENE_DATA">
+        <id name="id" type="long" column="ID">
+            <generator class="native"/>
+        </id>
+		<property name="description" type="string" column="DESCRIPTION" length="3072" not-null="true"/>
+		<property name="externalId" type="string" column="EXTERNAL_ID"/>
+<!--		<property name="externalKey1" type="string" column="EXTERNAL_KEY_1"/>-->
+<!--		<property name="externalKey2" type="string" column="EXTERNAL_KEY_2"/>-->
+        <many-to-one name="linkoutSource" class="GeneNamingSource" column="LINKOUT_SOURCE_ID"/>
+    </class>
+</hibernate-mapping>

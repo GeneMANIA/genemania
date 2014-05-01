@@ -1,0 +1,11 @@
+# organism	<id file>	<name>	<description>	<alias>	<taxonomy id>
+organism	ids.txt	organism_name	my organism	organism_alias	1337
+
+# group	<name>	<code>	<description>	<RRGGBB colour>
+group	group1	g1	my group #1	ff00ff	organism_name
+group	group2	g2	my group #2	00ff00	organism_name
+
+# network	<file name>	<name>	<description>	<group code>
+network	net.txt	net1	network #1	g1
+network	net.txt	net2	network #2	g2
+network	net.txt	net3	network #3	g1

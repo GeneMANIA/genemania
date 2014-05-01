@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.genemania.domain">
+    <class name="Organism" table="ORGANISMS">
+        <id name="id" type="long" column="ID">
+            <generator class="native"/>
+        </id>
+        <property name="name" type="string" column="NAME" length="100" not-null="true"/>
+        <property name="description" type="string" column="DESCRIPTION" length="255"/>
+        <bag name="interactionNetworkGroups" lazy="true" fetch="select">
+			<key column="ORGANISM_ID"/>
+			<one-to-many class="org.genemania.domain.InteractionNetworkGroup"/>
+        </bag>
+        <property name="alias" type="string" column="ALIAS" length="256"/>
+        <many-to-one name="ontology" class="Ontology" column="ONTOLOGY_ID"/>
+        <property name="taxonomyId" type="long" column="TAXONOMY_ID"/>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.genemania.domain">
+    <class name="NetworkTagAssoc" table="NETWORK_TAG_ASSOC" >
+        <id name="id" type="long" column="ID">
+            <generator class="native"/>
+        </id>
+        <many-to-one name="network_id" class="InteractionNetwork" column="NETWORK_ID" index="IX_NETWORK_ID"/>
+        <many-to-one name="tag_id" class="Tag" column="TAG_ID" index="IX_TAG_ID"/>
+    </class>
+</hibernate-mapping>

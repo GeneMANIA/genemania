@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+	updateCheck="false">
+	<!--
+		| Please see
+		http://ehcache.sourceforge.net/documentation/configuration.html for |
+		detailed information on how to configurigure caches in this file +
+	-->
+	<!-- Location of persistent caches on disk -->
+	<diskStore path="java.io.tmpdir/genemania_java_obj_cache" />
+
+	<defaultCache eternal="false" maxElementsInMemory="100000"
+        overflowToDisk="true" diskPersistent="false" timeToIdleSeconds="0"
+        timeToLiveSeconds="600" memoryStoreEvictionPolicy="LRU"/>
+
+	<cache name="searchResultsCache" eternal="false"
+		maxElementsInMemory="100" overflowToDisk="false" />
+
+ 	<cache name="geneIsValidCache" eternal="false"
+		maxElementsInMemory="10000" overflowToDisk="true" />
+
+	<cache name="genesForSymbolsCache" eternal="false"
+		maxElementsInMemory="10000" overflowToDisk="true" />
+
+	<cache name="geneForIdCache" eternal="false"
+		maxElementsInMemory="10000" overflowToDisk="true" />
+
+	<cache name="nodeIdCache" eternal="false" maxElementsInMemory="10000"
+		overflowToDisk="true" />
+
+	<cache name="networkCache" eternal="false" maxElementsInMemory="10000"
+		overflowToDisk="true" />
+
+	<cache name="networkIsValidCache" eternal="false"
+		maxElementsInMemory="10000" overflowToDisk="true" />
+
+	<cache name="networkGroupsByNameCache" eternal="false"
+		maxElementsInMemory="10000" overflowToDisk="true" />
+
+	<cache name="networkGroupsByOrganismCache" eternal="false"
+		maxElementsInMemory="10000" overflowToDisk="true" />
+
+	<cache name="attributeGroupsByOrganismCache" eternal="false" maxElementsInMemory="10000"
+		overflowToDisk="true" />
+		
+	<cache name="attributeGroupsByNameCache" eternal="false" maxElementsInMemory="10000"
+		overflowToDisk="true" />
+		
+	<cache name="attributeCache" eternal="false" maxElementsInMemory="10000"
+		overflowToDisk="true" />
+		
+	<cache name="attributeIsValidCache" eternal="false" maxElementsInMemory="10000"
+		overflowToDisk="true" />
+
+	<cache name="nodeCache" eternal="false" maxElementsInMemory="10000"
+		overflowToDisk="true" />
+
+	<cache name="allOrganismsCache" eternal="false"
+		maxElementsInMemory="10000" overflowToDisk="true" />
+
+	<cache name="organismCache" eternal="false" maxElementsInMemory="10000"
+		overflowToDisk="true" />
+
+	<cache name="defaultGenesCache" eternal="false"
+		maxElementsInMemory="10000" overflowToDisk="true" />
+
+	<cache name="defaultNetworksCache" eternal="false"
+		maxElementsInMemory="10000" overflowToDisk="true" />
+
+	<cache name="latestStatisticsCache" eternal="false"
+		maxElementsInMemory="10000" overflowToDisk="true" />
+
+
+	<!--
+		EXAMPLE ENTRIES
+		
+		<cache name="weatherCache" eternal="false"
+		maxElementsInMemory="100" overflowToDisk="false"
+		diskPersistent="false" timeToIdleSeconds="0" timeToLiveSeconds="300"
+		memoryStoreEvictionPolicy="LRU" /> <cache name="locationSearchCache"
+		eternal="false" maxElementsInMemory="100" overflowToDisk="false"
+		diskPersistent="false" timeToIdleSeconds="0" timeToLiveSeconds="300"
+		memoryStoreEvictionPolicy="LRU" />
+	-->
+</ehcache>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.genemania.domain">
+    <class name="Gene" table="GENES">
+        <id name="id" type="long" column="ID">
+            <generator class="native"/>
+        </id>
+		<property name="symbol" type="string" column="SYMBOL" length="64" not-null="true" index="ix_symbol"/>
+		<property name="symbolType" type="string" column="SYMBOL_TYPE" length="8" not-null="true"/>
+        <many-to-one name="namingSource" class="GeneNamingSource" column="NAMING_SOURCE_ID" not-null="true"/>
+        <many-to-one name="node" class="Node" column="NODE_ID" not-null="true"/>
+        <many-to-one name="organism" class="Organism" column="ORGANISM_ID" not-null="true" index="ix_organism_defaultselected"/>
+		<property name="defaultSelected" type="boolean" index="ix_organism_defaultselected">
+                    <column name="DEFAULT_SELECTED" sql-type="smallint"/>
+                </property>
+    </class>
+</hibernate-mapping>
