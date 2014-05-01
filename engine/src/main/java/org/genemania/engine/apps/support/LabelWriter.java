@@ -19,6 +19,7 @@
 
 package org.genemania.engine.apps.support;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -37,21 +38,25 @@ import org.genemania.exception.ApplicationException;
 import org.genemania.mediator.NodeMediator;
 
 public class LabelWriter  {
-	private String basePath;
+	private File baseFile;
+	private File baseDirectory;
 	private NodeMediator nodeMediator;
 	private long organismId;
 
 	public LabelWriter(String basePath, NodeMediator nodeMediator, long organismId) {
-		this.basePath = basePath;
+		baseFile = new File(basePath).getAbsoluteFile();
+		baseDirectory = new File(baseFile.getParentFile(), String.format("%s-details", baseFile.getName()));
+		baseDirectory.mkdirs();
+		
 		this.nodeMediator = nodeMediator;
 		this.organismId = organismId;
 	}
 	
 	public void write(String queryName, int fold, Vector label, Vector discriminant, Collection<Integer> labelIndices, NodeIds nodeIds) throws ApplicationException {
-		String path = String.format("%s-labels-%s-%d", basePath, queryName, fold);
+		String path = String.format("%s-labels-%s-%d", baseFile.getName(), queryName, fold);
 		Writer fileWriter;
 		try {
-			fileWriter = new FileWriter(path);
+			fileWriter = new FileWriter(new File(baseDirectory, path));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

@@ -20,12 +20,12 @@
 package org.genemania.util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.genemania.domain.Gene;
 import org.genemania.domain.Node;
 import org.genemania.domain.Organism;
@@ -37,9 +37,9 @@ import org.genemania.domain.Organism;
  * each individual generator is responsible for examining a nodes
  * identifier & source data and returning link data when possible.
  *
- * to add new generators, subclass Generator and override either check()
- * or generate() as appropriate, then register the new generator to the
- * required organisms in registerDefault().
+ * to add new generators, subclass Generator and override generate()
+ * for genes and/or nodes as appropriate, then register the new generator
+ * to the required organisms in registerDefault().
  *
  * iterating over the resulting map will visit the links in the
  * order they were registered
@@ -53,14 +53,19 @@ public class GeneLinkoutGenerator {
     private static long Dm_ORG_ID = 3;
     private static long Hs_ORG_ID = 4;
     private static long Mm_ORG_ID = 5;
-    private static long SC_ORG_ID = 6;
+    private static long Sc_ORG_ID = 6;
+    private static long Rn_ORG_ID = 7;
+    private static long Dr_ORG_ID = 8;
+    private static long Ec_ORG_ID = 9;
+    private static long Tt_ORG_ID = 10;
+
     private static String SOURCE_TAIR_ID = "TAIR ID";
     private static String SOURCE_ENTREZ_GENE_ID = "Entrez Gene ID";
     private static String SOURCE_ENTREZ_GENE_NAME = "Entrez Gene Name";
     private static String SOURCE_ENSEMBL_GENE_ID = "Ensembl Gene ID";
     private static String SOURCE_ENSEMBL_GENE_NAME = "Ensembl Gene Name";
     private static String SOURCE_GENE_NAME = "Gene Name";
-    
+
     private static GeneLinkoutGenerator instance;
 
     public static GeneLinkoutGenerator instance() {
@@ -91,7 +96,7 @@ public class GeneLinkoutGenerator {
                 registeredGenerators.put(organismId, generatorList);
             }
         }
-        
+
         void registerFallback(Generator generator) {
         	fallbackGenerators.add(generator);
         }
@@ -132,9 +137,12 @@ public class GeneLinkoutGenerator {
         registry.register(Mm_ORG_ID, entrezOrEnsembl);
 
         // yeast
-        registry.register(SC_ORG_ID, sgd);
-        registry.register(SC_ORG_ID, entrezOrEnsembl);
-        
+        registry.register(Sc_ORG_ID, sgd);
+        registry.register(Sc_ORG_ID, entrezOrEnsembl);
+
+        // Tetrahymena
+        registry.register(Tt_ORG_ID, entrezOrEnsemblProtists);
+
         // fallback to entrezOrEnsembl if we add organisms until
         // we get around to adding custom linkouts for them
         registry.registerFallback(entrezOrEnsembl);
@@ -169,17 +177,17 @@ public class GeneLinkoutGenerator {
     class Generator {
 
         /*
-         * default implementation just loops over all genes,
-         * processes each, and returns the first to return a
-         * non-null linkout. otherwise returns null
+         * default implementation just loops over all symbols
+         * associated with a node, processes each, and returns the
+         *  first to return a non-null linkout.  otherwise returns null
          */
         Linkout generate(Organism organism, Node node) {
             if (node == null || node.getGenes() == null) {
                 return null;
             }
 
-            for (Gene gene: (Collection<Gene>) node.getGenes()) {
-                Linkout linkout = check(organism, gene);
+            for (Gene gene: node.getGenes()) {
+                Linkout linkout = generate(organism, gene);
                 if (linkout != null) {
                     return linkout;
                 }
@@ -189,9 +197,10 @@ public class GeneLinkoutGenerator {
         }
 
         /*
-         * return a linkout for an individual gene when possible
+         * return a linkout for an individual gene when possible,
+         * else return null
          */
-        Linkout check(Organism organism, Gene gene) {
+        Linkout generate(Organism organism, Gene gene) {
             throw new RuntimeException("not implemented");
         }
     }
@@ -205,7 +214,7 @@ public class GeneLinkoutGenerator {
         static final String URL_TEMPLATE = "http://www.ncbi.nlm.nih.gov/sites/entrez?db=gene&cmd=search&term=%s";
 
         @Override
-        Linkout check(Organism organism, Gene gene) {
+        Linkout generate(Organism organism, Gene gene) {
             if (gene == null) {
                 return null;
             }
@@ -232,7 +241,7 @@ public class GeneLinkoutGenerator {
         static final String URL_TEMPLATE = "http://arabidopsis.org/servlets/TairObject?type=locus&name=%s";
 
         @Override
-        Linkout check(Organism organism, Gene gene) {
+        Linkout generate(Organism organism, Gene gene) {
             if (gene == null) {
                 return null;
             }
@@ -262,7 +271,7 @@ public class GeneLinkoutGenerator {
         static final String URL_TEMPLATE = "http://arabidopsis.org/servlets/TairObject?type=locus&name=%s";
 
         @Override
-        Linkout check(Organism organism, Gene gene) {
+        Linkout generate(Organism organism, Gene gene) {
             if (gene == null) {
                 return null;
             }
@@ -288,7 +297,7 @@ public class GeneLinkoutGenerator {
                 String url = String.format(URL_TEMPLATE, symbol);
                 return new Linkout(DISPLAY_NAME, url);
             }
-            
+
             return null;
         }
     };
@@ -321,7 +330,34 @@ public class GeneLinkoutGenerator {
         static final String URL_TEMPLATE = "http://www.ensembl.org/%s/geneview?gene=%s";
 
         @Override
-        Linkout check(Organism organism, Gene gene) {
+        Linkout generate(Organism organism, Gene gene) {
+            if (gene == null) {
+                return null;
+            }
+
+            if (gene.getNamingSource() == null) {
+                return null;
+            }
+
+            if (SOURCE_ENSEMBL_GENE_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
+                String organismName = organism.getAlias();
+                organismName = organismName.replace(" ", "_");
+                String url = String.format(URL_TEMPLATE, organismName, gene.getSymbol());
+                return new Linkout(DISPLAY_NAME, url);
+            }
+
+            return null;
+        }
+    };
+
+    // TODO: deal with code dup with above ensembl generator
+    Generator ensemblProtists = new Generator() {
+
+        static final String DISPLAY_NAME = "Ensembl";
+        static final String URL_TEMPLATE = "http://protists.ensembl.org/%s/geneview?gene=%s";
+
+        @Override
+        Linkout generate(Organism organism, Gene gene) {
             if (gene == null) {
                 return null;
             }
@@ -350,7 +386,7 @@ public class GeneLinkoutGenerator {
         static final String URL_TEMPLATE = "http://www.yeastgenome.org/cgi-bin/locus.fpl?locus=%s";
 
         @Override
-        Linkout check(Organism organism, Gene gene) {
+        Linkout generate(Organism organism, Gene gene) {
             if (gene == null) {
                 return null;
             }
@@ -368,7 +404,7 @@ public class GeneLinkoutGenerator {
                 String url = String.format(URL_TEMPLATE, gene.getSymbol());
                 return new Linkout(DISPLAY_NAME, url);
             }
-            
+
             return null;
         }
     };
@@ -382,7 +418,7 @@ public class GeneLinkoutGenerator {
         static final String URL_TEMPLATE = "http://bar.utoronto.ca/efp/cgi-bin/efpWeb.cgi?modeInput=Absolute&ncbi_gi=%s";
 
         @Override
-        Linkout check(Organism organism, Gene gene) {
+        Linkout generate(Organism organism, Gene gene) {
             if (gene == null) {
                 return null;
             }
@@ -409,7 +445,7 @@ public class GeneLinkoutGenerator {
         static final String URL_TEMPLATE = "http://flybase.org/reports/%s.html";
 
         @Override
-        Linkout check(Organism organism, Gene gene) {
+        Linkout generate(Organism organism, Gene gene) {
             if (gene == null) {
                 return null;
             }
@@ -436,7 +472,7 @@ public class GeneLinkoutGenerator {
         static final String URL_TEMPLATE = "http://www.wormbase.org/db/gene/gene?class=Gene&name=%s";
 
         @Override
-        Linkout check(Organism organism, Gene gene) {
+        Linkout generate(Organism organism, Gene gene) {
             if (gene == null) {
                 return null;
             }
@@ -465,6 +501,18 @@ public class GeneLinkoutGenerator {
             Linkout linkout = entrez.generate(organism, node);
             if (linkout == null) {
                 linkout = ensembl.generate(organism, node);
+            }
+            return linkout;
+        }
+    };
+
+    Generator entrezOrEnsemblProtists = new Generator() {
+
+        @Override
+        Linkout generate(Organism organism, Node node) {
+            Linkout linkout = entrez.generate(organism, node);
+            if (linkout == null) {
+                linkout = ensemblProtists.generate(organism, node);
             }
             return linkout;
         }

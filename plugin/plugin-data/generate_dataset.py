@@ -84,7 +84,7 @@ def package_dataset(id, build_dir, temp_dir):
         
     zip_path = join(build_dir, 'dist', 'gmdata-%s.zip' % id)
     zipfile = ZipFile(zip_path, 'w')
-    base_index = join(build_dir, 'index', 'base')
+    base_index = join(build_dir, 'index', 'lucene_index', 'base')
     
     walk(temp_dir, process_zip, (zipfile, temp_dir, id))
     walk(base_index, process_zip, (zipfile, parent_path(base_index), id))

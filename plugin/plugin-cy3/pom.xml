@@ -3,7 +3,7 @@
 	<parent>
         <groupId>org.genemania</groupId>
         <artifactId>plugin-parent</artifactId>
-        <version>3.2</version>
+        <version>3.3</version>
         <relativePath>..</relativePath>
 	</parent>
     <properties>
@@ -124,12 +124,13 @@
 				<configuration>
 					<instructions>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-						<Bundle-Version>3.2.1</Bundle-Version>
+						<Bundle-Version>3.3</Bundle-Version>
 						<Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
 						<Embed-Dependency>plugin-distribution;inline=true</Embed-Dependency>
 						<Private-Package>${bundle.namespace}.*</Private-Package>
 						<Export-Package>!${bundle.namespace}.*;version="${project.version}"</Export-Package>
 						<Import-Package>*;resolution:=optional</Import-Package>
+						<_include>../src/etc/MANIFEST</_include>
 						<_failok>true</_failok>
 					</instructions>
 				</configuration>

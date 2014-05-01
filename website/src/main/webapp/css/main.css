@@ -46,7 +46,7 @@ h1, h2, h3 { font-weight: normal; }
 .selected .score_text { background-color: #ffffcc !important; }
 .select_hover { border-color: #aae6ff !important; background-color: #e5f7ff !important; }
 .select_hover .score_text { background-color: #e5f7ff !important; }
-fieldset { background: #ffffff !important; overflow:hidden; border-top: 1px solid #cacaca; margin: -0.5em; padding: 0.75em; border-left: 1px solid transparent; border-right: 1px solid transparent; border-bottom: 1px solid transparent; }
+fieldset { background: #ffffff !important; overflow:hidden; border-top: 1px solid transparent; margin: -0.5em; padding: 0.75em; border-left: 1px solid transparent; border-right: 1px solid transparent; border-bottom: 1px solid transparent; }
 fieldset legend { color: #474D5A; }
 .bar { background-color: #d0d0d0; min-width: 1px; height: 4px; }
 .bar.disabled { background-color: #e5e5e5 !important; }
@@ -360,10 +360,11 @@ a.qtip-button { text-decoration: none; font-weight: normal; }
 #networkCache, #networkGroupsCache { display: none; }
 #posted_networks { display: none; }
 #advanced_options { width: 54em; }
+#advanced_options label.title { font-weight: bold; display: block; margin-bottom: 0.25em; margin-top: 0.25em; border-bottom: 1px solid #cacaca; }
 #advanced_line { padding-top: 0.5em; position: relative; }
 #results_count_notification { position: absolute; top: 0.5em; left: 0; font-size: 0.8em; color: #888; }
 #network_list { overflow: auto; overflow-x: hidden; height: 100%; border: 1px solid #eaeaea; }
-#advanced_options .line {width: 100%; margin-top: 0px; margin-bottom: 0.75em; }
+#advanced_options .line {width: 100%; margin-top: 0px; margin-bottom: 0.75em;  }
 #advanced_options.inset { padding: 1em 0.5em 0.5em 0.5em; margin-top: -0.5em; border-left: 4px solid #e5e5e5; border-right: 4px solid #e5e5e5; border-bottom: 4px solid #e5e5e5; -webkit-border-bottom-right-radius: 16px; -webkit-border-bottom-left-radius: 16px; -moz-border-radius-bottomright: 16px; -moz-border-radius-bottomleft: 16px; border-bottom-right-radius: 16px; border-bottom-left-radius: 16px; }
 #results_page #advanced_options.inset { border-left: 0; border-right: 0; border-bottom: 0; }
 #network_details p { margin-left: 0; }
@@ -372,7 +373,7 @@ a.qtip-button { text-decoration: none; font-weight: normal; }
 .toggle_advanced { text-align: right; }
 #networks_section { position: relative; }
 #networks_section legend { height: 1.25em; }
-#networks_section_loading { display: none; position: absolute; background: #ffffff; z-index: 1; margin: 1em 0.25em 0 0.25em; padding: 0 0.25em; }
+#networks_section_loading { display: none; position: absolute; background: #ffffff; z-index: 1; padding: 0 0.25em; }
 #networks_section_loading .icon { position: absolute; left: 50%; top: 50%; background: url("../img/icon/loading.gif") no-repeat transparent; height: 24px; width: 24px; margin-top: -24px; margin-left: -12px; }
 #networks_section_loading .message { position: absolute; left: 50%; top: 50%; width: 400px; margin-left: -200px; color: #777; text-align: center; margin-top: 1em; }
 #selected_networks { display: none; }

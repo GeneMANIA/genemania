@@ -109,7 +109,7 @@ public class SearchServiceImpl implements SearchService {
 		}
 
 		Collection<InteractionNetwork> networks = new HashSet<InteractionNetwork>();
-		Collection<Long> attributeGroupIds = new LinkedList<Long>();
+		Collection<Long> attributeGroupIds = new HashSet<Long>();
 
 		boolean noNetworks = params.getNetworks() == null
 				|| params.getNetworks().size() == 0;

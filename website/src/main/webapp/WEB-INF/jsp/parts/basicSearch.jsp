@@ -49,7 +49,7 @@
         <div id="gene_error" class="error_msg">&nbsp;</div>
         <div id="gene_open" class="hidden floating over_flash">
             <div id="gene_validation_icons">
-            	<c:forEach var="i" begin="0" end="499" step="1" varStatus ="status">
+            	<c:forEach var="i" begin="0" end="449" step="1" varStatus ="status">
 					<div class="icon" type="empty" line="${i}">
 						<div class="image"></div>
 					</div>

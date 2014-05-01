@@ -71,7 +71,7 @@ $(function(){
 //    			console.log(status);
 //    			console.log(request);
     			
-    			process_upload({ error: "no data" }, status, request, error);
+    			process_upload({ error: error }, status, request, error);
     		}
     	});
     }

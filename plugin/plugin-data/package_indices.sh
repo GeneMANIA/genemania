@@ -54,7 +54,7 @@ INDEXDIR=${BUILDDIR}/index
 
 # Packaging Lucene indices
 echo Packaging Lucene indices...
-pushd "${INDEXDIR}"
+pushd "${INDEXDIR}/lucene_index"
 for INDEX in [0-9]*
 do
     # Apache on MAC OS X doesn't seem to like spaces in the path name so we'll

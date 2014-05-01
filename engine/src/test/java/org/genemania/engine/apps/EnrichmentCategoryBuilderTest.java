@@ -20,8 +20,11 @@
 
 package org.genemania.engine.apps;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileWriter;
+
 import org.genemania.engine.Constants;
 import org.genemania.engine.cache.RandomDataCacheBuilder;
 import org.genemania.engine.core.data.GoIds;
@@ -31,12 +34,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
  */
-public class AnnotationSlimmerTest {
+public class EnrichmentCategoryBuilderTest {
 
     static RandomDataCacheBuilder cacheBuilder;
     // params for test organism
@@ -48,7 +50,7 @@ public class AnnotationSlimmerTest {
     static double org1AnnotationSparsity = .5;
     static long [] org1NetworkIds;
 
-    public AnnotationSlimmerTest() {
+    public EnrichmentCategoryBuilderTest() {
     }
 
     @BeforeClass
@@ -98,15 +100,13 @@ public class AnnotationSlimmerTest {
     public void testProcess() throws Exception {
         String TEST_FILENAME = cacheBuilder.getCacheDir() + File.separator + "test_categories.txt";
         buildTestCategoryFile(TEST_FILENAME, 5);
-        
-        AnnotationSlimmer slimmer = new AnnotationSlimmer();
-        slimmer.setOrgId(org1Id);
-        slimmer.setCacheDir(cacheBuilder.getCacheDir());
-        slimmer.setPondir(cacheBuilder.getCacheDir());
-        slimmer.setCache(cacheBuilder.getCache());
-//        slimmer.setOntologyName("TEST_SLIM");
-        
-        slimmer.process();
+
+        EnrichmentCategoryBuilder builder = new EnrichmentCategoryBuilder();
+        builder.setOrgId(org1Id);
+        builder.setCacheDir(cacheBuilder.getCacheDir());
+        builder.setCache(cacheBuilder.getCache());
+
+        builder.process();
 
         assertTrue("one day, we'll have real tests here!", true);
     }

@@ -157,7 +157,7 @@ public class FloatSymMatrixAccumulator implements MatrixAccumulator {
             int n = sum.data[blockStart-1].size;
             done = n*(n+1)/2;
         }
-        int all = numRows*(numRows+1)/2;
+        long all = numRows*(numRows+1L)/2;
         long todo = all - done;
 
         long overflow = todo-buffer.length;

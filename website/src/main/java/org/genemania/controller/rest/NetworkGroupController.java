@@ -23,8 +23,7 @@ import java.util.Collection;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.genemania.domain.InteractionNetworkGroup;
 import org.genemania.exception.DataStoreException;
 import org.genemania.service.NetworkGroupService;
@@ -44,7 +43,7 @@ public class NetworkGroupController {
 	@Autowired
 	private NetworkGroupService networkGroupService;
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected final Logger logger = Logger.getLogger(getClass());
 
 	// ========[ PUBLIC METHODS
 	// ]===================================================================

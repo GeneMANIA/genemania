@@ -39,10 +39,7 @@ import org.apache.lucene.search.MultiSearcher;
 import org.apache.lucene.search.Searchable;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.store.FSDirectory;
-import org.genemania.domain.InteractionNetwork;
-import org.genemania.domain.InteractionNetworkGroup;
-import org.genemania.domain.NetworkMetadata;
-import org.genemania.domain.Organism;
+import org.genemania.domain.*;
 import org.genemania.engine.apps.support.DataConnector;
 import org.genemania.engine.cache.DataCache;
 import org.genemania.engine.cache.FileSerializedObjectCache;
@@ -221,6 +218,32 @@ public abstract class AbstractEngineApp {
 
             if (list.size() > 0) {
                 ids.add(list);
+            }
+        }
+
+        return ids;
+    }
+
+    public Collection<Long> getAllAttributeGroups(Organism organism) {
+
+        List<AttributeGroup> attributeGroups = attributeMediator.findAttributeGroupsByOrganism(organism.getId());
+
+        Collection<Long> ids = new ArrayList<Long>();
+        for (AttributeGroup attributeGroup: attributeGroups) {
+            ids.add(attributeGroup.getId());
+        }
+
+        return ids;
+
+    }
+
+    public Collection<Long> getDefaultAttributeGroups(Organism organism) {
+        List<AttributeGroup> attributeGroups = attributeMediator.findAttributeGroupsByOrganism(organism.getId());
+
+        Collection<Long> ids = new ArrayList<Long>();
+        for (AttributeGroup attributeGroup: attributeGroups) {
+            if (attributeGroup.isDefaultSelected()) {
+                ids.add(attributeGroup.getId());
             }
         }
 

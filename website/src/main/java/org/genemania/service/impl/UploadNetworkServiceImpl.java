@@ -38,6 +38,8 @@ import org.genemania.exception.ApplicationException;
 import org.genemania.exception.DataStoreException;
 import org.genemania.exception.SystemException;
 import org.genemania.exception.ValidationException;
+import org.genemania.mediator.impl.CachingGeneMediator;
+import org.genemania.mediator.lucene.LuceneGeneMediator;
 import org.genemania.service.NetworkService;
 import org.genemania.service.UploadNetworkService;
 import org.genemania.type.DataLayout;
@@ -329,7 +331,12 @@ public class UploadNetworkServiceImpl implements UploadNetworkService {
 			DataNormalizer normalizer = new DataNormalizer();
 			GeneCompletionProvider2 geneProvider = new GeneCompletionProvider2(
 					LuceneConnector.getInstance().getSearcher(),
-					LuceneConnector.getInstance().getAnalyzer(), organism);
+					LuceneConnector.getInstance().getAnalyzer(),
+                    organism,
+                    new CachingGeneMediator(new LuceneGeneMediator(
+                            LuceneConnector.getInstance().getSearcher(),
+                            LuceneConnector.getInstance().getAnalyzer())
+                    ));
 
 			stream.reset();
 			Reader input = new InputStreamReader(stream);

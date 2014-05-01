@@ -44,9 +44,7 @@ import org.genemania.mediator.GeneMediator;
  * note we always put and check upper case for the cache, so search
  * is safely case insensitive
  *
- * TODO: this code exists in slightly different forms in VectorCrossValidator
- * and TargetMatricesGenerator{2}. now that its been moved
- * to its own class, remove the duplication there
+ * TODO: investigate/remove the duplication
  */
 public class SymbolCache {
     private static Logger logger = Logger.getLogger(SymbolCache.class);

@@ -21,8 +21,7 @@ package org.genemania.controller.rest;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.genemania.exception.DataStoreException;
 import org.genemania.service.GeneService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +49,7 @@ public class GeneValidationController {
 		this.geneService = geneValidationService;
 	}
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected final Logger logger = Logger.getLogger(getClass());
 
 	// ========[ PUBLIC METHODS
 	// ]===================================================================

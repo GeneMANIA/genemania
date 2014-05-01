@@ -24,16 +24,13 @@ public class Constants {
 	public class CONFIG_PROPERTIES {
 		
 		public static final String APP_VER = "appVer";
-		public static final String BROKER_PROTOCOL = "brokerProtocol";
-		public static final String BROKER_HOST = "brokerHost";
-		public static final String BROKER_PORT = "brokerPort";
+        public static final String BROKER_URL = "brokerUrl";
 		
 		public static final String MQ_REQUESTS_QUEUE_NAME = "mqRequestsQueueName";
-		public static final String MQ_REPLIES_QUEUE_NAME = "mqRepliesQueueName";
-		public static final String BROKER_ADMIN_PORT = "brokerAdminPort";
+
+        // used by website
 		public static final String CLIENT_TIMEOUT = "clientTimeout";
-		public static final String MAX_INACTIVITY_DURATION = "maxInactivityDuration";
-		
+
 	}
 	
 	public class ERROR_CODES {

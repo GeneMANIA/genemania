@@ -7,7 +7,7 @@
     <groupId>org.genemania</groupId>
     <artifactId>plugin-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.2</version>
+    <version>3.3</version>
     <name>${project.groupId}:${project.artifactId}</name>
 
     <modules>
@@ -156,12 +156,12 @@
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>genemania-common</artifactId>
-            <version>3.1.1</version>
+            <version>3.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>genemania-engine</artifactId>
-            <version>3.1.1</version>
+            <version>3.1.3</version>
         </dependency>
         
         <dependency>

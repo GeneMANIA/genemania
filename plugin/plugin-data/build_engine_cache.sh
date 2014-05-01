@@ -64,8 +64,11 @@ TEMPDIR=${BUILDDIR}/cache
 CACHEDIR=${DB_ROOT}/network_cache
 GENERICDB_DIR=${DB_ROOT}/generic_db
 
-LUCENE_INDEX_DIR=${BUILDDIR}/index
+LUCENE_INDEX_DIR=${BUILDDIR}/index/lucene_index
 GO_CATEGORIES_DIR=${DB_ROOT}/GoCategories
+
+# Test whether we have GNU or BSD find
+FIND_OPTS=$(find -E . &> /dev/null && echo " -E")
 
 mkdir -p ${BUILDDIR}
 mkdir -p ${DATADIR}
@@ -92,7 +95,7 @@ do
     
     # Copy network cache
     pushd ${TEMPDIR}
-    find -E . -regex ".*/CORE/${ORGANISM_ID}/[0-9]+.ser" -exec cp "${CACHEDIR}/{}" '{}' ';'
+    find ${FIND_OPTS} . -regex ".*/CORE/${ORGANISM_ID}/[0-9]+.ser" -exec cp "${CACHEDIR}/{}" '{}' ';'
     popd
 done
 

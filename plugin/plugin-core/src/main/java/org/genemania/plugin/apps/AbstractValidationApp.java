@@ -151,8 +151,10 @@ public class AbstractValidationApp extends AbstractPluginDataApp {
 	}
 	
 	protected VectorCrossValidator createValidator(String networkData, String excludeData) throws ApplicationException {
+		long organismId = fOrganism.getId();
+		
 	    VectorCrossValidator vcv = new VectorCrossValidator();
-	    vcv.setCacheNamespace(DataSet.USER);
+	    vcv.setCacheNamespace(organismId < 0 ? DataSet.USER : "CORE");
 	    
 	    IMediatorProvider provider = fData.getMediatorProvider();
 	    vcv.setGeneMediator(provider.getGeneMediator());
@@ -162,7 +164,7 @@ public class AbstractValidationApp extends AbstractPluginDataApp {
 	    vcv.setAttributeMediator(provider.getAttributeMediator());
 	    
 	    vcv.setCacheDir(fData.getFullPath(DataSet.CACHE_PATH));
-	    vcv.setOrganismId(fOrganism.getId());
+	    vcv.setOrganismId(organismId);
 	    
 	    if (networkData != null) {
 	    	Collection<Group<?, ?>> networks = parseNetworks(networkData, excludeData, fOrganism);

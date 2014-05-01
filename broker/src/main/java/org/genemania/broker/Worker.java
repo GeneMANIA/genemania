@@ -24,24 +24,17 @@
  */
 package org.genemania.broker;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
-import javax.jms.Connection;
-import javax.jms.DeliveryMode;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import javax.jms.*;
 
+import org.apache.activemq.ActiveMQConnection;
+import org.apache.activemq.pool.PooledConnection;
 import org.apache.activemq.pool.PooledConnectionFactory;
+import org.apache.activemq.transport.TransportListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.genemania.dto.EnrichmentEngineRequestDto;
@@ -65,270 +58,346 @@ import org.genemania.message.UploadNetworkResponseMessage;
 import org.genemania.util.ApplicationConfig;
 import org.genemania.util.BrokerUtils;
 
-public class Worker implements MessageListener, ExceptionListener {
+public class Worker implements MessageListener, ExceptionListener, TransportListener {
 
-	// __[static]______________________________________________________________
-	private static Logger LOG = Logger.getLogger(Worker.class);
-	
-	// __[attributes]__________________________________________________________
-	private String appVer;
-	private String brokerUrl;
+    private static Logger LOG = Logger.getLogger(Worker.class);
+
+    // configure message expiration, why are all app specific config constant names in common?
+    // putting this one here.
+    private static final String CONFIG_MESSAGE_EXPIRATION_MILLIS = "messageExpirationMillis";
+
+    private String appVer;
+    private String brokerUrl;
     private Session session;
+
     private MessageConsumer requestHandler;
     private MessageProducer responseHandler;
+
     private IMania engine;
+    private String cacheDir;
     private String mqRequestsQueueName;
+    private long messageExpirationMillis;
     private int processedMessages = 0;
-    private TextMessage requestMessage = null;
-    private TextMessage responseMessage = null;
-    
-	// __[constructors]________________________________________________________
-	public Worker() {
-		config();
-	}
-	
-	// __[public interface]____________________________________________________
-	public void start() {
-		try {
-            String cacheDir = ApplicationConfig.getInstance().getProperty(org.genemania.Constants.CONFIG_PROPERTIES.CACHE_DIR);
+
+    private long checkisActivePollingIntervalMillis = 60000;
+    private boolean active = true;
+
+    public static void main(String[] args) {
+        Worker w = new Worker();
+        w.start();
+    }
+
+    public Worker() {
+        config();
+    }
+
+    public void start() {
+        try {
             if (StringUtils.isEmpty(cacheDir)) {
-    			LOG.error("Missing required parameter: engine cache dir. Exiting...");
-            	System.exit(1);
+                LOG.error("Missing required parameter: engine cache dir. Exiting...");
+                System.exit(1);
             }
 
             engine = new Mania2(new DataCache(new MemObjectCache(new FileSerializedObjectCache(cacheDir))));
-			// output startup info
-			LOG.info("GeneMANIA Worker ver. " + appVer);
-            LOG.info("Engine ver. " + engine.getVersion() + ", cache: " + cacheDir);
-            startNewConnection();
-		} catch (JMSException e) {
-        	LOG.error("Worker startup error", e);
-        }
-	}
-	
-	// __[interface implementation]____________________________________________
-	public synchronized void onMessage(Message msg) {
-        if (msg instanceof TextMessage) {
-        	String responseBody = "";
-			try {
-				// extract message data
-				Queue queue = (Queue)msg.getJMSDestination();
-				requestMessage = (TextMessage)msg;
-            	LOG.debug("new " + msg.getJMSType() + " message received on queue " + queue.getQueueName() + "[correlation id: " + msg.getJMSCorrelationID() + "]");            	
-				responseMessage = session.createTextMessage();
-				responseMessage.setJMSDestination(requestMessage.getJMSReplyTo());
-				responseMessage.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
-				responseMessage.setJMSCorrelationID(msg.getJMSCorrelationID());
-				// invoke engine
-				if(queue.getQueueName().equalsIgnoreCase(mqRequestsQueueName)) {
-					if(MessageType.RELATED_GENES.equals(MessageType.fromCode(msg.getJMSType()))) {
-						RelatedGenesRequestMessage data = RelatedGenesRequestMessage.fromXml(requestMessage.getText());
-			        	RelatedGenesResponseMessage response = getRelatedGenes(data);
-			        	responseBody = response.toXml();
-					} else if (MessageType.TEXT2NETWORK.equals(MessageType.fromCode(msg.getJMSType()))) {
-						UploadNetworkRequestMessage data = UploadNetworkRequestMessage.fromXml(requestMessage.getText());
-						UploadNetworkResponseMessage response = uploadNetwork(data);
-			        	responseBody = response.toXml();
-					} else if (MessageType.PROFILE2NETWORK.equals(MessageType.fromCode(msg.getJMSType()))) {
-		            	LOG.warn("invoking engine.profile2network: not implemented");
-					} else {
-			        	LOG.warn("Unknown jms type: " + msg.getJMSType());
-					}
-				}
-				processedMessages++;
-			} catch (JMSException e) {
-				LOG.error(e);
-				try {
-		        	responseBody = buildErrorMessage(e.getMessage(), MessageType.fromCode(msg.getJMSType()));
-				} catch (JMSException x) {
-					LOG.error(x);
-				}
-			} finally {
-				if((requestMessage != null) && (responseMessage != null)) {
-	            	try {
-	            		if(StringUtils.isNotEmpty(responseBody)) {
-	            			responseMessage.setText(responseBody);
-	            			LOG.debug("Responding to " + responseMessage.getJMSDestination() + ", msg id " + responseMessage.getJMSCorrelationID() + ", response body size " + (int)responseBody.length());
-	            			responseHandler.send(responseMessage.getJMSDestination(), responseMessage);
-	            		} else {
-	    		        	responseBody = buildErrorMessage("Empty response body detected", MessageType.fromCode(msg.getJMSType()));
-	            		}
-					} catch (JMSException e) {
-						LOG.error("JMS Exception: " + e.getMessage());
-            			try {
-        		        	responseBody = buildErrorMessage(e.getMessage(), MessageType.fromCode(msg.getJMSType()));
-							responseHandler.send(responseMessage);
-						} catch (JMSException e1) {
-							LOG.error("JMS Exception", e1);
-						}
-					}            	
-				} else {
-					if(requestMessage == null) {
-						LOG.error("request message is null");
-					}
-					if(responseMessage == null) {					
-						LOG.error("response message is null");
-					}
-				}
-			}
-        } else {
-        	LOG.warn("Unknown message type: " + msg);
-        }
-		LOG.info("successfully processed messages: " + processedMessages);
-	}
 
-	public synchronized void onException(JMSException e) {
+            // output startup info
+            LOG.info("GeneMANIA Worker ver: " + appVer);
+            LOG.info("Engine ver: " + engine.getVersion());
+            LOG.info("cache dir: " + cacheDir);
+            LOG.info("broker URL: " + brokerUrl);
+            LOG.info("request Queue Name: " + mqRequestsQueueName);
+            LOG.info("messageExpirationMillis: " + messageExpirationMillis);
+
+            startNewConnection();
+            waitForExit();
+        } catch (JMSException e) {
+            LOG.error("Worker startup error", e);
+        }
+    }
+
+    /*
+     * in order to keep the worker alive across jms disconnects, keep the main thread
+     * running while polling a status flag. tidy cooperative shutdown would involve
+     * setting the flag to false somehow, but currently we just kill workers externally
+     */
+    public void waitForExit() {
+        while (true) {
+            try {
+                if (!isActive()) {
+                    return;
+                }
+                Thread.sleep(checkisActivePollingIntervalMillis);
+            }
+            catch (InterruptedException e) {
+                // swallow, return to sleep unless
+                // active flag was changed to false
+            }
+        }
+    }
+
+    /*
+     * implement MessageListener interface, handling requests
+     * from website
+     */
+    @Override
+    public synchronized void onMessage(Message msg) {
+        if (!(msg instanceof TextMessage)) {
+            LOG.warn("Unexpected message instance type: " + msg.getClass().getName());
+            return;
+        }
+
+        try {
+            // extract message data
+            Queue queue = (Queue) msg.getJMSDestination();
+            TextMessage requestMessage = (TextMessage) msg;
+
+            LOG.debug("new " + msg.getJMSType() + " message received on queue " + queue.getQueueName() +
+                    "[correlation id: " + msg.getJMSCorrelationID() + "]");
+
+            // invoke engine
+            String responseBody = invokeEngine(requestMessage.getJMSType(), requestMessage.getText());
+
+            // send reply
+            LOG.debug("Responding to " + requestMessage.getJMSDestination() + ", msg id " +
+                    requestMessage.getJMSCorrelationID() + ", response body size " + responseBody.length());
+
+            TextMessage responseMessage = session.createTextMessage();
+            responseMessage.setJMSDestination(requestMessage.getJMSReplyTo());
+            responseMessage.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
+            responseMessage.setJMSCorrelationID(msg.getJMSCorrelationID());
+            responseMessage.setText(responseBody);
+
+            responseHandler.send(responseMessage.getJMSDestination(), responseMessage);
+
+            processedMessages++;
+            LOG.info("successfully processed messages: " + processedMessages);
+        }
+        catch (JMSException e) {
+            LOG.error("JMS Exception: ", e);
+        }
+    }
+
+    /*
+     * convert given message text to an engine request, execute, and convert response
+     * back to text.
+     */
+    String invokeEngine(String msgType, String messageText) {
+        String responseBody;
+
+        if (MessageType.RELATED_GENES.equals(MessageType.fromCode(msgType))) {
+            RelatedGenesRequestMessage data = RelatedGenesRequestMessage.fromXml(messageText);
+            RelatedGenesResponseMessage response = getRelatedGenes(data);
+            responseBody = response.toXml();
+        }
+        else if (MessageType.TEXT2NETWORK.equals(MessageType.fromCode(msgType))) {
+            UploadNetworkRequestMessage data = UploadNetworkRequestMessage.fromXml(messageText);
+            UploadNetworkResponseMessage response = uploadNetwork(data);
+            responseBody = response.toXml();
+        }
+        else {
+            LOG.warn("Unknown message type: " + msgType);
+            responseBody = buildErrorMessage("Unknown message type");
+        }
+
+        return responseBody;
+    }
+
+    /*
+     * implement Exception listener. just log the error. depend on activemq failover transport,
+     * which should be specified via brokerUrl, to handle reconnect on jms errors
+     */
+    @Override
+    public synchronized void onException(JMSException e) {
         LOG.error("JMS Exception detected.", e);
     }
-	
-	// __[private helpers]____________________________________________________
+
+    /*
+     * load run parameters configured in properties file
+     */
     private void config() {
-		// read config data
-		appVer = ApplicationConfig.getInstance().getProperty(Constants.CONFIG_PROPERTIES.APP_VER);
-		String brokerProtocol = ApplicationConfig.getInstance().getProperty(Constants.CONFIG_PROPERTIES.BROKER_PROTOCOL);
-		String brokerHost = ApplicationConfig.getInstance().getProperty(Constants.CONFIG_PROPERTIES.BROKER_HOST);
-		String brokerPort = ApplicationConfig.getInstance().getProperty(Constants.CONFIG_PROPERTIES.BROKER_PORT);
-		String maxInactivityDuration = ApplicationConfig.getInstance().getProperty(Constants.CONFIG_PROPERTIES.MAX_INACTIVITY_DURATION );
-		brokerUrl = brokerProtocol + "://" + brokerHost + ":" + brokerPort + "?wireFormat.maxInactivityDuration=" + maxInactivityDuration; 
-		mqRequestsQueueName = ApplicationConfig.getInstance().getProperty(Constants.CONFIG_PROPERTIES.MQ_REQUESTS_QUEUE_NAME);
+        // read config data
+        ApplicationConfig config = ApplicationConfig.getInstance();
+
+        appVer = config.getProperty(Constants.CONFIG_PROPERTIES.APP_VER);
+        brokerUrl = config.getProperty(Constants.CONFIG_PROPERTIES.BROKER_URL);
+        mqRequestsQueueName = config.getProperty(Constants.CONFIG_PROPERTIES.MQ_REQUESTS_QUEUE_NAME);
+        cacheDir = config.getProperty(org.genemania.Constants.CONFIG_PROPERTIES.CACHE_DIR);
+        messageExpirationMillis = Integer.parseInt(config.getProperty(CONFIG_MESSAGE_EXPIRATION_MILLIS));
+
     }
-    
+
+    /*
+     * setup request handler and start listening to request queue
+     */
     private void startNewConnection() throws JMSException {
-		PooledConnectionFactory connectionFactory = new PooledConnectionFactory(brokerUrl);
-    	Connection connection = connectionFactory.createConnection();
-    	connection.setExceptionListener(this);
-    	connection.start();
-	    session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-	    responseHandler = session.createProducer(null);
-	    Queue requestsQueue = session.createQueue(mqRequestsQueueName);
-	    requestHandler = session.createConsumer(requestsQueue);
-	    requestHandler.setMessageListener(this);
+        PooledConnectionFactory connectionFactory = new PooledConnectionFactory(brokerUrl);
+        Connection connection = connectionFactory.createConnection();
+
+        connection.setExceptionListener(this);
+
+        // TransportListener is just for extra logging to monitor disconnects
+        // the casting is ugly no? this can be removed without functionally affecting
+        // the worker
+        ((ActiveMQConnection)((PooledConnection) connection).getConnection()).addTransportListener(this);
+
+        // setup Consumer to receive requests and Producer to send results
+        // the response handler will use a temp queue specified in the request
+        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+        responseHandler = session.createProducer(null);
+        responseHandler.setTimeToLive(messageExpirationMillis);
+
+        Queue requestsQueue = session.createQueue(mqRequestsQueueName);
+        requestHandler = session.createConsumer(requestsQueue);
+        requestHandler.setMessageListener(this);
+
+        // everyone is on stage, we can start the dance
+        connection.start();
         LOG.info("Listening to " + requestsQueue.getQueueName());
     }
-    
+
+    /*
+     * process the two engine api calls corresponding to the website's get-related-genes request,
+     * one to find the related-genes and the second to compute enrichment.
+     *
+     * TODO: cleanup use of deprecated API's
+     */
     private RelatedGenesResponseMessage getRelatedGenes(RelatedGenesRequestMessage requestMessage) {
-    	RelatedGenesResponseMessage ret = new RelatedGenesResponseMessage();
-		try {
-			RelatedGenesEngineRequestDto rgRequestDto = BrokerUtils.msg2dto(requestMessage);
-			RelatedGenesEngineResponseDto rgResponseDto = engine.findRelated(rgRequestDto);
-			printEngineReturn(rgResponseDto);
-			EnrichmentEngineRequestDto eRequestDto = BrokerUtils.buildEnrichmentRequestFrom(rgRequestDto, rgResponseDto, requestMessage.getOntologyId());
-			EnrichmentEngineResponseDto eResponseDto = null;
-			try {
-				eResponseDto = engine.computeEnrichment(eRequestDto);
-			} catch (Exception e) {
-				LOG.error("Failed to compute enrichment", e);
-			}
-			if(eResponseDto != null) {
-				Collection<OntologyCategoryDto> enrichedCategories = eResponseDto.getEnrichedCategories();
-				LOG.debug("enriched categories size:" + enrichedCategories.size());
-//				for(OntologyCategoryVO category: enrichedCategories) {
-//					LOG.debug("category[" + category.getId() + "][qVal=" + category.getqValue() + "][coverage=" + category.getNumAnnotatedInSample() + "/" + category.getNumAnnotatedInTotal() + "]");
-//				}
-				ret = BrokerUtils.dto2msg(rgResponseDto, eResponseDto);
-			} else {
-				ret = BrokerUtils.dto2msg(rgResponseDto);
-				LOG.warn("enriched categories response DTO is null");
-			}
-			ret.setNodes(rgResponseDto.getNodes());
-			// test setting organism id
-			ret.setOrganismId(requestMessage.getOrganismId());
-			printConverterReturn(ret);
-		} catch (ApplicationException e) {
-    		LOG.error("Failed to get related genes: ", e);
-    		ret.setErrorCode(org.genemania.Constants.ERROR_CODES.APPLICATION_ERROR);
-    		ret.setErrorMessage(e.getMessage());
-		}
-    	return ret;
-	}
-	
+        RelatedGenesResponseMessage ret = new RelatedGenesResponseMessage();
+
+        try {
+            RelatedGenesEngineRequestDto rgRequestDto = BrokerUtils.msg2dto(requestMessage);
+            RelatedGenesEngineResponseDto rgResponseDto = engine.findRelated(rgRequestDto);
+
+            printEngineReturn(rgResponseDto);
+
+            EnrichmentEngineRequestDto eRequestDto = BrokerUtils.
+                    buildEnrichmentRequestFrom(rgRequestDto, rgResponseDto, requestMessage.getOntologyId());
+            EnrichmentEngineResponseDto eResponseDto = null;
+
+            try {
+                eResponseDto = engine.computeEnrichment(eRequestDto);
+            } catch (Exception e) {
+                LOG.error("Failed to compute enrichment", e);
+            }
+
+            if (eResponseDto != null) {
+                Collection<OntologyCategoryDto> enrichedCategories = eResponseDto.getEnrichedCategories();
+                LOG.debug("enriched categories size:" + enrichedCategories.size());
+                ret = BrokerUtils.dto2msg(rgResponseDto, eResponseDto);
+            }
+            else {
+                ret = BrokerUtils.dto2msg(rgResponseDto);
+                LOG.warn("enriched categories response DTO is null");
+            }
+
+            ret.setNodes(rgResponseDto.getNodes());
+            ret.setOrganismId(requestMessage.getOrganismId());
+            printConverterReturn(ret);
+        }
+        catch (ApplicationException e) {
+            LOG.error("Failed to get related genes: ", e);
+            ret.setErrorCode(org.genemania.Constants.ERROR_CODES.APPLICATION_ERROR);
+            ret.setErrorMessage(e.getMessage());
+        }
+
+        return ret;
+    }
+
+    /*
+     * process upload network request
+     */
     private UploadNetworkResponseMessage uploadNetwork(UploadNetworkRequestMessage requestMessage) {
-    	UploadNetworkResponseMessage ret = new UploadNetworkResponseMessage();
-		try {
-			UploadNetworkEngineRequestDto requestDto = BrokerUtils.msg2dto(requestMessage);
-			UploadNetworkEngineResponseDto responseDto = engine.uploadNetwork(requestDto);
-			LOG.debug(responseDto.toString());
-			ret = BrokerUtils.dto2msg(responseDto);
-		} catch (ApplicationException e) {
-			LOG.error("Failed to load network", e);
-    		ret.setErrorCode(org.genemania.Constants.ERROR_CODES.APPLICATION_ERROR);
-    		ret.setErrorMessage(e.getMessage());
-		}
-    	return ret;
-	}
-	
-	private void printConverterReturn(RelatedGenesResponseMessage msg) {
-		StringBuffer buf1 = new StringBuffer("dto2msg returned " + msg.getNetworks().size() + " networks=["); 
-		Iterator<NetworkDto> it1 = msg.getNetworks().iterator();
-		while(it1.hasNext()) {
-			buf1.append(((NetworkDto)it1.next()).getId());
-			if(it1.hasNext()) {
-				buf1.append(" ");
-			}
-		}
-		buf1.append("]");
-		Map<Long, Collection<OntologyCategoryDto>> annotations = msg.getAnnotations();
-		buf1.append(" and " + annotations.size() + " annotations.");
-//		buf1.append(" and " + annotations.size() + " annotations=[");
-//		Iterator<Long> annotationsNodeIterator = annotations.keySet().iterator();
-//		while(annotationsNodeIterator.hasNext()) {
-//			long nodeId = annotationsNodeIterator.next();
-//			Collection<OntologyCategoryVO> categories = annotations.get(nodeId);
-//			if(categories.size() > 0) {
-//				buf1.append(nodeId + "->[");
-//				for(OntologyCategoryVO cat: categories) {
-//					buf1.append(cat.toString());
-//				}
-//				buf1.append("]");
-//				if(annotationsNodeIterator.hasNext()) {
-//					buf1.append(", ");
-//				}
-//			}
-//		}
-//		buf1.append("]");
-		LOG.debug(buf1);
-	}
+        UploadNetworkResponseMessage ret = new UploadNetworkResponseMessage();
 
-	private void printEngineReturn(RelatedGenesEngineResponseDto responseDto) {
-		StringBuffer buf = new StringBuffer("engine returned " + responseDto.getNetworks().size() + " networks=["); 
-		Iterator<NetworkDto> it = responseDto.getNetworks().iterator();
-		while(it.hasNext()) {
-			buf.append(((NetworkDto)it.next()).getId());
-			if(it.hasNext()) {
-				buf.append(" ");
-			}
-		}
-		buf.append("]");
-		if (responseDto.getAttributes() != null) {
-		    buf.append(" and " + responseDto.getAttributes().size() + " attributes");
-		}
-		else {
-		    buf.append(" and 0 attributes");
-		}
-		LOG.debug(buf);
-	}
-	
-	private String buildErrorMessage(String errMsg, MessageType msgType) {
-		String ret = "";
-		LOG.debug("WORKER ERROR: " + errMsg);
-		if(MessageType.RELATED_GENES.equals(msgType)) {
-        	RelatedGenesResponseMessage response = new RelatedGenesResponseMessage();
-        	response.setErrorCode(Constants.ERROR_CODES.ENGINE_ERROR);
-        	response.setErrorMessage(errMsg);
-        	ret = response.toXml();
-		} else if (MessageType.TEXT2NETWORK.equals(msgType)) {
-			UploadNetworkResponseMessage response = new UploadNetworkResponseMessage();
-        	response.setErrorCode(Constants.ERROR_CODES.ENGINE_ERROR);
-        	response.setErrorMessage(errMsg);
-        	ret = response.toXml();
-		}
-		return ret;
-	}
+        try {
+            UploadNetworkEngineRequestDto requestDto = BrokerUtils.msg2dto(requestMessage);
+            UploadNetworkEngineResponseDto responseDto = engine.uploadNetwork(requestDto);
+            LOG.debug(responseDto.toString());
+            ret = BrokerUtils.dto2msg(responseDto);
+        }
+        catch (ApplicationException e) {
+            LOG.error("Failed to load network", e);
+            ret.setErrorCode(org.genemania.Constants.ERROR_CODES.APPLICATION_ERROR);
+            ret.setErrorMessage(e.getMessage());
+        }
 
-	// __[main]________________________________________________________________
-	public static void main(String[] args) {
-		Worker w = new Worker();
-		w.start();
-	}
+        return ret;
+    }
+
+    private void printConverterReturn(RelatedGenesResponseMessage msg) {
+        StringBuffer buf1 = new StringBuffer("dto2msg returned " + msg.getNetworks().size() + " networks=[");
+        Iterator<NetworkDto> it1 = msg.getNetworks().iterator();
+        while (it1.hasNext()) {
+            buf1.append(it1.next().getId());
+            if (it1.hasNext()) {
+                buf1.append(" ");
+            }
+        }
+        buf1.append("]");
+        Map<Long, Collection<OntologyCategoryDto>> annotations = msg.getAnnotations();
+        buf1.append(" and " + annotations.size() + " annotations.");
+        LOG.debug(buf1);
+    }
+
+    private void printEngineReturn(RelatedGenesEngineResponseDto responseDto) {
+        StringBuffer buf = new StringBuffer("engine returned " + responseDto.getNetworks().size() + " networks=[");
+        Iterator<NetworkDto> it = responseDto.getNetworks().iterator();
+        while (it.hasNext()) {
+            buf.append(it.next().getId());
+            if (it.hasNext()) {
+                buf.append(" ");
+            }
+        }
+        buf.append("]");
+        if (responseDto.getAttributes() != null) {
+            buf.append(" and " + responseDto.getAttributes().size() + " attributes");
+        } else {
+            buf.append(" and 0 attributes");
+        }
+        LOG.debug(buf);
+    }
+
+    /*
+     * error messages when app protocol is broken (shouldn't happen in production)
+     */
+    private String buildErrorMessage(String errMsg) {
+        // should have a generic response message type, reuse related genes
+        // response for now
+        RelatedGenesResponseMessage response = new RelatedGenesResponseMessage();
+        response.setErrorCode(org.genemania.Constants.ERROR_CODES.APPLICATION_ERROR);
+        response.setErrorMessage(errMsg);
+        return response.toXml();
+    }
+
+    public synchronized boolean isActive() {
+        return active;
+    }
+
+    public synchronized void setActive(boolean active) {
+        this.active = active;
+    }
+
+    // TransportListener events. intended for monitoring only,
+    // don't *do* anything here
+    @Override
+    public void onCommand(Object o) {
+       LOG.trace("Transport event 'Command': " + o) ;
+    }
+
+    @Override
+    public void onException(IOException e) {
+        LOG.warn("Transport event 'Exception'", e);
+    }
+
+    @Override
+    public void transportInterupted() {
+        LOG.info("transport event 'Interrupted'");
+    }
+
+    @Override
+    public void transportResumed() {
+        LOG.info("transport event 'Resumed'");
+    }
 }
 

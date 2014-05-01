@@ -23,13 +23,11 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 import org.genemania.domain.Organism;
-import org.genemania.engine.apps.support.DataConnector;
+import org.genemania.engine.summary.AttributesSummarizer;
 import org.genemania.engine.summary.IdentifiersSummarizer;
 import org.genemania.engine.summary.NetworksSummarizer;
-import org.genemania.engine.summary.NullReporter;
 import org.genemania.engine.summary.OntologiesSummarizer;
 import org.genemania.engine.summary.OrganismsSummarizer;
-import org.genemania.engine.summary.Reporter;
 import org.genemania.engine.summary.ReporterFactory;
 import org.genemania.engine.summary.Summarizer;
 import org.genemania.engine.summary.TabularReporterFactory;
@@ -41,15 +39,20 @@ import org.kohsuke.args4j.Option;
  * networks, interactions etc.
  */
 public class DatasetSummarizer extends AbstractEngineApp {
-    private static Logger logger = Logger.getLogger(DatasetSummarizer.class);	
-    
-    @Option(name = "-reportDir", usage = "location of report directory")	
+    private static Logger logger = Logger.getLogger(DatasetSummarizer.class);
+
+    @Option(name = "-reportDir", usage = "location of report directory")
     private String reportDir;
-    
+
+    // ordered list of symbol types when converting genes to external identifeirs
+    public static String [] preferredNamesList = {"Entrez Gene ID", "Ensembl Gene ID",
+        "TAIR ID", "Gene Name", "Entrez Gene Name", "Ensembl Gene Name",
+        "Ensembl Protein ID", "Uniprot ID"};
+
     public DatasetSummarizer() {
     	super();
     }
-    
+
     void summarize(Summarizer summarizer, ReporterFactory reporterFactory) throws Exception {
     	summarizer.setUp();
     	try {
@@ -59,11 +62,12 @@ public class DatasetSummarizer extends AbstractEngineApp {
     		summarizer.tearDown();
     	}
     }
-    
+
+    @Override
     public void init() throws Exception {
     	super.init();
     }
-    
+
     void summarizeOrganism(Organism organism) throws Exception {
     	ReporterFactory reporterFactory = new TabularReporterFactory(reportDir + File.separator + organism.getId());
     	Summarizer summarizer = null;
@@ -71,23 +75,27 @@ public class DatasetSummarizer extends AbstractEngineApp {
     	// ontologies
     	summarizer = new OntologiesSummarizer(organism, dataConnector);
     	summarize(summarizer, reporterFactory);
-    	
+
     	// identifiers
     	summarizer = new IdentifiersSummarizer(organism, dataConnector);
     	summarize(summarizer, reporterFactory);
-    	
+
     	// networks
     	summarizer = new NetworksSummarizer(organism, dataConnector);
-    	summarize(summarizer, reporterFactory);    	    	
+    	summarize(summarizer, reporterFactory);
+
+    	// attributes
+    	summarizer = new AttributesSummarizer(organism, dataConnector);
+    	summarize(summarizer, reporterFactory);
     }
-    
+
 	@Override
 	public void process() throws Exception {
-		
+
 		// dataset level report
 		Summarizer summarizer = new OrganismsSummarizer(dataConnector);
 		summarize(summarizer, new TabularReporterFactory(reportDir));
-		
+
 		// organism level reports
 		for (Organism organism : organismMediator.getAllOrganisms()) {
 			logger.info(String.format("Organism %d: %s", organism.getId(),
@@ -95,24 +103,24 @@ public class DatasetSummarizer extends AbstractEngineApp {
 			summarizeOrganism(organism);
 		}
 	}
-	
+
 	// thank-you stackoverflow
 	// argh, this is a java6 thing, and we need to support java5 for the plugin!
 //	public static String decompose(String s) {
 //	    return java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+","");
 //	}
-        
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-        try {		
+        try {
         	DatasetSummarizer instance = new DatasetSummarizer();
 
         	// load up command line arguments
         	instance.getCommandLineArgs(args);
         	instance.setupLogging();
-        	
+
         	instance.init();
             instance.process();
             instance.cleanup();

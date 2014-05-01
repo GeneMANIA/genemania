@@ -44,11 +44,11 @@ import org.genemania.engine.core.data.KtK;
 import org.genemania.engine.core.data.KtKFeatures;
 import org.genemania.engine.core.data.KtT;
 import org.genemania.engine.core.data.NetworkIds;
+import org.genemania.engine.core.integration.AssocLoader;
 import org.genemania.engine.core.integration.CoAnnoTargetBuilder;
 import org.genemania.engine.core.integration.CorrelatedAttributeSelector;
 import org.genemania.engine.core.integration.Feature;
 import org.genemania.engine.core.integration.FeatureList;
-import org.genemania.engine.core.integration.TargetMatricesGenerator;
 import org.genemania.engine.core.integration.gram.BasicGramBuilder;
 import org.genemania.exception.ApplicationException;
 import org.genemania.mediator.GeneMediator;
@@ -67,6 +67,20 @@ import org.kohsuke.args4j.Option;
  * Computes a map of NetworkId to weights generated for Simultaneous Weighting
  * Generates 3 Matrix where rows are genes and columns are GO categories
  * Generates a map of column number of the matrices above to GO id
+ *
+ * Load GO annotations from tab delimited text files into binary
+ * engine cache data structures used for Fast aka Simultaneous aka GO-based
+ * network weighting methods.
+ *
+ * Input: reads files in -qdir matching the pattern organismId_gobranch.txt, eg:
+ *
+ *   db/GoCategories/1_BP.txt
+ *   db/GoCategories/1_CC.txt
+ *   db/GoCategories/1_MF.txt
+ *
+ * for organism 1.
+ *
+ * Requires
  *
  */
 public class FastWeightCacheBuilder extends AbstractEngineApp {
@@ -174,14 +188,15 @@ public class FastWeightCacheBuilder extends AbstractEngineApp {
     }
 
     public void loadAnnos(Organism organism) throws ApplicationException, IOException {
-        TargetMatricesGenerator gen = new TargetMatricesGenerator(organism, getGeneMediator(), getCache());
+        AssocLoader gen = new AssocLoader(organism, getGeneMediator(),
+                getOntologyMediator(), getCache());
 
         String filebase = queryDir + File.separator + organism.getId();
 
         for (String goBranch: Constants.goBranches) {
             String filename = filebase + "_" + goBranch + ".txt";
             logger.info("getting labels from file: " + filename);
-            gen.load(filename, goBranch);
+            gen.loadGoBranchAnnos(filename, goBranch);
         }
     }
 

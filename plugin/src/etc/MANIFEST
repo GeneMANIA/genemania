@@ -1,0 +1,2 @@
+Cytoscape-Plugin: org.genemania.plugin.cytoscape2.GeneManiaPlugin
+Main-Class: org.genemania.plugin.apps.Main

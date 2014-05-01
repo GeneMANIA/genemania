@@ -39,8 +39,8 @@ public class OrganismServiceImpl implements OrganismService {
 
 			@Override
 			public int compare(Organism org0, Organism org1) {
-				return org0.getAlias().toLowerCase()
-						.compareTo(org1.getAlias().toLowerCase());
+				return org0.getName().toLowerCase()
+						.compareTo(org1.getName().toLowerCase());
 			}
 
 		};

@@ -36,23 +36,49 @@ import org.genemania.exception.ApplicationException;
 import org.kohsuke.args4j.Option;
 
 /**
- * build cache versions of the full
- * annotation data structures. targetmatricesgenerator{2}
- * does something similar, but from data files that
- * are both more specific and more expensive to build.
+ * Load GO annotations from tab delimited text files into binary
+ * engine cache data structures.
  *
- * this code is intended to supercede that previous version
+ * Input: reads files in -annoDir matching a pattern organismId.annos.txt, eg:
+ *
+ *   db/GoCategories/1.annos.txt
+ *   db/GoCategories/2.annos.txt
+ *
+ * for organisms 1 and 2. By default, GO Terms are assumed to be in column 3
+ * and gene symbols in column 7.
+ *
+ * Output is a GoIds and GoAnnotations file for in the engine data cache for
+ * each organism, eg:
+ *
+ *   cache/CORE/1/ALL.GoIds.ser
+ *   cache/CORE/1/ALL.GoAnnos.ser
+ *
+ * for organism 1. The GoIds structure contains contains an array of
+ * term identifier strings, e.g. "GO:01234", with the position of the
+ * term in the array indicating the position of the corresponding
+ * gene annotations to that term in the GoAnnoations structure.
+ *
+ * The GoAnnotations structure contains a matrix relating
+ * genes (in the rows, as indexed by NodeIds) to go terms (in the cols).
  */
 public class AnnotationCacheBuilder extends AbstractEngineApp {
 
     private static Logger logger = Logger.getLogger(AnnotationCacheBuilder.class);
+
+    private static final int DEFAULT_TERM_COL = 3;
+    private static final int DEFAULT_GENE_SYMBOL_COL = 7;
+
     @Option(name = "-annodir", usage = "annotation data dir")
     String annoDir;
+
     @Option(name = "-orgId", usage = "optional organism id, otherwise will process all oganisms")
     private long orgId = -1;
 
-    private static int TERM_COL = 2;
-    private static int GENE_SYMBOL_COL = 6;
+    @Option(name = "-geneCol", usage = "column containing gene symbols")
+    private int geneCol = DEFAULT_GENE_SYMBOL_COL;
+
+    @Option(name = "-termCol", usage = "column containing functional categories")
+    private int termCol = DEFAULT_TERM_COL;
 
     public String getAnnoDir() {
         return annoDir;
@@ -70,6 +96,22 @@ public class AnnotationCacheBuilder extends AbstractEngineApp {
         this.orgId = orgId;
     }
 
+    public int getGeneCol() {
+        return geneCol;
+    }
+
+    public void setGeneCol(int geneCol) {
+        this.geneCol = geneCol;
+    }
+
+    public int getTermCol() {
+        return termCol;
+    }
+
+    public void setTermCol(int termCol) {
+        this.termCol = termCol;
+    }
+
     public void logParams() {
         logger.info("cache dir: " + getCacheDir());
         logger.info("annotations dir: " + annoDir);
@@ -80,7 +122,7 @@ public class AnnotationCacheBuilder extends AbstractEngineApp {
         if (orgId != -1) {
             throw new ApplicationException("single organism processing not implemented");
         }
-    	
+
         for (Organism organism: organismMediator.getAllOrganisms()) {
             processOrganism(organism);
         }
@@ -118,13 +160,13 @@ public class AnnotationCacheBuilder extends AbstractEngineApp {
                 // TODO: header line?
 
                 String[] tokens = line.split("\t");
-                String termName = tokens[TERM_COL];
+                String termName = tokens[getTermCol()-1];
 
                 // ignore the top level term "all"
                 if ("all".equalsIgnoreCase(termName)) {
                     continue;
                 }
-                
+
                 uniqueTerms.add(termName);
 
             }
@@ -134,7 +176,7 @@ public class AnnotationCacheBuilder extends AbstractEngineApp {
         }
 
         logger.info("total number of unique terms extracted: " + uniqueTerms.size());
-        
+
         GoIds goIds = new GoIds(organism.getId(), Constants.ALL_ONTOLOGY);
         String [] goIdList = uniqueTerms.toArray(new String[] {});
         goIds.setGoIds(goIdList);
@@ -165,8 +207,8 @@ public class AnnotationCacheBuilder extends AbstractEngineApp {
                 // TODO: header line?
 
                 String[] tokens = line.split("\t");
-                String termName = tokens[TERM_COL];
-                String geneSymbol = tokens[GENE_SYMBOL_COL];
+                String termName = tokens[getTermCol()-1];
+                String geneSymbol = tokens[getGeneCol()-1];
 
                 // ignore top level term "all"
                 if ("all".equalsIgnoreCase(termName)) {

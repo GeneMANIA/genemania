@@ -27,8 +27,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.genemania.Constants;
 import org.genemania.domain.AttributeGroup;
 import org.genemania.domain.Gene;
@@ -86,7 +85,7 @@ public class SearchController {
 	@Autowired
 	private AttributeGroupService attributeGroupService;
 
-	protected Log logger = LogFactory.getLog(getClass());
+	protected Logger logger = Logger.getLogger(getClass());
 
 	/**
 	 * Test the error page
@@ -398,7 +397,7 @@ public class SearchController {
 	 *            The genes separated by pipes
 	 * @param weightingAsString
 	 *            The name of the weighting method
-	 * @param threshold
+	 * @param thresholdAsString
 	 *            The number of genes to return
 	 * @param session
 	 *            The HTTP session
@@ -560,7 +559,8 @@ public class SearchController {
 		logger.debug("Return results view...");
 
 		ModelAndView mv;
-
+		Collection<Gene> validGenes = null;
+		
 		try {
 			// validate organism
 			// ============================================
@@ -580,7 +580,7 @@ public class SearchController {
 
 			GeneNames geneNames = geneService.getGeneNames(organismId,
 					geneLines);
-			Collection<Gene> validGenes = geneService.findGenesForOrganism(
+			validGenes = geneService.findGenesForOrganism(
 					organismId, geneNames.getValidGenes());
 
 			// validate attributes
@@ -733,7 +733,14 @@ public class SearchController {
 			}
 
 		} catch (Exception e) {
-			mv = ModelAndViewFactory.create(url, "error.jsp");
+			if( validGenes == null || validGenes.isEmpty() ){
+                this.logger.warn("No genes error, warning user");
+				mv = ModelAndViewFactory.create(url, "noGenesError.jsp");
+			} else {
+                this.logger.error(e.getMessage(), e);
+				mv = ModelAndViewFactory.create(url, "error.jsp");
+			}
+			
 			mv.addObject("exception", e);
 			mv.addObject("organismId", organismId);
 			mv.addObject("geneLines", geneLines);
@@ -742,9 +749,6 @@ public class SearchController {
 			mv.addObject("weighting", weighting);
 			mv.addObject("threshold", threshold);
 			mv.addObject("sessionId", session.getId());
-
-			this.logger.error(e.getMessage(), e);
-
 		}
 
 		return mv;
@@ -822,14 +826,6 @@ public class SearchController {
 	public void setVisualizationDataService(
 			VisualizationDataService visualizationDataService) {
 		this.visualizationDataService = visualizationDataService;
-	}
-
-	public Log getLogger() {
-		return logger;
-	}
-
-	public void setLogger(Log logger) {
-		this.logger = logger;
 	}
 
 	public NetworkGroupService getNetworkGroupService() {
