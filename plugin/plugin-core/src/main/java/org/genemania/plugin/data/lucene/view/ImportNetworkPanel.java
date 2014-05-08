@@ -416,6 +416,8 @@ public class ImportNetworkPanel extends JPanel {
 		HashSet<String> extensions = new HashSet<String>();
 		extensions.add("csv"); //$NON-NLS-1$
 		extensions.add("txt"); //$NON-NLS-1$
+		extensions.add("soft"); //$NON-NLS-1$
+		extensions.add("soft.gz"); //$NON-NLS-1$
 		File initialFile = fileUtils.getUserHome();
 		File file;
 		try {
