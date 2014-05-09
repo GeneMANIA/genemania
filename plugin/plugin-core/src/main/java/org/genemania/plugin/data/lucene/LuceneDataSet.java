@@ -394,7 +394,7 @@ public class LuceneDataSet<NETWORK, NODE, EDGE> extends DataSet {
 		try {
 			String baseUrl = fileUtils.findDataSetBaseUrl(FileUtils.DEFAULT_BASE_URL, getVersion().toString());
 			URL url = new URL(String.format("%s.xml", baseUrl)); //$NON-NLS-1$
-			URLConnection connection = url.openConnection(fileUtils.getProxy());
+			URLConnection connection = fileUtils.getUrlConnection(url);
 			InputStream stream = connection.getInputStream();
 			try {
 				Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream).getDocumentElement();

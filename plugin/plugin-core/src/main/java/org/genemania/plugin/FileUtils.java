@@ -28,15 +28,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
-import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -61,8 +60,7 @@ public class FileUtils {
 	
 	public File download(URL dataUrl, File destination, ProgressReporter progress) throws IOException {
 		HttpURLConnection.setFollowRedirects(true);
-		Proxy proxy = getProxy();
-		URLConnection connection = dataUrl.openConnection(proxy);
+		URLConnection connection = getUrlConnection(dataUrl);
 		connection.setUseCaches(false);
 		
 		int totalBytes = connection.getContentLength();
@@ -107,6 +105,10 @@ public class FileUtils {
 		return new File(fullPath);
 	}
 	
+	public URLConnection getUrlConnection(URL url) throws IOException {
+		return url.openConnection();
+	}
+
 	String determineFileName(URLConnection connection, File basePath) throws IOException {
 		String contentDisposition = connection.getHeaderField("Content-Disposition"); //$NON-NLS-1$
 		if (contentDisposition != null) {
@@ -129,7 +131,7 @@ public class FileUtils {
 	}
 	
 	Properties getMetadata(URL url) throws IOException {
-		URLConnection connection = url.openConnection(getProxy());
+		URLConnection connection = getUrlConnection(url);
 		InputStream metadataStream = connection.getInputStream();
 		try {
 			Properties properties = new Properties();
@@ -140,10 +142,6 @@ public class FileUtils {
 		}
 	}
 	
-	public Proxy getProxy() {
-		return Proxy.NO_PROXY;
-	}
-
 	String join(String conjunct, String[] parts) {
 		StringBuilder buffer = new StringBuilder();
 		for (int i = 0; i < parts.length; i++) {
@@ -245,10 +243,9 @@ public class FileUtils {
 	
 	public List<String> getCompatibleDataSets(String baseUrl, String schemaVersion) throws IOException {
 		HttpURLConnection.setFollowRedirects(true);
-		Proxy proxy = getProxy();
 
 		String url = String.format("%s/data/schema-%s.txt", baseUrl, schemaVersion); //$NON-NLS-1$
-		URLConnection connection = new URL(url).openConnection(proxy);
+		URLConnection connection = getUrlConnection(new URL(url));
 		connection.setUseCaches(false);
 		List<String> dataSets = new ArrayList<String>();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -284,10 +281,9 @@ public class FileUtils {
 	
 	Map<String, String> getDataSetProperties(String baseUrl, String name) throws IOException {
 		HttpURLConnection.setFollowRedirects(true);
-		Proxy proxy = getProxy();
 
 		String url = String.format("%s/data/%s", baseUrl, name); //$NON-NLS-1$
-		URLConnection connection = new URL(url).openConnection(proxy);
+		URLConnection connection = getUrlConnection(new URL(url));
 		connection.setUseCaches(false);
 		
 		return getDataSetDescriptions(new InputStreamReader(connection.getInputStream()));

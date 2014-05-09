@@ -18,7 +18,10 @@
  */
 package org.genemania.plugin.cytoscape2;
 
+import java.io.IOException;
 import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
 
 import org.genemania.plugin.FileUtils;
 
@@ -26,7 +29,11 @@ import cytoscape.util.ProxyHandler;
 
 public class FileUtilsImpl extends FileUtils {
 	@Override
-	public Proxy getProxy() {
+	public URLConnection getUrlConnection(URL url) throws IOException {
+		return url.openConnection(getProxy());
+	}
+	
+	Proxy getProxy() {
 		Proxy proxy = ProxyHandler.getProxyServer();
 		if (proxy != null) {
 			return proxy;

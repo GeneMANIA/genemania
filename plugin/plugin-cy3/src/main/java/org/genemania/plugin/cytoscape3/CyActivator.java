@@ -26,6 +26,7 @@ import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CyAction;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.event.CyEventHelper;
+import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
@@ -92,8 +93,10 @@ public class CyActivator extends AbstractCyActivator {
 		CyEventHelper cyEventHelperRef = getService(bc, CyEventHelper.class);
 		RenderingEngineManager renderingEngineManager = getService(bc, RenderingEngineManager.class);
 
+		StreamUtil streamUtil = getService(bc, StreamUtil.class);
+
 		UiUtils uiUtils = new UiUtils();
-		FileUtils fileUtils = new FileUtils();
+		FileUtils fileUtils = new CyFileUtils(streamUtil);
 		NetworkUtils networkUtils = new NetworkUtils();
 		CytoscapeUtilsImpl cytoscapeUtils = new CytoscapeUtilsImpl(
 				networkUtils, cySwingApplicationRef, cyApplicationManagerRef,
