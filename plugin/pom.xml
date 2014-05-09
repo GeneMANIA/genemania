@@ -71,6 +71,28 @@
             <name>Cytoscape Snapshots</name>
             <url>http://code.cytoscape.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>cytoscape_third_party</id>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <name>Cytoscape Third Party</name>
+            <url>http://code.cytoscape.org/nexus/content/repositories/thirdparty/</url>
+        </repository>
+        <repository>
+            <id>biopax</id>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <name>BioPAX Releases</name>
+            <url>http://code.cytoscape.org/nexus/content/repositories/biopax-release/</url>
+        </repository>
     </repositories>
 
     <build>
