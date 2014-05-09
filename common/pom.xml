@@ -4,7 +4,7 @@
     <groupId>org.genemania</groupId>
     <artifactId>genemania-common</artifactId>
     <packaging>jar</packaging>
-    <version>3.1.3</version>
+    <version>3.1.2</version>
     <name>GeneManiaCommon</name>
     <url>genemania.org</url>
     

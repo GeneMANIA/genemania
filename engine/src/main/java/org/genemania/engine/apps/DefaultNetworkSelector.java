@@ -256,6 +256,13 @@ public class DefaultNetworkSelector extends AbstractEngineApp {
     }
 
     /*
+     * TODO
+     */
+    Collection<Long> getDefaultAttributeGroups(Organism organism) {
+        return new ArrayList<Long>();
+    }
+
+    /*
      * the request is all networks marked as default in data set, plus all coexp
      * networks whether or not they are default. run using BP combining.
      */

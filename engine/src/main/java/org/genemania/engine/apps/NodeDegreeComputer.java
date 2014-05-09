@@ -29,11 +29,12 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 import org.genemania.domain.Organism;
-import org.genemania.engine.core.data.*;
-import org.genemania.engine.matricks.Matrix;
+import org.genemania.engine.core.data.Data;
+import org.genemania.engine.core.data.DatasetInfo;
+import org.genemania.engine.core.data.Network;
+import org.genemania.engine.core.data.NodeDegrees;
+import org.genemania.engine.core.data.NodeIds;
 import org.genemania.engine.matricks.SymMatrix;
-import org.genemania.engine.matricks.Vector;
-import org.genemania.engine.matricks.custom.DenseDoubleVector;
 import org.genemania.exception.ApplicationException;
 import org.kohsuke.args4j.Option;
 
@@ -128,37 +129,7 @@ public class NodeDegreeComputer extends AbstractEngineApp {
                 degreesInOrganism.add(degreesInNetwork);
             }
         }
-
-        Collection<Long> attributeGroupIds = getAllAttributeGroups(organism);
-
-        for (long attributeGroupId: attributeGroupIds) {
-            AttributeData groupData = cache.getAttributeData(Data.CORE, organism.getId(), attributeGroupId);
-            System.out.println(groupData.getData().toString());
-
-            // attributes as (binary) columns, rows as genes
-            Matrix matrix = groupData.getData();
-
-            // weight accounts for network normalization
-            double weights[] = new double[matrix.numCols()];
-            matrix.columnSums(weights);
-
-            for (int i=0; i<weights.length; i++) {
-                double sum = weights[i];
-                if (sum > 1) {
-                    double weight = 1d / (sum - 1d);
-                    weights[i] = weight;
-                }
-                else {
-                    weights[i] = 0d;
-
-                }
-
-            }
-
-            matrix.multAdd(weights, degreesInOrganism.getData());
-        }
     }
-
 
     protected  int countNodesWithPositiveDegree() {
         numConnectedGenes = 0;
