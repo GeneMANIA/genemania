@@ -2,3 +2,6 @@ target
 *.class
 *.jar
 *.war
+.settings
+.classpath
+.project

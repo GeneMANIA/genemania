@@ -28,6 +28,7 @@ import java.awt.Frame;
 import java.awt.Image;
 import java.awt.SystemColor;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -217,40 +218,59 @@ public class UiUtils {
 	
 	private File getFileAWT(Component parent, String title, File initialFile, final String typeDescription, final Set<String> extensions, FileSelectionMode mode) throws ApplicationException {
 		// Use AWT dialog for Mac since it lets us use Finder's file chooser
-		FileDialog dialog;
-		switch (mode) {
-		case OPEN_FILE:
-		case OPEN_DIRECTORY:
-			dialog = new FileDialog(getFrame(parent), title, FileDialog.LOAD);
-			break;
-		case SAVE_FILE:
-			dialog = new FileDialog(getFrame(parent), title, FileDialog.SAVE);
-			break;
-		default:
-			throw new ApplicationException(String.valueOf(mode));
+		final String fileDialogForDirectories = System.getProperty("apple.awt.fileDialogForDirectories");
+		System.setProperty("apple.awt.fileDialogForDirectories", mode == FileSelectionMode.OPEN_DIRECTORY ? "true" : "false");
+		try {
+			FileDialog dialog;
+			switch (mode) {
+			case OPEN_FILE:
+			case OPEN_DIRECTORY:
+				dialog = new FileDialog(getFrame(parent), title, FileDialog.LOAD);
+				break;
+			case SAVE_FILE:
+				dialog = new FileDialog(getFrame(parent), title, FileDialog.SAVE);
+				break;
+			default:
+				throw new ApplicationException(String.valueOf(mode));
+			}
+			dialog.setFilenameFilter(new FilenameFilter() {
+				@Override
+				public boolean accept(File directory, String name) {
+					String[] parts = name.split("[.]"); //$NON-NLS-1$
+					String lastPart = parts[parts.length - 1];
+					for (String extension : extensions) {
+						if (extension.equalsIgnoreCase(lastPart)) {
+							return true;
+						}
+					}
+					return false;
+				}
+			});
+			File directory = null;
+			if (initialFile.isDirectory()) {
+				directory = initialFile;
+			}
+			if (initialFile.isFile() || !initialFile.exists()) {
+				dialog.setFile(initialFile.getName());
+				directory = initialFile.getParentFile();
+			}
+			if (directory != null) {
+				dialog.setDirectory(directory.getAbsolutePath());
+			}
+			dialog.setTitle(title);
+			dialog.setVisible(true);
+			String file = dialog.getFile();
+			if (file == null) {
+				return null;
+			}
+			String targetDirectory = dialog.getDirectory();
+			if (targetDirectory == null) {
+				return null;
+			}
+			return new File(String.format("%s%s%s", targetDirectory, File.separator, file)); //$NON-NLS-1$
+		} finally {
+			System.setProperty("apple.awt.fileDialogForDirectories", fileDialogForDirectories);
 		}
-		File directory = null;
-		if (initialFile.isDirectory()) {
-			directory = initialFile;
-		}
-		if (initialFile.isFile() || !initialFile.exists()) {
-			dialog.setFile(initialFile.getName());
-			directory = initialFile.getParentFile();
-		}
-		if (directory != null) {
-			dialog.setDirectory(directory.getAbsolutePath());
-		}
-		dialog.setTitle(title);
-		dialog.setVisible(true);
-		String file = dialog.getFile();
-		if (file == null) {
-			return null;
-		}
-		String targetDirectory = dialog.getDirectory();
-		if (targetDirectory == null) {
-			return null;
-		}
-		return new File(String.format("%s%s%s", targetDirectory, File.separator, file)); //$NON-NLS-1$
 	}
 	
 	private File getFileSwing(Component parent, String title, File initialFile, final String typeDescription, final Set<String> extensions, FileSelectionMode mode) throws ApplicationException {

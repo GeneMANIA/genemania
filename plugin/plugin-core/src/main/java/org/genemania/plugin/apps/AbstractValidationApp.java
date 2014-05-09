@@ -154,7 +154,7 @@ public class AbstractValidationApp extends AbstractPluginDataApp {
 		long organismId = fOrganism.getId();
 		
 	    VectorCrossValidator vcv = new VectorCrossValidator();
-	    vcv.setCacheNamespace(organismId < 0 ? DataSet.USER : "CORE");
+	    vcv.setCacheNamespace(DataSet.USER);
 	    
 	    IMediatorProvider provider = fData.getMediatorProvider();
 	    vcv.setGeneMediator(provider.getGeneMediator());
