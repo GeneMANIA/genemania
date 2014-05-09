@@ -79,7 +79,7 @@ public class CyNetworkImporter<NETWORK, NODE, EDGE> {
 				
 				if (weightAttribute != null) {
 					// Weighted interaction
-					writer.printf("%s\t%s\t%f\n", sourceSymbol, targetSymbol, weight); //$NON-NLS-1$
+					writer.printf("%s\t%s\t%s\n", sourceSymbol, targetSymbol, Double.toString(weight)); //$NON-NLS-1$
 				} else {
 					// Unweighted interaction
 					writer.printf("%s\t%s\n", sourceSymbol, targetSymbol); //$NON-NLS-1$

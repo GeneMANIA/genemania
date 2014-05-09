@@ -83,7 +83,7 @@ public class WeightedNetworkNormalizer extends BaseNormalizer {
 		writer.print(toId);
 		writer.print("\t"); //$NON-NLS-1$
 		if (isWeighted()) {
-			writer.print(weight);
+			writer.print(Double.toString(weight));
 		}
 		writer.print("\n"); //$NON-NLS-1$
 		context.totalInteractions++;

@@ -37,7 +37,7 @@ public class GeneScoresOutputFormatter extends GeneListOutputFormatter {
 		if (result.isQueryNode(gene.getNode().getId())) {
 			writer.printf("%s\t\n", preferredGene.getSymbol()); //$NON-NLS-1$
 		} else {
-			writer.printf("%s\t%f\n", preferredGene.getSymbol(), score * 100); //$NON-NLS-1$
+			writer.printf("%s\t%s\n", preferredGene.getSymbol(), Double.toString(score * 100)); //$NON-NLS-1$
 		}
 	}
 

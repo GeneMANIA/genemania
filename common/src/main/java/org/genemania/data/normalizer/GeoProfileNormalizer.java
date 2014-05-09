@@ -73,7 +73,7 @@ public class GeoProfileNormalizer implements INormalizer {
 						if (Double.isNaN(value) || Double.isInfinite(value)) {
 							writer.print("null"); //$NON-NLS-1$
 						} else {
-							writer.print(value);
+							writer.print(Double.toString(value));
 						}
 					}
 					writer.println();

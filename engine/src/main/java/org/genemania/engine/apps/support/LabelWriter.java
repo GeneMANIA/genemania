@@ -64,7 +64,7 @@ public class LabelWriter  {
 		try {
 			List<LabelResult> results = sortResults(label, discriminant, labelIndices, nodeIds);
 			for (LabelResult result : results) {
-				writer.printf("%s\t%d\t%f\n", result.getName(), result.getLabel() == 1.0 ? 1 : 0, result.getScore());
+				writer.printf("%s\t%d\t%s\n", result.getName(), result.getLabel() == 1.0 ? 1 : 0, Double.toString(result.getScore()));
 			}
 		} finally {
 			writer.close();
