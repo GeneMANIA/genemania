@@ -1,11 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.genemania</groupId>
+        <artifactId>parent</artifactId>
+        <version>3.1.4-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+    
 	<groupId>org.genemania</groupId>
 	<artifactId>genemania-broker</artifactId>
 	<packaging>jar</packaging>
-	<version>3.1.3</version>
-	<name>GeneManiaBroker</name>
+	<name>GeneMANIA Broker</name>
 	<url>genemania.org</url>
 	<repositories>
 		<repository>
@@ -18,12 +24,12 @@
 		<dependency>
 			<groupId>org.genemania</groupId>
 			<artifactId>genemania-common</artifactId>
-			<version>3.1.3</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.genemania</groupId>
 			<artifactId>genemania-engine</artifactId>
-			<version>3.1.3</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
