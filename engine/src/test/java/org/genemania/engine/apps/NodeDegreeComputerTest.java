@@ -25,6 +25,7 @@ import org.genemania.domain.Organism;
 import org.genemania.engine.cache.RandomDataCacheBuilder;
 import org.genemania.engine.core.data.Data;
 import org.genemania.engine.core.data.NodeDegrees;
+import org.genemania.engine.mediators.DataCacheAttributeMediator;
 import org.genemania.engine.mediators.DataCacheGeneMediator;
 import org.genemania.engine.mediators.DataCacheNetworkMediator;
 import org.genemania.engine.mediators.DataCacheOrganismMediator;
@@ -48,6 +49,9 @@ public class NodeDegreeComputerTest {
     static double org1networkSparsity = .5;
     static int numCategories = 20;
     static double org1AnnotationSparsity = .5;
+    static int org1NumAttributeGroups = 3;
+    static int org1NumAttributesPerGroup = 10;
+    static double org1AttributeSparsity = .5;
     static long [] org1NetworkIds;
 
     public NodeDegreeComputerTest() {
@@ -68,7 +72,8 @@ public class NodeDegreeComputerTest {
 
         // random organism 1
         org1NetworkIds = cacheBuilder.addOrganism(org1Id, org1numGenes, org1numNetworks,
-                org1networkSparsity, numCategories, org1AnnotationSparsity);
+                org1networkSparsity, numCategories, org1AnnotationSparsity,
+                org1NumAttributeGroups, org1NumAttributesPerGroup, org1AttributeSparsity);
     }
 
     @After
@@ -90,6 +95,7 @@ public class NodeDegreeComputerTest {
         ndc.setGeneMediator(new DataCacheGeneMediator(cacheBuilder.getCache()));
         ndc.setNetworkMediator(new DataCacheNetworkMediator(cacheBuilder.getCache()));
         ndc.setOrganismMediator(new DataCacheOrganismMediator(cacheBuilder.getCache()));
+        ndc.setAttributeMediator(new DataCacheAttributeMediator(cacheBuilder.getCache()));
 
         ndc.setOrgId(org1Id);
         Organism organism = ndc.getOrganismMediator().getOrganism(org1Id);
