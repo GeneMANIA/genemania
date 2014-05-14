@@ -16,6 +16,7 @@
         <module>broker</module>
         <module>website</module>
         <module>plugin</module>
+        <module>adminweb</module>
     </modules>
 
     <repositories>
