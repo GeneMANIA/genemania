@@ -30,7 +30,7 @@ The `website-ui` contains the frontend interface for the website.  Naturally, Ja
 
 1. **Requirements:**
  1. Node.js & npm
- 1. Gulp
+ 1. Gulp: `sudo npm install -g gulp`
  1. NB: you must `npm install` before using `gulp`
 1. **Targets:** `gulp <target1> <target2> ...`
  1. TODO build and copy to `website`
