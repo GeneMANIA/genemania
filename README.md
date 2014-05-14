@@ -1,6 +1,8 @@
 GeneMANIA
 =========
 
+http://genemania.org
+
 GeneMANIA helps you predict the function of your favourite genes and gene sets.
 
 
