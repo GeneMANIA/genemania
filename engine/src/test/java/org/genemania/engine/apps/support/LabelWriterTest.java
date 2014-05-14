@@ -18,6 +18,8 @@
  */
 package org.genemania.engine.apps.support;
 
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,16 +34,21 @@ import org.genemania.engine.core.data.NodeIds;
 import org.genemania.mediator.NodeMediator;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class LabelWriterTest {
 	private LabelWriter writer;
-	private long organismId;
+    private NodeMediator mediator;
+	private long organismId = 1;
+
+    @Rule
+    public TemporaryFolder tempFolder= new TemporaryFolder();
 
 	@Before
-	public void setUp() {
-		organismId = 1;
-		NodeMediator mediator = new NodeMediator() {
+	public void setUp() throws Exception{
+		mediator = new NodeMediator() {
 			@Override
 			public Node getNode(long nodeId, long organismId) {
 				Node node = new Node();
@@ -58,11 +65,13 @@ public class LabelWriterTest {
 				return node;
 			}
 		};
-		writer = new LabelWriter(null, mediator, organismId);
 	}
 	
 	@Test
 	public void testSort() throws Exception {
+        File outfile = tempFolder.newFile("LabelWriterTest.txt");
+        writer = new LabelWriter(outfile.getPath(), mediator, organismId);
+
 		Vector label = new DenseVector(new double[] { 0, 1, 0, 1 });
 		Vector discriminant = new DenseVector(new double[] { 2, 1, 1, 0 });
 		List<Integer> labelIndices = new ArrayList<Integer>();
