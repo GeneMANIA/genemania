@@ -1,0 +1,7 @@
+1	A. thaliana	arabidopsis	Arabidopsis thaliana	1	3702
+2	C. elegans	worm	Caenorhabditis elegans	2	6239
+3	D. melanogaster	fly	Drosophila melanogaster	3	7227
+4	H. sapiens	human	Homo sapiens	4	9606
+5	M. musculus	mouse	Mus musculus	5	10090
+6	S. cerevisiae	baker's yeast	Saccharomyces cerevisiae	6	4932
+7	R. norvegicus	rat	Rattus norvegicus	7	10116

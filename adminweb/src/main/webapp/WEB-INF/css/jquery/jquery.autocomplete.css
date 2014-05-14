@@ -1,0 +1,66 @@
+.ac_results {
+	border-bottom: none;
+	display: block;
+	overflow: hidden;
+	z-index: 99999;
+	border: 1px solid #B1BCD1;
+	background-color: #ffffff;
+	-webkit-box-shadow: 0 2px 2px #666666; -moz-box-shadow: 0 2px 2px #666666;
+}
+
+.ac_results ul {
+	width: 100%;
+	list-style-position: outside;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: block;
+	overflow: hidden;
+}
+
+.ac_results li {
+	margin: 0px;
+	padding-left: 0.25em;
+	padding-right: 0px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+	cursor: default;
+	display: block;
+	/* 
+	if width will be 100% horizontal scrollbar will apear 
+	when scroll mode will be used
+	*/
+	/*width: 100%;*/
+	/*font: menu;
+	font-size: 12px;*/
+	/* 
+	it is very important, if line-height not setted or setted 
+	in relative units scroll will be broken in firefox
+	*/
+	line-height: 1.5em;
+	overflow: hidden;
+	height: 1.5em;
+	width: 1000px;
+}
+
+.ac_loading {
+	
+}
+
+.ac_odd, .ac_even {
+	background-color: #fefefe;
+	/* border-bottom: 1px solid #dddddd; */
+}
+
+.ac_over {
+	background-color: #336699;
+	color: #ffffff;
+}
+
+.ac_results strong {
+    text-decoration: underline;
+}
+
+.ac_loading {
+	background: #fefefe url("../img/icon/loading.gif") center center no-repeat;
+}

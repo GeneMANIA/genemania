@@ -1,0 +1,22 @@
+ul.checktree, ul.checktree * { list-style-type: none; }
+ul.checktree {  }
+ul.checktree li { clear: left; margin-bottom: 0.2em; padding-top: 0.2em; border-top: 1px #eaeaea solid; }
+ul.checktree > li:first-of-type { border: 0; padding-top: 0.5em; }
+ul.checktree > li:first-child { border: 0; padding-top: 0.5em; }
+ul.checktree ul { margin-top: 0.1em;}
+ul.checktree li .arrow { float: left; width: 2em; text-align: center; cursor: default; margin-left: 0.5em; background-position: left center; margin-top: 0.1em; }
+ul.checktree li .arrow.expanded { background-image: url("../img/arrow/expanded_transparent.png"); background-repeat: no-repeat; cursor: pointer;}
+ul.checktree li .arrow.collapsed { background-image: url("../img/arrow/collapsed_transparent.png"); background-repeat: no-repeat; cursor: pointer;}
+ul.checktree li .checkbox, ul.checktree li .checkbox_spacer { float: left; width: 1.5em; text-align: center; cursor: default; background-position: center center; margin-top: 0.2em; }
+ul.checktree li .checkbox.half_checked { opacity: 0.5; filter: alpha(opacity=50); }
+ul.checktree li .checkbox_spacer {  }
+ul.checktree li .label { border: 1px solid transparent; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
+ul.checktree li .label.selected { border-color: #ffff00; background-color: #ffffcc;  }
+ul.checktree li .label.select_hover { border-color: #aae6ff; background-color: #e5f7ff;  }
+ul.checktree li ul {padding: 0px; margin-left: 2.25em;}
+li .info {display: none;}
+ul.checktree li .text {margin-left: 4em;}
+ul.checktree a { cursor: pointer; }
+ul.checktree .sortable {cursor: move;}
+ul.checktree li > .label { height: auto; overflow: hidden; padding-left: 0.5em; display: block; cursor: text; }
+ul.checktree p { margin: 0px; padding: 0.25em 0 0.25em 0; }

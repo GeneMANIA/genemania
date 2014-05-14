@@ -1,0 +1,212 @@
+<ul id="myTab" class="nav nav-tabs">
+    <li class="active"><a href="#description" data-toggle="tab">Description</a></li>
+    <li><a href="#analysis" data-toggle="tab">Analysis</a></li>
+    {{#attributeNetwork}}
+        <li><a href="#metadata" data-toggle="tab">Linkouts</a></li>
+    {{/attributeNetwork}}
+</ul>
+<div id="myTabContent" class="tab-content">
+    <div class="tab-pane fade in active" id="description">
+        <p>
+        <form class="form-horizontal" id="networkForm" action="updateNetwork" method="post">
+            <input type="hidden" name="organismId" value="{{organismId}}" /> 
+            <input type="hidden" name="networkId" value="{{id}}" />
+
+             <div class="control-group">
+                <label class="control-label" for="name">Name</label>
+                <div class="controls">
+                    <input class="input-block-level" name="name" type="text" value="{{title}}" placeholder="{{suggestedName}}"> 
+                    <span
+                        class="help-block"> Example: FirstAuthLastName-LastAuthLastName-Year </span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="description">Description</label>
+                <div class="controls">
+                    <textarea class="input-block-level" rows="3" name="description" placeHolder="{{suggestedDescription}}">{{{description}}}</textarea>
+                    <span class="help-block"></span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="pubmedId">Pubmed ID</label>
+                <div class="controls">
+                    <input class="input-medium" name="pubmedId" type="text" value="{{pubmedDisplayId}}" placeholder=""> 
+                    <span class="help-block"> 
+                        <span id="pubmed_ref" style="display: {{displayPubmedLink}}"> 
+                        <a href="{{{pubmedLink}}}" target="_blank">Pubmed abstract</a></span>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label" for="enabled">Enabled</label>
+                <div class="controls">
+                    <input type="checkbox" name="enabled" {{isEnabledChecked}}>
+                    <span class="help-block"> Include in build</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="default">Selected by default</label>
+                <div class="controls">
+                    <input type="checkbox" name="default" {{isDefaultChecked}}>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="restrictedLicense">Restricted license</label>
+                <div class="controls">
+                    <input type="checkbox" name="restrictedLicense" {{isRestrictedLicenseChecked}}>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="comment">Comment</label>
+                <div class="controls">
+                    <textarea class="input-block-level" rows="3" name="comment">{{{comment}}}</textarea>
+                    <span class="help-block"> Notes for internal use only. Will not appear on production. </span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="fileupload">Replace data</label>
+                <div class="controls">
+                    <span class="btn btn-success fileinput-button"> <i class="icon-plus icon-white"></i> 
+                    <span>Select file</span> 
+ 
+                     <input id="fileupload" type="file" name="files" data-url="replacenetwork">
+                     </span>
+
+                    <div id="spinner" class="spinner" style="display: none;">
+                        <img id="img-spinner" src="img/icon/loading.gif" alt="Loading" />
+                    </div>
+                </div>
+            </div>
+
+            <dl class="dl-horizontal">
+                <dt>Upload date</dt>
+                <dd>{{date}}</dd>
+                <dt>Data file</dt>
+                <dd>{{{fileDownloadLink}}}</dd>
+                <dt>Processed network</dt>
+                <dd><a href="">todo</a></dd>
+            </dl>
+
+
+            <div class="form-actions">
+                <button id="submitButton" name="submitButton" value="submitButton" type="submit" class="btn btn-primary" disabled>Save</button>
+                <button id="resetButton" name="resetButton" type="button" class="btn">Reset</button>
+                <button id="deleteButton" name="deleteButton" value="deleteButton" type="submit" class="btn pull-right">Delete</button>
+            </div>
+            
+            </form>
+        </p>
+    </div>
+    <div class="tab-pane fade" id="analysis">
+        <dl class="dl-horizontal">
+            <dt>Status</dt>
+            <dd>{{processingDetails.status}}</dd>
+
+            <dt>Data Type</dt>
+            <dd>{{processingDetails.processingDescription}}</dd>
+            
+            {{^attributeNetwork}}
+            <dt># Interactions</dt>
+            <dd>{{processingDetails.interactionCount}}</dd>
+            {{/attributeNetwork}}
+            
+            {{#attributeNetwork}}
+            <dt># Attributes</dt>
+            <dd>{{processingDetails.numAttributes}}</dd>
+            
+            <dt># Genes</dt>
+            <dd>{{processingDetails.numGenes}}</dd>
+            
+            <dt># Interactions</dt>
+            <dd>{{processingDetails.numAssociations}}</dd>
+            {{/attributeNetwork}}
+            
+            <dt>Unrecognized idents</dt>
+            <dd>{{processingDetails.invalidCount}}</dd>
+                        
+            <dt>Sample unrecognized</dt>
+            <dd>{{#processingDetails.invalidInteractions}} {{.}} {{/processingDetails.invalidInteractions}}</dd>
+        </dl>
+        <form class="form-horizontal" id="networkStatsForm" action="updateNetwork" method="post">
+            <input type="hidden" name="organismId" value="{{organismId}}" /> <input type="hidden" name="networkId" value="{{id}}" />
+
+            <div class="form-actions">
+            <div class="btn-group pull-right">
+                <span id="submit_spinner" class="spinner" style="display: none;">
+                    <img id="img-spinner" src="img/icon/loading.gif" alt="Loading" />
+                </span>
+                <button name="updateValidationButton" value="updateValidationButton" type="submit" class="btn">Reanalyze</button>
+            </div>
+        </div>
+        </form>
+    </div>
+
+    {{#attributeNetwork}}
+    <div class="tab-pane fade" id="metadata">
+           
+        <form class="form-horizontal" id="attributeMetadataForm" action="updateAttributeMetadata" method="post">
+            <input type="hidden" name="organismId" value="{{organismId}}" /> <input type="hidden" name="networkId" value="{{id}}" />
+
+            <div class="control-group">
+                <label class="control-label" for="linkoutUrl">Linkout URL</label>
+                <div class="controls">
+                    <input class="input-xxlarge" name="linkoutUrl" type="text" value="{{linkoutUrl}}" placeholder="">
+                    <span class="help-block">Use the placeholder {1} for the accession's position. For example given a Linkout URL 
+                    of http://www.ebi.ac.uk/interpro/entry/{1}, the value {1} will 
+                    be replaced with an accession for each attribute, such as IPR020610.</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="linkoutLabel">Linkout Label</label>
+                <div class="controls">
+                    <input class="input-large" name="linkoutLabel" type="text" value="{{linkoutLabel}}" placeholder="">
+                    <span class="help-block">Text to display for the linkout, usually the target 
+                    database name such as "InterPro".</span>
+                </div>
+            </div>
+            
+            <dl class="dl-horizontal">
+                <dt>Description file</dt>
+                <dd>{{{metadatafileDownloadLink}}}</dd>
+                
+                <dt># records</dt>
+                <dd>{{metadataProcessingDetails.metadataRecordCount}}</dd>
+                
+                <dt>Sample linkout</dt>
+                <dd>{{sampleLinkoutDescription}}: <a href="{{sampleLinkoutUrl}}" target="_">{{sampleLinkoutLabel}}</a></dd>
+            </dl>
+                   
+            <div class="control-group">
+                <label class="control-label" for="fileupload">Replace descriptions</label>
+                <div class="controls">
+                    <span class="btn btn-success fileinput-button"> 
+                        <i class="icon-plus icon-white"></i> 
+                        <span>Select file</span> 
+                        <input id="fileupload2" type="file" name="files" data-url="replaceAttributeMetadata">
+                    </span>
+                    <div id="spinner" class="spinner" style="display: none;">
+                        <img id="img-spinner" src="img/icon/loading.gif" alt="Loading" />
+                    </div>
+                </div>
+            </div>
+                
+            
+            
+            <div class="form-actions">
+                <button id="submitButton" name="submitButton" value="submitButton" type="submit" class="btn btn-primary" disabled>Save</button>
+                <button id="resetButton" name="resetButton" type="button" class="btn">Reset</button>
+                <button id="deleteButton" name="deleteButton" value="deleteButton" type="submit" class="btn pull-right">Delete</button>
+            </div>
+        </form>
+    </div>
+    {{/attributeNetwork}}
+
+</div>

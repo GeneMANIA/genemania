@@ -1,0 +1,20 @@
+Name_1	domain9	domain1	domain6	domain5	domain8	domain4	domain10	domain7
+Name_2	domain3
+Name_3	domain6	domain8	domain1	domain7	domain2	domain10	domain9	domain3
+Name_4	domain1	domain3	domain9	domain10	domain2	domain6
+Name_5	domain8	domain7
+Name_6	domain2	domain3	domain9	domain10	domain6
+Name_7	domain5	domain4	domain6	domain3	domain2	domain10	domain8
+Name_8	domain9	domain3	domain8	domain2
+Name_9	domain8	domain10	domain1
+Name_10	domain6	domain8	domain4	domain3	domain9	domain7	domain5	domain1
+Name_11	domain8	domain10	domain3	domain4
+Name_12	domain4	domain1	domain6	domain3	domain7	domain5	domain2	domain8
+Name_13	domain3	domain5	domain4	domain10	domain1	domain9	domain2	domain8
+Name_14	domain4	domain7	domain6	domain3	domain2	domain10	domain1
+Name_15	domain1	domain10	domain5	domain2	domain3
+Name_16	domain1	domain5	domain2	domain7
+Name_17	domain9	domain2
+Name_18	domain2	domain7	domain6	domain4	domain3
+Name_19	domain6	domain3	domain7	domain10
+Name_20	domain5	domain8	domain6	domain2	domain4	domain1

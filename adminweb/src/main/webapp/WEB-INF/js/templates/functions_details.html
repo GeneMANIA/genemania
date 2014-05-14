@@ -1,0 +1,160 @@
+<ul id="myTab" class="nav nav-tabs">
+    <li class="active"><a href="#description" data-toggle="tab">Description</a></li>
+    <li><a href="#analysis" data-toggle="tab">Analysis</a></li>
+        <li><a href="#metadata" data-toggle="tab">Descriptions</a></li>
+</ul>
+<div id="myTabContent" class="tab-content">
+    <div class="tab-pane fade in active" id="description">
+        <p>
+        <form class="form-horizontal" id="FunctionsForm" action="updateFunctions" method="post">
+            <input type="hidden" name="organismId" value="{{organismId}}" /> 
+            <input type="hidden" name="functionsId" value="{{id}}" />
+
+             <div class="control-group">
+                <label class="control-label" for="name">Name</label>
+                <div class="controls">
+                    <input class="input-block-level" name="name" type="text" value="{{title}}" placeholder="{{suggestedName}}"> 
+                    <span
+                        class="help-block"> Example: FirstAuthLastName-LastAuthLastName-Year </span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="comment">Comment</label>
+                <div class="controls">
+                    <textarea class="input-block-level" rows="3" name="comment">{{{comment}}}</textarea>
+                    <span class="help-block"> Notes for internal use only. Will not appear on production. </span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="fileupload">Replace data</label>
+                <div class="controls">
+                    <span class="btn btn-success fileinput-button"> <i class="icon-plus icon-white"></i> 
+                    <span>Select file</span> 
+ 
+                     <input id="fileupload" type="file" name="files" data-url="replacefunctions">
+                     </span>
+
+                    <div id="spinner" class="spinner" style="display: none;">
+                        <img id="img-spinner" src="img/icon/loading.gif" alt="Loading" />
+                    </div>
+                </div>
+            </div>
+
+            <dl class="dl-horizontal">
+                <dt>Upload date</dt>
+                <dd>{{date}}</dd>
+                <dt>Data file</dt>
+                <dd>{{{fileDownloadLink}}}</dd>
+                <dt>Processed network</dt>
+                <dd><a href="">todo</a></dd>
+            </dl>
+
+
+            <div class="form-actions">
+                <button id="submitButton" name="submitButton" value="submitButton" type="submit" class="btn btn-primary" disabled>Save</button>
+                <button id="resetButton" name="resetButton" type="button" class="btn">Reset</button>
+                <button id="deleteButton" name="deleteButton" value="deleteButton" type="submit" class="btn pull-right">Delete</button>
+            </div>
+            
+            </form>
+        </p>
+    </div>
+    <div class="tab-pane fade" id="analysis">
+        <dl class="dl-horizontal">
+            <dt>Status</dt>
+            <dd>{{processingDetails.status}}</dd>
+
+            <dt>Data Type</dt>
+            <dd>{{processingDetails.processingDescription}}</dd>
+            
+            
+            <dt># Attributes</dt>
+            <dd>{{processingDetails.numAttributes}}</dd>
+            
+            <dt># Genes</dt>
+            <dd>{{processingDetails.numGenes}}</dd>
+            
+            <dt># Interactions</dt>
+            <dd>{{processingDetails.numAssociations}}</dd>
+            
+            <dt>Unrecognized idents</dt>
+            <dd>{{processingDetails.invalidCount}}</dd>
+                        
+            <dt>Sample unrecognized</dt>
+            <dd>{{#processingDetails.invalidInteractions}} {{.}} {{/processingDetails.invalidInteractions}}</dd>
+        </dl>
+        <form class="form-horizontal" id="FunctionsStatsForm" action="updateFunctions" method="post">
+            <input type="hidden" name="organismId" value="{{organismId}}" /> <input type="hidden" name="networkId" value="{{id}}" />
+
+            <div class="form-actions">
+            <div class="btn-group pull-right">
+                <span id="submit_spinner" class="spinner" style="display: none;">
+                    <img id="img-spinner" src="img/icon/loading.gif" alt="Loading" />
+                </span>
+                <button name="updateValidationButton" value="updateValidationButton" type="submit" class="btn">Reanalyze</button>
+            </div>
+        </div>
+        </form>
+    </div>
+
+    <div class="tab-pane fade" id="metadata">
+           
+        <form class="form-horizontal" id="FunctionDescriptionsForm" action="updateFunctionDescriptions" method="post">
+            <input type="hidden" name="organismId" value="{{organismId}}" /> <input type="hidden" name="networkId" value="{{id}}" />
+
+            <div class="control-group">
+                <label class="control-label" for="linkoutUrl">Linkout URL</label>
+                <div class="controls">
+                    <input class="input-xxlarge" name="linkoutUrl" type="text" value="{{linkoutUrl}}" placeholder="">
+                    <span class="help-block">Use the placeholder {1} for the accession's position. For example given a Linkout URL 
+                    of http://www.ebi.ac.uk/interpro/entry/{1}, the value {1} will 
+                    be replaced with an accession for each attribute, such as IPR020610.</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="linkoutLabel">Linkout Label</label>
+                <div class="controls">
+                    <input class="input-large" name="linkoutLabel" type="text" value="{{linkoutLabel}}" placeholder="">
+                    <span class="help-block">Text to display for the linkout, usually the target 
+                    database name such as "InterPro".</span>
+                </div>
+            </div>
+            
+            <dl class="dl-horizontal">
+                <dt>Description file</dt>
+                <dd>{{{metadatafileDownloadLink}}}</dd>
+                
+                <dt># records</dt>
+                <dd>{{metadataProcessingDetails.metadataRecordCount}}</dd>
+                
+                <dt>Sample linkout</dt>
+                <dd>{{sampleLinkoutDescription}}: <a href="{{sampleLinkoutUrl}}" target="_">{{sampleLinkoutLabel}}</a></dd>
+            </dl>
+                   
+            <div class="control-group">
+                <label class="control-label" for="fileupload2">Replace descriptions</label>
+                <div class="controls">
+                    <span class="btn btn-success fileinput-button"> 
+                        <i class="icon-plus icon-white"></i> 
+                        <span>Select file</span> 
+                        <input id="fileupload2" type="file" name="files" data-url="addfunctiondescriptions">
+                    </span>
+                    <div id="spinner" class="spinner" style="display: none;">
+                        <img id="img-spinner" src="img/icon/loading.gif" alt="Loading" />
+                    </div>
+                </div>
+            </div>
+                
+            
+            
+            <div class="form-actions">
+                <button id="submitButton" name="submitButton" value="submitButton" type="submit" class="btn btn-primary" disabled>Save</button>
+                <button id="resetButton" name="resetButton" type="button" class="btn">Reset</button>
+                <button id="deleteButton" name="deleteButton" value="deleteButton" type="submit" class="btn pull-right">Delete</button>
+            </div>
+        </form>
+
+</div>

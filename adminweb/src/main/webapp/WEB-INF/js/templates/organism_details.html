@@ -1,0 +1,37 @@
+<div>
+    <h4>{{title}}</h4>
+    <p>
+    <form class="form-horizontal" id="organismForm" action="addorganism" method="post">
+        <input type="hidden" name="organismId" value="{{id}}" /> 
+
+        <div class="control-group">
+            <label class="control-label" for="name">Name</label>
+            <div class="controls">
+                <input class="input-large" name="name" type="text" value="{{title}}" placeholder="{{suggestedName}}"> <span
+                    class="help-block">Example: Homo sapiens</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="code">Code</label>
+            <div class="controls">
+                <input class="input-small" name="code" type="text" value="{{code}}" placeholder="{{suggestedCode}}"> <span
+                    class="help-block">Short code used for organism identification in data files. Example: Hs</span>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button id="submitButton" name="submitButton" value="submitButton" type="submit" class="btn btn-primary" disabled>Save</button>
+            <button id="resetButton" name="resetButton" type="button" class="btn">Reset</button>
+            <button id="deleteButton" name="deleteButton" value="deleteButton" type="submit" class="btn pull-right">Delete</button>
+        </div>
+    </form>
+
+    <dl class="dl-horizontal">
+        {{#nw_counts}}
+        <dt style="white-space: normal; width: 170px;">{{name}}</dt>
+        <dd>{{count}}</dd>
+        {{/nw_counts}}
+    </dl>
+    <p>
+</div>

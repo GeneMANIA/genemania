@@ -1,0 +1,31 @@
+
+
+/* 
+ * instead of default border around dynatree, 
+ * just a light colored right border
+ */
+ul.dynatree-container {
+    border: 0px;
+    border-right: 1px solid #ddd;
+}
+
+/*
+ * spacing of left column of form fields,
+ * overriding bootstrap default
+ */
+.dl-horizontal dt 
+{
+    white-space: normal;
+    /*width: 140px; */
+}
+
+
+/*
+ * if a definition in a dl is blank,
+ * it is collapsed by default and the next
+ * one below move up. set a min to prevent.
+ */
+.dl-horizontal dd {
+  /* should be the same as line-height */
+  min-height: 20px;
+}

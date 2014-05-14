@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p" 
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+    <!-- so we can load some config from local properties file, like database connection info -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <!-- <property name="location" value="classpath:config.properties"/> -->
+        <property name="ignoreUnresolvablePlaceholders" value="false"/>
+        <property name="ignoreResourceNotFound" value="true"/>
+        <property name="order" value="1"/>
+        <property name="locations">
+            <list> <!-- later files in list override earlier. can use e.g. ${user.home} or  ${var:default} -->
+                <value>/WEB-INF/config.properties</value>
+<!-- still need to allow local override?
+                 <value>classpath:/WEB-INF/config.properties</value>
+                 <value>file:config.properties</value>
+ -->
+             </list>
+        </property>
+    </bean>
+
+    <!-- Scans the classpath of the application for @Components to deploy as beans -->	
+	<context:component-scan base-package="org.genemania.adminweb" />
+    
+	<!-- Configures the @Controller programming model -->
+	<mvc:annotation-driven/>    
+    
+	<!-- Forwards requests to the "/" resource to the "home" view -->
+	<mvc:view-controller path="/" view-name="index"/>    
+
+	<mvc:resources mapping="/img/**" location="WEB-INF/img/" />
+    <mvc:resources mapping="/css/**" location="WEB-INF/css/" />
+    <mvc:resources mapping="/js/**" location="WEB-INF/js/" />
+    <mvc:resources mapping="/favicon.ico" location="WEB-INF/img/favicon.ico" />
+
+    <!-- load database properties -->
+    <bean id="datamartDbImpl" class="org.genemania.adminweb.dao.impl.DatamartDbImpl"
+                init-method="init" destroy-method="destroy">
+        <property name="dbUrl" value="${dbUrl}" />
+        <property name="dbUser" value="${dbUser}" />
+        <property name="dbPass" value="${dbPass}" /> 
+    </bean>
+    
+    <!-- file storage properties -->
+    <bean id="fileStorageServiceImpl" class="org.genemania.adminweb.service.impl.FileStorageServiceImpl"
+        init-method="init" destroy-method="destroy">
+        <property name="basePath" value="${fileStorageDirectory}"/>
+    </bean>
+    
+     <!-- data build properties -->
+    <bean id="dataSetManagerServiceImpl" class="org.genemania.adminweb.service.impl.DataSetManagerServiceImpl"
+        init-method="init" destroy-method="destroy">
+        <property name="basePath" value="${dataSetStorageDirectory}"/>
+    </bean>
+    
+	<!-- i18n message source -->
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="/WEB-INF/i18n/messages" />
+		<property name="defaultEncoding" value="UTF-8"/>
+		<property name="cacheSeconds" value="30" />
+	</bean>
+	
+	<!-- misc properties -->
+   <bean id="aboutServiceImpl" class="org.genemania.adminweb.web.service.impl.AboutServiceImpl">
+        <property name="version" value="${version}"/>
+        <property name="genemaniaPort" value="${genemaniaPort}"/>
+    </bean>
+    	
+	
+	
+	<!-- Resolve jsp's -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+	    <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- something to do with JSON REST services -->
+    <bean id="marshallingHttpMessageConverter"
+        class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+    </bean>
+
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        <property name="messageConverters">
+            <util:list id="beanList">
+                <ref bean="marshallingHttpMessageConverter" />
+            </util:list>
+        </property>
+    </bean>
+    	
+    <!-- Configure the multipart resolver for file upload support -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"
+        p:maxUploadSize="500000000"/>
+</beans>

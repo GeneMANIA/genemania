@@ -1,0 +1,12 @@
+coexp    d0b7d5
+coloc    a0b3dc
+gi       90e190
+path     9bd8de
+pi       eaa2a2
+predict  f6c384
+spd      dad4a2
+spd_attr d0d0d0
+reg      d0d0d0
+reg_attr d0d0d0
+user     f0ec86
+other    d0d0d0
