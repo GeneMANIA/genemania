@@ -116,6 +116,8 @@ public class SoftProfileCursor extends ReaderProfileCursor {
 	public double getValue(int index) {
 		try {
 			return Double.parseDouble(current[dataColumns.get(index)]);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return Double.NaN;
 		} catch (NumberFormatException e) {
 			return Double.NaN;
 		}
