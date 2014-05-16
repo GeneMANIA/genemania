@@ -21,6 +21,12 @@ base_url = 'http://www.genemania.org/plugin/data'
 
 data_sets = [
     {
+        'name': '2013-10-15',
+        'profiles': ['', 'core', 'open_license'],
+        'equivalent_website_version': '15 October 2013',
+        'internal_version': 'r8',
+    },
+    {
         'name': '2012-08-02',
         'profiles': ['', 'core', 'open_license'],
         'equivalent_website_version': '19 July 2012',
@@ -69,6 +75,7 @@ data_sets = [
 
 schema_compatibility = {
     'dev': [
+        '2013-10-15',
         '2012-08-02',
         '2012-05-25',
         '2012-01-06',
@@ -78,6 +85,7 @@ schema_compatibility = {
         '2010-08-25',
     ],
     '1.1': [
+        '2013-10-15',
         '2012-08-02',
         '2012-05-25',
         '2012-01-06',
