@@ -8,37 +8,43 @@ import org.genemania.adminweb.service.impl.SetupServiceImpl;
 import java.util.List;
 
 /**
- * command-line utility application to
- * create an empty database schema
+ * command-line utility to setup a
+ * new admin sql database.
  */
 public class CreateDB {
 
     @Parameter(names = "-dburl", description = "dburl")
-    private String dburl = "jdbc:mysql://localhost/adminwebtest";
+    private String dburl = "jdbc:h2:file:./adminwebtest";
 
-    @Parameter(names = "-user", description = "user")
-    private String user = "username";
+    @Parameter(names = "-user", description = "")
+    private String user = "";
 
-    @Parameter(names = "-pass", description = "pass")
-    private String pass = "password";
+    @Parameter(names = "-pass", description = "")
+    private String pass = "";
+
+    @Parameter(names = "-dump", description = "print create database sql")
+    private boolean dump = false;
 
     public static void main(String args[]) throws Exception {
         CreateDB tool = new CreateDB();
         new JCommander(tool, args);
         System.out.println("dburl: " + tool.dburl);
-        tool.create();
+
+        tool.run();
+   }
+
+    public void run() throws Exception {
+        if (dump) {
+            dumpCreateTableSql();
+        }
+        else {
+            createDb();
+        }
     }
 
-    public void create() throws Exception {
+    public void createDb() throws Exception {
         DatamartDbImpl dmdb = new DatamartDbImpl(dburl, user, pass);
         dmdb.init();
-
-//        List<String> is = dmdb.getTableCreateStatements();
-//        for (String s: is) {
-//            System.out.println(s + ";");
-//        }
-//        if (true) return;
-
         dmdb.createTables();
 
         SetupServiceImpl setupService = new SetupServiceImpl();
@@ -47,12 +53,12 @@ public class CreateDB {
     }
 
     public void dumpCreateTableSql()throws Exception {
-
         DatamartDbImpl dmdb = new DatamartDbImpl(dburl, user, pass);
         dmdb.init();
-            List<String> stmts = dmdb.getTableCreateStatements();
-            for (String s: stmts) {
-                System.out.println(s + ";");
-            }
+
+        List<String> stmts = dmdb.getTableCreateStatements();
+        for (String s: stmts) {
+            System.out.println(s + ";");
+        }
     }
 }
