@@ -33,6 +33,6 @@ ul.fancytree-treefocus {
  * one below move up. set a min to prevent.
  */
 .dl-horizontal dd {
-  /* should be the same as line-height */
-  min-height: 20px;
+    /* should be the same as line-height */
+    min-height: 20px;
 }

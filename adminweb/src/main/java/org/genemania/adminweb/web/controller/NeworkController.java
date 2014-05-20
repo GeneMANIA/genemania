@@ -105,7 +105,7 @@ public class NeworkController extends BaseController {
             @RequestParam("organismId") int organismId,
             @RequestParam("networkId") int networkId) throws DatamartException, IOException {
 
-        logger.info("processing newtork file upload: Organism {} network {} file {}", organismId, networkId, file.getOriginalFilename());
+        logger.info("processing network file upload: Organism {} network {} file {}", organismId, networkId, file.getOriginalFilename());
 
         Network network = networkService.replaceNetwork(organismId, networkId, file.getOriginalFilename(), file.getInputStream());
         validationService.validateNetwork(network);
