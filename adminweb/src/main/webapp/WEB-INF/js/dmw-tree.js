@@ -29,7 +29,7 @@ var dmw = function(my, $) {
 						if (node.data.type == my.NETWORK_NODE) {
 							details = node.data.processingDetails;
 							if (details && details.status == "OK") {
-								node.data.icon = window.location.pathname + "/img/valid_file.png";
+								node.data.icon = "valid_file.png";
 							}
 						}
 					});
