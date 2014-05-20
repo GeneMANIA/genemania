@@ -12,21 +12,40 @@
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 
     <!-- so we can load some config from local properties file, like database connection info -->
-    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <!-- <property name="location" value="classpath:config.properties"/> -->
-        <property name="ignoreUnresolvablePlaceholders" value="false"/>
+    <bean id="allProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="singleton" value="true"/>
         <property name="ignoreResourceNotFound" value="true"/>
-        <property name="order" value="1"/>
         <property name="locations">
-            <list> <!-- later files in list override earlier. can use e.g. ${user.home} or  ${var:default} -->
-                <value>/WEB-INF/config.properties</value>
-<!-- still need to allow local override?
-                 <value>classpath:/WEB-INF/config.properties</value>
+            <list>
+                <!-- later files in list override earlier.
+                can use e.g. ${user.home} or  ${var:default}
+
+                  * non-user editable properties in system app.properties
+                  * default values for user-editable properties in
+                    WEB-INF/adminweb-default-config.properties
+                  * user can copy them and place in
+                    WEB-INF/admin-config.properties, or in their
+                    app container classpath as adminweb-config.properties,
+                    e.g. under $CATALINA_HOME/lib, so the war doesn't
+                    need to be modified.
+
+                 still need to allow local override? could try adding:
                  <value>file:config.properties</value>
- -->
+                -->
+                <value>/WEB-INF/app.properties</value>
+                <value>/WEB-INF/adminweb-default-config.properties</value>
+                <value>/WEB-INF/adminweb-config.properties</value>
+                <value>classpath:adminweb-config.properties</value>
              </list>
         </property>
+     </bean>
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="false"/>
+        <property name="order" value="100"/>
+        <property name="properties" ref="allProperties" />
     </bean>
+
 
     <!-- Scans the classpath of the application for @Components to deploy as beans -->	
 	<context:component-scan base-package="org.genemania.adminweb" />
