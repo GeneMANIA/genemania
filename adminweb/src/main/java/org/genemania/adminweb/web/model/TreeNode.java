@@ -5,7 +5,7 @@ import java.util.List;
 
 /*
  * Node of a tree in the UI treeview, fields as required
- * by dynatree plugin. subclasses adding application
+ * by fancytree plugin. subclasses adding application
  * specific fields.
  *
  * icon field is a bit weird, since it can be a string
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class TreeNode {
     private String title; // this is name
-    private boolean isFolder = false;
+    private boolean folder = false;
     private Object icon;
     private List<TreeNode> children;
     private String key;
@@ -30,11 +30,11 @@ public class TreeNode {
     public void setTitle(String title) {
         this.title = title;
     }
-    public boolean getIsFolder() {
-        return isFolder;
+     public boolean getFolder() {
+        return folder;
     }
-    public void setIsFolder(boolean isFolder) {
-        this.isFolder = isFolder;
+     public void setFolder(boolean isFolder) {
+        this.folder = isFolder;
     }
 
     public Object getIcon() {

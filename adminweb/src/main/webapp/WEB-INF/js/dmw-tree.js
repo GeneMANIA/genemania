@@ -3,10 +3,10 @@ var dmw = function(my, $) {
 
 	my.setupTree = function(orgId) {
 		
-		$("#tree").dynatree({
+		$("#tree").fancytree({
 			debugLevel: 1, // 0:quiet, 1:normal, 2:debug
 	        fx: { height: "toggle", duration: 100 },
-			initAjax : {
+			source: {
 				url : "organism/all",
 				data : {
 					id : orgId
@@ -15,40 +15,54 @@ var dmw = function(my, $) {
 			minExpandLevel : 1,
 			selectMode : 1,
 			activeVisible: true,
+			imagePath: "js/lib/skin/",
 			
-			onRender : function(node, nodeSpan) {
-				$(nodeSpan).find("a.dynatree-title")
-						   .html(my.formatNodeTitle(node.data));
+			renderNode : function(event, data) { //node, nodeSpan) {
+			    //console.log("renderNode %o, %o", event, data);
+
+			    node = data.node;
+				$(node.span).find("span.fancytree-title")
+						   .html(my.formatNodeTitle(node));
 			},
-			
+
+
 			// customize icons after loading, based on status. could
 			// also do this server side ...
-			onPostInit : function(isReloading, isError, XMLHttpRequest, textStatus, errorThrown) {
-				if (isReloading == false && isError == false) {
-					this.visit(function(node) {
-						if (node.data.type == my.NETWORK_NODE) {
-							details = node.data.processingDetails;
-							if (details && details.status == "OK") {
-								node.data.icon = "valid_file.png";
-							}
-						}
-					});
-				}
+			//postProcess: function(isReloading, isError, XMLHttpRequest, textStatus, errorThrown) {
+			init: function(event, data) {
+				data.tree.visit(function(node) {
+//					var title = my.formatNodeTitle(node.data);
+//					if (title) {
+//					    node.title = title;
+//					}
+
+					if (node.data.type == my.NETWORK_NODE) {
+						details = node.data.processingDetails;
+						if (details && details.status == "OK") {
+						    node.data.icon = "valid_file.png";
+					    }
+					}
+
+					return true;
+				});
 			},
 
-			onSelect: function(flag, node) {
-				if (!flag) {
-					return;
-				}
+             activate: function(event, data) {
+                var node = data.node;
+			    console.log("activate %o, %o", event, node);
+				//if (!flag) {
+				//	return;
+				//}
 
 				my.computeNodeStats(node);
-				$("#details").hide().html(my.formatNodeDetails(node.data)).fadeIn('fast');
+				$("#details").hide().html(my.formatNodeDetails(node)).fadeIn('fast');
 				my.setupFileUpload(node);
 				my.setupForm(node);
 //				dmw.setupTabChangeCallbacks(node);				
 			},
 
-			onClick : function(node, event) {
+			click : function(event, data) {
+			    var node = data.node;
 				if (my.formNeedsSave()) {
 					bootbox.dialog("Save changes?", 
 						[{
@@ -88,7 +102,7 @@ var dmw = function(my, $) {
 					return false;
 				}
 				else {
-					node.select();
+					node.setSelected();
 				}
 			},
 		});
@@ -113,7 +127,7 @@ var dmw = function(my, $) {
 	my.computeNodeStats = function(node) {
 		if (node.data.type === my.ORGANISM_NODE) {
 			
-			network_groups = node.childList[1].childList;
+			network_groups = node.children[1].children;
 			
 			nw_counts = {};
 			all_counts = [];
@@ -122,16 +136,16 @@ var dmw = function(my, $) {
 				group = network_groups[i];
 				var one_count = {};
 	
-				if (group.childList === null) {
+				if (group.children === null) {
 					nw_counts[group.data.title] = 0;
 					one_count['name'] = group.data.title;
 					one_count['count'] = 0;
 					//one_count[group.data.title] = 0;
 				}
 				else {
-					nw_counts[group.data.title] = group.childList.length;
+					nw_counts[group.data.title] = group.children.length;
 					one_count['name'] = group.data.title;
-					one_count['count'] = group.childList.length;
+					one_count['count'] = group.children.length;
 				}
 				all_counts.push(one_count);
 			}
@@ -144,9 +158,10 @@ var dmw = function(my, $) {
 	// networks don't have to have names, since names can
 	// be automatically generated later in the process, 
 	// put in a placeholder value
-	my.formatNodeTitle = function(nodeData) {
+	my.formatNodeTitle = function(node) {
+	    var nodeData = node.data;
 		if (nodeData.type == "network") {
-			newTitle = my.suggestNetworkName(nodeData);
+			newTitle = my.suggestNetworkName(node);
 			
 			if (nodeData.enabled == false) {
 				newTitle = '<strike>' + newTitle + '</strike>';
@@ -174,11 +189,12 @@ var dmw = function(my, $) {
 					key = data.result.key;
 				}
 				else {
-					key = node.data.key;						
+					key = node.key;
 				}
-				$("#tree").dynatree("getTree").reload(function() {
-					$("#tree").dynatree("getTree").activateKey(key);
-					$("#tree").dynatree("getTree").getNodeByKey(key).select();
+				var promise = $("#tree").fancytree("getTree").reload()
+				$.when(promise).then(function() {
+					$("#tree").fancytree("getTree").activateKey(key);
+					$("#tree").fancytree("getTree").getNodeByKey(key).setSelected();
 				});
 				
 				if (data.result && data.result.error == "1") {
@@ -314,27 +330,28 @@ var dmw = function(my, $) {
 			submitFunction = function() {
 				form.ajaxSubmit({
 					success: function(data) { 
-						console.log("processed networkForm");
+						console.log("processed networkForm, success callback data %o", data);
 						$("#submit_spinner").hide();
 						
 						// if result data had a key, use it for focus
 						if (data.key === undefined) {
-							key = node.data.key;
+							key = node.key;
 							if (node.parent === undefined) {
 								parentKey = null;
 							}
 							else {
-								parentKey = node.parent.data.key;
+								parentKey = node.parent.key;
 							}
 						}
 						else {
 							key = data.key;
 						}
-						$("#tree").dynatree("getTree").reload(function() {
+						var promise = $("#tree").fancytree("getTree").reload();
+						$.when(promise).then(function() {
 							
 							// focus on the same node after reload, or
 							// on parent on node if it was deleted
-							var tree = $("#tree").dynatree("getTree");
+							var tree = $("#tree").fancytree("getTree");
 							found = tree.getNodeByKey(key);
 							if (found === null) {
 								focusKey = parentKey;
@@ -343,7 +360,7 @@ var dmw = function(my, $) {
 								focusKey = key;
 							}								
 							tree.activateKey(focusKey);
-							tree.getNodeByKey(focusKey).select();
+							tree.getNodeByKey(focusKey).setSelected();
 							
 							// if the details panel consists of
 							// multiple tabs, need to active the
@@ -362,13 +379,14 @@ var dmw = function(my, $) {
 						// code duplication, cleanup! TODO
 						console.log("form processing error");
 						$("#submit_spinner").hide();
-						key = node.data.key;
-						parentKey = node.parent.data.key;
-						$("#tree").dynatree("getTree").reload(function() {
+						key = node.key;
+						parentKey = node.parent.key;
+						var promise = $("#tree").fancytree("getTree").reload()
+						$.when(promise).then(function() {
 							
 							// focus on the same node after reload, or
 							// on parent on node if it was deleted
-							var tree = $("#tree").dynatree("getTree");
+							var tree = $("#tree").fancytree("getTree");
 							found = tree.getNodeByKey(key);
 							parentFound = tree.getNodeByKey(parentKey);
 							if (found === null) {
@@ -378,7 +396,7 @@ var dmw = function(my, $) {
 								focusKey = key;
 							}								
 							tree.activateKey(focusKey);
-							tree.getNodeByKey(focusKey).select();
+							tree.getNodeByKey(focusKey).setSelected();
 							
 							// if the details panel consists of
 							// multiple tabs, need to active the
@@ -423,12 +441,12 @@ var dmw = function(my, $) {
 	}
 	
 	my.reloadTree = function(organism_id) {
-		$("#tree").dynatree("getTree").options.initAjax.url = "organism/all";
-		$("#tree").dynatree("getTree").options.initAjax.data.id = organism_id;
-		$("#tree").dynatree("getTree").reload();
+		$("#tree").fancytree("getTree").options.source.url = "organism/all";
+		$("#tree").fancytree("getTree").options.source.data.id = organism_id;
+		$("#tree").fancytree("getTree").reload();
 	}
 	
-	// alpha versions of the latest dynatree ('fancytree') have a filtering extension.
+	// alpha versions of the latest fancytree ('fancytree') have a filtering extension.
 	// but for the current stable version we roll our own, reusing what we can
 	my.applyTreeFilter = function(filter) {
 		
@@ -442,7 +460,7 @@ var dmw = function(my, $) {
 			};
 		}
 		
-		$("#tree").dynatree("getRoot").visit(function(node) {
+		$("#tree").fancytree("getRootNode").visit(function(node) {
 			//console.log('filtering node %o', node);
 			if (filter(node.data)) {
 				console.log("match " + node.data.title);
@@ -458,7 +476,7 @@ var dmw = function(my, $) {
 			return true;
 		});
 
-		$("#tree").dynatree("getRoot").visit(function(node) {
+		$("#tree").fancytree("getRootNode").visit(function(node) {
 			if (!!(node.dmw_match || node.dmw_submatch)) {
 				$(node.li).show();
 			}
@@ -468,7 +486,7 @@ var dmw = function(my, $) {
 			return true;
 		});	
 		
-		$("#tree").dynatree("getRoot").render();
+		$("#tree").fancytree("getRootNode").render();
 	}
 
 	function _escapeRegex(str){
@@ -477,7 +495,7 @@ var dmw = function(my, $) {
 	}
 
 	my.clearTreeFilter = function() {
-		$("#tree").dynatree("getRoot").visit(function(node) {
+		$("#tree").fancytree("getRootNode").visit(function(node) {
 			delete node.dmw_match;
 			delete node.dmw_submatch;
 			$(node.li).show();
@@ -485,7 +503,7 @@ var dmw = function(my, $) {
 			return true;
 		});
 		
-		$("#tree").dynatree("getRoot").render();
+		$("#tree").fancytree("getRootNode").render();
 	}
 	
 	my.setupSearchHandlers = function() {

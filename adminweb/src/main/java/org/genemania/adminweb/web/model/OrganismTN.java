@@ -12,7 +12,7 @@ public class OrganismTN extends TreeNode {
 
     public OrganismTN(String title) {
         super(title);
-        setIsFolder(true); // TODO: rename this class as folder for consistency
+        setFolder(true); // TODO: rename this class as folder for consistency
         setType(NODETYPE);
     }
 

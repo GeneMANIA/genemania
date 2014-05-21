@@ -8,7 +8,7 @@ public class FunctionsFolderTN extends TreeNode {
 
     public FunctionsFolderTN(String title) {
         super(title);
-        setIsFolder(true);
+        setFolder(true);
         setType(NODETYPE);
     }
 

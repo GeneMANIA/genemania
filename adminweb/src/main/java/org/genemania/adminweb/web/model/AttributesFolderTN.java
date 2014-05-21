@@ -7,7 +7,7 @@ public class AttributesFolderTN extends TreeNode {
 
     public AttributesFolderTN(String title) {
         super(title);
-        setIsFolder(true);
+        setFolder(true);
         setType(NODETYPE);
     }
 

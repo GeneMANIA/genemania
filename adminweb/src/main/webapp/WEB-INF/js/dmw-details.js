@@ -8,38 +8,32 @@ var dmw = function(my, $) {
 //			});
 //		}
 	
-	my.formatNodeDetails = function(nodeData) {
-		if (nodeData.type == my.NETWORK_NODE) {
-			return my.formatNetworkDetails(nodeData);
-		} 
-		else if (nodeData.type == my.GROUP_FOLDER_NODE) {
-			return my.formatGroupDetails(nodeData);
-		}
-		else if (nodeData.type == my.IDENTIFIERS_NODE) {
-			return my.formatIdentifiersDetails(nodeData);
-		}
-		else if (nodeData.type == my.IDENTIFIERS_FOLDER_NODE) {
-			return my.formatIdentifierFolderDetails(nodeData);
-		}
-		else if (nodeData.type == my.ATTRIBUTES_FOLDER_NODE) {
-			return my.formatAttributeDetails(nodeData);
-		}
-		else if (nodeData.type == my.FUNCTIONS_FOLDER_NODE) {
-			return my.formatFunctionsFolderDetails(nodeData);
-		}
-		else if (nodeData.type == my.FUNCTIONS_NODE) {
-			return my.formatFunctionsDetails(nodeData);
-		}
-		else if (nodeData.type == my.ORGANISM_NODE) {
-			return my.formatOrganismDetails(nodeData);
-		}
-		else {
-			console.log("unknown node type: " + nodeData.type);
-			return "";
+	my.formatNodeDetails = function(node) {
+	    switch (node.data.type) {
+    		case my.NETWORK_NODE:
+    			return my.formatNetworkDetails(node);
+    		case  my.GROUP_FOLDER_NODE:
+    			return my.formatGroupDetails(node);
+    		case my.IDENTIFIERS_NODE:
+    			return my.formatIdentifiersDetails(node);
+    		case my.IDENTIFIERS_FOLDER_NODE:
+    			return my.formatIdentifierFolderDetails(node);
+    		case my.ATTRIBUTES_FOLDER_NODE:
+    			return my.formatAttributeDetails(node);
+    		case my.FUNCTIONS_FOLDER_NODE:
+    			return my.formatFunctionsFolderDetails(node);
+    		case my.FUNCTIONS_NODE:
+	    		return my.formatFunctionsDetails(node);
+	    	case my.ORGANISM_NODE:
+	    		return my.formatOrganismDetails(node);
+	    	default:
+	    		console.log("unknown node type: " + node.data.type);
+	    		return "";
 		}
 	}
 
-	my.formatNetworkDetails = function(nodeData) {
+	my.formatNetworkDetails = function(node) {
+	    var nodeData = node.data;
 		
 		if (nodeData.defaultSelected) {
 			nodeData.isDefaultChecked = "checked";
@@ -84,11 +78,10 @@ var dmw = function(my, $) {
 			console.log("linkout: nada");
 		}
 		
-		console.log("node data %o", nodeData);
-		
+
 		my.makePubmedLink(nodeData);
 		
-		nodeData.suggestedName = my.suggestNetworkName(nodeData);
+		nodeData.suggestedName = my.suggestNetworkName(node);
 		nodeData.suggestedDescription = my.suggestNetworkDescription(nodeData);
 		
 		d = $.mustache(my.network_details_template, nodeData);
@@ -96,36 +89,39 @@ var dmw = function(my, $) {
 		return d;
 	}
 
-	my.formatIdentifiersDetails = function(nodeData) {
+	my.formatIdentifiersDetails = function(node) {
+	    var nodeData = node.data;
+
 		link = my.makeFileDownloadLink(nodeData.fileId, nodeData.filename);
 		nodeData.link = link;
 		return $.mustache(my.identifier_details_template, nodeData);
 	}
 
-	my.formatIdentifierFolderDetails = function(nodeData) {
+	my.formatIdentifierFolderDetails = function(node) {
+	    var nodeData = node.data;
 		return my.identifier_folder_details_template;
 	}
 	
-	my.formatOrganismDetails = function(nodeData) {
-		console.log("organism node %o", nodeData);
-		return $.mustache(my.organism_details_template, nodeData);
+	my.formatOrganismDetails = function(node) {
+		return $.mustache(my.organism_details_template, node.data);
 	}
 	
-	my.formatAttributeDetails = function(nodeData) {
-		return $.mustache(my.attribute_details_template, nodeData); 
+	my.formatAttributeDetails = function(node) {
+		return $.mustache(my.attribute_details_template, node.data);
 	}
 
-	my.formatFunctionsFolderDetails = function(nodeData) {
-		return $.mustache(my.functions_folder_details_template, nodeData);   
+	my.formatFunctionsFolderDetails = function(node) {
+		return $.mustache(my.functions_folder_details_template, node.data);
 	}
 	
-	my.formatFunctionsDetails = function(nodeData) {
+	my.formatFunctionsDetails = function(node) {
+	    var nodeData = node.data;
 		nodeData.fileDownloadLink = my.makeFileDownloadLink(nodeData.fileId, nodeData.filename);
 		return $.mustache(my.functions_details_template, nodeData);   
 	}
 	
-	my.formatGroupDetails = function(nodeData) {		
-		return $.mustache(my.group_details_template, nodeData);
+	my.formatGroupDetails = function(node) {
+		return $.mustache(my.group_details_template, node.data);
 	}
 	
 	my.makeFileDownloadLink = function(id, label) {
@@ -147,9 +143,12 @@ var dmw = function(my, $) {
 		}
 	}
 	
-	my.suggestNetworkName = function(nodeData) {
-		if (nodeData.title != "") {
-			newTitle = nodeData.title;
+	my.suggestNetworkName = function(node) {
+	    var nodeData = node.data;
+	    var newTitle = "";
+	    console.log("in suggest name with %o", nodeData);
+		if (node.title != "") {
+			newTitle = node.title;
 		} 
 		else if (nodeData.extra) {
 			extra = nodeData.extra;

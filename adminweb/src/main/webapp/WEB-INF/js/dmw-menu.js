@@ -10,7 +10,7 @@ var dmw = function(my, $) {
 	}
 	
 	my.newOrganismNode = function() {
-		node = { 
+		nodeData = {
 				title: "New organism",
 		        tooltip: "This child node was added programmatically.",
 		        isFolder: true,
@@ -22,13 +22,12 @@ var dmw = function(my, $) {
 				}
 		};
 		
-	    var rootNode = $("#tree").dynatree("getRoot");
-	    rootNode.addChild(node);
-	    key = node.key;
-	    console.log(key);
-		$("#tree").dynatree("getTree").activateKey(key);
-		$("#tree").dynatree("getTree").getNodeByKey(key).select();
-		return node;
+	    var rootNode = $("#tree").fancytree('getRootNode');
+	    var newNode = rootNode.addNode(nodeData, 'child');
+	    key = newNode.key;
+		$("#tree").fancytree("getTree").activateKey(key);
+		$("#tree").fancytree("getTree").getNodeByKey(key).setSelected();
+		return newNode;
 	}
 	return my;
 }(dmw || {}, $);

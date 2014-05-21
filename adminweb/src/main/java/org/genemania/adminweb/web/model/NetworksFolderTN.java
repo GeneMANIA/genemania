@@ -7,7 +7,7 @@ public class NetworksFolderTN extends TreeNode {
 
     public NetworksFolderTN(String title) {
         super(title);
-        setIsFolder(true);
+        setFolder(true);
         setType(NODETYPE);
     }
 

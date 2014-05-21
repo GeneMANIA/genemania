@@ -11,7 +11,7 @@ public class GroupFolderTN extends TreeNode {
 
     public GroupFolderTN(String title) {
         super(title);
-        setIsFolder(true);
+        setFolder(true);
         setType(NODETYPE);
     }
 

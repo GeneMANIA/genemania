@@ -3,7 +3,7 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/css/jquery-ui-1.10.0.custom/jquery-ui-1.10.0.custom.min.css'>
-<link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/css/dynatree/ui.dynatree.css'>
+<link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/js/lib/fancytree/skin-win7/ui.fancytree.css'>
 <link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/js/lib/bootstrap/css/bootstrap.min.css' media='screen'>
 <link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/js/lib/jquery-fileupload/css/jquery.fileupload-ui.css' media='screen'>
  
@@ -20,7 +20,7 @@
 <script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery-fileupload/js/jquery.fileupload.js"></script>
 <script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery-fileupload/js/jquery.fileupload-ui.js"></script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/lib/jquery.dynatree.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/lib/fancytree/jquery.fancytree-all.js"></script>
 
 <script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery.form.js"></script>
 <script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery.mustache.js"></script>

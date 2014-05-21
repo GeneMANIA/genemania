@@ -10,7 +10,7 @@ public class IdentifiersFolderTN extends TreeNode {
 
     public IdentifiersFolderTN(String title) {
         super(title);
-        setIsFolder(true);
+        setFolder(true);
         setType(NODETYPE);
     }
 
