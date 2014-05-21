@@ -10,32 +10,39 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
 
 ### General
 
-1. **Requirements:**
+**Requirements:**
  1. JDK
  1. Maven
-1. **Projects:**
+
+**Projects:**
  1. `common` : common APIs used amongst the projects
  1. `engine` : the GeneMANIA algorithm engine
  1. `broker` : for communicating between the website and workers that use the engine
  1. `website` : the website backend (webservices etc)
  1. `adminweb` : the administrative interface for editing data used in the website
  1. `plugin` : the Cytoscape plugin/app
-1. **Building:**
+
+**Building:**
  1. To build all Java projects: `mvn package`
  1. To build a particular project, e.g. website `mvn package -pl website -am`
 
 ### Website UI
 
-The `website-ui` contains the frontend interface for the website.  Naturally, JavaScript is used for the UI and the build process, so the build process here differs from the previous Java projects.  The `website` should pull in the latest UI by calling the appropriate `website-ui` target &mdash; that way, the website always automatically gets the latest UI on each build.
+**Notes:**
+ * The `website-ui` contains the frontend interface for the website.  Naturally, JavaScript is used for the UI and the build process, so the build process here differs from the previous Java projects.  The `website` should pull in the latest UI by calling the appropriate `website-ui` target &mdash; that way, the website always automatically gets the latest UI on each build.
+ * The website UI assumes a local development environment, unless deployed to the `website` Java project.  For local development, the UI assumes the website server resides at `http://localhost:8080/genemania`.  You can configure this in `js/conf.js`.
 
-1. **Requirements:**
+**Requirements:**
  1. Node.js & npm
  1. Gulp: `sudo npm install -g gulp`
  1. NB: you must `npm install` before using `gulp`
-1. **Targets:** `gulp <target1> <target2> ...`
- 1. TODO build and copy to `website`
- 1. TODO build locally
- 1. TODO minify
+
+**Targets:** `gulp <target1> <target2> ...`
+ * `website` : deploy to the `website` Java project
+ * `websiteclean` : clean the web directory for the `website` Java project
+ * `minify` : build a local minified UI for debugging
+ * `clean` : cleans the website UI so it is in a fresh state for local debugging
+ * `refs` : updates file references when you add JS, CSS, etc (useful during development)
 
 
 ## Deployment instructions

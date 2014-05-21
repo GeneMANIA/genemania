@@ -6,6 +6,18 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "gulp": "~3.6.2"
+    "gulp": "~3.6.2",
+    "gulp-clean": "~0.2.4",
+    "gulp-rename": "~1.2.0",
+    "gulp-tap": "~0.1.1",
+    "gulp-inject": "~0.4.1",
+    "gulp-ignore": "~1.1.0",
+    "gulp-open": "~0.2.8",
+    "gulp-concat": "~2.2.0",
+    "gulp-uglify": "~0.3.0",
+    "gulp-shell": "~0.2.5",
+    "gulp-minify-css": "~0.3.4",
+    "gulp-ng-html2js": "~0.1.7",
+    "gulp-ngmin": "~0.3.0"
   }
 }
