@@ -3,10 +3,17 @@
 /* 
  * instead of default border around fancytree,
  * just a light colored right border
+ *
+ * remove border around tree container when selected
  */
 ul.fancytree-container {
     border: 0px;
     border-right: 1px solid #ddd;
+}
+
+ul.fancytree-treefocus {
+    outline: none;
+    -webkit-focus-ring-color: none
 }
 
 /*
