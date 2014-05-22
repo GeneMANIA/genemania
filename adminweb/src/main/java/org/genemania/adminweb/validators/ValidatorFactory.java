@@ -3,20 +3,19 @@ package org.genemania.adminweb.validators;
 import org.genemania.adminweb.dao.DatamartDb;
 import org.genemania.adminweb.dataset.DataSetContext;
 import org.genemania.adminweb.entity.Functions;
+import org.genemania.adminweb.entity.Identifiers;
 import org.genemania.adminweb.entity.Network;
 import org.genemania.adminweb.service.FileStorageService;
 import org.genemania.adminweb.service.MappingService;
-import org.genemania.adminweb.validators.impl.AttributeMetadataValidator;
-import org.genemania.adminweb.validators.impl.AttributeValidatorImpl;
-import org.genemania.adminweb.validators.impl.FunctionsValidator;
-import org.genemania.adminweb.validators.impl.NetworkValidatorImpl;
+import org.genemania.adminweb.validators.impl.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /*
  * want objects initialized with instance data but also wired up with
- * spring dependencies. not sure how to accomplish this most cleanly,
- * use factory and impl classes that are not themselves spring components.
+ * spring dependencies. not sure how to accomplish this most cleanly.
+ * use factory wiring up and returning impl classes that are not themselves
+ * spring components.
  *
  * also, spring hurts my brain.
  */
@@ -49,5 +48,10 @@ public class ValidatorFactory {
     public FunctionsValidator functionsValidator(DataSetContext context, Functions functions) {
         return new FunctionsValidator(dmdb, mappingService,
                 fileStorageService, context, functions);
+    }
+
+    public Validator identifiersValidator(DataSetContext context, Identifiers identifiers) {
+        return new IdentifiersValidatorImpl(dmdb, mappingService, fileStorageService, context, identifiers);
+
     }
 }
