@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.Properties;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 @Component
 public class PropertiesLogger {
@@ -20,8 +22,18 @@ public class PropertiesLogger {
 
     @PostConstruct
     public void logProperties() {
-        for (Map.Entry<Object, Object> prop : props.entrySet()) {
-            logger.debug("{}={}", prop.getKey(), prop.getValue());
+
+        TreeMap<Object, Object> sorted = new TreeMap(props);
+        for (Map.Entry<Object, Object> entry: sorted.entrySet()) {
+            String key = entry.getKey().toString();
+            String val = entry.getValue().toString();
+
+            // scrub passwords
+            if (key.toLowerCase().contains("pass")) {
+                val = "(password)";
+            }
+
+            logger.debug("{}={}", key, val);
         }
     }
 }
