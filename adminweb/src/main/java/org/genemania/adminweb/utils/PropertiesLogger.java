@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.Properties;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 @Component
