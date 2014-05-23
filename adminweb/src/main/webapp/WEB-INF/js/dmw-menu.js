@@ -4,7 +4,7 @@ var dmw = function(my, $) {
 	my.setupMenu = function() {
 		$('#new-organism').on('click', function() {
 			node = my.newOrganismNode();
-			$("#details").hide().html(my.formatNodeDetails(node.data)).fadeIn('fast');			
+			$("#details").hide().html(my.formatNodeDetails(node)).fadeIn('fast');
 			my.setupForm(node);
 		});
 	}

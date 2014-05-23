@@ -125,8 +125,8 @@ var dmw = function(my, $) {
 	// like # of networks in an organism. should probably do
 	// this server side, quick hack here. TODO	
 	my.computeNodeStats = function(node) {
-		if (node.data.type === my.ORGANISM_NODE) {
-			
+		if (node.data.type === my.ORGANISM_NODE && node.children) {
+
 			network_groups = node.children[1].children;
 			
 			nw_counts = {};
