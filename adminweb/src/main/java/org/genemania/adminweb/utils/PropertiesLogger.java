@@ -15,12 +15,17 @@ import java.util.TreeMap;
 public class PropertiesLogger {
     private static Logger logger = LoggerFactory.getLogger(PropertiesLogger.class);
 
-    @Autowired
+    @Autowired(required=false) // not resolved for unit tests
     @Qualifier("allProperties")
     private Properties props;
 
     @PostConstruct
     public void logProperties() {
+
+        if (props == null) {
+            logger.debug("no properties found");
+            return;
+        }
 
         TreeMap<Object, Object> sorted = new TreeMap(props);
         for (Map.Entry<Object, Object> entry: sorted.entrySet()) {
