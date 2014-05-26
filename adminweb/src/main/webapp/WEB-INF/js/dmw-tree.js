@@ -106,8 +106,6 @@ var dmw = function(my, $) {
 				}
 			},
 		});
-		
-		my.setupSearchHandlers();
 	}
 	
 	my.formNeedsSave = function() {
@@ -444,101 +442,6 @@ var dmw = function(my, $) {
 		$("#tree").fancytree("getTree").options.source.url = "organism/all";
 		$("#tree").fancytree("getTree").options.source.data.id = organism_id;
 		$("#tree").fancytree("getTree").reload();
-	}
-	
-	// alpha versions of the latest fancytree ('fancytree') have a filtering extension.
-	// but for the current stable version we roll our own, reusing what we can
-	my.applyTreeFilter = function(filter) {
-		
-		my.clearTreeFilter();
-		console.log("filter is: '" + filter + "'");
-		if(typeof filter === "string"){
-			var match = _escapeRegex(filter), // make sure a '.' is treated literally
-			    re = new RegExp(".*" + match + ".*", "i");
-			filter = function(node){
-				return !!re.exec(node.title);
-			};
-		}
-		
-		$("#tree").fancytree("getRootNode").visit(function(node) {
-			//console.log('filtering node %o', node);
-			if (filter(node.data)) {
-				console.log("match " + node.data.title);
-				node.dmw_match = true;
-				
-				node.visitParents(function(parent) {
-					// console.log("    submatch " + parent.data.title);
-					parent.dmw_submatch = true;
-					return true;
-				});				
-			}
-			
-			return true;
-		});
-
-		$("#tree").fancytree("getRootNode").visit(function(node) {
-			if (!!(node.dmw_match || node.dmw_submatch)) {
-				$(node.li).show();
-			}
-			else {
-				$(node.li).hide();
-			}
-			return true;
-		});	
-		
-		$("#tree").fancytree("getRootNode").render();
-	}
-
-	function _escapeRegex(str){
-		/*jshint regexdash:true */
-	    return (str + "").replace(/([.?*+\^\$\[\]\\(){}|-])/g, "\\$1");
-	}
-
-	my.clearTreeFilter = function() {
-		$("#tree").fancytree("getRootNode").visit(function(node) {
-			delete node.dmw_match;
-			delete node.dmw_submatch;
-			$(node.li).show();
-			
-			return true;
-		});
-		
-		$("#tree").fancytree("getRootNode").render();
-	}
-	
-	my.setupSearchHandlers = function() {
-		/*
-		 * Event handlers for our little demo interface
-		 */
-		$("input[name=search]").keyup(function(e){
-			var match = $(this).val();
-			if(e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === ""){
-				$("button#btnResetSearch").click();
-				return;
-			}
-			// Pass text as filter string (will be matched as substring in the node title)
-			// kz var n = tree.applyFilter(match);
-			
-			my.applyTreeFilter(match);
-			n = 99;
-			$("button#btnResetSearch").attr("disabled", false);
-			//$("span#matches").text("(" + n + " matches)");
-		}).focus();
-		
-		$("button#btnResetSearch").click(function(e){
-			$("input[name=search]").val("");
-			// $("span#matches").text("");
-// kz			tree.clearFilter();
-			my.clearTreeFilter();
-		}).attr("disabled", true);
-		
-		$("input#hideMode").change(function(e){
-			tree.options.filter.mode = $(this).is(":checked") ? "hide" : "dimm"; 
-// kz			tree.clearFilter();
-			my.clearTreeFilter();
-			$("input[name=search]").keyup();
-//			tree.render();
-		});
 	}
 	
 	return my;
