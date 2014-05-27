@@ -73,7 +73,7 @@ public abstract class AbstractGeneMania<NETWORK, NODE, EDGE> implements GeneMani
 	protected abstract void startUp();
 	protected abstract void shutDown();
 	
-	public AbstractGeneMania(DataSetManager dataSetManager, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, UiUtils uiUtils, FileUtils fileUtils, NetworkUtils networkUtils, TaskDispatcher taskDispatcher) {
+	public AbstractGeneMania(DataSetManager dataSetManager, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, UiUtils uiUtils, FileUtils fileUtils, NetworkUtils networkUtils, TaskDispatcher taskDispatcher, NetworkSelectionManager<NETWORK, NODE, EDGE> selectionManager) {
 		this.dataSetManager = dataSetManager;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.uiUtils = uiUtils;
@@ -82,7 +82,7 @@ public abstract class AbstractGeneMania<NETWORK, NODE, EDGE> implements GeneMani
 		this.taskDispatcher = taskDispatcher;
 		
 		metadata = new Metadata();
-		selectionManager = new NetworkSelectionManager<NETWORK, NODE, EDGE>(this, cytoscapeUtils);
+		this.selectionManager = selectionManager;  
 	}
 	
 	public static File getSettingsDirectory() {

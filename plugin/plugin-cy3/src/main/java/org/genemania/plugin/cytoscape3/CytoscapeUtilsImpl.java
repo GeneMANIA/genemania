@@ -42,6 +42,7 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.RowSetRecord;
 import org.cytoscape.model.events.RowsSetEvent;
@@ -425,13 +426,35 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	protected CyEdge getEdge(String id, CyNetwork network) {
 		Map<String, Reference<CyEdge>> edgeMap = edges.get(network);
 		if (edgeMap == null) {
-			return null;
+			if (!isGeneManiaNetwork(network)) {
+				return null;
+			}
+			edgeMap = cacheEdges(network);
+			edges.put(network, edgeMap);
 		}
 		Reference<CyEdge> reference = edgeMap.get(id);
 		if (reference == null) {
 			return null;
 		}
 		return reference.get();
+	}
+
+	private Map<String, Reference<CyEdge>> cacheEdges(CyNetwork network) {
+		HashMap<String, Reference<CyEdge>> edges = new HashMap<String, Reference<CyEdge>>();
+		for (CyEdge edge : network.getEdgeList()) {
+			CyRow row = network.getRow(edge);
+			if (row.get(MAX_WEIGHT_ATTRIBUTE, Double.class) == null) {
+				continue;
+			}
+			String name = row.get(CyNetwork.NAME, String.class);
+			edges.put(name, new WeakReference<CyEdge>(edge));
+		}
+		return edges;
+	}
+
+	private boolean isGeneManiaNetwork(CyNetwork network) {
+		String version = network.getRow(network).get(DATA_VERSION_ATTRIBUTE, String.class);
+		return version != null;
 	}
 
 	CyNetworkView getView(CyNetwork network) {

@@ -61,7 +61,7 @@ public class SessionChangeDelegate<NETWORK, NODE, EDGE> implements Delegate {
 				ResultReconstructor<NETWORK, NODE, EDGE> reconstructor = new ResultReconstructor<NETWORK, NODE, EDGE>(data, plugin, cytoscapeUtils);
 				ViewState options = reconstructor.reconstructCache(cyNetwork, progress);
 				if (options == null) {
-					return;
+					continue;
 				}
 				manager.addNetworkConfiguration(cyNetwork, options);
 			}

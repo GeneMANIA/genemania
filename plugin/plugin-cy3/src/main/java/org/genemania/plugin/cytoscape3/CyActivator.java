@@ -33,6 +33,8 @@ import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.RowsSetListener;
+import org.cytoscape.property.CyProperty;
+import org.cytoscape.property.SimpleCyProperty;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.visualize.ApplyPreferredLayoutTaskFactory;
@@ -112,9 +114,17 @@ public class CyActivator extends AbstractCyActivator {
 		DefaultDataSetFactory<CyNetwork, CyNode, CyEdge> luceneDataSetFactory = new DefaultDataSetFactory<CyNetwork, CyNode, CyEdge>(
 				dataSetManager, uiUtils, fileUtils, cytoscapeUtils,
 				taskDispatcher);
+		
+		SimpleCyProperty<Properties> properties = new SimpleCyProperty<Properties>("org.genemania", new Properties(), Properties.class, CyProperty.SavePolicy.SESSION_FILE);
+		registerService(bc, properties, CyProperty.class, new Properties());
+		
+		NetworkSelectionManagerImpl selectionManager = new NetworkSelectionManagerImpl(cytoscapeUtils, taskDispatcher, properties);
 		GeneManiaImpl geneMania = new GeneManiaImpl(dataSetManager,
 				cytoscapeUtils, uiUtils, fileUtils, networkUtils,
-				taskDispatcher, cySwingApplicationRef, cyServiceRegistrarRef);
+				taskDispatcher, cySwingApplicationRef, cyServiceRegistrarRef,
+				selectionManager, properties);
+		selectionManager.setGeneMania(geneMania);
+		registerAllServices(bc, selectionManager, new Properties());
 		geneMania.startUp();
 
 		Map<String, String> serviceProperties;
