@@ -54,8 +54,14 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     @Override
-    public void validateIdentifiers(Identifiers identifiers) {
-        logger.info("not implemented");
+    public void validateIdentifiers(Identifiers identifiers) throws DatamartException {
+        // ensure we have a dataset to validate against
+        int organismId = identifiers.getDataFile().getOrganism().getId();
+        DataSetContext context = dataSetManagerService.getContext(organismId);
+        buildService.refresh(context, organismId);
+
+        Validator validator = validatorFactory.identifiersValidator(context, identifiers);
+        validator.validate();
     }
 
     boolean isAttributeData(Network network) {

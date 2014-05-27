@@ -12,6 +12,7 @@ import org.genemania.adminweb.entity.Organism;
 import org.genemania.adminweb.exception.DatamartException;
 import org.genemania.adminweb.service.DataSetManagerService;
 import org.genemania.adminweb.service.IdentifiersService;
+import org.genemania.adminweb.service.ValidationService;
 import org.genemania.adminweb.web.service.UploadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,9 @@ public class IdentifiersServiceImpl implements IdentifiersService {
 
     @Autowired
     private UploadService uploadService;
+
+    @Autowired
+    private ValidationService validationService;
 
     @Autowired
     private DataSetManagerService dataSetManagerService;
@@ -47,12 +51,18 @@ public class IdentifiersServiceImpl implements IdentifiersService {
                 logger.error("undefined parameters");
             }
             else {
+                // store the data file
                 DataFile dataFile = uploadService.addDataFile(organismId, originalFilename, inputStream);
                 identifiers = new Identifiers();
                 identifiers.setOrganism(organism);
                 identifiers.setDataFile(dataFile);
                 dmdb.getIdentifiersDao().create(identifiers);
+
+                // cleanup working data cache
                 deleteDataSet(organismId);
+
+                // validate
+                validationService.validateIdentifiers(identifiers);
             }
         }
         catch (SQLException e) {
