@@ -49,10 +49,6 @@ var dmw = function(my, $) {
 
              activate: function(event, data) {
                 var node = data.node;
-			    console.log("activate %o, %o", event, node);
-				//if (!flag) {
-				//	return;
-				//}
 
 				my.computeNodeStats(node);
 				$("#details").hide().html(my.formatNodeDetails(node)).fadeIn('fast');
@@ -224,7 +220,6 @@ var dmw = function(my, $) {
 	my.setupFileUpload = function(node) {
 		switch (node.data.type) {
 		case my.NETWORK_NODE:
-			console.log("setup upload for network node");
 			formData = {
 				organismId : node.data.organismId,
 				networkId : node.data.id,
@@ -233,7 +228,6 @@ var dmw = function(my, $) {
 			my.setupFileUploadForType('#fileupload2', node, formData, false);
 			break;
 		case my.GROUP_FOLDER_NODE:
-			console.log("setup upload for group node");
 			formData = {
 				organismId : node.data.organismId,
 				groupId : node.data.id,
@@ -241,14 +235,12 @@ var dmw = function(my, $) {
 			my.setupFileUploadForType('#fileupload', node, formData, true);
 			break;
 		case my.IDENTIFIERS_FOLDER_NODE:
-			console.log("setup upload for identifiers folder node");
 			formData = {
 				organismId : node.data.organismId,
 			};
 			my.setupFileUploadForType('#fileupload', node, formData, true);
 			break;
 		case my.IDENTIFIERS_NODE:
-			console.log("setup upload for identifiers");
 			formData = {
 				organismId : node.data.organismId,
 				identifiersId: node.data.id,
@@ -256,21 +248,18 @@ var dmw = function(my, $) {
 			my.setupFileUploadForType('#fileupload', node, formData, false);
 			break;
 		case my.ATTRIBUTES_FOLDER_NODE:
-			console.log("setup upload for attributes folder node");
 			formData = {
 					organismId: node.data.organismId,
 			}
 			my.setupFileUploadForType('#fileupload', node, formData, true);
 			break;
 		case my.FUNCTIONS_FOLDER_NODE:
-			console.log("setup upload for functions folder node");
 			formData = {
 					organismId: node.data.organismId,
 			}
 			my.setupFileUploadForType('#fileupload', node, formData, true);
 			break;
 		case my.FUNCTIONS_NODE:
-			console.log("setup upload for functions node");
 			formData = {
 					organismId: node.data.organismId,
 					functionsId: node.data.id,
@@ -356,7 +345,7 @@ var dmw = function(my, $) {
 							}
 							else {
 								focusKey = key;
-							}								
+							}
 							tree.activateKey(focusKey);
 							tree.getNodeByKey(focusKey).setSelected();
 							
