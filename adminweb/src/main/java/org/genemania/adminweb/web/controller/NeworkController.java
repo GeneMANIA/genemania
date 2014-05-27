@@ -250,7 +250,7 @@ public class NeworkController extends BaseController {
 
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST, value = "/updateAttributeMetadata", params = "submitButton")
-    public String updateAttributeMetadata(@ModelAttribute("AttributeMetadtataForm")
+    public String updateAttributeMetadata(@ModelAttribute("AttributeMetadataForm")
         AttributeMetadataForm form, BindingResult result) throws DatamartException {
 
         logger.info("update controller: updateAttributeMetadata");
