@@ -67,7 +67,9 @@ public class GeneManiaPlugin extends CytoscapePlugin {
 			DataSetManager dataSetManager = new DataSetManager();
 			dataSetManager.addDataSetFactory(new LuceneDataSetFactory<CyNetwork, CyNode, CyEdge>(dataSetManager, uiUtils, fileUtils, cytoscapeUtils, taskDispatcher), Collections.emptyMap());
 			
-			geneMania = new GeneManiaImpl(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils, taskDispatcher);
+			NetworkSelectionManagerImpl selectionManager = new NetworkSelectionManagerImpl(cytoscapeUtils);
+			geneMania = new GeneManiaImpl(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils, taskDispatcher, selectionManager);
+			selectionManager.setGeneMania(geneMania);
 			geneMania.startUp();
 			activated = true;
 		}		

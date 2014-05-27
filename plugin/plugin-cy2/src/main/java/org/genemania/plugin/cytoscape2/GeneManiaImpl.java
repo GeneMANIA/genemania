@@ -71,8 +71,8 @@ public class GeneManiaImpl extends AbstractGeneMania<CyNetwork, CyNode, CyEdge> 
 	protected PropertyChangeListener networkDestroyedListener;
 	protected SessionChangeListener sessionChangeListener;
 
-	public GeneManiaImpl(DataSetManager dataSetManager, final CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, UiUtils uiUtils, FileUtils fileUtils, NetworkUtils networkUtils, TaskDispatcher taskDispatcher) {
-		super(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils, taskDispatcher);
+	public GeneManiaImpl(DataSetManager dataSetManager, final CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, UiUtils uiUtils, FileUtils fileUtils, NetworkUtils networkUtils, TaskDispatcher taskDispatcher, NetworkSelectionManagerImpl selectionManager) {
+		super(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils, taskDispatcher, selectionManager);
 		dataSetManager.addDataSetChangeListener(new DataSetChangeListener() {
 			@Override
 			public void dataSetChanged(DataSet dataSet, ProgressReporter progress) {
@@ -95,8 +95,10 @@ public class GeneManiaImpl extends AbstractGeneMania<CyNetwork, CyNode, CyEdge> 
 		PropertyChangeSupport coreSupport = Cytoscape.getPropertyChangeSupport();
 		coreSupport.addPropertyChangeListener(Cytoscape.SESSION_LOADED, sessionChangeListener);
 		
-		networkFocusListener = selectionManager.getNetworkChangeListener();
-		networkDestroyedListener = selectionManager.getNetworkDestroyedListener();
+		NetworkSelectionManagerImpl selectionManager2 = (NetworkSelectionManagerImpl) selectionManager;
+		networkFocusListener = selectionManager2.getNetworkChangeListener();
+		networkDestroyedListener = selectionManager2.getNetworkDestroyedListener();
+		
 		NetworkViewManager viewManager = Cytoscape.getDesktop().getNetworkViewManager();
 		SwingPropertyChangeSupport support = viewManager.getSwingPropertyChangeSupport();
 		support.addPropertyChangeListener(CytoscapeDesktop.NETWORK_VIEW_FOCUSED, networkFocusListener);

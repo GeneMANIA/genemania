@@ -69,7 +69,7 @@ public class SessionChangeListener implements PropertyChangeListener {
 				
 				CyNetwork currentNetwork = cytoscapeUtils.getCurrentNetwork();
 				PropertyChangeEvent event = new PropertyChangeEvent(Cytoscape.getDesktop(), CytoscapeDesktop.NETWORK_VIEW_FOCUSED, null, currentNetwork.getIdentifier());
-				NetworkSelectionManager<CyNetwork, CyNode, CyEdge> manager = plugin.getNetworkSelectionManager();
+				NetworkSelectionManagerImpl manager = (NetworkSelectionManagerImpl) plugin.getNetworkSelectionManager();
 				manager.getNetworkChangeListener().propertyChange(event);
 			}
 		};
