@@ -14,6 +14,11 @@ public class IdentifiersFolderTN extends TreeNode {
         setType(NODETYPE);
     }
 
+    @Override
+    public String getKey() {
+        return String.format("o=%d:identifiersFolder", getOrganismId());
+    }
+
     public int getId() {
         return id;
     }

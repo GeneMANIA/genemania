@@ -12,6 +12,12 @@ public class FunctionsFolderTN extends TreeNode {
         setType(NODETYPE);
     }
 
+
+    @Override
+    public String getKey() {
+        return String.format("o=%d:functionsFolder", getOrganismId());
+    }
+
 	public int getOrganismId() {
 		return organismId;
 	}
