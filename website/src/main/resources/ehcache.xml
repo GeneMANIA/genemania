@@ -11,65 +11,65 @@
 	<diskStore path="java.io.tmpdir/genemania_java_obj_cache" />
 
 	<defaultCache eternal="false" maxElementsInMemory="100000"
-        overflowToDisk="true" diskPersistent="false" timeToIdleSeconds="0"
+        overflowToDisk="false" diskPersistent="false" timeToIdleSeconds="0"
         timeToLiveSeconds="600" memoryStoreEvictionPolicy="LRU"/>
 
 	<cache name="searchResultsCache" eternal="false"
 		maxElementsInMemory="100" overflowToDisk="false" />
 
  	<cache name="geneIsValidCache" eternal="false"
-		maxElementsInMemory="10000" overflowToDisk="true" />
+		maxElementsInMemory="10000" overflowToDisk="false" />
 
 	<cache name="genesForSymbolsCache" eternal="false"
-		maxElementsInMemory="10000" overflowToDisk="true" />
+		maxElementsInMemory="10000" overflowToDisk="false" />
 
 	<cache name="geneForIdCache" eternal="false"
-		maxElementsInMemory="10000" overflowToDisk="true" />
+		maxElementsInMemory="10000" overflowToDisk="false" />
 
 	<cache name="nodeIdCache" eternal="false" maxElementsInMemory="10000"
-		overflowToDisk="true" />
+		overflowToDisk="false" />
 
 	<cache name="networkCache" eternal="false" maxElementsInMemory="10000"
-		overflowToDisk="true" />
+		overflowToDisk="false" />
 
 	<cache name="networkIsValidCache" eternal="false"
-		maxElementsInMemory="10000" overflowToDisk="true" />
+		maxElementsInMemory="10000" overflowToDisk="false" />
 
 	<cache name="networkGroupsByNameCache" eternal="false"
-		maxElementsInMemory="10000" overflowToDisk="true" />
+		maxElementsInMemory="10000" overflowToDisk="false" />
 
 	<cache name="networkGroupsByOrganismCache" eternal="false"
-		maxElementsInMemory="10000" overflowToDisk="true" />
+		maxElementsInMemory="10000" overflowToDisk="false" />
 
 	<cache name="attributeGroupsByOrganismCache" eternal="false" maxElementsInMemory="10000"
-		overflowToDisk="true" />
+		overflowToDisk="false" />
 		
 	<cache name="attributeGroupsByNameCache" eternal="false" maxElementsInMemory="10000"
-		overflowToDisk="true" />
+		overflowToDisk="false" />
 		
 	<cache name="attributeCache" eternal="false" maxElementsInMemory="10000"
-		overflowToDisk="true" />
+		overflowToDisk="false" />
 		
 	<cache name="attributeIsValidCache" eternal="false" maxElementsInMemory="10000"
-		overflowToDisk="true" />
+		overflowToDisk="false" />
 
 	<cache name="nodeCache" eternal="false" maxElementsInMemory="10000"
-		overflowToDisk="true" />
+		overflowToDisk="false" />
 
 	<cache name="allOrganismsCache" eternal="false"
-		maxElementsInMemory="10000" overflowToDisk="true" />
+		maxElementsInMemory="10000" overflowToDisk="false" />
 
 	<cache name="organismCache" eternal="false" maxElementsInMemory="10000"
-		overflowToDisk="true" />
+		overflowToDisk="false" />
 
 	<cache name="defaultGenesCache" eternal="false"
-		maxElementsInMemory="10000" overflowToDisk="true" />
+		maxElementsInMemory="10000" overflowToDisk="false" />
 
 	<cache name="defaultNetworksCache" eternal="false"
-		maxElementsInMemory="10000" overflowToDisk="true" />
+		maxElementsInMemory="10000" overflowToDisk="false" />
 
 	<cache name="latestStatisticsCache" eternal="false"
-		maxElementsInMemory="10000" overflowToDisk="true" />
+		maxElementsInMemory="10000" overflowToDisk="false" />
 
 
 	<!--
