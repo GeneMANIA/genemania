@@ -16,7 +16,12 @@ var dmw = function(my, $) {
 			selectMode : 1,
 			activeVisible: true,
 			imagePath: "js/lib/skin/",
-			
+
+            extensions: ["filter"],
+            filter: {
+                mode: "hide"
+            },
+
 			renderNode : function(event, data) { //node, nodeSpan) {
 			    //console.log("renderNode %o, %o", event, data);
 
@@ -433,6 +438,22 @@ var dmw = function(my, $) {
 		$("#tree").fancytree("getTree").options.source.data.id = organism_id;
 		$("#tree").fancytree("getTree").reload();
 	}
+
+	my.setupSearch= function() {
+	    $("#filter-tree").on('keypress',function (e) {
+            if (e.keyCode == 13) {
+                var searchkey = e.target.value;
+                console.log("got search request %o", searchkey);
+
+                if (searchkey === "") {
+                    $("#tree").fancytree("getTree").clearFilter();
+                }
+                else {
+                    $("#tree").fancytree("getTree").applyFilter(searchkey);
+                }
+            }
+        });
+    }
 	
 	return my;
 }(dmw || {}, $);

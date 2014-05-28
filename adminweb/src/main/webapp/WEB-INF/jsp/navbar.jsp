@@ -41,9 +41,9 @@
             </ul>
             <ul class="nav pull-right">
                 <li>
-                    <form class="navbar-form">
-                        <input type="text" class="input-medium" type="text" placeholder="Search" />
-                    </form>
+                    <div class="navbar-form">
+                        <input id="filter-tree" type="text" class="input-medium" type="text" placeholder="Search" />
+                    </div>
                 </li>
                 <li id="fat-menu" class="dropdown"><a href="#" id="drop3" role="button" class="dropdown-toggle" data-toggle="dropdown">Help
                         <b class="caret"></b>

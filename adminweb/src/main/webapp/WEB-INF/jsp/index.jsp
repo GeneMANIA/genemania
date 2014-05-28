@@ -28,6 +28,7 @@
     	// TODO: maybe these should all be hoisted up into init?
         dmw.init();
         dmw.setupTree(dmw.INIT_ORGANISM_ID);
+        dmw.setupSearch();
         dmw.setupMenu();
         
     });
