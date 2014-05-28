@@ -173,6 +173,18 @@ var dmw = function(my, $) {
 		}
 		return newDescription;
 	}
+
+	my.loadFileSnippet = function(node) {
+	    if (node.data.type === my.IDENTIFIERS_NODE) {
+            if (node.data.fileId) {
+                link = "preview/file?&id=" + node.data.fileId;
+                $('#file_snippet').dataTable({
+                    "serverSide": true,
+                    "ajax": link
+                });
+            }
+        }
+	}
 	
 	return my;
 }(dmw || {}, $);

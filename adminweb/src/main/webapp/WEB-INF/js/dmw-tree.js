@@ -52,6 +52,7 @@ var dmw = function(my, $) {
 
 				my.computeNodeStats(node);
 				$("#details").hide().html(my.formatNodeDetails(node)).fadeIn('fast');
+                my.loadFileSnippet(node);
 				my.setupFileUpload(node);
 				my.setupForm(node);
 //				dmw.setupTabChangeCallbacks(node);				

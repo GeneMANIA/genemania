@@ -12,7 +12,6 @@ import org.genemania.adminweb.dao.DatamartDb;
 import org.genemania.adminweb.entity.DataFile;
 import org.genemania.adminweb.exception.DatamartException;
 import org.genemania.adminweb.service.FileStorageService;
-import org.genemania.adminweb.service.IdentifiersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,11 +19,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /*
- * pull given file from datastore and
- * return to client.
- *
- * should probably switch filename in the request to
- * network id.
+ * download given file by id,
+ * response includes original filename
  */
 @Controller
 public class DownloadController extends BaseController {
@@ -33,10 +29,12 @@ public class DownloadController extends BaseController {
     private FileStorageService fileStorageService;
 
     @Autowired
-    private IdentifiersService identifiersService;
-
-    @Autowired
     private DatamartDb dmdb;
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/download/file")
     public void downloadFile(@RequestParam("id") int fileId,

@@ -7,7 +7,8 @@
 <link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/js/lib/fancytree/skin-win7/ui.fancytree.css'>
 <link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/js/lib/bootstrap/css/bootstrap.min.css' media='screen'>
 <link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/js/lib/jquery-fileupload/css/jquery.fileupload-ui.css' media='screen'>
- 
+<link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/js/lib/datatables/css/jquery.dataTables.css'>
+
 <link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/css/dmw.css' />
  
 <script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery-1.9.1.min.js"></script>
@@ -25,6 +26,8 @@
 
 <script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery.form.js"></script>
 <script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery.mustache.js"></script>
+
+<script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/js/lib/datatables/js/jquery.dataTables.js"></script>
 
 <script type="text/javascript"  src="${pageContext.request.contextPath}/js/dmw.js"></script>
 <script type="text/javascript"  src="${pageContext.request.contextPath}/js/dmw-details.js"></script>

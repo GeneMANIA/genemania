@@ -1,34 +1,74 @@
-<div>
+<ul id="myTab" class="nav nav-tabs">
+    <li class="active"><a href="#description" data-toggle="tab">Description</a></li>
+    <li><a href="#analysis" data-toggle="tab">Analysis</a></li>
+</ul>
 
-    <h4>Identifier file</h4>
+<div id="myTabContent" class="tab-content">
 
-    <dl class="dl-horizontal">
-        <dt>Data file</dt>
-        <dd>{{{link}}}</dd>
-        <dt>Upload date</dt>
-        <dd>{{date}}</dd>
-    </dl>
+    <div class="tab-pane fade in active" id="description">
+        <div>
 
-    <div class="form-horizontal">
-        <div class="control-group">
-            <label class="control-label">Replace</label>
-            <div class="controls">
-                <span class="btn btn-success fileinput-button"> <i class="icon-plus icon-white"></i> <span>Select file</span> <input
-                    id="fileupload" type="file" name="files" data-url="replaceidentifiers" />
+            <h4>Identifier file</h4>
+
+            <dl class="dl-horizontal">
+                <dt>Data file</dt>
+                <dd>{{{link}}}</dd>
+                <dt>Upload date</dt>
+                <dd>{{date}}</dd>
+            </dl>
+
+
+            <div class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label">Replace</label>
+
+                    <div class="controls">
+                <span class="btn btn-success fileinput-button"> <i
+                        class="icon-plus icon-white"></i> <span>Select file</span> <input
+                        id="fileupload" type="file" name="files" data-url="replaceidentifiers"/>
                 </span>
-                <div id="spinner" class="spinner" style="display: none;">
-                    <img id="img-spinner" src="img/icon/loading.gif" alt="Loading" />
+
+                        <div id="spinner" class="spinner" style="display: none;">
+                            <img id="img-spinner" src="img/icon/loading.gif" alt="Loading"/>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <form class="form-horizontal" id="identifiersForm" action="deleteidentifiers" method="post">
+                <input type="hidden" name="organismId" value="{{organismId}}"/>
+                <input type="hidden" name="identifiersId" value="{{id}}"/>
+
+                <div class="form-actions">
+                    <button id="deleteButton" name="deleteButton" value="deleteButton" type="submit"
+                            class="btn pull-right">Delete
+                    </button>
+                </div>
+            </form>
+
+
         </div>
     </div>
 
-    <form class="form-horizontal" id="identifiersForm" action="deleteidentifiers" method="post">
-        <input type="hidden" name="organismId" value="{{organismId}}" />
-        <input type="hidden" name="identifiersId" value="{{id}}" />
-        <div class="form-actions">
-            <button id="deleteButton" name="deleteButton" value="deleteButton" type="submit" class="btn pull-right">Delete</button>
-        </div>
-    </form>
+    <div class="tab-pane fade" id="analysis">
+            <table id="file_snippet" class="display" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Symbol</th>
+                    <th>Source</th>
+                </tr>
+                </thead>
 
+                <tfoot>
+                <tr>
+                    <th>ID</th>
+                    <th>Symbol</th>
+                    <th>Source</th>
+                </tr>
+                </tfoot>
+
+            </table>
+    </div>
 </div>
+
