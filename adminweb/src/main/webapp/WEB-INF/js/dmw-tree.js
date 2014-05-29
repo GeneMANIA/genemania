@@ -22,26 +22,23 @@ var dmw = function(my, $) {
                 mode: "hide"
             },
 
-			renderNode : function(event, data) { //node, nodeSpan) {
-			    //console.log("renderNode %o, %o", event, data);
-
+			renderNode : function(event, data) {
 			    node = data.node;
 				$(node.span).find("span.fancytree-title")
 						   .html(my.formatNodeTitle(node));
 			},
 
-
 			// customize icons after loading, based on status. could
 			// also do this server side ...
-			//postProcess: function(isReloading, isError, XMLHttpRequest, textStatus, errorThrown) {
 			init: function(event, data) {
 				data.tree.visit(function(node) {
-//					var title = my.formatNodeTitle(node.data);
-//					if (title) {
-//					    node.title = title;
-//					}
 
 					if (node.data.type == my.NETWORK_NODE) {
+					    var title = my.suggestNetworkName(node);
+    					if (title) {
+    					    node.title = title;
+    					}
+
 						details = node.data.processingDetails;
 						if (details && details.status == "OK") {
 						    node.data.icon = "valid_file.png";
@@ -52,7 +49,7 @@ var dmw = function(my, $) {
 				});
 			},
 
-             activate: function(event, data) {
+            activate: function(event, data) {
                 var node = data.node;
 
 				my.computeNodeStats(node);
@@ -155,22 +152,17 @@ var dmw = function(my, $) {
 		}
 	}
 	
-	// networks don't have to have names, since names can
-	// be automatically generated later in the process, 
-	// put in a placeholder value
+	// strike out the names of networks that are disabled in the
+	// treelist
 	my.formatNodeTitle = function(node) {
-	    var nodeData = node.data;
-		if (nodeData.type == "network") {
-			newTitle = my.suggestNetworkName(node);
-			
-			if (nodeData.enabled == false) {
-				newTitle = '<strike>' + newTitle + '</strike>';
+		if (node.data.type == my.NETWORK_NODE) {
+			if (node.data.enabled == false) {
+				var newTitle = '<strike>' + node.title + '</strike>';
+			    return newTitle;
 			}
-			return newTitle;
-		} 
-		else {
-			return nodeData.title;
 		}
+
+		return node.title;
 	}
 
 	my.setupFileUploadForType = function(element_name, node, formData, focusOnNewNode) {

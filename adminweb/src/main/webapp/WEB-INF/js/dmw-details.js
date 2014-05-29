@@ -142,11 +142,13 @@ var dmw = function(my, $) {
 			nodeData.pubmedDisplayId = nodeData.pubmedId;
 		}
 	}
-	
+
+	// if a node has no title, try computing one
+	// first using author information, then falling
+	// back to the filename
 	my.suggestNetworkName = function(node) {
 	    var nodeData = node.data;
-	    var newTitle = "";
-	    console.log("in suggest name with %o", nodeData);
+	    var newTitle = "Unnamed";
 		if (node.title != "") {
 			newTitle = node.title;
 		} 
@@ -158,7 +160,7 @@ var dmw = function(my, $) {
 			newTitle = nodeData.filename;
 		}
 
-		return newTitle;		
+		return newTitle;
 	}
 	
 	my.suggestNetworkDescription = function(nodeData) {
