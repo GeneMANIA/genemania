@@ -1,21 +1,23 @@
 
-var dmw = function(my, $) {
-	
-	my.setupMenu = function() {
+define(['jquery', 'app/constants', 'app/details'], function($, constants, details) {
+
+	var menu = {};
+
+	menu.setupMenu = function() {
 		$('#new-organism').on('click', function() {
-			node = my.newOrganismNode();
-			$("#details").hide().html(my.formatNodeDetails(node)).fadeIn('fast');
-			my.setupForm(node);
+			node = menu.newOrganismNode();
+			$("#details").hide().html(details.formatNodeDetails(node)).fadeIn('fast');
+			details.setupForm(node);
 		});
 	}
 	
-	my.newOrganismNode = function() {
+	menu.newOrganismNode = function() {
 		nodeData = {
 				title: "New organism",
 		        tooltip: "This child node was added programmatically.",
 		        isFolder: true,
 				data: {
-					type: my.ORGANISM_NODE,
+					type: constants.ORGANISM_NODE,
 					organismId: '',
 					title: 'New organism',
 					code: '',
@@ -29,5 +31,6 @@ var dmw = function(my, $) {
 		$("#tree").fancytree("getTree").getNodeByKey(key).setSelected();
 		return newNode;
 	}
-	return my;
-}(dmw || {}, $);
+
+	return menu;
+});

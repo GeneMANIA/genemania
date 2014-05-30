@@ -11,25 +11,5 @@
 
 <link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/css/dmw.css' />
  
-<script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery-1.9.1.min.js"></script>
-<script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery-ui-1.10.0.custom.min.js"></script>
- 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/lib/bootstrap/js/bootstrap.min.js"></script>
+<script data-main="js/app.js" src="js/require.js"></script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/lib/bootbox.min.js"></script>
-     
-<script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery-fileupload/js/jquery.iframe-transport.js"></script>
-<script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery-fileupload/js/jquery.fileupload.js"></script>
-<script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery-fileupload/js/jquery.fileupload-ui.js"></script>
-
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/lib/fancytree/jquery.fancytree-all.js"></script>
-
-<script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery.form.js"></script>
-<script type="text/javascript"  src="${pageContext.request.contextPath}/js/lib/jquery.mustache.js"></script>
-
-<script type="text/javascript" charset="utf8" src="${pageContext.request.contextPath}/js/lib/datatables/js/jquery.dataTables.js"></script>
-
-<script type="text/javascript"  src="${pageContext.request.contextPath}/js/dmw.js"></script>
-<script type="text/javascript"  src="${pageContext.request.contextPath}/js/dmw-details.js"></script>
-<script type="text/javascript"  src="${pageContext.request.contextPath}/js/dmw-tree.js"></script>
-<script type="text/javascript"  src="${pageContext.request.contextPath}/js/dmw-menu.js"></script>

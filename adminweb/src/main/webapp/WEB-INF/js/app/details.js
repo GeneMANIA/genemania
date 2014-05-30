@@ -1,5 +1,6 @@
 
-var dmw = function(my, $) {
+define(['jquery', 'app/constants', 'app/templates', 'mustache', 'datatables'],
+    function($, constants, templates, mustache, datatables) {
 //		my.setupTabChangeCallbacks = function(node) {
 //			$('a[data-toggle="tab"]').on('shown', function (e) {
 //				console.log("tab change received");
@@ -7,32 +8,34 @@ var dmw = function(my, $) {
 //				my.setupForm(node);
 //			});
 //		}
-	
-	my.formatNodeDetails = function(node) {
+
+	details = {};
+
+	details.formatNodeDetails = function(node) {
 	    switch (node.data.type) {
-    		case my.NETWORK_NODE:
-    			return my.formatNetworkDetails(node);
-    		case  my.GROUP_FOLDER_NODE:
-    			return my.formatGroupDetails(node);
-    		case my.IDENTIFIERS_NODE:
-    			return my.formatIdentifiersDetails(node);
-    		case my.IDENTIFIERS_FOLDER_NODE:
-    			return my.formatIdentifierFolderDetails(node);
-    		case my.ATTRIBUTES_FOLDER_NODE:
-    			return my.formatAttributeDetails(node);
-    		case my.FUNCTIONS_FOLDER_NODE:
-    			return my.formatFunctionsFolderDetails(node);
-    		case my.FUNCTIONS_NODE:
-	    		return my.formatFunctionsDetails(node);
-	    	case my.ORGANISM_NODE:
-	    		return my.formatOrganismDetails(node);
+    		case constants.NETWORK_NODE:
+    			return details.formatNetworkDetails(node);
+    		case  constants.GROUP_FOLDER_NODE:
+    			return details.formatGroupDetails(node);
+    		case constants.IDENTIFIERS_NODE:
+    			return details.formatIdentifiersDetails(node);
+    		case constants.IDENTIFIERS_FOLDER_NODE:
+    			return details.formatIdentifierFolderDetails(node);
+    		case constants.ATTRIBUTES_FOLDER_NODE:
+    			return details.formatAttributeDetails(node);
+    		case constants.FUNCTIONS_FOLDER_NODE:
+    			return details.formatFunctionsFolderDetails(node);
+    		case constants.FUNCTIONS_NODE:
+	    		return details.formatFunctionsDetails(node);
+	    	case constants.ORGANISM_NODE:
+	    		return details.formatOrganismDetails(node);
 	    	default:
 	    		console.log("unknown node type: " + node.data.type);
 	    		return "";
 		}
 	}
 
-	my.formatNetworkDetails = function(node) {
+	details.formatNetworkDetails = function(node) {
 	    var nodeData = node.data;
 		
 		if (nodeData.defaultSelected) {
@@ -54,8 +57,8 @@ var dmw = function(my, $) {
 			nodeData.isEnabledChecked = "";
 		}
 		
-		nodeData.fileDownloadLink = my.makeFileDownloadLink(nodeData.fileId, nodeData.filename);
-		nodeData.metadatafileDownloadLink = my.makeFileDownloadLink(nodeData.metadataFileId, nodeData.metadataFilename);
+		nodeData.fileDownloadLink = details.makeFileDownloadLink(nodeData.fileId, nodeData.filename);
+		nodeData.metadatafileDownloadLink = details.makeFileDownloadLink(nodeData.metadataFileId, nodeData.metadataFilename);
 
 		// sample linkout for metadata
 		if (nodeData.metadataProcessingDetails && nodeData.metadataProcessingDetails.sampleAccession) {
@@ -79,58 +82,58 @@ var dmw = function(my, $) {
 		}
 		
 
-		my.makePubmedLink(nodeData);
+		details.makePubmedLink(nodeData);
 		
-		nodeData.suggestedName = my.suggestNetworkName(node);
-		nodeData.suggestedDescription = my.suggestNetworkDescription(nodeData);
+		nodeData.suggestedName = details.suggestNetworkName(node);
+		nodeData.suggestedDescription = details.suggestNetworkDescription(nodeData);
 		
-		d = $.mustache(my.network_details_template, nodeData);
+		d = mustache.render(templates.network, nodeData);
 
 		return d;
 	}
 
-	my.formatIdentifiersDetails = function(node) {
+	details.formatIdentifiersDetails = function(node) {
 	    var nodeData = node.data;
 
-		link = my.makeFileDownloadLink(nodeData.fileId, nodeData.filename);
+		link = details.makeFileDownloadLink(nodeData.fileId, nodeData.filename);
 		nodeData.link = link;
-		return $.mustache(my.identifier_details_template, nodeData);
+		return mustache.render(templates.identifier, nodeData);
 	}
 
-	my.formatIdentifierFolderDetails = function(node) {
+	details.formatIdentifierFolderDetails = function(node) {
 	    var nodeData = node.data;
-		return my.identifier_folder_details_template;
+		return templates.identifier_folder;
 	}
 	
-	my.formatOrganismDetails = function(node) {
-		return $.mustache(my.organism_details_template, node.data);
+	details.formatOrganismDetails = function(node) {
+		return mustache.render(templates.organism, node.data);
 	}
 	
-	my.formatAttributeDetails = function(node) {
-		return $.mustache(my.attribute_details_template, node.data);
+	details.formatAttributeDetails = function(node) {
+		return mustache.render(templates.attribute, node.data);
 	}
 
-	my.formatFunctionsFolderDetails = function(node) {
-		return $.mustache(my.functions_folder_details_template, node.data);
+	details.formatFunctionsFolderDetails = function(node) {
+		return mustache.render(templates.functions_folder, node.data);
 	}
 	
-	my.formatFunctionsDetails = function(node) {
+	details.formatFunctionsDetails = function(node) {
 	    var nodeData = node.data;
-		nodeData.fileDownloadLink = my.makeFileDownloadLink(nodeData.fileId, nodeData.filename);
-		return $.mustache(my.functions_details_template, nodeData);   
+		nodeData.fileDownloadLink = details.makeFileDownloadLink(nodeData.fileId, nodeData.filename);
+		return mustache.render(templates.functions, nodeData);
 	}
 	
-	my.formatGroupDetails = function(node) {
-		return $.mustache(my.group_details_template, node.data);
+	details.formatGroupDetails = function(node) {
+		return mustache.render(templates.group, node.data);
 	}
 	
-	my.makeFileDownloadLink = function(id, label) {
+	details.makeFileDownloadLink = function(id, label) {
 		template = '<a href="{{link}}">{{label}}</a>';
 		link = "download/file?&id=" + id;
-		return $.mustache(template, {link: link, label:label});			
+		return mustache.render(template, {link: link, label:label});
 	}
 	
-	my.makePubmedLink = function(nodeData) {
+	details.makePubmedLink = function(nodeData) {
 		if (nodeData.pubmedId == '' || nodeData.pubmedId == 0) {
 			nodeData.displayPubmedLink = "none";
 			nodeData.pubmedLink = "#";
@@ -146,7 +149,7 @@ var dmw = function(my, $) {
 	// if a node has no title, try computing one
 	// first using author information, then falling
 	// back to the filename
-	my.suggestNetworkName = function(node) {
+	details.suggestNetworkName = function(node) {
 	    var nodeData = node.data;
 	    var newTitle = "Unnamed";
 		if (node.title != "") {
@@ -163,7 +166,7 @@ var dmw = function(my, $) {
 		return newTitle;
 	}
 	
-	my.suggestNetworkDescription = function(nodeData) {
+	details.suggestNetworkDescription = function(nodeData) {
 		if (nodeData.description != null && nodeData.description != "") {
 			newDescription = nodeData.description;
 		}
@@ -176,8 +179,8 @@ var dmw = function(my, $) {
 		return newDescription;
 	}
 
-	my.loadFileSnippet = function(node) {
-	    if (node.data.type === my.IDENTIFIERS_NODE) {
+	details.loadFileSnippet = function(node) {
+	    if (node.data.type === constants.IDENTIFIERS_NODE) {
             if (node.data.fileId) {
                 link = "preview/file?&id=" + node.data.fileId;
                 $('#file_snippet').dataTable({
@@ -188,5 +191,5 @@ var dmw = function(my, $) {
         }
 	}
 	
-	return my;
-}(dmw || {}, $);
+	return details;
+});

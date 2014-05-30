@@ -3,7 +3,6 @@ Data Storage
 ============
 
 
-
 ORM
 ===
 
@@ -24,12 +23,12 @@ sorry if the boilerplate offends your objection-relational automagic tooling sen
 UI libraries
 ============
 
-jquery, of course, along with fileupload plugin
-Bootstrap
-Treelist: <https://code.google.com/p/dynatree/>
+ * [jquery](http://jquery.com/) of course
+ * [File-Upload](http://blueimp.github.io/jQuery-File-Upload/)
+ * [Bootstrap](http://getbootstrap.com/) version 2
+ * [Bootbox.js](http://bootboxjs.com/)
+ * [mustache](http://mustache.github.io/)
+ * [jquery.form](http://malsup.com/jquery/form/)
+ * [FancyTree](https://github.com/mar10/fancytree)
+ * [DataTables](https://datatables.net/)
 
-
-To Investigate
-==============
-
-data grid library, e.g. <http://handsontable.com>

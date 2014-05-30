@@ -1,7 +1,12 @@
 
-var dmw = function(my, $) {
+define(['jqueryui', 'fancytree', 'fileupload', 'bootbox', 'jqueryform',
+    'app/constants', 'app/details'],
+    function($, fancytree, fileupload, bootbox, jqueryform,
+        constants, details) {
 
-	my.setupTree = function(orgId) {
+    var tree = {};
+
+	tree.setupTree = function(orgId) {
 		
 		$("#tree").fancytree({
 			debugLevel: 1, // 0:quiet, 1:normal, 2:debug
@@ -24,8 +29,9 @@ var dmw = function(my, $) {
 
 			renderNode : function(event, data) {
 			    node = data.node;
+			    $("#hithere");
 				$(node.span).find("span.fancytree-title")
-						   .html(my.formatNodeTitle(node));
+						   .html(tree.formatNodeTitle(node));
 			},
 
 			// customize icons after loading, based on status. could
@@ -33,14 +39,14 @@ var dmw = function(my, $) {
 			init: function(event, data) {
 				data.tree.visit(function(node) {
 
-					if (node.data.type == my.NETWORK_NODE) {
-					    var title = my.suggestNetworkName(node);
+					if (node.data.type == constants.NETWORK_NODE) {
+					    var title = details.suggestNetworkName(node);
     					if (title) {
     					    node.title = title;
     					}
 
-						details = node.data.processingDetails;
-						if (details && details.status == "OK") {
+						procDetails = node.data.processingDetails;
+						if (procDetails && procDetails.status == "OK") {
 						    node.data.icon = "valid_file.png";
 					    }
 					}
@@ -52,17 +58,17 @@ var dmw = function(my, $) {
             activate: function(event, data) {
                 var node = data.node;
 
-				my.computeNodeStats(node);
-				$("#details").hide().html(my.formatNodeDetails(node)).fadeIn('fast');
-                my.loadFileSnippet(node);
-				my.setupFileUpload(node);
-				my.setupForm(node);
+				tree.computeNodeStats(node);
+				$("#details").hide().html(details.formatNodeDetails(node)).fadeIn('fast');
+                details.loadFileSnippet(node);
+				tree.setupFileUpload(node);
+				tree.setupForm(node);
 //				dmw.setupTabChangeCallbacks(node);				
 			},
 
 			click : function(event, data) {
 			    var node = data.node;
-				if (my.formNeedsSave()) {
+				if (tree.formNeedsSave()) {
 					bootbox.dialog("Save changes?", 
 						[{
 							"label": "Save",
@@ -107,7 +113,7 @@ var dmw = function(my, $) {
 		});
 	}
 	
-	my.formNeedsSave = function() {
+	tree.formNeedsSave = function() {
 		e = $('form button[name="submitButton"]');
 		if (e.length > 0 && e.attr('disabled') === undefined) {
 			return true;
@@ -121,8 +127,8 @@ var dmw = function(my, $) {
 	// compute some stats for certain nodes used in the display,
 	// like # of networks in an organism. should probably do
 	// this server side, quick hack here. TODO	
-	my.computeNodeStats = function(node) {
-		if (node.data.type === my.ORGANISM_NODE && node.children) {
+	tree.computeNodeStats = function(node) {
+		if (node.data.type === constants.ORGANISM_NODE && node.children) {
 
 			network_groups = node.children[1].children;
 			
@@ -154,8 +160,8 @@ var dmw = function(my, $) {
 	
 	// strike out the names of networks that are disabled in the
 	// treelist
-	my.formatNodeTitle = function(node) {
-		if (node.data.type == my.NETWORK_NODE) {
+	tree.formatNodeTitle = function(node) {
+		if (node.data.type == constants.NETWORK_NODE) {
 			if (node.data.enabled == false) {
 				var newTitle = '<strike>' + node.title + '</strike>';
 			    return newTitle;
@@ -165,7 +171,7 @@ var dmw = function(my, $) {
 		return node.title;
 	}
 
-	my.setupFileUploadForType = function(element_name, node, formData, focusOnNewNode) {
+	tree.setupFileUploadForType = function(element_name, node, formData, focusOnNewNode) {
 		// button to upload new network at group level
 		$(element_name).fileupload({
 			dataType : 'json',
@@ -215,62 +221,62 @@ var dmw = function(my, $) {
 //		});
 	}
 	
-	my.setupFileUpload = function(node) {
+	tree.setupFileUpload = function(node) {
 		switch (node.data.type) {
-		case my.NETWORK_NODE:
+		case constants.NETWORK_NODE:
 			formData = {
 				organismId : node.data.organismId,
 				networkId : node.data.id,
 			};
-			my.setupFileUploadForType('#fileupload', node, formData, false);
-			my.setupFileUploadForType('#fileupload2', node, formData, false);
+			tree.setupFileUploadForType('#fileupload', node, formData, false);
+			tree.setupFileUploadForType('#fileupload2', node, formData, false);
 			break;
-		case my.GROUP_FOLDER_NODE:
+		case constants.GROUP_FOLDER_NODE:
 			formData = {
 				organismId : node.data.organismId,
 				groupId : node.data.id,
 			};
-			my.setupFileUploadForType('#fileupload', node, formData, true);
+			tree.setupFileUploadForType('#fileupload', node, formData, true);
 			break;
-		case my.IDENTIFIERS_FOLDER_NODE:
+		case constants.IDENTIFIERS_FOLDER_NODE:
 			formData = {
 				organismId : node.data.organismId,
 			};
-			my.setupFileUploadForType('#fileupload', node, formData, true);
+			tree.setupFileUploadForType('#fileupload', node, formData, true);
 			break;
-		case my.IDENTIFIERS_NODE:
+		case constants.IDENTIFIERS_NODE:
 			formData = {
 				organismId : node.data.organismId,
 				identifiersId: node.data.id,
 			};	
-			my.setupFileUploadForType('#fileupload', node, formData, false);
+			tree.setupFileUploadForType('#fileupload', node, formData, false);
 			break;
-		case my.ATTRIBUTES_FOLDER_NODE:
+		case constants.ATTRIBUTES_FOLDER_NODE:
 			formData = {
 					organismId: node.data.organismId,
 			}
-			my.setupFileUploadForType('#fileupload', node, formData, true);
+			tree.setupFileUploadForType('#fileupload', node, formData, true);
 			break;
-		case my.FUNCTIONS_FOLDER_NODE:
+		case constants.FUNCTIONS_FOLDER_NODE:
 			formData = {
 					organismId: node.data.organismId,
 			}
-			my.setupFileUploadForType('#fileupload', node, formData, true);
+			tree.setupFileUploadForType('#fileupload', node, formData, true);
 			break;
-		case my.FUNCTIONS_NODE:
+		case constants.FUNCTIONS_NODE:
 			formData = {
 					organismId: node.data.organismId,
 					functionsId: node.data.id,
 			};
-			my.setupFileUploadForType('#fileupload', node, formData, false);
-			my.setupFileUploadForType('#fileupload2', node, formData, false);
+			tree.setupFileUploadForType('#fileupload', node, formData, false);
+			tree.setupFileUploadForType('#fileupload2', node, formData, false);
 			break;
 		default:
 			console.log("no upload available for node type: " + node.data.type);
 		}
 	}
 		
-	my.setupForm = function(node) {
+	tree.setupForm = function(node) {
 		
 		// changing an input causes submit button to be enabled
 		$('form input[type!="submit"],textarea').on('input', function (e) {
@@ -425,13 +431,13 @@ var dmw = function(my, $) {
 		});		
 	}
 	
-	my.reloadTree = function(organism_id) {
+	tree.reloadTree = function(organism_id) {
 		$("#tree").fancytree("getTree").options.source.url = "organism/all";
 		$("#tree").fancytree("getTree").options.source.data.id = organism_id;
 		$("#tree").fancytree("getTree").reload();
 	}
 
-	my.setupSearch= function() {
+	tree.setupSearch= function() {
 	    $("#filter-tree").on('keypress',function (e) {
             if (e.keyCode == 13) {
                 var searchkey = e.target.value;
@@ -447,5 +453,5 @@ var dmw = function(my, $) {
         });
     }
 	
-	return my;
-}(dmw || {}, $);
+	return tree;
+});
