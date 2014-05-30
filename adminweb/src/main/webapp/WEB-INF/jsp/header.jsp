@@ -9,7 +9,7 @@
 <link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/js/lib/jquery-fileupload/css/jquery.fileupload-ui.css' media='screen'>
 <link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/js/lib/datatables/css/jquery.dataTables.css'>
 
-<link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/css/dmw.css' />
+<link rel='stylesheet' type='text/css' href='${pageContext.request.contextPath}/css/app.css' />
  
 <script data-main="js/app.js" src="js/require.js"></script>
 
