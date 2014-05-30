@@ -451,6 +451,12 @@ define(['jqueryui', 'fancytree', 'fileupload', 'bootbox', 'jqueryform',
                 }
             }
         });
+
+        $("#clear-search").click(function() {
+            console.log("clearing search");
+            $("#filter-tree").val('');
+            $("#tree").fancytree("getTree").clearFilter();
+        });
     }
 	
 	return tree;

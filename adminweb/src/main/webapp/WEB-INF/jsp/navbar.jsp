@@ -42,7 +42,10 @@
             <ul class="nav pull-right">
                 <li>
                     <div class="navbar-form">
+                    <div class="input-append">
                         <input id="filter-tree" type="text" class="input-medium" type="text" placeholder="Search" />
+                        <button id="clear-search" class="btn" type="reset"><i class="icon-remove"></i></button>
+                    </div>
                     </div>
                 </li>
                 <li id="fat-menu" class="dropdown"><a href="#" id="drop3" role="button" class="dropdown-toggle" data-toggle="dropdown">Help
