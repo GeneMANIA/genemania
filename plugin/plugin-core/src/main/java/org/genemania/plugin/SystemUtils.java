@@ -19,10 +19,10 @@
 
 package org.genemania.plugin;
 
+import java.awt.Desktop;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -31,41 +31,25 @@ import org.apache.log4j.Logger;
 
 public class SystemUtils {
 	public static boolean openBrowser(URL url) {
-		String osName = System.getProperty("os.name"); //$NON-NLS-1$
-		
-		try {
-			if (osName.startsWith("Windows")) { //$NON-NLS-1$
-				Runtime runtime = Runtime.getRuntime();
-				Process p = runtime.exec(new String[] { "rundll32", "url.dll,FileProtocolHandler", url.toString() }); //$NON-NLS-1$ //$NON-NLS-2$
-				return p.waitFor() == 0;
-			} else if (osName.startsWith("Mac OS")) { //$NON-NLS-1$
-				Class<?> fileManagerClass = Class.forName("com.apple.eio.FileManager"); //$NON-NLS-1$
-				Method method = fileManagerClass.getDeclaredMethod("openURL", new Class[] { String.class }); //$NON-NLS-1$
-				method.invoke(null, new Object[] { url.toString() });
-				return true;
-			} else {
-				// Assume POSIX/UNIX
-				Runtime runtime = Runtime.getRuntime();
-				Process p = runtime.exec(new String[] { "xdg-open", url.toString() }); //$NON-NLS-1$
-				return p.waitFor() == 0;
-			}
-		} catch (ClassNotFoundException e) {
-			return false;
-		} catch (SecurityException e) {
-			return false;
-		} catch (NoSuchMethodException e) {
-			return false;
-		} catch (IllegalArgumentException e) {
-			return false;
-		} catch (IllegalAccessException e) {
-			return false;
-		} catch (InvocationTargetException e) {
-			return false;
-		} catch (IOException e) {
-			return false;
-		} catch (InterruptedException e) {
-			return false;
+        if (!Desktop.isDesktopSupported())
+            return false;
+        try {
+            Desktop.getDesktop().browse(url.toURI());
+            return true;
+        } catch (IOException e) {
+        } catch (URISyntaxException e) {
+            return false;
 		}
+        
+        for (String browser : new String[] { "xdg-open", "htmlview", "firefox", "mozilla", "konqueror", "chrome", "chromium" }) {
+	        final ProcessBuilder builder = new ProcessBuilder(browser, url.toString());
+	        try {
+	            builder.start();
+	            return true;
+	        } catch (IOException e) {
+	        }
+        }
+        return false;
 	}
 	
 	public static String escape(String data) {
