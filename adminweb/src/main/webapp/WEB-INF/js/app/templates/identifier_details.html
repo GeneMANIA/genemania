@@ -17,6 +17,31 @@
                 <dd>{{date}}</dd>
             </dl>
 
+            <dl class="dl-horizontal">
+                <dt>Status</dt>
+                <dd>{{stats.status}}</dd>
+
+                <dt># records</dt>
+                <dd>{{stats.numRecordsRead}}</dd>
+
+                <dt># invalid records</dt>
+                <dd>{{stats.numMissing}}</dd>
+
+                <dt># duplicated symbols</dt>
+                <dd>{{stats.numDups}}</dd>
+
+                <dt># valid nodes</dt>
+                <dd>{{stats.numIds}}</dd>
+
+                <dt># valid symbols</dt>
+                <dd>{{stats.numSymbols}}</dd>
+
+                <dt># valid sources</dt>
+                <dd>{{stats.numSources}}</dd>
+
+                <dt>Symbol counts by source</dt>
+                <dd>{{#stats.sourceCounts}} {{#.}} {{.}} {{/.}} <br/> {{/stats.sourceCounts}}</dd>
+            </dl>
 
             <div class="form-horizontal">
                 <div class="control-group">

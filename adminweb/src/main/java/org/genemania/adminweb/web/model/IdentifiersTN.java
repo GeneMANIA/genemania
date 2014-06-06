@@ -1,5 +1,7 @@
 package org.genemania.adminweb.web.model;
 
+import org.genemania.adminweb.validators.stats.IdentifierValidationStats;
+
 public class IdentifiersTN extends TreeNode {
     public static final String NODETYPE = "identifiers";
 
@@ -7,9 +9,8 @@ public class IdentifiersTN extends TreeNode {
     private String filename;
     private int fileId;
     private int organismId;
-    private int numIdentifiers;
-    private int numSymbols;
     private String date;
+    private IdentifierValidationStats stats;
 
     public IdentifiersTN(String title) {
         super(title);
@@ -40,22 +41,6 @@ public class IdentifiersTN extends TreeNode {
 		this.organismId = organismId;
 	}
 
-	public int getNumIdentifiers() {
-		return numIdentifiers;
-	}
-
-	public void setNumIdentifiers(int numIdentifiers) {
-		this.numIdentifiers = numIdentifiers;
-	}
-
-	public int getNumSymbols() {
-		return numSymbols;
-	}
-
-	public void setNumSymbols(int numSymbols) {
-		this.numSymbols = numSymbols;
-	}
-
     public String getDate() {
         return date;
     }
@@ -75,5 +60,13 @@ public class IdentifiersTN extends TreeNode {
 
     public void setFileId(int fileId) {
         this.fileId = fileId;
+    }
+
+    public IdentifierValidationStats getStats() {
+        return stats;
+    }
+
+    public void setStats(IdentifierValidationStats stats) {
+        this.stats = stats;
     }
 }

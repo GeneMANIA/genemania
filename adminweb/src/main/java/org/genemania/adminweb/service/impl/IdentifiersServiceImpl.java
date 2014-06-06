@@ -93,9 +93,14 @@ public class IdentifiersServiceImpl implements IdentifiersService {
 
                 identifiers.setDataFile(dataFile);
                 dmdb.getIdentifiersDao().update(identifiers);
-                deleteDataSet(organismId);
                 // TODO: delete old file, or move to trash?
-            }
+
+                // cleanup working data cache
+                deleteDataSet(organismId);
+
+                // validate
+                validationService.validateIdentifiers(identifiers);
+             }
         }
         catch (SQLException e) {
             logger.error("failed to replace identifiers", e);

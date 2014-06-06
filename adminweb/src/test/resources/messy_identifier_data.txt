@@ -1,0 +1,15 @@
+Mp:1	Name_1	Name
+Mp:2	Name_2	Name
+Mp:3	Name_3	Name
+Mp:4		Name
+Mp:5	Name_5	Name
+Mp:1	Accession_1	Accession
+Mp:2	Accession_2
+Mp:3	Accession_3	Accession
+Mp:4	Accession_4	Accession
+Mp:5	Accession_5	Accession
+Mp:1	Synonym_1	Synonym
+Mp:2	Synonym_2	Synonym
+Mp:3	Synonym_3	Synonym
+Mp:4	Synonym_3	Synonym
+Mp:5	Synonym_5	Synonym

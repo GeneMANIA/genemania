@@ -93,6 +93,7 @@ define(['jquery', 'app/constants', 'app/templates', 'mustache', 'datatables'],
 	}
 
 	details.formatIdentifiersDetails = function(node) {
+	    console.log("identifiers node %o", node);
 	    var nodeData = node.data;
 
 		link = details.makeFileDownloadLink(nodeData.fileId, nodeData.filename);

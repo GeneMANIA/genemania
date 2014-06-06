@@ -23,6 +23,7 @@ import org.genemania.adminweb.entity.Organism;
 import org.genemania.adminweb.service.MappingService;
 import org.genemania.adminweb.service.impl.PubmedServiceImpl.PubmedInfo;
 import org.genemania.adminweb.validators.stats.AttributeMetadataValidationStats;
+import org.genemania.adminweb.validators.stats.IdentifierValidationStats;
 import org.genemania.adminweb.validators.stats.NetworkValidationStats;
 import org.genemania.adminweb.web.model.AttributesFolderTN;
 import org.genemania.adminweb.web.model.FunctionsFolderTN;
@@ -274,6 +275,13 @@ public class TreeBuilderServiceImpl implements TreeBuilderService {
         node.setFilename(identifiers.getDataFile().getOriginalFilename()); // UI doesn't need to know about internal storage filenames
         node.setFileId(identifiers.getDataFile().getId());
         node.setOrganismId(identifiers.getOrganism().getId());
+
+        String processingDetails = identifiers.getDataFile().getProcessingDetails();
+        if(processingDetails != null && processingDetails.trim() != null) {
+            IdentifierValidationStats stats = (IdentifierValidationStats) mappingService.unmap(processingDetails,
+                    IdentifierValidationStats.class);
+            node.setStats(stats);
+        }
 
         if (identifiers.getDataFile().getUploadDate() != null) {
             node.setDate(formatDate(identifiers.getDataFile().getUploadDate()));
