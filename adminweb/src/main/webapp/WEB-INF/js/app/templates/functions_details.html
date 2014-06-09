@@ -10,20 +10,23 @@
             <input type="hidden" name="organismId" value="{{organismId}}" /> 
             <input type="hidden" name="functionsId" value="{{id}}" />
 
-             <div class="control-group">
-                <label class="control-label" for="name">Name</label>
-                <div class="controls">
-                    <input class="input-block-level" name="name" type="text" value="{{title}}" placeholder="{{suggestedName}}"> 
-                    <span
-                        class="help-block"> Example: FirstAuthLastName-LastAuthLastName-Year </span>
-                </div>
-            </div>
-
             <div class="control-group">
                 <label class="control-label" for="comment">Comment</label>
                 <div class="controls">
                     <textarea class="input-block-level" rows="3" name="comment">{{{comment}}}</textarea>
                     <span class="help-block"> Notes for internal use only. Will not appear on production. </span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="usage">Use for</label>
+                <div class="controls">
+                    <div class="btn-group btn-group-vertical" data-toggle="buttons-radio">
+                        <label class="radio"><input id="usage_bp" name="usage" value="BP" type="radio" class="form-control" {{isUsageBPChecked}}></input>BP Weighting</label>
+                        <label class="radio"><input id="usage_mf" name="usage" value="MF" type="radio" class="form-control" {{isUsageMFChecked}}></input>MF Weighting</label>
+                        <label class="radio"><input id="usage_cc" name="usage" value="CC" type="radio" class="form-control" {{isUsageCCChecked}}></input>CC Weighting</label>
+                        <label class="radio"><input id="usage_enrichment" name="usage" value="ENRICHMENT" type="radio" class="form-control" {{isUsageEnrichmentChecked}}></input>Enrichment Analysis</label>
+                    </div>
                 </div>
             </div>
 

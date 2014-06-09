@@ -351,6 +351,7 @@ public class TreeBuilderServiceImpl implements TreeBuilderService {
         node.setDate(formatDate(functions.getDataFile().getUploadDate()));
         node.setComment(functions.getComment());
         node.setFileId(functions.getDataFile().getId());
+        node.setUsage(functions.getFunctionType());
         NetworkValidationStats details = (NetworkValidationStats) mappingService.unmap(functions.getDataFile().getProcessingDetails(),
                 NetworkValidationStats.class);
         node.setProcessingDetails(details);

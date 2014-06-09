@@ -66,6 +66,7 @@ public class FormProcessorServiceImpl implements FormProcessorService {
             check(organism, functions);
 
             functions.setComment(functionsForm.getComment());
+            functions.setFunctionType(functionsForm.getUsage());
 
             dmdb.getFunctionsDao().update(functions);
         }

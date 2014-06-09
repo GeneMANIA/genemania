@@ -45,7 +45,7 @@ public class FunctionsServiceImpl implements FunctionsService {
                 DataFile dataFile = uploadService.addDataFile(organismId, originalFilename, inputStream);
                 functions = new Functions();
                 functions.setDataFile(dataFile);
-                functions.setFunctionType("ENRICHMENT");
+                functions.setFunctionType("");
 
                 dmdb.getFunctionsDao().create(functions);
 
@@ -109,7 +109,7 @@ public class FunctionsServiceImpl implements FunctionsService {
 
                 DataFile dataFile = uploadService.addDataFile(organismId, originalFilename, inputStream);
                 functions.setDataFile(dataFile);
-                functions.setFunctionType("ENRICHMENT");
+                functions.setFunctionType("");
 
                 dmdb.getFunctionsDao().update(functions);
 

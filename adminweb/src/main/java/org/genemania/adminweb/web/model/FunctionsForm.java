@@ -15,6 +15,7 @@ public class FunctionsForm {
     boolean isDefault;
     boolean isRestrictedLicense;
     boolean isEnabled;
+    public String usage;
 
     public String getName() {
         return name;
@@ -69,5 +70,11 @@ public class FunctionsForm {
     }
     public void setEnabled(boolean isEnabled) {
         this.isEnabled = isEnabled;
+    }
+    public String getUsage() {
+        return usage;
+    }
+    public void setUsage(String usage) {
+        this.usage = usage;
     }
 }

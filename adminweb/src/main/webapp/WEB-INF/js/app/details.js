@@ -121,6 +121,28 @@ define(['jquery', 'app/constants', 'app/templates', 'mustache', 'datatables'],
 	details.formatFunctionsDetails = function(node) {
 	    var nodeData = node.data;
 		nodeData.fileDownloadLink = details.makeFileDownloadLink(nodeData.fileId, nodeData.filename);
+
+		// mark the appropriate usage as selected. TODO currently
+		// this just sets up some template vars, but can probably
+		// do this in a couple lines of jquery instead. need to reorganize
+		// templating to be able to run a function afterwards
+        node.data.isUsageBPChecked = node.data.isUsageMFChecked = node.data.isUsageCCChecked = node.data.isUsageEnrichmentChecked = "";
+        switch(node.data.usage) {
+            case "BP":
+                node.data.isUsageBPChecked = "checked";
+                break;
+            case "MF":
+                node.data.isUsageMFChecked = "checked";
+                break;
+            case "CC":
+                node.data.isUsageCCChecked = "checked";
+                break;
+            case "ENRICHMENT":
+                node.data.isUsageEnrichmentChecked = "checked";
+                break;
+        }
+
+
 		return mustache.render(templates.functions, nodeData);
 	}
 	

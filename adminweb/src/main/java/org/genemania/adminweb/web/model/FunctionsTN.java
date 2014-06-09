@@ -11,6 +11,7 @@ public class FunctionsTN extends TreeNode {
     private String date;
     private String comment;
     private int fileId;
+    private String usage;
 
     private NetworkValidationStats processingDetails;
 
@@ -73,6 +74,8 @@ public class FunctionsTN extends TreeNode {
         this.fileId = fileId;
     }
 
+
+
     public NetworkValidationStats getProcessingDetails() {
         return processingDetails;
     }
@@ -81,4 +84,11 @@ public class FunctionsTN extends TreeNode {
         this.processingDetails = processingDetails;
     }
 
+    public String getUsage() {
+        return usage;
+    }
+
+    public void setUsage(String usage) {
+        this.usage = usage;
+    }
 }
