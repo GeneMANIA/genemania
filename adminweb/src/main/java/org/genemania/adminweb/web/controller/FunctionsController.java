@@ -7,8 +7,10 @@ import java.util.Map;
 import org.genemania.adminweb.entity.Functions;
 import org.genemania.adminweb.exception.DatamartException;
 import org.genemania.adminweb.web.model.FunctionsForm;
+import org.genemania.adminweb.web.model.FunctionsTN;
 import org.genemania.adminweb.web.service.FormProcessorService;
 import org.genemania.adminweb.web.service.FunctionsService;
+import org.genemania.adminweb.web.service.TreeBuilderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class FunctionsController extends BaseController {
     @Autowired
     private FormProcessorService formProcessorService;
 
+    @Autowired
+    private TreeBuilderService treeBuilderService;
+
     @RequestMapping(method = RequestMethod.POST, value = "/addfunctions")
     @ResponseBody
     public Map<String, String> addFunctions(@RequestParam("files") MultipartFile file,
@@ -39,6 +44,8 @@ public class FunctionsController extends BaseController {
         Functions functions = functionsService.addFunctions(organismId, file.getOriginalFilename(), file.getInputStream());
 
         Map<String, String> responseMap = new HashMap<String, String>();
+        FunctionsTN functionsTN = treeBuilderService.getFunctionsTN(functions);
+        responseMap.put("key", functionsTN.getKey());
 
         return responseMap;
     }
