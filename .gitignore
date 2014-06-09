@@ -2,3 +2,7 @@ target
 *.class
 *.jar
 *.war
+.classpath
+.project
+.settings
+local.properties
