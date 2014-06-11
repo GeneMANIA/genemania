@@ -107,6 +107,7 @@ define(['jquery', 'app/constants', 'app/templates', 'mustache', 'datatables'],
 	}
 	
 	details.formatOrganismDetails = function(node) {
+	    node.data.title = node.title;
 		return mustache.render(templates.organism, node.data);
 	}
 	
