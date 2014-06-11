@@ -1,5 +1,6 @@
 
-define(['jquery', 'app/constants', 'app/details'], function($, constants, details) {
+define(['jquery', 'app/constants', 'app/details', 'app/tree'],
+       function($, constants, details, tree) {
 
 	var menu = {};
 
@@ -7,7 +8,7 @@ define(['jquery', 'app/constants', 'app/details'], function($, constants, detail
 		$('#new-organism').on('click', function() {
 			node = menu.newOrganismNode();
 			$("#details").hide().html(details.formatNodeDetails(node)).fadeIn('fast');
-			details.setupForm(node);
+			tree.setupForm(node);
 		});
 	}
 	
