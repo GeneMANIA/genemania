@@ -64,7 +64,7 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <path>/genemania-adminweb-${version}</path>
+                            <path>/</path>
                         </configuration>
                     </execution>
                 </executions>
