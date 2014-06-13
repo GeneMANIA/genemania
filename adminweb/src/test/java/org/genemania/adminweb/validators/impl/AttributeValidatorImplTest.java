@@ -64,7 +64,7 @@ public class AttributeValidatorImplTest extends BaseTest {
         Network testNetwork = network.get(0);
 
         DataSetContext context = getDataSetManagerService().getContext(organism.getId());
-        builder.build(context, organism.getId());
+
         Validator attributeValidator = new AttributeValidatorImpl(dmdb, mappingService,
                 fileStorageService, context, testNetwork);
         NetworkValidationStats validationStats = attributeValidator.validate();

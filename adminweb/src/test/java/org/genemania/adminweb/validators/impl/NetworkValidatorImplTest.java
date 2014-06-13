@@ -49,7 +49,6 @@ public class NetworkValidatorImplTest extends BaseTest {
         assertEquals(1, network.size());
         Network testNetwork = network.get(0);
 
-        builder.build(getDataSetManagerService().getContext(organism.getId()), organism.getId());
         DataSetContext context = getDataSetManagerService().getContext(organism.getId());
         Validator networkValidator = validatorFactory.networkValidator(context, testNetwork);
         NetworkValidationStats validationStats = networkValidator.validate();
