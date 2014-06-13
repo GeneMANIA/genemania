@@ -55,6 +55,26 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <execution>
+                        <id>read-external-properties</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>${env.PRIVATE_REPO}/website/${profile}.properties</file>
+                            </files>
+                            <quiet>true</quiet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     
@@ -76,4 +96,35 @@
             </plugin>
         </plugins>
     </reporting>
+    
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties><profile>dev</profile></properties>
+        </profile>
+        <profile>
+            <id>dev-debug</id>
+            <properties><profile>dev-debug</profile></properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties><profile>prod</profile></properties>
+        </profile>
+        <profile>
+            <id>qa1</id>
+            <properties><profile>qa1</profile></properties>
+        </profile>
+        <profile>
+            <id>qa2</id>
+            <properties><profile>qa2</profile></properties>
+        </profile>
+        <profile>
+            <id>stage</id>
+            <properties><profile>stage</profile></properties>
+        </profile>
+        <profile>
+            <id>vm</id>
+            <properties><profile>vm</profile></properties>
+        </profile>
+    </profiles>
 </project>
