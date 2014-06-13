@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import org.genemania.adminweb.dao.DatamartDb;
 import org.genemania.adminweb.entity.Format;
 import org.genemania.adminweb.entity.Group;
+import org.genemania.adminweb.exception.DatamartException;
 import org.genemania.adminweb.service.SetupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +21,35 @@ public class SetupServiceImpl implements SetupService {
     DatamartDb dmdb;
 
     @Override
-    public void setup() {
+    public void setup() throws DatamartException {
+            create();
+            populate();
+    }
+
+    @Override
+    public void populate() {
         try {
-//            dmdb.createTables();
             populateBase();
         }
         catch (SQLException e) {
-            logger.error("failed to create tables", e);
+            logger.error("failed to setup database", e);
+        }
+    }
+
+    @Override
+    public void check() throws DatamartException {
+        // TODO: try and load the version info recorded
+        // in the db, check against a required schema.
+        throw new DatamartException("not implemented");
+    }
+
+    @Override
+    public void create() throws DatamartException {
+        try {
+            getDatamartDb().createTables();
+        }
+        catch (SQLException e) {
+            logger.error("failed to create database", e);
         }
     }
 

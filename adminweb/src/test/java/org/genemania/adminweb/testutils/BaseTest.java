@@ -3,6 +3,7 @@ package org.genemania.adminweb.testutils;
 import java.io.File;
 
 import org.genemania.adminweb.dao.impl.DatamartDbImpl;
+import org.genemania.adminweb.service.SetupService;
 import org.genemania.adminweb.service.impl.DataSetManagerServiceImpl;
 import org.genemania.adminweb.service.impl.FileStorageServiceImpl;
 import org.junit.After;
@@ -28,6 +29,9 @@ public abstract class BaseTest {
     DatamartDbImpl dmdb;
 
     @Autowired
+    SetupService setupService;
+
+    @Autowired
     FileStorageServiceImpl fileStorageService;
 
     @Autowired
@@ -46,7 +50,6 @@ public abstract class BaseTest {
         dmdb.setDbUser(null);
         dmdb.setDbPass(null);
         dmdb.init();
-        dmdb.createTables();
 
         fileStorageService.setBasePath(testFolder.newFolder("filestorage").getPath());
         fileStorageService.init();
@@ -83,5 +86,21 @@ public abstract class BaseTest {
     public void setDataSetManagerService(
             DataSetManagerServiceImpl dataSetManagerService) {
         this.dataSetManagerService = dataSetManagerService;
+    }
+
+    public SetupService getSetupService() {
+        return setupService;
+    }
+
+    public void setSetupService(SetupService setupService) {
+        this.setupService = setupService;
+    }
+
+    public TemporaryFolder getTestFolder() {
+        return testFolder;
+    }
+
+    public void setTestFolder(TemporaryFolder testFolder) {
+        this.testFolder = testFolder;
     }
 }

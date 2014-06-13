@@ -7,6 +7,7 @@ public interface DatamartDb {
     String info();
     void init() throws SQLException;
     void createTables() throws SQLException;
+    void createTablesIfNotExist() throws SQLException;
     void dropTables() throws SQLException;
     void clearTables() throws SQLException;
     List<String> getTableCreateStatements() throws SQLException;

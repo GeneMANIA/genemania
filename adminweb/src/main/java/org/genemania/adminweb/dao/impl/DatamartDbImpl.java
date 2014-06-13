@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.genemania.adminweb.dao.*;
 import org.genemania.adminweb.entity.*;
+import org.genemania.adminweb.exception.DatamartException;
 import org.springframework.stereotype.Component;
 
 import com.j256.ormlite.dao.DaoManager;
@@ -74,6 +75,14 @@ public class DatamartDbImpl implements DatamartDb {
             TableUtils.createTable(connectionSource, domainClass);
         }
     }
+
+    @Override
+    public void createTablesIfNotExist() throws SQLException {
+        for (Class<?> domainClass: domainClasses) {
+            TableUtils.createTableIfNotExists(connectionSource, domainClass);
+        }
+    }
+
 
     @Override
     public void dropTables() throws SQLException {

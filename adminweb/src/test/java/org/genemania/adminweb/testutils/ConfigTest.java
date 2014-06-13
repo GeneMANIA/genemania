@@ -15,16 +15,16 @@ public class ConfigTest extends BaseTest {
 
     @Test
     public void test() throws Exception {
-        assertNotNull(dmdb);
-        List<Organism> organisms = dmdb.getOrganismDao().queryForAll();
+        getSetupService().setup();
+        List<Organism> organisms = getDmdb().getOrganismDao().queryForAll();
         assertNotNull(organisms);
         assertEquals(0, organisms.size());
     }
 
     @Test
     public void test2() throws Exception {
-        assertNotNull(dmdb);
-        List<Organism> organisms = dmdb.getOrganismDao().queryForAll();
+        getSetupService().setup();
+        List<Organism> organisms = getDmdb().getOrganismDao().queryForAll();
         assertNotNull(organisms);
         assertEquals(0, organisms.size());
     }

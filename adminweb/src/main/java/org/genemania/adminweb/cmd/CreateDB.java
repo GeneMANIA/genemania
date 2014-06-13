@@ -45,7 +45,6 @@ public class CreateDB {
     public void createDb() throws Exception {
         DatamartDbImpl dmdb = new DatamartDbImpl(dburl, user, pass);
         dmdb.init();
-        dmdb.createTables();
 
         SetupServiceImpl setupService = new SetupServiceImpl();
         setupService.setDatamartDb(dmdb);
