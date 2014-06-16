@@ -90,7 +90,7 @@ define(['jqueryui', 'fancytree', 'fileupload', 'bootbox', 'jqueryform',
 								// reset the form and fire the event again,
 								// which should get us safely through to the
 								// desired node
-								$("#networkForm").find('#resetButton').click();		
+								$("#networkForm, #FunctionsForm").find('#resetButton').click();
 								event.target.click();
 							}
 						},
