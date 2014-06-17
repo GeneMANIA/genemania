@@ -12,6 +12,11 @@ var tap = require('gulp-tap');
 var path = require('path');
 var rename = require('gulp-rename');
 var mincss = require('gulp-minify-css');
+var livereload = require('gulp-livereload');
+var less = require('gulp-less');
+var runSequence = require('run-sequence');
+var watch = require('gulp-watch');
+var plumber = require('gulp-plumber');
 
 var paths = {
   js: [
@@ -19,49 +24,53 @@ var paths = {
     './js/lib/fastclick.js',
     './js/lib/angular.js',
     './js-build/angular-templates.js', // include templates if built
-    './ui/js/lib/*.js',
-    './js/conf.js',
-    './js/website-conf.js', // so if website conf exists, then it overwrites the local conf
+    './js/lib/*.js',
+    './js/config.js',
+    './js/website-config.js', // so if website config exists, then it overwrites the local config
     './js/app.js',
     './js/*.js'
   ],
 
-  css: [
-    './css/reset.css',
-    './css/font-awesome.css',
-    './css/jquery.qtip.css',
-    './css/app.css'
+  debug: [
+    './js/debug/livereload.js' // for live reloading when source files change
   ],
 
-  website: '../website/src/main/webapp/'
+  css: [
+    './css/reset.css',
+    './css/lesshat.less',
+    './css/font-awesome.css',
+    './css/jquery.qtip.css',
+    './css/app.less'
+  ]
 };
+
+// map raw css/less files to built files
+paths.cssBuild = paths.css.map(function( path ){
+  path = path.replace('./css/', './css-build/');
+  path = path.replace('.less', '.css');
+
+  return path;
+});
+
+gulp.task('default', ['watch']);
 
 // clean built files
 gulp.task('clean', ['htmlrefs'], function(){
-  return gulp.src([ './js-build', './js/website-conf.js', './css-build' ])
+  return gulp.src([ './js-build', './js/website-config.js', './css-build' ])
     .pipe( clean() );
   ;
 });
 
-// deploy to genemania website java project
-gulp.task('website', ['websiteconf'], function(){
+// use website config
+gulp.task('websiteconfig', function(){
   gulp.src('./js/website/*.js')
     .pipe( gulp.dest('./js') );
   ;
 });
 
-// clean website of built resources
-gulp.task('websiteclean', function(){
-  gulp.src( paths.website )
-    .pipe( clean() )
-  ;
-});
-
-// place website conf in js dir
-gulp.task('websiteconf', function(){
-  gulp.src('./js/website/*')
-    .pipe( gulp.dest('./js') );
-  ;
+// minified website config
+gulp.task('website', function( next ){
+  return runSequence( 'websiteconfig', 'minify', next );
 });
 
 // build minified ui 
@@ -71,16 +80,13 @@ gulp.task('minify', ['htmlminrefs'], function(next){
 
 function htmlrefs(){
   return gulp.src( './index.html' )
-    .pipe(inject( gulp.src(paths.js.concat(paths.css), { read: false }), {
+    .pipe(inject( gulp.src(paths.js.concat(paths.debug).concat(paths.cssBuild), { read: false }), {
       addRootSlash: false
     } ))
 
     .pipe( gulp.dest('.') )
   ;
 }
-
-// TODO update all refs
-gulp.task('refs');
 
 // update path refs
 gulp.task('htmlrefs', function(){
@@ -136,13 +142,54 @@ gulp.task('js', ['templates'], function(){
 
 });
 
-// TODO minify css
+function pipeLess( src ){
+  return src
+
+    .pipe( less({
+      paths: ['./css'],
+      sourceMap: true,
+      relativeUrls: true,
+      sourceMapRootpath: '../',
+      sourceMapBasepath: process.cwd()
+    }) )
+
+    .pipe( gulp.dest('./css-build') )
+  ;
+}
+
+// less => css
+gulp.task('less', function(){
+  return pipeLess( gulp.src( paths.css ) );
+});
+
+// minify css
 gulp.task('css', function(){
   return gulp.src( paths.css )
+
+    .pipe( less() )
+
     .pipe( concat('all.min.css') )
 
     .pipe( mincss() )
 
     .pipe( gulp.dest('./css-build') )
   ;
+});
+
+gulp.task('prewatch', function( next ){
+  return runSequence( 'less', 'htmlrefs', next );
+});
+
+gulp.task('watch', ['prewatch'], function(){
+  livereload.listen();
+
+  gulp.watch( ['index.html'].concat(paths.js).concat(paths.cssBuild) )
+    .on('change', livereload.changed)
+  ;
+
+  // rebuild less files on a per-file basis
+  pipeLess( gulp.src( paths.css )
+    .pipe( watch() )
+    .pipe( plumber() )
+  );
 });

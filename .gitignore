@@ -5,3 +5,5 @@ target
 .settings
 .classpath
 .project
+local.properties
+build.xml
