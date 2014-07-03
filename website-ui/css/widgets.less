@@ -1,0 +1,26 @@
+@import 'constants.less';
+
+input,
+textarea,
+button {
+	font: inherit;
+	outline: 0;
+}
+
+textarea {
+	background: transparent;
+	border: 0;
+	resize: none;
+	padding: 0;
+	margin: 0;
+	line-height: 1;
+}
+
+button,
+.buttonified {
+	padding: 0.5em 0.25em;
+	width: 100px;
+	background: @BUTTON_COLOR;
+	cursor: pointer;
+	line-height: 2em;
+}

@@ -5,6 +5,18 @@
 	right: 0;
 	top: 0;
 	bottom: 0;
-	width: @DATA_WIDTH;
+	width: @DEFAULT_DATA_WIDTH;
 	background: #ffeeee;
+}
+
+@media (max-width: @SMALL_SCREEN_WIDTH) {
+	#data {
+		width: 100%;
+	}
+
+	@media (orientation: landscape){
+		#data {
+			width: 33%;
+		}
+	}
 }

@@ -44,9 +44,11 @@ var paths = {
     './css/lesshat.less',
     './css/font-awesome.css',
     './css/jquery.qtip.css',
+    './css/widgets.less',
     './css/app.less',
+    './css/cytoscape.less',
     './css/data.less',
-    './css/cytoscape.less'
+    './css/query.less'
   ]
 };
 
@@ -70,6 +72,15 @@ paths.cssBuild = paths.css.map(function( path ){
 
   return path;
 });
+
+paths.cssOnly = paths.css.filter(function( path ){
+  return path.match(/\.css$/);
+});
+
+paths.lessOnly = paths.css.filter(function( path ){
+  return path.match(/\.less$/);
+});
+
 
 function isLessFile( file ){
   return file.path.match('.less');
@@ -222,12 +233,16 @@ gulp.task('watch', ['prewatch'], function(){
   ;
 
   // rebuild less files on a per-file basis
-  gulp.src( paths.css )
+  gulp.src( paths.lessOnly )
     .pipe( watch() )
-    .pipe( plumber() )
-    .pipe( 
-      gulpif( isLessFile, less(debugLessOpts) )
-    )
+    .pipe( less(debugLessOpts) )
+      .on('error', handleError)
+    .pipe( gulp.dest('./css-build') )
+  ;
+
+  // directly put plain css files
+  gulp.src( paths.cssOnly )
+    .pipe( watch() )
     .pipe( gulp.dest('./css-build') )
   ;
 
