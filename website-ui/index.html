@@ -28,19 +28,22 @@
   <script src="js/lib/angular.js"></script>
   <script src="js/lib/arbor.js"></script>
   <script src="js/lib/bindonce.js"></script>
+  <script src="js/lib/bluebird.js"></script>
   <script src="js/lib/cytoscape.js"></script>
   <script src="js/lib/jquery.qtip.js"></script>
   <script src="js/lib/lodash.js"></script>
-  <script src="js/lib/rsvp-latest.js"></script>
+  <script src="js/lib/pubsub.js"></script>
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/app-gene.js"></script>
+  <script src="js/app-network.js"></script>
+  <script src="js/app-search.js"></script>
   <script src="js/debug/livereload.js"></script>
   <!-- endinject -->
 
 </head>
 <body ng-app="app">
 
-<!--window.scrollTo(0, 0);
   <div id="query">
     <a class="query-item query-button"><span class="fa fa-chevron-right"></span></a>
     <a class="query-item query-button">org</a>
@@ -53,7 +56,8 @@
   <div id="cy"></div>
 
   <div id="data"></div>
--->
+
+  <div ng-controller="Test"></div>
 
 </body>
 </html>

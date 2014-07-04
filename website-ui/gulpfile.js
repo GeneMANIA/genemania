@@ -20,6 +20,7 @@ var plumber = require('gulp-plumber');
 var shell = require('gulp-shell');
 var gulpif = require('gulp-if');
 var combine = require('stream-combiner');
+var replace = require('gulp-replace');
 
 var paths = {
   js: [
@@ -31,6 +32,7 @@ var paths = {
     './js/config.js',
     './js/website-config.js', // so if website config exists, then it overwrites the local config
     './js/app.js',
+    './js/app-*.js',
     './js/*.js'
   ],
 
@@ -49,6 +51,13 @@ var paths = {
     './css/cytoscape.less',
     './css/data.less',
     './css/query.less'
+  ],
+
+  javaTargetDir: '../website/target',
+  builtJava: '../website/target/genemania/**/*',
+  deployJavaDir: '../../tomcat/webapps/genemania',
+  springFiles: [
+    '../website/target/**/ApplicationConfig.properties'
   ]
 };
 
@@ -95,14 +104,39 @@ gulp.task('clean', ['htmlrefs'], function(){
   ;
 });
 
-// compile java projects for debugging
-gulp.task( 'javac', shell.task([
-  'export PRIVATE_REPO=' + path.resolve( process.cwd(), '../../genemania-private' ),
-  'mvn install -pl website -am -P dev-debug'
+// compile java projects for debugging (incl. dependent projects)
+gulp.task( 'javac-wdeps', shell.task([
+  'export PRIVATE_REPO=' + path.resolve( process.cwd(), '../../genemania-private' ) + ' && mvn clean install -pl website -am -P dev-debug'
 ], { cwd: '..' }) );
 
+// compile java projects for debugging
+gulp.task( 'javac', shell.task([
+  'export PRIVATE_REPO=' + path.resolve( process.cwd(), '../../genemania-private' ) + ' && mvn clean install -pl website -P dev-debug'
+], { cwd: '..' }) );
+
+// fix dir refs w/ `~` in springmvc confs
+// (can't hardcode single user's homedir in spring config)
+gulp.task('fix-spring-dir-refs', function(){
+  return gulp.src( paths.springFiles )
+    .pipe( replace('~', process.env['HOME']) )
+    .pipe( gulp.dest( paths.javaTargetDir ) )
+  ;
+});
+
+// deploy built java files to tomcat
+gulp.task('java-deploy', ['fix-spring-dir-refs'], function(){
+  return gulp.src( paths.builtJava )
+    .pipe( gulp.dest( paths.deployJavaDir ) )
+  ;
+});
+
+// compile java website and deploy to tomcat
+gulp.task('javac-deploy', function(next){
+  return runSequence( 'javac', 'java-deploy', next );
+});
+
 // use website config
-gulp.task('websiteconfig', function(){
+gulp.task('website-config', function(){
   gulp.src('./js/website/*.js')
     .pipe( gulp.dest('./js') );
   ;
@@ -110,7 +144,7 @@ gulp.task('websiteconfig', function(){
 
 // minified website config
 gulp.task('website', function( next ){
-  return runSequence( 'websiteconfig', 'minify', next );
+  return runSequence( 'website-config', 'minify', next );
 });
 
 // build minified ui 
@@ -189,7 +223,8 @@ gulp.task('less', function(){
   ;
 });
 
-gulp.task('safeless', function(){
+// compile less but don't die from errors
+gulp.task('less-safe', function(){
   var all = combine(
     gulp.src( paths.css )
       .pipe( 
@@ -220,10 +255,12 @@ gulp.task('css', function(){
   ;
 });
 
+// make sure everything is uptodate before watching
 gulp.task('prewatch', function( next ){
   return runSequence( 'less', 'htmlrefs', next );
 });
 
+// auto less compilation & livereload
 gulp.task('watch', ['prewatch'], function(){
   livereload.listen();
 
@@ -247,7 +284,7 @@ gulp.task('watch', ['prewatch'], function(){
   ;
 
   // rebuild all less when at least one file changed
-  // gulp.watch( paths.css, ['safeless'] );
+  // gulp.watch( paths.css, ['less-safe'] );
 
   // reload all css when any css changed
   gulp.watch( paths.cssBuild )

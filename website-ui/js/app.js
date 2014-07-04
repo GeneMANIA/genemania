@@ -7,3 +7,7 @@ try {
 }
 
 var app = angular.module('app', ['templates', 'pasvaz.bindonce']);
+
+app.controller('Test', [ '$$networks', function( $$networks ){
+  window.$$networks = $$networks;
+} ]);
