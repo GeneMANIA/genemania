@@ -27,6 +27,15 @@ public interface OrganismService {
 	public Organism findOrganismById(Long id) throws DataStoreException;
 
 	/**
+	 * Gets a particular organism from a string
+	 * 
+	 * @param str
+	 *            A string with the organism ID or name
+	 * @return
+	 */
+	public Organism findOrganismByString(String str) throws DataStoreException;
+
+	/**
 	 * Gets the default query organism
 	 * 
 	 * @return The default query organism

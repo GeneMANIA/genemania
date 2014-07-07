@@ -25,101 +25,104 @@ import java.util.Collection;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  * Organism
  */
 public class Organism implements java.io.Serializable {
 
-    private static final long                   serialVersionUID         = -2062779451690027505L;
+	private static final long serialVersionUID = -2062779451690027505L;
 
-    private long                                id;
-    private String                              name;
-    private String                              description;
-    private Collection<InteractionNetworkGroup> interactionNetworkGroups = new ArrayList<InteractionNetworkGroup>(0);
-    private String                              alias;
-    private Ontology                            ontology;
-    private long                                taxonomyId;
-    private Collection<Gene> 					defaultGenes;
+	private long id;
+	private String name;
+	private String description;
+	private Collection<InteractionNetworkGroup> interactionNetworkGroups = new ArrayList<InteractionNetworkGroup>(
+			0);
+	private String alias;
+	private Ontology ontology;
+	private long taxonomyId;
+	private Collection<Gene> defaultGenes;
 
-    public Organism() {
-    }
+	public Organism() {
+	}
 
-    public Organism(String name) {
-        this.name = name;
-    }
+	public Organism(String name) {
+		this.name = name;
+	}
 
-    public Organism(String name,
-                    String description,
-                    Collection<InteractionNetworkGroup> interactionNetworkGroups,
-                    String alias,
-                    Ontology ontology,
-                    long taxonomyId) {
-        this.name = name;
-        this.description = description;
-        this.interactionNetworkGroups = interactionNetworkGroups;
-        this.alias = alias;
-        this.ontology = ontology;
-        this.taxonomyId = taxonomyId;
-    }
+	public Organism(String name, String description,
+			Collection<InteractionNetworkGroup> interactionNetworkGroups,
+			String alias, Ontology ontology, long taxonomyId) {
+		this.name = name;
+		this.description = description;
+		this.interactionNetworkGroups = interactionNetworkGroups;
+		this.alias = alias;
+		this.ontology = ontology;
+		this.taxonomyId = taxonomyId;
+	}
 
 	public long getId() {
-        return this.id;
-    }
+		return this.id;
+	}
 
-    public void setId(long id) {
-        this.id = id;
-    }
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public String getName() {
-        return this.name;
-    }
+	public String getName() {
+		return this.name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public String getDescription() {
-        return this.description;
-    }
+	public String getDescription() {
+		return this.description;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public Collection<InteractionNetworkGroup> getInteractionNetworkGroups() {
-        return this.interactionNetworkGroups;
-    }
+	@JsonIgnore
+	public Collection<InteractionNetworkGroup> getInteractionNetworkGroups() {
+		return this.interactionNetworkGroups;
+	}
 
-    public void setInteractionNetworkGroups(Collection<InteractionNetworkGroup> interactionNetworkGroups) {
-        this.interactionNetworkGroups = interactionNetworkGroups;
-    }
+	public void setInteractionNetworkGroups(
+			Collection<InteractionNetworkGroup> interactionNetworkGroups) {
+		this.interactionNetworkGroups = interactionNetworkGroups;
+	}
 
-    public String getAlias() {
-        return this.alias;
-    }
+	public String getAlias() {
+		return this.alias;
+	}
 
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
 
-    public Ontology getOntology() {
-        return this.ontology;
-    }
+	@JsonIgnore
+	public Ontology getOntology() {
+		return this.ontology;
+	}
 
-    public void setOntology(Ontology ontology) {
-        this.ontology = ontology;
-    }
+	public void setOntology(Ontology ontology) {
+		this.ontology = ontology;
+	}
 
-    public long getTaxonomyId() {
-        return this.taxonomyId;
-    }
+	public long getTaxonomyId() {
+		return this.taxonomyId;
+	}
 
-    public void setTaxonomyId(long taxonomyId) {
-        this.taxonomyId = taxonomyId;
-    }
-    
-    public Collection<Gene> getDefaultGenes() {
+	public void setTaxonomyId(long taxonomyId) {
+		this.taxonomyId = taxonomyId;
+	}
+
+	@JsonIgnore
+	public Collection<Gene> getDefaultGenes() {
 		return defaultGenes;
 	}
 
@@ -127,23 +130,26 @@ public class Organism implements java.io.Serializable {
 		this.defaultGenes = defaultGenes;
 	}
 
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(3, 11).appendSuper(super.hashCode()).append(getId()).toHashCode();
-    }
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(3, 11).appendSuper(super.hashCode())
+				.append(getId()).toHashCode();
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Organism)) return false;
-        Organism o = (Organism) obj;
-        return new EqualsBuilder().append(getId(), o.getId()).isEquals();
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Organism))
+			return false;
+		Organism o = (Organism) obj;
+		return new EqualsBuilder().append(getId(), o.getId()).isEquals();
+	}
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString()).append("id", getId()).append("name", getName())
-                .toString();
-    }
-    
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this).appendSuper(super.toString())
+				.append("id", getId()).append("name", getName()).toString();
+	}
+
 }

@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import org.genemania.type.CombiningMethod;
+import org.genemania.type.SearchResultsErrorCode;
 
 public class SearchResults {
 	private Collection<ResultInteractionNetworkGroup> resultNetworkGroups = new LinkedList<ResultInteractionNetworkGroup>();
@@ -30,6 +31,9 @@ public class SearchResults {
 	private Collection<ResultOntologyCategory> resultOntologyCategories = new LinkedList<ResultOntologyCategory>();
 	private CombiningMethod weighting;
 	private Collection<ResultAttributeGroup> resultAttributeGroups = new LinkedList<ResultAttributeGroup>();
+	private String error;
+	private SearchResultsErrorCode errorCode;
+	private SearchParameters parameters;
 
 	public SearchResults() {
 	}
@@ -46,6 +50,18 @@ public class SearchResults {
 		this.resultOntologyCategories = resultOntologyCategories;
 		this.weighting = weighting;
 		this.resultAttributeGroups = resultAttributeGroups;
+	}
+
+	public SearchResults(String error) {
+		super();
+		this.error = error;
+		this.errorCode = SearchResultsErrorCode.UNKNOWN;
+	}
+
+	public SearchResults(String error, SearchResultsErrorCode errorCode) {
+		super();
+		this.error = error;
+		this.errorCode = errorCode;
 	}
 
 	public Collection<ResultAttributeGroup> getResultAttributeGroups() {
@@ -91,10 +107,37 @@ public class SearchResults {
 		this.weighting = weighting;
 	}
 
+	public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
+
+	public SearchResultsErrorCode getErrorCode() {
+		return errorCode;
+	}
+
+	public void setErrorCode(SearchResultsErrorCode errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	public SearchParameters getParameters() {
+		return parameters;
+	}
+
+	public void setParameters(SearchParameters parameters) {
+		this.parameters = parameters;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((error == null) ? 0 : error.hashCode());
+		result = prime * result
+				+ ((errorCode == null) ? 0 : errorCode.hashCode());
 		result = prime
 				* result
 				+ ((resultAttributeGroups == null) ? 0 : resultAttributeGroups
@@ -123,6 +166,13 @@ public class SearchResults {
 		if (getClass() != obj.getClass())
 			return false;
 		SearchResults other = (SearchResults) obj;
+		if (error == null) {
+			if (other.error != null)
+				return false;
+		} else if (!error.equals(other.error))
+			return false;
+		if (errorCode != other.errorCode)
+			return false;
 		if (resultAttributeGroups == null) {
 			if (other.resultAttributeGroups != null)
 				return false;
@@ -155,7 +205,8 @@ public class SearchResults {
 				+ ", resultGenes=" + resultGenes
 				+ ", resultOntologyCategories=" + resultOntologyCategories
 				+ ", weighting=" + weighting + ", resultAttributeGroups="
-				+ resultAttributeGroups + "]";
+				+ resultAttributeGroups + ", error=" + error + ", errorCode="
+				+ errorCode + "]";
 	}
 
 }

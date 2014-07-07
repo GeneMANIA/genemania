@@ -53,6 +53,7 @@ var paths = {
     './css/query.less'
   ],
 
+  // config for java project integration & debugging locally
   javaTargetDir: '../website/target',
   builtJava: '../website/target/genemania/**/*',
   deployJavaDir: '../../tomcat/webapps/genemania',

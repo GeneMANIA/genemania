@@ -20,13 +20,17 @@
 package org.genemania.controller.rest;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.genemania.domain.InteractionNetworkGroup;
+import org.genemania.domain.Organism;
 import org.genemania.exception.DataStoreException;
 import org.genemania.service.NetworkGroupService;
+import org.genemania.service.OrganismService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,18 +40,21 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class NetworkGroupController {
-	
+
 	// ========[ PRIVATE PROPERTIES
 	// ]===============================================================
 
 	@Autowired
 	private NetworkGroupService networkGroupService;
 
+	@Autowired
+	private OrganismService organismService;
+
 	protected final Logger logger = Logger.getLogger(getClass());
 
 	// ========[ PUBLIC METHODS
 	// ]===================================================================
-	
+
 	/**
 	 * Return query network groups as XML.
 	 * 
@@ -56,14 +63,36 @@ public class NetworkGroupController {
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/network_groups/{organismId}")
 	@ResponseBody
-	public Collection<InteractionNetworkGroup> list(@PathVariable Long organismId, HttpSession session)
+	public Collection<InteractionNetworkGroup> list(
+			@PathVariable Long organismId, HttpSession session)
 			throws DataStoreException {
 		logger.debug("Return Network Groups list...");
 
 		Collection<InteractionNetworkGroup> groups = networkGroupService
 				.findNetworkGroupsByOrganism(organismId, session.getId());
-		
+
 		return groups;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/network_groups")
+	@ResponseBody
+	public Map<Long, Collection<InteractionNetworkGroup>> listAll(
+			HttpSession session) throws DataStoreException {
+
+		Map<Long, Collection<InteractionNetworkGroup>> idToNetworks = new HashMap<Long, Collection<InteractionNetworkGroup>>();
+
+		Collection<Organism> organisms = organismService.getOrganisms();
+
+		for (Organism organism : organisms) {
+			Long organismId = organism.getId();
+
+			Collection<InteractionNetworkGroup> groups = networkGroupService
+					.findNetworkGroupsByOrganism(organismId, session.getId());
+
+			idToNetworks.put(organismId, groups);
+		}
+
+		return idToNetworks;
 	}
 
 	public NetworkGroupService getNetworkGroupService() {
@@ -72,6 +101,14 @@ public class NetworkGroupController {
 
 	public void setNetworkGroupService(NetworkGroupService networkGroupService) {
 		this.networkGroupService = networkGroupService;
+	}
+
+	public OrganismService getOrganismService() {
+		return organismService;
+	}
+
+	public void setOrganismService(OrganismService organismService) {
+		this.organismService = organismService;
 	}
 
 	// show (GET), list (GET), create (POST), update (POST), delete (DELETE ?)
