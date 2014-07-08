@@ -38,11 +38,17 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
  1. NB: you must `npm install` before using `gulp`
 
 **Targets:** `gulp <target1> <target2> ...`
- * `website` : deploy to the `website` Java project
- * `websiteclean` : clean the web directory for the `website` Java project
- * `minify` : build a local minified UI for debugging
- * `clean` : cleans the website UI so it is in a fresh state for local debugging
- * `refs` : updates file references when you add JS, CSS, etc (useful during development)
+ * `clean` : clean built java & ui files (resets ui to default unminified state)
+ * `clean-all` : clean everything (including java)
+ * `minify` : build the minified ui
+ * `watch` (default) : autocompilation & livereload for dev
+ * Building java website
+  * `javac` : build java website
+  * `javac-wdeps` : build java website and its java dependencies
+  * `javac-deploy` : build java website and deploy to tomcat
+  * `javac-clean` : clean java website built files
+  * `java-deploy` : deploy java website to tomcat
+  * `java-deploy-clean` : clean java website in tomcat
 
 
 ## Deployment instructions

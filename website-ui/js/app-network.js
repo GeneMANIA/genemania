@@ -3,9 +3,9 @@ app.factory('$$networks',
 function( $http ){
 
   var $$networks = function(){
-    return $http.get( config.service.baseUrl + 'network_groups/1' )
-      .then(function( json ){
-        return json;
+    return $http.get( config.service.baseUrl + 'network_groups' )
+      .then(function( res ){
+        return res.data;
       })
     ;
   };

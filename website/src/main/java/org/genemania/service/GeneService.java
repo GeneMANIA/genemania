@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.genemania.domain.Gene;
 import org.genemania.exception.DataStoreException;
@@ -38,18 +39,20 @@ public interface GeneService {
 	 */
 	public class ValidationResult {
 		private Map<Integer, PossibleGene> genes = new HashMap<Integer, PossibleGene>();
+		private Vector<PossibleGene> genesList = new Vector<PossibleGene>();
 		private Integer size = null;
 
 		public int getSize() {
 			return this.size;
 		}
 
-		public Map<Integer, PossibleGene> getGenes() {
-			return this.genes;
+		public List<PossibleGene> getGenes() {
+			return this.genesList;
 		}
 
 		public void addGene(int lineNumber, PossibleGene gene) {
 			genes.put(lineNumber, gene);
+			genesList.add(lineNumber, gene);
 
 			int possibleNewSize = lineNumber + 1; // lineNumber starts at 0
 			if (size == null || possibleNewSize > size) {

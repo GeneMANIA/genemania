@@ -251,9 +251,10 @@ public class GeneServiceImpl implements GeneService {
 				organismId, geneLines);
 		List<String> invalidGeneNames = new LinkedList<String>();
 		List<String> validGeneNames = new LinkedList<String>();
-
-		for (int line : validationResult.getGenes().keySet()) {
-			PossibleGene pg = validationResult.getGenes().get(line);
+		List<PossibleGene> genes = validationResult.getGenes();
+		
+		for (int line = 0; line < genes.size(); line++) {
+			PossibleGene pg = genes.get(line);
 
 			if (pg.getType() == PossibleGene.Type.VALID) {
 				validGeneNames.add(pg.getName());

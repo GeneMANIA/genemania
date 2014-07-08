@@ -99,10 +99,14 @@ function isLessFile( file ){
 gulp.task('default', ['watch']);
 
 // clean built files
-gulp.task('clean', ['htmlrefs'], function(){
+gulp.task('clean', ['javac-clean', 'htmlrefs'], function(){
   return gulp.src([ './js-build', './js/website-config.js', './css-build' ])
-    .pipe( clean() );
+    .pipe( clean() )
   ;
+});
+
+gulp.task('clean-all', ['javac-clean', 'java-deploy-clean', 'clean'], function( next ){
+  next();
 });
 
 // compile java projects for debugging (incl. dependent projects)
@@ -134,6 +138,20 @@ gulp.task('java-deploy', ['fix-spring-dir-refs'], function(){
 // compile java website and deploy to tomcat
 gulp.task('javac-deploy', function(next){
   return runSequence( 'javac', 'java-deploy', next );
+});
+
+// clean built java files
+gulp.task('javac-clean', function(next){
+  return gulp.src( paths.javaTargetDir, { read: false } )
+    .pipe( clean({ force: true }) )
+  ;
+});
+
+// compile java website and deploy to tomcat
+gulp.task('java-deploy-clean', function(next){
+  return gulp.src( paths.deployJavaDir, { read: false } )
+    .pipe( clean({ force: true }) )
+  ;
 });
 
 // use website config

@@ -7,6 +7,7 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpSession;
 
+import org.genemania.domain.AttributeGroup;
 import org.genemania.domain.Gene;
 import org.genemania.domain.InteractionNetwork;
 import org.genemania.domain.Organism;
@@ -15,6 +16,7 @@ import org.genemania.domain.SearchResults;
 import org.genemania.exception.ApplicationException;
 import org.genemania.exception.DataStoreException;
 import org.genemania.exception.NoUserNetworkException;
+import org.genemania.service.AttributeGroupService;
 import org.genemania.service.AttributeService;
 import org.genemania.service.GeneService;
 import org.genemania.service.NetworkService;
@@ -48,6 +50,9 @@ public class SearchResultsController {
 	@Autowired
 	private AttributeService attributeService;
 
+	@Autowired
+	AttributeGroupService attributeGroupService;
+
 	@RequestMapping(method = RequestMethod.POST, value = "/search_results")
 	@ResponseBody
 	public SearchResults list(
@@ -57,7 +62,7 @@ public class SearchResultsController {
 			@RequestParam(value = "geneThreshold", required = false, defaultValue = "20") Integer geneThreshold,
 			@RequestParam(value = "attrThreshold", required = false, defaultValue = "10") Integer attrThreshold,
 			@RequestParam(value = "networks", required = false) Long[] networkIds,
-			@RequestParam(value = "attrgroups", required = false) Long[] attrGroupIds,
+			@RequestParam(value = "attrGroups", required = false) Long[] attrGroupIds,
 			HttpSession session) {
 
 		// set up search params
@@ -80,7 +85,7 @@ public class SearchResultsController {
 
 		// set genes
 		String[] genesSplit = genesStr.split("\n");
-		for( int i = 0; i < genesSplit.length; i++ ){
+		for (int i = 0; i < genesSplit.length; i++) {
 			genesSplit[i] = genesSplit[i].trim();
 		}
 		List<String> geneLines = Arrays.asList(genesSplit);
@@ -115,12 +120,34 @@ public class SearchResultsController {
 		}
 
 		// set networks
-
 		Collection<InteractionNetwork> networks;
 		try {
-			networks = networkService.getNetworks(organismId, networkIds,
-					sessionId, includeUserNetworks);
+			if (networkIds == null) {
+				networks = networkService.findDefaultNetworksForOrganism(
+						(long) organismId, sessionId, includeUserNetworks);
+			} else {
+				networks = networkService.getNetworks(organismId, networkIds,
+						sessionId, includeUserNetworks);
+			}
+
 			params.setNetworks(networks);
+		} catch (DataStoreException e) {
+			return new SearchResults(e.getMessage(),
+					SearchResultsErrorCode.DATASTORE);
+		}
+
+		// set attrs
+		Collection<AttributeGroup> attrs;
+		try {
+			if (attrGroupIds == null) {
+				attrs = attributeGroupService.findAttributeGroups(organismId,
+						attrGroupIds);
+			} else {
+				attrs = attributeGroupService
+						.findDefaultAttributeGroups(organismId);
+			}
+
+			params.setAttributeGroups(attrs);
 		} catch (DataStoreException e) {
 			return new SearchResults(e.getMessage(),
 					SearchResultsErrorCode.DATASTORE);
@@ -147,6 +174,15 @@ public class SearchResultsController {
 					SearchResultsErrorCode.USER_NETWORK);
 		}
 
+	}
+
+	public AttributeGroupService getAttributeGroupService() {
+		return attributeGroupService;
+	}
+
+	public void setAttributeGroupService(
+			AttributeGroupService attributeGroupService) {
+		this.attributeGroupService = attributeGroupService;
 	}
 
 	public SearchService getSearchService() {

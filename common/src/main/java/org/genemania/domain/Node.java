@@ -26,6 +26,7 @@ import java.util.Collection;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  * Node
@@ -64,6 +65,7 @@ public class Node implements java.io.Serializable {
         this.name = name;
     }
 
+    @JsonIgnore
     public Collection<Gene> getGenes() {
         return this.genes;
     }

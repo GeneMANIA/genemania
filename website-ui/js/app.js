@@ -8,6 +8,12 @@ try {
 
 var app = angular.module('app', ['templates', 'pasvaz.bindonce']);
 
-app.controller('Test', [ '$$networks', function( $$networks ){
+app.controller('Test', 
+[ '$$networks', '$$organisms', '$$attributes', '$$email', '$$features', '$$genes'
+function( $$networks, $$organisms, $$attributes, $$email, $$features, $$genes ){
+
   window.$$networks = $$networks;
+  window.$$organisms = $$organisms;
+  window.$$attributes = $$attributes;
+  window.$$email = $$email;
 } ]);
