@@ -1,14 +1,20 @@
-@queryHeight: 3em;
+@queryHeight: 2.5em;
 @queryItemWidth: @queryHeight * 1.25;
+@queryBg: rgba(220, 220, 220, 0.5);
+@querySeparatorColor: darken(@queryBg, 10%);
+@queryBorderColor: darken(@queryBg, 1%);
+@queryBorderRadius: 0.5em;
+
 
 #query {
 	position: absolute;
 	left: 0;
 	top: 0;
+	margin: 0.25em;
 	z-index: 9999;
-	background: rgba(255, 255, 255, 0.5);
-	border-radius: 0.5em;
-	overflow: hidden;
+	background: @queryBg;
+	border: 1px solid @queryBorderColor;
+	border-radius: @queryBorderRadius;
 	float: left;
 
 }
@@ -25,8 +31,55 @@
 	width: @queryItemWidth;
 	text-align: center;
 	cursor: pointer;
+
+	&:active {
+		background: darken(@queryBg, 50%);
+	}
+}
+
+.query-organism * {
+	font-size: 2em;
 }
 
 .query-genes {
 
+}
+
+.query-genes-textarea {
+	@m: 0.5em;
+	@h: @queryHeight - 2 * @m;
+	@c: #fcfcfc;
+
+	width: 10em;
+	background: @c;
+	border: 1px solid darken(@c, 10%);
+	height: @h;
+	margin: @m;
+
+	transition-property: height;
+	transition-duration: 250ms;
+
+	&:focus {
+		height: 20em;
+	}
+}
+
+.query-action {
+	color: #888;
+}
+
+.query-expander {
+	.query-action;
+
+	border-right: 1px solid @querySeparatorColor;
+	border-top-left-radius: @queryBorderRadius;
+	border-bottom-left-radius: @queryBorderRadius;
+}
+
+.query-submit {
+	.query-action;
+
+	border-left: 1px solid @querySeparatorColor;
+	border-top-right-radius: 1em;
+	border-bottom-right-radius: @queryBorderRadius * 2;
 }

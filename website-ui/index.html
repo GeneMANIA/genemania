@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css-build/reset.css">
   <link rel="stylesheet" href="css-build/lesshat.css">
   <link rel="stylesheet" href="css-build/font-awesome.css">
+  <link rel="stylesheet" href="css-build/model-organism-icons.css">
   <link rel="stylesheet" href="css-build/jquery.qtip.css">
   <link rel="stylesheet" href="css-build/widgets.css">
   <link rel="stylesheet" href="css-build/app.css">
@@ -35,6 +36,9 @@
   <script src="js/lib/pubsub.js"></script>
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/app-attribute.js"></script>
+  <script src="js/app-email.js"></script>
+  <script src="js/app-feature.js"></script>
   <script src="js/app-gene.js"></script>
   <script src="js/app-network.js"></script>
   <script src="js/app-organism.js"></script>
@@ -46,12 +50,12 @@
 <body ng-app="app">
 
   <div id="query">
-    <a class="query-item query-button"><span class="fa fa-chevron-right"></span></a>
-    <a class="query-item query-button">org</a>
+    <a class="query-item query-button query-expander"><span class="fa fa-chevron-right"></span></a>
+    <a class="query-item query-button query-organism"><span class="org-human"></span></a>
     <div class="query-item query-genes">
-      <textarea class="query-item"></textarea>
+      <textarea class="query-genes-textarea" spellcheck="false"></textarea>
     </div>
-    <a class="query-item query-button"><span class="fa fa-search"></span></a>
+    <a class="query-item query-button query-submit"><span class="fa fa-search"></span></a>
   </div>
 
   <div id="cy"></div>
