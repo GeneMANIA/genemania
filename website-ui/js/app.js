@@ -9,8 +9,10 @@ try {
 var app = angular.module('app', ['templates', 'pasvaz.bindonce']);
 
 app.controller('Test', 
-[ '$$networks', '$$organisms', '$$attributes', '$$email', '$$features', '$$genes',
-function( $$networks, $$organisms, $$attributes, $$email, $$features, $$genes ){
+[ '$$networks', '$$organisms', '$$attributes', '$$email', '$$features', '$$genes', 'query',
+function( $$networks, $$organisms, $$attributes, $$email, $$features, $$genes, query ){
+
+  console.log('running test ctrl');
 
   window.$$networks = $$networks;
   window.$$organisms = $$organisms;

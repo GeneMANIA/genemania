@@ -1,0 +1,57 @@
+/*
+  Icon Font: bio-icons
+*/
+
+@font-face {
+  font-family: "bio-icons";
+  src: url("../fonts/bio-icons.eot");
+  src: url("../fonts/bio-icons.eot?#iefix") format("embedded-opentype"),
+       url("../fonts/bio-icons.woff") format("woff"),
+       url("../fonts/bio-icons.ttf") format("truetype"),
+       url("../fonts/bio-icons.svg#bio-icons") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: "bio-icons";
+    src: url("../fonts/bio-icons.svg#bio-icons") format("svg");
+  }
+}
+
+[data-icon]:before { content: attr(data-icon); }
+
+[data-icon]:before,
+.bio-cells:before,
+.bio-fish:before,
+.bio-fly:before,
+.bio-helix:before,
+.bio-human:before,
+.bio-mouse:before,
+.bio-plant:before,
+.bio-rat:before,
+.bio-worm:before {
+  display: inline-block;
+  font-family: "bio-icons";
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  line-height: 1;
+  text-decoration: inherit;
+  text-rendering: optimizeLegibility;
+  text-transform: none;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+}
+
+.bio-cells:before { content: "\f100"; }
+.bio-fish:before { content: "\f101"; }
+.bio-fly:before { content: "\f102"; }
+.bio-helix:before { content: "\f103"; }
+.bio-human:before { content: "\f104"; }
+.bio-mouse:before { content: "\f105"; }
+.bio-plant:before { content: "\f106"; }
+.bio-rat:before { content: "\f107"; }
+.bio-worm:before { content: "\f108"; }

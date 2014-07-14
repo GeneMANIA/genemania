@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="css-build/reset.css">
   <link rel="stylesheet" href="css-build/lesshat.css">
   <link rel="stylesheet" href="css-build/font-awesome.css">
-  <link rel="stylesheet" href="css-build/model-organism-icons.css">
+  <link rel="stylesheet" href="css-build/bio-icons.css">
   <link rel="stylesheet" href="css-build/jquery.qtip.css">
   <link rel="stylesheet" href="css-build/widgets.css">
   <link rel="stylesheet" href="css-build/app.css">
@@ -37,70 +37,72 @@
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
   <script src="js/app-attribute.js"></script>
+  <script src="js/app-bootstrapper.js"></script>
   <script src="js/app-email.js"></script>
   <script src="js/app-feature.js"></script>
   <script src="js/app-gene.js"></script>
   <script src="js/app-network.js"></script>
   <script src="js/app-organism.js"></script>
+  <script src="js/app-query.js"></script>
   <script src="js/app-search.js"></script>
   <script src="js/debug/livereload.js"></script>
   <!-- endinject -->
 
 </head>
-<body ng-app="app">
+<body>
 
-  <div id="query">
+  <div id="query" ng-controller="QueryCtrl">
     <div class="query-item query-button query-expander"><span class="fa fa-chevron-right"></span></div>
-    <div class="query-item query-button query-organism"><span class="org-human"></span></div>
+    <div class="query-item query-button query-organism"><span class="bio-human"></span></div>
     <div class="query-item query-genes">
       <a class="query-genes-example">e.g.</a>
 
       <div class="query-genes-expander">
         <div class="query-genes-validation">
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
-          <div class="query-genes-validation-entry"><span class="fa fa-check"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
         </div>
-        <textarea class="query-genes-textarea" spellcheck="false"></textarea>
+        <textarea class="query-genes-textarea" spellcheck="false" ng-model="query.genesText"></textarea>
       </div>
     </div>
     <div class="query-item query-button query-submit"><span class="fa fa-search"></span></div>

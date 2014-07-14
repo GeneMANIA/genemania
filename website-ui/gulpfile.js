@@ -45,7 +45,7 @@ var paths = {
     './css/reset.css',
     './css/lesshat.less',
     './css/font-awesome.css',
-    './css/model-organism-icons.css',
+    './css/bio-icons.css',
     './css/jquery.qtip.css',
     './css/widgets.less',
     './css/app.less',
