@@ -1,6 +1,26 @@
 
 <div id="stats" class="line">
-	<spring:message code="stats.indexing"/> <fmt:formatNumber type="number" value="${stats.networks}" /> <spring:message code="stats.association_networks_containing"/> <fmt:formatNumber type="number" value="${stats.interactions}" /> <spring:message code="stats.interactions_mapped_to"/> <fmt:formatNumber type="number" value="${stats.genes}" /> <spring:message code="stats.genes_from"/> <fmt:formatNumber type="number" value="${stats.organisms}" /> <spring:message code="stats.organisms"/><spring:message code="stats.period"/>       
+	Indexing 
+	<fmt:formatNumber type="number" value="${stats.networks}" /> 
+	
+	association networks containing
+	<fmt:formatNumber type="number" value="${stats.interactions}" />
+	
+	interactions mapped to
+	<fmt:formatNumber type="number" value="${stats.genes}" />
+	genes
+	
+	<br />and
+	<fmt:formatNumber type="number" value="${stats.attributeGroups}" />  
+	attribute groups
+	
+	containing
+	<fmt:formatNumber type="number" value="${stats.attributes}" /> 
+	attributes
+	
+	from
+	<fmt:formatNumber type="number" value="${stats.organisms}" /> 
+	organisms.       
 </div>
 
 <div id="page_links" class="line">
