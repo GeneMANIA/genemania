@@ -26,82 +26,115 @@ import java.util.Date;
  */
 public class Statistics implements java.io.Serializable {
 
-    private static final long serialVersionUID = -5513373729152923216L;
+	private static final long serialVersionUID = -5513373729152923216L;
 
-    private long              id;
-    private long              organisms;
-    private long              networks;
-    private long              interactions;
-    private long              genes;
-    private long              predictions;
-    private Date              date;
+	private long id;
+	private long organisms;
+	private long networks;
+	private long interactions;
+	private long genes;
+	private long predictions;
+	private Date date;
+	private long attributeGroups = 28; // TODO remove hardcoding when data can be pulled in
+	private long attributes = 49014;
 
-    public Statistics() {
-    }
+	public Statistics() {
+	}
 
-    public Statistics(long organisms, long networks, long interactions, long genes, long predictions, Date date) {
-        this.organisms = organisms;
-        this.networks = networks;
-        this.interactions = interactions;
-        this.genes = genes;
-        this.predictions = predictions;
-        this.date = date;
-    }
+	public Statistics(long organisms, long networks, long interactions,
+			long genes, long predictions, Date date) {
+		this.organisms = organisms;
+		this.networks = networks;
+		this.interactions = interactions;
+		this.genes = genes;
+		this.predictions = predictions;
+		this.date = date;
+	}
 
-    public long getId() {
-        return this.id;
-    }
+	public Statistics(long organisms, long networks, long interactions,
+			long genes, long predictions, Date date, long attributeGroups,
+			long attributes) {
+		super();
+		this.organisms = organisms;
+		this.networks = networks;
+		this.interactions = interactions;
+		this.genes = genes;
+		this.predictions = predictions;
+		this.date = date;
+		this.attributeGroups = attributeGroups;
+		this.attributes = attributes;
+	}
 
-    public void setId(long id) {
-        this.id = id;
-    }
+	public long getId() {
+		return this.id;
+	}
 
-    public long getOrganisms() {
-        return this.organisms;
-    }
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public void setOrganisms(long organisms) {
-        this.organisms = organisms;
-    }
+	public long getOrganisms() {
+		return this.organisms;
+	}
 
-    public long getNetworks() {
-        return this.networks;
-    }
+	public void setOrganisms(long organisms) {
+		this.organisms = organisms;
+	}
 
-    public void setNetworks(long networks) {
-        this.networks = networks;
-    }
+	public long getNetworks() {
+		return this.networks;
+	}
 
-    public long getInteractions() {
-        return this.interactions;
-    }
+	public void setNetworks(long networks) {
+		this.networks = networks;
+	}
 
-    public void setInteractions(long interactions) {
-        this.interactions = interactions;
-    }
+	public long getInteractions() {
+		return this.interactions;
+	}
 
-    public long getGenes() {
-        return this.genes;
-    }
+	public void setInteractions(long interactions) {
+		this.interactions = interactions;
+	}
 
-    public void setGenes(long genes) {
-        this.genes = genes;
-    }
+	public long getGenes() {
+		return this.genes;
+	}
 
-    public long getPredictions() {
-        return this.predictions;
-    }
+	public void setGenes(long genes) {
+		this.genes = genes;
+	}
 
-    public void setPredictions(long predictions) {
-        this.predictions = predictions;
-    }
+	public long getPredictions() {
+		return this.predictions;
+	}
 
-    public Date getDate() {
-        return this.date;
-    }
+	public void setPredictions(long predictions) {
+		this.predictions = predictions;
+	}
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
+	public Date getDate() {
+		return this.date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public long getAttributeGroups() {
+		return attributeGroups;
+	}
+
+	public void setAttributeGroups(long attributeGroups) {
+		this.attributeGroups = attributeGroups;
+	}
+
+	public long getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(long attributes) {
+		this.attributes = attributes;
+	}
 
 }
