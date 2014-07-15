@@ -31,6 +31,7 @@ var paths = {
     './js/lib/*.js',
     './js/config.js',
     './js/website-config.js', // so if website config exists, then it overwrites the local config
+    './js/pubsub.js',
     './js/app.js',
     './js/app-*.js',
     './js/*.js'
@@ -130,7 +131,7 @@ gulp.task('fix-spring-dir-refs', function(){
 });
 
 // deploy built java files to tomcat
-gulp.task('java-deploy', ['fix-spring-dir-refs'], function(){
+gulp.task('java-deploy', ['fix-spring-dir-refs', 'java-deploy-clean'], function(){
   return gulp.src( paths.builtJava )
     .pipe( gulp.dest( paths.deployJavaDir ) )
   ;

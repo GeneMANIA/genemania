@@ -3,7 +3,9 @@ app.factory('$$organisms',
 function( $http ){
 
   var $$organisms = function(){
-    return $http.get( config.service.baseUrl + 'organisms' )
+    return $http.get( config.service.baseUrl + 'organisms', {
+      cache: true
+    } )
       .then(function( res ){
         return res.data;
       })

@@ -1,15 +1,67 @@
-app.factory('query', 
-[ 'bootstrapper', '$$organisms', 
-function( $$organisms ){
+app.factory('Query', 
+[ '$$organisms', '$$networks', '$$attributes', 'util',
+function( $$organisms, $$networks, $$attributes, util ){
+  var copy = util.copy;
 
   console.log('query init');
 
-  var pOrgs = $$organisms();
-  bootstrapper( pOrgs );
+  var organisms;
+  var networkGroups;
+  var attributeGroups;
 
-  var q = function(){
+  // when all resources are pulled in, the query is ready
+  Promise.all([
+    
+    $$organisms().then(function( orgs ){
+      organisms = orgs;
+    }),
 
+    $$networks().then(function( nets ){
+      networkGroups = nets;
+    }),
+
+    $$attributes().then(function( attrs ){
+      attributeGroups = attrs;
+    })
+
+  ]).then(function(){
+    // current query (only one at a time)
+    q.current = new q();
+
+    PubSub.publish('query.ready', q.current);
+  });
+
+  function Query( opts ){
+    // set defaults
+    var self = this;
+
+    self.organisms = copy( organisms );
+    self.organism = _.find( self.organisms, function( o ){
+      return o.taxonomyId === 9606;
+    } ) || self.organisms[0];
+
+    self.networkGroups = copy( networkGroups[ self.organism.id ] );
+
+    self.networks = [];
+    self.networksById = {};
+    for( var i = 0; i < self.networkGroups.length; i++ ){
+      var group = self.networkGroups[i];
+      var nets = group.interactionNetworks;
+
+      if( nets ){ for( var j = 0; j < nets.length; j++ ){
+        var net = nets[j];
+
+        net.selected = net.defaultSelected;
+        net.expanded = false;
+
+        self.networks.push( net );
+        self.networksById[ net.id ] = net;
+      } }
+    }
+
+    self.attributeGroups = copy( attributeGroups[ self.organism.id ] );
   };
+  var q = Query;
 
   // flat list of weighting types
   var wg = q.weightings = [
@@ -38,14 +90,6 @@ function( $$organisms ){
 
   var qfn = q.prototype;
 
-  // current query (only one at a time)
-  q.current = new q();
-
-  // get a new query that contains the defaults
-  q.defaults = function( opts ){
-
-  };
-
   // get the next query in the history
   qfn.next = function(){};
 
@@ -59,16 +103,43 @@ function( $$organisms ){
   qfn.removeAllGenes = function(){};
 
   // weighting
-  qfn.setWeighting = function(){};
+  qfn.setWeighting = function( w ){
+    this.weighting = w;
+  };
 
-  // networks
-  qfn.enableNetwork = function(){};
-  qfn.disableNetwork = function(){};
-  qfn.setNetworks = function(){};
+  qfn.enableNetwork = function( id ){
+    var net = this.networksById[ id ];
+    net.enabled = true;
 
-  // results size
-  qfn.setMaxGenes = function(){};
-  qfn.setMaxAttrs = function(){};
+    PubSub.publish( 'query.enable_network', net );
+    PubSub.publish( 'query.toggle_network', net );
+  };
+
+  qfn.disableNetwork = function( id ){
+    this.networksById[ id ].enabled = false;
+
+    PubSub.publish( 'query.disable_network', net );
+    PubSub.publish( 'query.toggle_network', net );
+  };
+
+  // for an array of network objects { id, enabled }, set enabled
+  qfn.setNetworks = function( nets ){
+    for( var i = 0; i < nets.length; i++ ){
+      var net = nets[i];
+
+      net.enabled ? this.enableNetwork( net ) : this.disableNetwork( net );
+    }
+  };
+
+  // results genes size
+  qfn.setMaxGenes = function( max ){
+    this.maxGenes = max;
+  };
+
+  // results attrs size
+  qfn.setMaxAttrs = function( max ){
+    this.maxAttrs = max;
+  };
 
   // search using this query, thereby superseding the previous query (i.e. this is current)
   qfn.search = function(){};
@@ -79,9 +150,17 @@ function( $$organisms ){
 
 
 app.controller('QueryCtrl',
-[ '$scope', 'query',
-function( $scope, query ){
+[ '$scope', 'Query',
+function( $scope, Query ){
 
-  $scope.foo = 'bar';
+  // initialise once whole app is ready
+  function init(){
+    window.query = $scope.query = Query.current;
+
+    $scope.$apply();
+  }
+
+  PubSub.subscribe('ready', init);
+  PubSub.subscribe('query.search_result', init);
 
 } ]);
