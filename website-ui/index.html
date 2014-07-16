@@ -36,12 +36,12 @@
   <script src="js/lib/pubsub.js"></script>
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
-  <script src="js/app-attribute.js"></script>
+  <script src="js/app-attributes.js"></script>
   <script src="js/app-email.js"></script>
-  <script src="js/app-feature.js"></script>
-  <script src="js/app-gene.js"></script>
-  <script src="js/app-network.js"></script>
-  <script src="js/app-organism.js"></script>
+  <script src="js/app-features.js"></script>
+  <script src="js/app-genes.js"></script>
+  <script src="js/app-networks.js"></script>
+  <script src="js/app-organisms.js"></script>
   <script src="js/app-query.js"></script>
   <script src="js/app-search.js"></script>
   <script src="js/app-util.js"></script>
@@ -57,7 +57,7 @@
     <div class="query-item query-genes">
       <a class="query-genes-example">e.g.</a>
 
-      <div class="query-genes-expander">
+      <div class="query-genes-expander" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
         <div class="query-genes-validation">
           <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
           <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
@@ -102,7 +102,7 @@
           <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
           <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
         </div>
-        <textarea class="query-genes-textarea" spellcheck="false" ng-model="query.genesText"></textarea>
+        <textarea class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()"></textarea>
       </div>
     </div>
     <div class="query-item query-button query-submit"><span class="fa fa-search"></span></div>

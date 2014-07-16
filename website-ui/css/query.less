@@ -68,9 +68,16 @@
 	left: -@bw; // offset border
 	top: 0;
 	width: @qGenesW;
-	height: @qGenesExpH;
+	height: @qGenesH;
 	overflow: hidden;
 	overflow-y: scroll;
+
+	transition-property: height;
+	transition-duration: 150ms;
+}
+
+.query-genes-expander-expanded {
+	height: @qGenesExpH;
 }
 
 .query-genes-validation {

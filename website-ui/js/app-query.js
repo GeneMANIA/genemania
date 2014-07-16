@@ -1,6 +1,6 @@
 app.factory('Query', 
-[ '$$organisms', '$$networks', '$$attributes', 'util',
-function( $$organisms, $$networks, $$attributes, util ){
+[ '$$organisms', '$$networks', '$$attributes', 'util', '$$genes',
+function( $$organisms, $$networks, $$attributes, util, $$genes ){
   var copy = util.copy;
 
   console.log('query init');
@@ -101,6 +101,36 @@ function( $$organisms, $$networks, $$attributes, util ){
   qfn.removeGenes = function(){};
   qfn.setGenes = function(){};
   qfn.removeAllGenes = function(){};
+
+  qfn.setGenesFromText = _.debounce( function(){
+    var txt = this.genesText;
+
+    if( txt && !txt.match(/^\s+$/) ){
+      $$genes.validate({
+        organism: this.organism.id,
+        genes: txt
+      })
+        .then(function( t ){
+          console.log( 'val', t );
+        })
+      ;
+    }
+  }, config.query.genesValidationDelay, {
+    leading: false,
+    trailing: true
+  });
+
+  qfn.expandGenes = function(){
+    this.genesExpanded = true;
+
+    PubSub.publish('query.expand_genes', this);
+  };
+
+  qfn.collapseGenes = function(){
+    this.genesExpanded = false;
+
+    PubSub.publish('query.collapse_genes', this);
+  };
 
   // weighting
   qfn.setWeighting = function( w ){
