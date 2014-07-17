@@ -10,6 +10,11 @@
     <version>3.4.0-SNAPSHOT</version>
     <name>GeneMANIA Parent</name>
 
+	<properties>
+		<spring.version>4.0.6.RELEASE</spring.version>
+		<jackson.version>1.9.13</jackson.version>
+	</properties>
+
     <modules>
         <module>common</module>
         <module>engine</module>

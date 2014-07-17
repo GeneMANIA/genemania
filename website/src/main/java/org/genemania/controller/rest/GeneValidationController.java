@@ -19,13 +19,16 @@
 
 package org.genemania.controller.rest;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
+import org.genemania.exception.ApplicationException;
 import org.genemania.exception.DataStoreException;
 import org.genemania.service.GeneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,8 +47,7 @@ public class GeneValidationController {
 		return geneService;
 	}
 
-	public void setGeneService(
-			GeneService geneValidationService) {
+	public void setGeneService(GeneService geneValidationService) {
 		this.geneService = geneValidationService;
 	}
 
@@ -53,6 +55,44 @@ public class GeneValidationController {
 
 	// ========[ PUBLIC METHODS
 	// ]===================================================================
+
+	public static class ValidationRequest {
+		private Integer organism;
+		private String genes;
+
+		public ValidationRequest() {
+			super();
+		}
+
+		public Integer getOrganism() {
+			return organism;
+		}
+
+		public void setOrganism(Integer organism) {
+			this.organism = organism;
+		}
+
+		public String getGenes() {
+			return genes;
+		}
+
+		public void setGenes(String genes) {
+			this.genes = genes;
+		}
+
+		public boolean assertParamsSet() throws ApplicationException {
+			if (this.genes == null) {
+				throw new ApplicationException("`genes` not set");
+			}
+
+			if (this.organism == null) {
+				throw new ApplicationException("`organism` not set");
+			}
+
+			return true;
+		}
+
+	}
 
 	/**
 	 * Validates a list of genes separated by newlines
@@ -63,16 +103,27 @@ public class GeneValidationController {
 	 *            the newline separated list of genes in a string
 	 * @param session
 	 *            the session
+	 * @throws Exception
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/gene_validation")
 	@ResponseBody
 	public GeneService.ValidationResult list(
-			@RequestParam("organism") Integer organismId,
-			@RequestParam("genes") String geneLines, HttpSession session)
-			throws DataStoreException {
+			@RequestBody(required = false) ValidationRequest vReq,
+			HttpSession session, HttpServletRequest req)
+			throws ApplicationException {
 		logger.debug("Return validation list...");
 
-		return geneService.validateGeneLines(organismId, geneLines);
+		if (vReq == null) { // no automatic parsing of json params
+			vReq = new ValidationRequest();
+			vReq.setGenes(req.getParameter("genes"));
+			vReq.setOrganism(Integer.parseInt(req.getParameter("organism")));
+		}
+
+		vReq.assertParamsSet();
+
+		return geneService.validateGeneLines(vReq.getOrganism(),
+				vReq.getGenes());
+
 	}
 
 	// show (GET), list (GET), create (POST), update (POST), delete (DELETE ?)

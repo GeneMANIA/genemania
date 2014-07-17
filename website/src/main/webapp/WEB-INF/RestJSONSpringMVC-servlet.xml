@@ -10,7 +10,8 @@
         http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
         http://www.springframework.org/schema/oxm
-  		http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd">
+  		http://www.springframework.org/schema/oxm/spring-oxm-4.0.xsd
+  		">
 	
     <!-- Enable annotation scanning. -->
     <context:component-scan base-package="org.genemania.controller.rest" />
