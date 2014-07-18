@@ -33,6 +33,10 @@
         </property>
     </bean>
 
+	<bean id="httpConverter"
+        class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+    </bean>
+
 	<!-- i18n -->
 
 	<bean id="localeResolver"

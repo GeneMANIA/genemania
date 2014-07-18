@@ -26,7 +26,12 @@ import org.apache.log4j.Logger;
 import org.genemania.exception.ApplicationException;
 import org.genemania.exception.DataStoreException;
 import org.genemania.service.GeneService;
+import org.genemania.service.OrganismService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,12 +48,35 @@ public class GeneValidationController {
 	@Autowired
 	private GeneService geneService;
 
+	@Autowired
+	private OrganismService organismService;
+
+	@Autowired
+	private MappingJacksonHttpMessageConverter httpConverter;
+
+	public MappingJacksonHttpMessageConverter getHttpConverter() {
+		return httpConverter;
+	}
+
+	public void setHttpConverter(
+			MappingJacksonHttpMessageConverter httpConverter) {
+		this.httpConverter = httpConverter;
+	}
+
 	public GeneService getGeneService() {
 		return geneService;
 	}
 
 	public void setGeneService(GeneService geneValidationService) {
 		this.geneService = geneValidationService;
+	}
+
+	public OrganismService getOrganismService() {
+		return organismService;
+	}
+
+	public void setOrganismService(OrganismService organismService) {
+		this.organismService = organismService;
 	}
 
 	protected final Logger logger = Logger.getLogger(getClass());
@@ -107,13 +135,20 @@ public class GeneValidationController {
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/gene_validation")
 	@ResponseBody
-	public GeneService.ValidationResult list(
-			@RequestBody(required = false) ValidationRequest vReq,
-			HttpSession session, HttpServletRequest req)
-			throws ApplicationException {
+	public GeneService.ValidationResult list(HttpSession session,
+			HttpServletRequest req) throws ApplicationException {
 		logger.debug("Return validation list...");
 
-		if (vReq == null) { // no automatic parsing of json params
+		ValidationRequest vReq = null;
+
+		try {
+			vReq = httpConverter.getObjectMapper().readValue(
+					req.getInputStream(), ValidationRequest.class);
+		} catch (Exception e) {
+
+		}
+
+		if (vReq == null) {
 			vReq = new ValidationRequest();
 			vReq.setGenes(req.getParameter("genes"));
 			vReq.setOrganism(Integer.parseInt(req.getParameter("organism")));
@@ -125,6 +160,5 @@ public class GeneValidationController {
 				vReq.getGenes());
 
 	}
-
 	// show (GET), list (GET), create (POST), update (POST), delete (DELETE ?)
 }

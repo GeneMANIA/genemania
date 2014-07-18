@@ -168,8 +168,13 @@ gulp.task('website', function( next ){
   return runSequence( 'website-config', 'minify', next );
 });
 
-// build minified ui 
+// build minified ui
 gulp.task('minify', ['htmlminrefs'], function(next){
+  next();
+});
+
+// alt name for minify
+gulp.task('build', ['minify'], function(next){
   next();
 });
 

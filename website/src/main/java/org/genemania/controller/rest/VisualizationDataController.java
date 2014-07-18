@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+// NOTE: used on old website to generate cytoscape web data
 @Controller
 public class VisualizationDataController {
 

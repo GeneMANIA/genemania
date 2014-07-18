@@ -11,8 +11,8 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
 ### General
 
 **Requirements:**
- 1. JDK
- 1. Maven
+ 1. JDK (v1.7; other vesions may work)
+ 1. Maven (v3.2+)
 
 **Projects:**
  1. `common` : common APIs used amongst the projects
@@ -40,7 +40,7 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
 **Targets:** `gulp <target1> <target2> ...`
  * `clean` : clean built java & ui files (resets ui to default unminified state)
  * `clean-all` : clean everything (including java)
- * `minify` : build the minified ui
+ * `minify`/`build` : build the minified ui
  * `watch` (default) : autocompilation & livereload for dev
  * Building java website
   * `javac` : build java website
@@ -53,10 +53,39 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
 
 ## Deployment instructions
 
-### Deploying a local copy of the website
+The GeneMANIA website has several components, including data, workers, the webservices server, and the frontend webapp.
 
-1. TODO
-1. TODO
+**Requirements:**
+ 1. JDK (v1.7; other vesions may work)
+ 1. Maven (v3.2+)
+ 1. Tomcat (v8; other versions may work)
+
+**Deploying the data:**
+ 1. TODO
+
+**Deploying the workers:**
+ 1. TODO
+
+**Deploying the webservices:**
+ 1. Create a `prod.properties` file : TODO link to example properties file
+ 1. Set the `PRIVATE_REPO` environment variable to point to the directory where you're storing `prod.properties`: `export PRIVATE_REPO=/some/dir`
+ 1. Build the website: `mvn package -pl website -am -P prod`
+ 1. Deploy the produced `.war` file to Tomcat
+
+**Deploying the frontend webapp:**
+ 1. TODO configure to point towards the webservices
+ 1. Install npm packages needed to build with gulp: `npm install`
+ 1. Build the webapp: `gulp build`
+ 1. Deploy the entire `website-ui` directory to a HTTP server of your choice, like Apache httpd
+
+
+
+## Debugging tools
+
+* [Eclipse](https://www.eclipse.org) works fairly well as an IDE for this project
+ * Configure Eclipse to use the JDK you want for building or else it will use the old system default
+ * [m2e](https://www.eclipse.org/m2e/) for maven; reports some errors but works OK despite that
+ * [Sysdeo Tomcat plugin] for debugging the webservices website; can be used on Tomcat 8 even though it's not listed on their site
 
 
 ## Funding

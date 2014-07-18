@@ -21,6 +21,7 @@ import org.genemania.service.AttributeGroupService;
 import org.genemania.service.VisualizationDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+//NOTE: used on old website to generate cytoscape web data
 public class VisualizationDataServiceImpl implements VisualizationDataService {
 
 	@Override
