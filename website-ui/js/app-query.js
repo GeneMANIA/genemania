@@ -3,8 +3,6 @@ app.factory('Query',
 function( $$organisms, $$networks, $$attributes, util, $$genes ){
   var copy = util.copy;
 
-  console.log('query init');
-
   var organisms;
   var networkGroups;
   var attributeGroups;
@@ -96,29 +94,76 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
   // get the previous query in the history
   qfn.prev = function(){};
 
+  // make this query the current/active one
+  qfn.activate = function(){};
+
   // genes
   qfn.addGenes = function(){};
   qfn.removeGenes = function(){};
   qfn.setGenes = function(){};
   qfn.removeAllGenes = function(){};
 
+  // ui sets genes from text box => validate
   qfn.setGenesFromText = _.debounce( function(){
-    var txt = this.genesText;
+    this.validateGenes();
 
-    if( txt && !txt.match(/^\s+$/) ){
-      $$genes.validate({
-        organism: this.organism.id,
-        genes: txt
-      })
-        .then(function( t ){
-          console.log( 'val', t );
-        })
-      ;
-    }
   }, config.query.genesValidationDelay, {
     leading: false,
     trailing: true
   });
+
+  var $textarea;
+  var $genesVal;
+  $(function(){
+    $textarea = $('#query-genes-textarea');
+    $genesVal = $('#query-genes-validation');
+
+    $textarea.autosize({
+      callback: function(){
+        $genesVal[0].style.height = $textarea[0].style.height;
+      }
+    });
+  });
+
+  // validate genes directly
+  qfn.validateGenes = function(){
+    var self = this;
+    var txt = this.genesText;
+    var p;
+    var prev = self.prevValidateGenes;
+
+    self.validatingGenes = true;
+    PubSub.publish('query.validate_genes_start', self);
+
+    if( prev ){
+      prev.cancel('Cancelling stale gene validation query');
+    }
+
+    if( txt && !txt.match(/^\s+$/) ){
+      p = $$genes.validate({
+        organism: this.organism.id,
+        genes: txt
+      })
+        .cancellable()
+
+        .then(function( t ){
+          self.validatingGenes = false;
+          self.geneValidations = t.genes;
+
+          PubSub.publish('query.validate_genes', self);
+        })
+      ;
+    } else {
+      p = Promise.resolve().cancellable().then(function(){
+        self.validatingGenes = false;
+        self.geneValidations = [];
+        
+        PubSub.publish('query.validate_genes', self);
+      });
+    }
+
+    return self.prevValidateGenes = p;
+  };
 
   qfn.expandGenes = function(){
     this.genesExpanded = true;
@@ -180,17 +225,25 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
 
 
 app.controller('QueryCtrl',
-[ '$scope', 'Query',
-function( $scope, Query ){
+[ '$scope', 'Query', '$timeout',
+function( $scope, Query, $timeout ){
+
+  function updateScope(){
+    $timeout(function(){});
+  }
 
   // initialise once whole app is ready
   function init(){
     window.query = $scope.query = Query.current;
 
-    $scope.$apply();
+    updateScope();
   }
 
   PubSub.subscribe('ready', init);
   PubSub.subscribe('query.search_result', init);
+
+  PubSub.subscribe('query.validate_genes', updateScope);
+  PubSub.subscribe('query.validate_genes_start', updateScope);
+
 
 } ]);

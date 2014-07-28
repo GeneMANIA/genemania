@@ -48,6 +48,7 @@ var paths = {
     './css/font-awesome.css',
     './css/bio-icons.css',
     './css/jquery.qtip.css',
+    './css/ng-animations.less',
     './css/widgets.less',
     './css/app.less',
     './css/cytoscape.less',

@@ -1,3 +1,5 @@
+@import 'constants.less';
+
 // container
 @qH: 2.5em;
 @qItemW: @qH * 1.25;
@@ -11,9 +13,10 @@
 @qGenesMargin: 0.25em;
 @qGenesH: @qH - 2 * @qGenesMargin;
 @qGenesExpH: 10em;
-@qGenesValW: 1.25em;
-@qGenesLineHeight: 1.25;
+@qGenesValW: 1.333em;
+@qGenesLineHeight: 1.25em;
 @qGenesPaddingLeft: 3em;
+@qGenesAniDelay: 0.25s;
 
 
 #query {
@@ -80,16 +83,50 @@
 	height: @qGenesExpH;
 }
 
+.query-genes-expander-expanded .query-genes-validation,
+.query-genes-expander-expanded .query-genes-textarea {
+	min-height: @qGenesExpH;
+}
+
+.query-genes-expander-instr {
+	position: absolute;
+	left: -1px;
+	right: -1px;
+	top: @qGenesExpH;
+	z-index: 999;
+	color: #fff;
+	background: rgba(0, 0, 0, 0.5);
+	border-radius: 0.25em;
+	text-align: center;
+	height: 1.5em;
+	line-height: 1.5em;
+}
+
+.query-genes-expander-instr-text {
+	font-size: 0.8em;
+}
+
 .query-genes-validation {
 	position: absolute;
 	left: 0;
 	top: 0;
+	height: @qGenesExpH;
 	width: @qGenesValW;
-	height: 3*@qGenesExpH;
 	line-height: @qGenesLineHeight;
 	text-align: center;
 
-	background: rgba(0, 0, 255, 0.5);
+	// background: rgba(0, 0, 255, 0.5);
+	// background: #888;
+	// color: #fff;
+	background: #f0f0f0;
+
+	transition-property: opacity;
+	transition-duration: 0.25s;
+	transition-delay: @qGenesAniDelay;
+}
+
+.query-genes-validation-loading {
+	opacity: 0.333;
 }
 
 .query-genes-validation-entry * {
@@ -97,25 +134,61 @@
 }
 
 .query-genes-textarea {
+	@padding: 0.125em;
+
 	position: absolute;
 	left: @qGenesValW;
 	top: 0;
-	width: @qGenesW - @qGenesValW;
-	height: 2*@qGenesExpH;
+	padding-left: @padding;
+	width: @qGenesW - @qGenesValW - @padding;
+	height: @qGenesExpH;
 	overflow: hidden;
 	line-height: @qGenesLineHeight;
 	white-space: nowrap;
 
-	background: rgba(255, 0, 0, 0.5);
+	// background: rgba(255, 0, 0, 0.5);
+	background: #fff;
 }
 
 .query-genes-example {
 	position: absolute;
 	right: 0;
-	top: 50%;
-	margin-top: -0.666em;
+	top: 0;
+	margin-right: 0.25em;
+	height: @qGenesH;
+	line-height: @qGenesH;
+	z-index: 999;
+
+	transition-delay: @qGenesAniDelay;
+}
+
+.query-genes-loader {
+	opacity: 0.5;
+	position: absolute;
+	right: 0;
+	top: 0;
+	height: @qGenesH;
+	line-height: @qGenesH;
 	margin-right: 0.25em;
 	z-index: 999;
+
+	transition-delay: @qGenesAniDelay;
+}
+
+.query-genes-empty-text {
+	position: absolute;
+	left: @qGenesValW;
+	margin-left: 0.125em;
+	top: 0;
+	height: @qGenesH;
+	line-height: @qGenesH;
+	z-index: 999;
+	color: #888;
+	pointer-events: none;
+}
+
+.query-gene-empty-icon {
+	visibility: hidden;
 }
 
 .query-action {
@@ -133,7 +206,13 @@
 .query-submit {
 	.query-action;
 
+	margin: -1px;
+	margin-left: 1px;
+	border: 1px solid @BUTTON_COLOR;
 	border-left: 1px solid @qSepColor;
 	border-top-right-radius: @qBorderRadius;
 	border-bottom-right-radius: @qBorderRadius;
+
+	background: @BUTTON_COLOR;
+	color: #fff;
 }

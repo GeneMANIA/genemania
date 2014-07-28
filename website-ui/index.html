@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="css-build/font-awesome.css">
   <link rel="stylesheet" href="css-build/bio-icons.css">
   <link rel="stylesheet" href="css-build/jquery.qtip.css">
+  <link rel="stylesheet" href="css-build/ng-animations.css">
   <link rel="stylesheet" href="css-build/widgets.css">
   <link rel="stylesheet" href="css-build/app.css">
   <link rel="stylesheet" href="css-build/cytoscape.css">
@@ -27,10 +28,12 @@
   <script src="js/lib/jquery-2.1.1.js"></script>
   <script src="js/lib/fastclick.js"></script>
   <script src="js/lib/angular.js"></script>
+  <script src="js/lib/angular-animate.js"></script>
   <script src="js/lib/arbor.js"></script>
   <script src="js/lib/bindonce.js"></script>
   <script src="js/lib/bluebird.js"></script>
   <script src="js/lib/cytoscape.js"></script>
+  <script src="js/lib/jquery.autosize.js"></script>
   <script src="js/lib/jquery.qtip.js"></script>
   <script src="js/lib/lodash.js"></script>
   <script src="js/lib/pubsub.js"></script>
@@ -55,55 +58,25 @@
     <div class="query-item query-button query-expander"><span class="fa fa-chevron-right"></span></div>
     <div class="query-item query-button query-organism"><span class="bio-human"></span></div>
     <div class="query-item query-genes">
-      <a class="query-genes-example">e.g.</a>
+      <a class="query-genes-example animate-fade" ng-show="!query.validatingGenes">e.g.</a>
+      <span class="query-genes-loader animate-fade fa fa-refresh fa-spin" ng-show="query.validatingGenes"></span>
 
       <div class="query-genes-expander" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
-        <div class="query-genes-validation">
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
-          <div class="query-genes-validation-entry"><span class="bio-helix"></span></div>
+        <div id="query-genes-validation" class="query-genes-validation" style="height: {{query.genesHeight}}px" ng-class="{ 'query-genes-validation-loading': query.validatingGenes }">
+          <div class="query-genes-validation-entry" ng-repeat="vEntry in query.geneValidations">
+            <span class="bio-helix query-gene-valid-icon" ng-if="vEntry.type === 'VALID'"></span>
+            <span class="fa fa-question query-gene-invalid-icon" ng-if="vEntry.type === 'INVALID'"></span>
+            <span class="fa fa-minus query-gene-empty-icon" ng-if="vEntry.type === 'EMPTY'"></span>
+            <span class="fa fa-tag query-gene-tag-icon" ng-if="vEntry.type === 'TAG'"></span>
+            <span class="bio-helix query-gene-duplicate-icon" ng-if="vEntry.type === 'DUPLICATE'"></span>
+          </div>
         </div>
-        <textarea class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()"></textarea>
+        <textarea id="query-genes-textarea" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" style="height: {{query.genesHeight}}px"></textarea>
       </div>
+      <div class="query-genes-expander-instr animate-fade" ng-show="query.genesExpanded">
+        <span class="query-genes-expander-instr-text"><span class="fa fa-question-circle"></span> Enter one gene per line</span>
+      </div>
+
     </div>
     <div class="query-item query-button query-submit"><span class="fa fa-search"></span></div>
   </div>
