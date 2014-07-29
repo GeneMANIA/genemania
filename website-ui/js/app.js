@@ -33,8 +33,8 @@ var app = angular.module('app', ['templates', 'pasvaz.bindonce', 'ngAnimate']);
 })();
 
 app.controller('Test', 
-[ '$$networks', '$$organisms', '$$attributes', '$$email', '$$features', '$$genes', 'Query',
-function( $$networks, $$organisms, $$attributes, $$email, $$features, $$genes, Query ){
+[ '$$networks', '$$organisms', '$$attributes', '$$email', '$$features', '$$genes', 'Query', '$scope',
+function( $$networks, $$organisms, $$attributes, $$email, $$features, $$genes, Query, $scope ){
 
   console.log('running test ctrl');
 
@@ -44,4 +44,10 @@ function( $$networks, $$organisms, $$attributes, $$email, $$features, $$genes, Q
   window.$$email = $$email;
   window.$$features = $$features;
   window.$$genes = $$genes;
+
+  $scope.foo = 'init';
+
+  $scope.bar = function(){
+    $scope.foo = 'bar';
+  };
 } ]);

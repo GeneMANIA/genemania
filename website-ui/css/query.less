@@ -1,4 +1,5 @@
 @import 'constants.less';
+@import 'lesshat.less';
 
 // container
 @qH: 2.5em;
@@ -7,6 +8,9 @@
 @qSepColor: darken(@qBg, 10%);
 @qBorderColor: darken(@qBg, 1%);
 @qBorderRadius: 0.5em;
+
+// organism
+@qOrgP: 0.5em;
 
 // genes
 @qGenesW: 10em;
@@ -17,6 +21,10 @@
 @qGenesLineHeight: 1.25em;
 @qGenesPaddingLeft: 3em;
 @qGenesAniDelay: 0.25s;
+
+// expander
+@qExpAniDur: 0.15s;
+@qExpW: 3*@qItemW + @qGenesW + 2*@qGenesMargin + 0.25em;
 
 
 #query {
@@ -29,14 +37,50 @@
 	border: 1px solid @qBorderColor;
 	border-radius: @qBorderRadius;
 	float: left;
+	border-bottom: 2px solid darken(@qBorderColor, 30%);
+	border-left-color: darken(@qBorderColor, 15%);
+	border-right-color: darken(@qBorderColor, 15%);
+}
 
+.query-expander {
+	.query-action;
+
+	border-top-left-radius: @qBorderRadius;
+	border-bottom-left-radius: @qBorderRadius;
+}
+
+.query-expander-icon {
+	.transition-property( transform );
+	.transition-duration( @qExpAniDur );
+}
+
+.query-expanded-false .query-expander-icon {
+	.transform( rotate(90deg) );
+}
+
+.query-expander-content {
+	border-left: 1px solid @qSepColor;
+
+	.transition-property( width, opacity, transform, margin-left );
+	.transition-duration( @qExpAniDur );
+
+	//width: @qExpW;
+	margin-left: 0;
+}
+
+.query-expanded-false .query-expander-content {
+	@offset: @qExpW + @qItemW;
+	//.transform(translate3d(-@offset, 0, 0));
+	opacity: 0;
+	//width: 0;
+
+	margin-left: -@offset;
 }
 
 .query-item {
-	display: inline-block;
+	display: block;
 	height: @qH;
 	float: left;
-	
 }
 
 .query-button {
@@ -50,8 +94,47 @@
 	}
 }
 
-.query-organism * {
+.query-organism-icon {
+	font-size: 1.75em;
+}
+
+.query-organism-select {
+	width: @qItemW * 4 + @qGenesW + @qGenesValW - @qOrgP;
+}
+
+.query-organism-select-item {
+	cursor: pointer;
+	height: 2em;
+	position: relative;
+	float: left;
+	width: 100%;
+	border-radius: 0.25em;
+}
+
+.query-organism-select-item:not(:first-child) {
+	border-top: 1px solid #f0f0f0;
+}
+
+.query-organism-select-radio {
+	padding-left: @qOrgP;
+}
+
+.query-organism-select-radio,
+.query-organism-select-name {
+	display: block;
+	line-height: 2em;
+	height: 2em;
+	float: left;
+}
+
+.query-organism-select-icon {
 	font-size: 2em;
+	display: inline-block;
+	height: 100%;
+	line-height: 1em;
+	width: 1.25em;
+	text-align: center;
+	float: left;
 }
 
 .query-genes {
@@ -75,8 +158,8 @@
 	overflow: hidden;
 	overflow-y: scroll;
 
-	transition-property: height;
-	transition-duration: 150ms;
+	.transition-property( height );
+	.transition-duration( @qExpAniDur );
 }
 
 .query-genes-expander-expanded {
@@ -90,20 +173,7 @@
 
 .query-genes-expander-instr {
 	position: absolute;
-	left: -1px;
-	right: -1px;
-	top: @qGenesExpH;
-	z-index: 999;
-	color: #fff;
-	background: rgba(0, 0, 0, 0.5);
-	border-radius: 0.25em;
-	text-align: center;
-	height: 1.5em;
-	line-height: 1.5em;
-}
-
-.query-genes-expander-instr-text {
-	font-size: 0.8em;
+	top: @qGenesExpH - 0.25em;
 }
 
 .query-genes-validation {
@@ -120,9 +190,9 @@
 	// color: #fff;
 	background: #f0f0f0;
 
-	transition-property: opacity;
-	transition-duration: 0.25s;
-	transition-delay: @qGenesAniDelay;
+	.transition-property( opacity );
+	.transition-duration( 0.25s );
+	.transition-delay( @qGenesAniDelay );
 }
 
 .query-genes-validation-loading {
@@ -159,7 +229,7 @@
 	line-height: @qGenesH;
 	z-index: 999;
 
-	transition-delay: @qGenesAniDelay;
+	.transition-delay( @qGenesAniDelay );
 }
 
 .query-genes-loader {
@@ -172,7 +242,7 @@
 	margin-right: 0.25em;
 	z-index: 999;
 
-	transition-delay: @qGenesAniDelay;
+	.transition-delay( @qGenesAniDelay );
 }
 
 .query-genes-empty-text {
@@ -193,14 +263,6 @@
 
 .query-action {
 	color: #888;
-}
-
-.query-expander {
-	.query-action;
-
-	border-right: 1px solid @qSepColor;
-	border-top-left-radius: @qBorderRadius;
-	border-bottom-left-radius: @qBorderRadius;
 }
 
 .query-submit {

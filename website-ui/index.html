@@ -16,7 +16,9 @@
   <link rel="stylesheet" href="css-build/font-awesome.css">
   <link rel="stylesheet" href="css-build/bio-icons.css">
   <link rel="stylesheet" href="css-build/jquery.qtip.css">
+  <link rel="stylesheet" href="css-build/qtip-config.css">
   <link rel="stylesheet" href="css-build/ng-animations.css">
+  <link rel="stylesheet" href="css-build/popover.css">
   <link rel="stylesheet" href="css-build/widgets.css">
   <link rel="stylesheet" href="css-build/app.css">
   <link rel="stylesheet" href="css-build/cytoscape.css">
@@ -35,6 +37,7 @@
   <script src="js/lib/cytoscape.js"></script>
   <script src="js/lib/jquery.autosize.js"></script>
   <script src="js/lib/jquery.qtip.js"></script>
+  <script src="js/lib/jquery.velocity.js"></script>
   <script src="js/lib/lodash.js"></script>
   <script src="js/lib/pubsub.js"></script>
   <script src="js/config.js"></script>
@@ -45,45 +48,74 @@
   <script src="js/app-genes.js"></script>
   <script src="js/app-networks.js"></script>
   <script src="js/app-organisms.js"></script>
+  <script src="js/app-popover.js"></script>
+  <script src="js/app-qtip.js"></script>
   <script src="js/app-query.js"></script>
   <script src="js/app-search.js"></script>
+  <script src="js/app-tap.js"></script>
   <script src="js/app-util.js"></script>
   <script src="js/debug/livereload.js"></script>
   <!-- endinject -->
 
 </head>
-<body ng-app="app">
+<body ng-app="app" ontouchstart="/* force mobile to use :active state */">
 
-  <div id="query" ng-controller="QueryCtrl">
-    <div class="query-item query-button query-expander"><span class="fa fa-chevron-right"></span></div>
-    <div class="query-item query-button query-organism"><span class="bio-human"></span></div>
-    <div class="query-item query-genes">
-      <a class="query-genes-example animate-fade" ng-show="!query.validatingGenes">e.g.</a>
-      <span class="query-genes-loader animate-fade fa fa-refresh fa-spin" ng-show="query.validatingGenes"></span>
-
-      <div class="query-genes-expander" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
-        <div id="query-genes-validation" class="query-genes-validation" style="height: {{query.genesHeight}}px" ng-class="{ 'query-genes-validation-loading': query.validatingGenes }">
-          <div class="query-genes-validation-entry" ng-repeat="vEntry in query.geneValidations">
-            <span class="bio-helix query-gene-valid-icon" ng-if="vEntry.type === 'VALID'"></span>
-            <span class="fa fa-question query-gene-invalid-icon" ng-if="vEntry.type === 'INVALID'"></span>
-            <span class="fa fa-minus query-gene-empty-icon" ng-if="vEntry.type === 'EMPTY'"></span>
-            <span class="fa fa-tag query-gene-tag-icon" ng-if="vEntry.type === 'TAG'"></span>
-            <span class="bio-helix query-gene-duplicate-icon" ng-if="vEntry.type === 'DUPLICATE'"></span>
-          </div>
+  <div id="query" ng-controller="QueryCtrl" class="query-expanded-{{query.expanded}}">
+    <div class="query-item query-button query-expander" on-tap="query.toggleExpand()"><span class="query-expander-icon fa fa-chevron-right"></span></div>
+    
+    <div class="query-item query-expander-content">
+      <div id="query-organism" class="query-item query-button query-organism">
+        <span class="query-organism-icon {{query.organism.icon}}"></span>
+      </div>
+      <qtip target="query-organism" class="query-organism-select" qtip-class="qtip-no-padding">
+        <div class="query-organism-select-item clearfix activatable-bg" ng-repeat="org in query.organisms track by org.id" on-tap="query.setOrganism( org )">
+          <span class="query-organism-select-radio radio radio-{{query.organism === org}}"></span>
+          <span class="query-organism-select-icon" bindonce bo-class="org.icon"></span>
+          <span class="query-organism-select-name" bindonce bo-bind="org.alias"></span>
         </div>
-        <textarea id="query-genes-textarea" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" style="height: {{query.genesHeight}}px"></textarea>
-      </div>
-      <div class="query-genes-expander-instr animate-fade" ng-show="query.genesExpanded">
-        <span class="query-genes-expander-instr-text"><span class="fa fa-question-circle"></span> Enter one gene per line</span>
+      </qtip>
+
+      <div class="query-item query-genes">
+        <a class="query-genes-example animate-fade" ng-show="!query.validatingGenes">e.g.</a>
+        <span class="query-genes-loader animate-fade fa fa-refresh fa-spin" ng-show="query.validatingGenes"></span>
+
+        <div class="query-genes-expander" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
+          <div id="query-genes-validation" class="query-genes-validation" style="height: {{query.genesHeight}}px" ng-class="{ 'query-genes-validation-loading': query.validatingGenes }">
+            <div class="query-genes-validation-entry" ng-repeat="vEntry in query.geneValidations">
+              <span class="bio-helix query-gene-valid-icon" ng-if="vEntry.type === 'VALID'"></span>
+              <span class="fa fa-question query-gene-invalid-icon" ng-if="vEntry.type === 'INVALID'"></span>
+              <span class="fa fa-minus query-gene-empty-icon" ng-if="vEntry.type === 'EMPTY'"></span>
+              <span class="fa fa-tag query-gene-tag-icon" ng-if="vEntry.type === 'TAG'"></span>
+              <span class="bio-helix query-gene-duplicate-icon" ng-if="vEntry.type === 'DUPLICATE'"></span>
+            </div>
+          </div>
+          <textarea id="query-genes-textarea" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" style="height: {{query.genesHeight}}px"></textarea>
+        </div>
+
+        <popover class="query-genes-expander-instr bottom popover-help animate-fade" ng-show="query.genesExpanded">
+          <span class="fa fa-question-circle"></span> Enter one gene per line
+        </popover>
+
       </div>
 
+      <div id="query-more" class="query-item query-button query-more"><span class="fa fa-ellipsis-v"></span></div>
+      <qtip target="query-more" class="query-more-content" qtip-class="qtip-no-padding">
+        Advanced options TODO
+      </qtip>
+      
+      <div class="query-item query-button query-submit"><span class="fa fa-search"></span></div>
     </div>
-    <div class="query-item query-button query-submit"><span class="fa fa-search"></span></div>
   </div>
 
   <div id="cy"></div>
 
-  <div id="data"></div>
+  <div id="data" ng-controller="Test">
+    <p on-tap="bar()">hello (foo = {{foo}})</p>
+    <p id="world">world</p>
+    <qtip target="world" qtip-show="foo === 'bar'" hide-event="none" show-event="none">
+      qtip body {{foo}}
+    </qtip>
+  </div>
 
   <div ng-controller="Test"></div>
 

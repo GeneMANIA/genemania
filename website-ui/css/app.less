@@ -18,3 +18,52 @@ a {
 	text-decoration: underline;
 	cursor: pointer;
 }
+
+.clearfix:after {
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	overflow: hidden;
+	visibility: hidden;
+}
+
+.scrollable {
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.check,
+.radio {
+	width: 1em;
+
+	color: @LINK_COLOR;
+
+	display: inline-block;
+	font-family: FontAwesome;
+	font-style: normal;
+	font-weight: normal;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.check:before {
+	content: "\f096";
+}
+
+.check-true:before {
+	content: "\f046";
+}
+
+.radio:before {
+	content: "\f1db";
+}
+
+.radio-true:before {
+	content: "\f111";
+}
+
+.activatable-bg:active {
+	background: #ccc;
+}

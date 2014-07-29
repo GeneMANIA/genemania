@@ -1,0 +1,129 @@
+// adapted from twitter bootstrap
+
+.poppedover (@bg, @border) {
+  position: relative;
+  z-index: 1010;
+  background-color: @bg;
+  border: 1px solid @border;
+  border-radius: 0.4em;
+
+  &.top {
+    margin-bottom: 10px;
+  }
+
+  &.right {
+    margin-left: 10px;
+  }
+
+  &.bottom {
+    margin-top: 10px;
+  }
+
+  &.left {
+    margin-right: 10px;
+  }
+
+  .popover-content {
+    padding: 0.5em;
+  }
+
+  & > .arrow,
+  & > .arrow > .arrow-before,
+  & > .arrow > .arrow-after {
+    position: absolute;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+  }
+
+  & > .arrow > .arrow-before {
+    z-index: 1;
+  }
+
+  & > .arrow > .arrow-after {
+    z-index: 2;
+  }
+
+  &.top > .arrow {
+    bottom: 0;
+    left: 50%;
+    margin-left: -12px;
+  }
+
+  &.top > .arrow > .arrow-before {
+    border-top-color: @border;
+    border-width: 11px 11px 0;
+  }
+
+  &.top > .arrow > .arrow-after {
+    border-top-color: @bg;
+    border-width: 10px 10px 0;
+    margin-left: 1px;
+  }
+
+  &.right > .arrow {
+    top: 50%;
+    left: -10px;
+    margin-top: -11px;
+  }
+
+  &.right > .arrow > .arrow-before {
+    border-right-color: @border;
+    border-width: 11px 11px 11px 0;
+    margin-left: -1px;
+    margin-top: -1px;
+  }
+
+  &.right > .arrow > .arrow-after {
+    border-right-color: @bg;
+    border-width: 10px 10px 10px 0;
+  }
+
+  &.bottom > .arrow {
+    top: -11px;
+    left: 50%;
+    margin-left: -12px;
+  }
+
+  &.bottom > .arrow > .arrow-before {
+    border-bottom-color: @border;
+    border-width: 0 11px 11px;
+  }
+
+  &.bottom > .arrow > .arrow-after {
+    border-bottom-color: @bg;
+    border-width: 0 10px 10px;
+    margin-top: 1px;
+    margin-left: 1px;
+  }
+
+  &.left > .arrow {
+    top: 50%;
+    right: 0px;
+    margin-top: -11px;
+  }
+
+  &.left > .arrow > .arrow-before {
+    border-left-color: @border;
+    border-width: 11px 0 11px 11px;
+  }
+
+  &.left > .arrow > .arrow-after {
+    border-left-color: @bg;
+    border-width: 10px 0 10px 10px;
+    margin-top: 1px;
+  }
+
+}
+
+.popover {
+  .poppedover( #fff, rgba(0, 0, 0, 0.25) );
+}
+
+.popover-help {
+  .poppedover( rgba(0,0,0,0.666), rgba(255, 255, 255, 0.25) );
+  border-top: 0;
+  color: #fff;
+}

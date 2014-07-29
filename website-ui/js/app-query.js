@@ -34,9 +34,9 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     var self = this;
 
     self.organisms = copy( organisms );
-    self.organism = _.find( self.organisms, function( o ){
-      return o.taxonomyId === 9606;
-    } ) || self.organisms[0];
+    self.organism = _.find( self.organisms, function( o ){ // default org is human
+      return o.id === 4;
+    } ) || self.organisms[0]; // fallback on first org
 
     self.networkGroups = copy( networkGroups[ self.organism.id ] );
 
@@ -88,6 +88,20 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
 
   var qfn = q.prototype;
 
+  qfn.expanded = true;
+
+  qfn.collapse = function(){
+    qfn.expanded = false;
+  };
+
+  qfn.expand = function(){
+    qfn.expanded = true;
+  };
+
+  qfn.toggleExpand = function(){
+    qfn.expanded = !qfn.expanded;
+  };
+
   // get the next query in the history
   qfn.next = function(){};
 
@@ -96,6 +110,15 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
 
   // make this query the current/active one
   qfn.activate = function(){};
+
+  // organism
+  qfn.setOrganism = function( org ){ 
+    this.organism = org;
+
+    PubSub.publish('query.set_organism', self);
+
+    this.validateGenes(); // new org => new genes validation
+  };
 
   // genes
   qfn.addGenes = function(){};
