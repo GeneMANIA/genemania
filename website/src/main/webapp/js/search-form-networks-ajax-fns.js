@@ -313,12 +313,14 @@ function loadNetworks(){
 			
 			var attr_group_name = "Attributes";
 			var attr_group_id = -1;
-			groups_map[attr_group_name] = {
-				name: attr_group_name,
-				id: attr_group_id,
-				attributeGroups: attr_groups
-			};
-			group_names.push(attr_group_name);
+			if( attr_groups && attr_groups.length > 0 ){
+				groups_map[attr_group_name] = {
+					name: attr_group_name,
+					id: attr_group_id,
+					attributeGroups: attr_groups
+				};
+				group_names.push(attr_group_name);
+			}
 			
 			group_names.sort();
 			
