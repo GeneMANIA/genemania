@@ -170,6 +170,10 @@ public class SearchResultsController {
 		public void setAttrGroups(String s) {
 			// TODO
 		}
+		
+		public void assertParamsSet(){
+			// TODO
+		}
 
 	}
 
@@ -179,14 +183,17 @@ public class SearchResultsController {
 
 		SearchRequest sReq = null;
 
-		try {
-			sReq = httpConverter.getObjectMapper().readValue(
-					req.getInputStream(), SearchRequest.class);
-		} catch (Exception e) {
+		String contentType = req.getHeader("Content-Type");
+		contentType = contentType != null ? contentType : "";
 
-		}
+		if (contentType.toLowerCase().contains("application/json")) {
+			try {
+				sReq = httpConverter.getObjectMapper().readValue(
+						req.getInputStream(), SearchRequest.class);
+			} catch (Exception e) {
 
-		if (sReq == null) { // no req obj found (e.g. json)
+			}
+		} else {
 			sReq = new SearchRequest();
 
 			sReq.setOrganism(req.getParameter("organism"));
@@ -199,9 +206,10 @@ public class SearchResultsController {
 
 			// TODO networks & attrs
 			// System.out.println(req.getParameter("networks"));
-
 		}
-
+		
+		sReq.assertParamsSet();
+		
 		// set up search params
 		//
 		SearchParameters params = new SearchParameters();

@@ -141,14 +141,17 @@ public class GeneValidationController {
 
 		ValidationRequest vReq = null;
 
-		try {
-			vReq = httpConverter.getObjectMapper().readValue(
-					req.getInputStream(), ValidationRequest.class);
-		} catch (Exception e) {
+		String contentType = req.getHeader("Content-Type");
+		contentType = contentType != null ? contentType : "";
 
-		}
+		if (contentType.toLowerCase().contains("application/json")) {
+			try {
+				vReq = httpConverter.getObjectMapper().readValue(
+						req.getInputStream(), ValidationRequest.class);
+			} catch (Exception e) {
 
-		if (vReq == null) {
+			}
+		} else { // assume form params
 			vReq = new ValidationRequest();
 			vReq.setGenes(req.getParameter("genes"));
 			vReq.setOrganism(Integer.parseInt(req.getParameter("organism")));
