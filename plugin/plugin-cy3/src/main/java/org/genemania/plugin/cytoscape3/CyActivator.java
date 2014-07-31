@@ -114,9 +114,10 @@ public class CyActivator extends AbstractCyActivator {
 		DefaultDataSetFactory<CyNetwork, CyNode, CyEdge> luceneDataSetFactory = new DefaultDataSetFactory<CyNetwork, CyNode, CyEdge>(
 				dataSetManager, uiUtils, fileUtils, cytoscapeUtils,
 				taskDispatcher);
-		
+
+		// Don't register this until fix for bug #2701 is released and workaround is removed.
+		// https://code.cytoscape.org/redmine/issues/2701
 		SimpleCyProperty<Properties> properties = new SimpleCyProperty<Properties>("org.genemania", new Properties(), Properties.class, CyProperty.SavePolicy.SESSION_FILE);
-		registerService(bc, properties, CyProperty.class, new Properties());
 		
 		NetworkSelectionManagerImpl selectionManager = new NetworkSelectionManagerImpl(cytoscapeUtils, taskDispatcher, properties);
 		GeneManiaImpl geneMania = new GeneManiaImpl(dataSetManager,
@@ -125,6 +126,7 @@ public class CyActivator extends AbstractCyActivator {
 				selectionManager, properties);
 		selectionManager.setGeneMania(geneMania);
 		registerAllServices(bc, selectionManager, new Properties());
+		registerAllServices(bc, geneMania, new Properties());
 		geneMania.startUp();
 
 		Map<String, String> serviceProperties;
