@@ -1,6 +1,6 @@
 app.factory('$$organisms', 
-['$http',
-function( $http ){
+['$http', 'util',
+function( $http, util ){
 
   var id2icon = {
     '1': 'bio-plant', // arabidopsis
@@ -13,10 +13,12 @@ function( $http ){
     '8': 'bio-fish', // zebrafish
   };
 
+  var cache;
+
   var $$organisms = function(){
-    return $http.get( config.service.baseUrl + 'organisms', {
-      cache: true
-    } )
+    if( cache ){ return Promise.resolve(cache); }
+
+    return util.nativePromise( $http.get(config.service.baseUrl + 'organisms') )
       .then(function( res ){
         return res.data;
       })
@@ -38,6 +40,10 @@ function( $http ){
 
           return 0;
         });
+      })
+
+      .then(function(orgs){
+        return cache = orgs;
       })
     ;
   };

@@ -1,0 +1,62 @@
+<div id="query" ng-controller="QueryCtrl" class="query-expanded-{{query.expanded}}">
+  <div class="query-item query-button query-expander" on-tap="query.toggleExpand()"><span class="query-expander-icon fa fa-chevron-right"></span></div>
+  
+  <div class="query-item query-expander-content">
+    <div id="query-organism" class="query-item query-button query-organism">
+      <span class="query-organism-icon {{query.organism.icon}}"></span>
+    </div>
+    <qtip target="query-organism" class="query-organism-select" qtip-class="qtip-no-padding qtip-query-aligned">
+      <div class="query-organism-select-item clearfix activatable-bg" ng-repeat="org in query.organisms track by org.id" on-tap="query.setOrganism( org )">
+        <span class="query-organism-select-radio radio radio-{{query.organism === org}}"></span>
+        <span class="query-organism-select-icon" bindonce bo-class="org.icon"></span>
+        <span class="query-organism-select-name" bindonce bo-bind="org.alias"></span>
+      </div>
+    </qtip>
+
+    <div class="query-item query-genes">
+      <a class="query-genes-example animate-fade" ng-show="!query.validatingGenes && !query.genesExpanded">e.g.</a>
+      <span class="query-genes-loader animate-fade" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
+
+      <div class="query-genes-expander" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
+        <div id="query-genes-validation" class="query-genes-validation" style="height: {{query.genesHeight}}px" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }">
+          <div class="query-genes-validation-entry" ng-repeat="vEntry in query.geneValidations">
+            <span class="bio-helix query-gene-valid-icon" ng-if="vEntry.type === 'VALID'"></span>
+            <span class="fa fa-question query-gene-invalid-icon" ng-if="vEntry.type === 'INVALID'"></span>
+            <span class="fa fa-minus query-gene-empty-icon" ng-if="vEntry.type === 'EMPTY'"></span>
+            <span class="fa fa-tag query-gene-tag-icon" ng-if="vEntry.type === 'TAG'"></span>
+            <span class="bio-helix query-gene-duplicate-icon" ng-if="vEntry.type === 'DUPLICATE'"></span>
+          </div>
+        </div>
+        <textarea id="query-genes-textarea" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" style="height: {{query.genesHeight}}px"></textarea>
+      </div>
+
+      <popover class="query-genes-expander-instr bottom popover-help animate-fade" ng-show="query.genesExpanded">
+        <span class="fa fa-question-circle"></span> Enter one gene per line
+      </popover>
+
+    </div>
+
+    <div id="query-more" class="query-item query-button query-more"><span class="fa fa-ellipsis-v"></span></div>
+    <qtip target="query-more" class="query-more-content scrollable" qtip-class="qtip-no-padding qtip-query-aligned" qtip-pos-my="top right" qtip-pos-at="bottom center">
+      
+      <div class="query-input-data">
+        <div class="query-network-group" bindonce ng-repeat="netGr in query.networkGroups track by netGr.id">
+          <span class="query-network-group-check check check-{{netGr.selected}}"></span>
+          <span class="query-network-group-name" bo-text="netGr.name"></span>
+
+          <div class="query-networks" ng-show="false">
+            <div class="query-network" bindonce ng-repeat="net in netGr.interactionNetworks track by net.id">
+              <span class="query-network-check check check-{{net.selected}}"></span>
+              <span class="query-network-name" bo-text="net.name"></span>
+              <a bo-href="net.metadata.url"><span class="query-network-title" bo-text="net.metadata.title"></span></a>
+              <span class="query-network-year">(<span bo-text="net.metadata.yearPublished"></span>)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </qtip>
+    
+    <div class="query-item query-button query-submit"><span class="fa fa-search"></span></div>
+  </div>
+</div>

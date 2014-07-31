@@ -45,16 +45,27 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     for( var i = 0; i < self.networkGroups.length; i++ ){
       var group = self.networkGroups[i];
       var nets = group.interactionNetworks;
+      var selCount = 0;
 
       if( nets ){ for( var j = 0; j < nets.length; j++ ){
         var net = nets[j];
 
-        net.selected = net.defaultSelected;
-        net.expanded = false;
-
         self.networks.push( net );
         self.networksById[ net.id ] = net;
+
+        net.group = group;
+        net.selected = net.defaultSelected;
+
+        if( net.selected ){
+          selCount++;
+        }
+
       } }
+
+      group.selectedCount = selCount;
+
+      updateNetworkGroupSelection( group );
+      
     }
 
     self.attributeGroups = copy( attributeGroups[ self.organism.id ] );
@@ -88,6 +99,9 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
 
   var qfn = q.prototype;
 
+  // 
+  // EXPANDING AND COLLAPSING THE QUERY INTERFACE
+
   qfn.expanded = true;
 
   qfn.collapse = function(){
@@ -102,6 +116,9 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     qfn.expanded = !qfn.expanded;
   };
 
+  //
+  // NAVIGATING THE QUERY HISTORY
+
   // get the next query in the history
   qfn.next = function(){};
 
@@ -111,7 +128,10 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
   // make this query the current/active one
   qfn.activate = function(){};
 
-  // organism
+  
+  //
+  // ORGANISM
+
   qfn.setOrganism = function( org ){ 
     this.organism = org;
 
@@ -120,20 +140,33 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     this.validateGenes(); // new org => new genes validation
   };
 
-  // genes
+  //
+  // GENES
+
   qfn.addGenes = function(){};
   qfn.removeGenes = function(){};
   qfn.setGenes = function(){};
   qfn.removeAllGenes = function(){};
 
-  // ui sets genes from text box => validate
-  qfn.setGenesFromText = _.debounce( function(){
+
+  // internal helper function for setGenesFromText()
+  qfn.validateGenesFromText = _.debounce( function(){
     this.validateGenes();
 
   }, config.query.genesValidationDelay, {
     leading: false,
     trailing: true
   });
+
+  // ui sets genes from text box => validate
+  qfn.setGenesFromText = function(){
+    var self = this;
+
+    self.settingGenes = true;
+    PubSub.publish('query.set_genes_text', self);
+
+    self.validateGenesFromText();
+  };
 
   var $textarea;
   var $genesVal;
@@ -155,6 +188,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     var p;
     var prev = self.prevValidateGenes;
 
+    self.settingGenes = false;
     self.validatingGenes = true;
     PubSub.publish('query.validate_genes_start', self);
 
@@ -205,16 +239,39 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     this.weighting = w;
   };
 
-  qfn.enableNetwork = function( id ){
+  //
+  // NETWORKS
+
+  function updateNetworkGroupSelection( group ){
+    var selCount = group.selectedCount;
+    var netCount = group.interactionNetworks ? group.interactionNetworks.length : 0;
+
+    if( selCount === 0 ){
+      group.selected = false;
+    } else if( selCount === netCount ){
+      group.selected = true;
+    } else {
+      group.selected = 'semi';
+    }
+  }
+
+  qfn.selectNetwork = function( id ){
     var net = this.networksById[ id ];
-    net.enabled = true;
+    net.selected = true;
+
+    net.group.selectedCount++;
+    updateNetworkGroupSelection( net.group );
 
     PubSub.publish( 'query.enable_network', net );
     PubSub.publish( 'query.toggle_network', net );
   };
 
-  qfn.disableNetwork = function( id ){
-    this.networksById[ id ].enabled = false;
+  qfn.unselectNetwork = function( id ){
+    var net = this.networksById[ id ];
+    net.selected = false;
+
+    net.group.selectedCount--;
+    updateNetworkGroupSelection( net.group );
 
     PubSub.publish( 'query.disable_network', net );
     PubSub.publish( 'query.toggle_network', net );
@@ -225,7 +282,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     for( var i = 0; i < nets.length; i++ ){
       var net = nets[i];
 
-      net.enabled ? this.enableNetwork( net ) : this.disableNetwork( net );
+      net.enabled ? this.selectNetwork( net.id ) : this.unselectNetwork( net.id );
     }
   };
 
@@ -267,6 +324,11 @@ function( $scope, Query, $timeout ){
 
   PubSub.subscribe('query.validate_genes', updateScope);
   PubSub.subscribe('query.validate_genes_start', updateScope);
+  PubSub.subscribe('query.set_genes_text', _.debounce(function(){
+    updateScope();
+  }, 50, {
+    leading: true
+  }));
 
 
 } ]);

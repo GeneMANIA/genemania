@@ -294,7 +294,7 @@ gulp.task('watch', ['prewatch'], function(){
   livereload.listen();
 
   // reload all when page or js changed
-  gulp.watch( ['index.html'].concat(paths.js) )
+  gulp.watch( ['index.html', 'templates/*.html'].concat(paths.js) )
     .on('change', livereload.changed)
   ;
 

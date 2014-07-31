@@ -1,6 +1,6 @@
 app.factory('$$search', 
-['$http',
-function( $http ){
+['$http', 'util',
+function( $http, util ){
 
   // organism : id of org
   // genes : newline separated list of genes
@@ -10,7 +10,7 @@ function( $http ){
   // networks : array of network ids to use in search
   // attrGroups : array of attribute group ids to use in search
   var $$search = function(){
-    return $http.get( config.service.baseUrl + 'search_results' )
+    return util.nativePromise( $http.get(config.service.baseUrl + 'search_results') )
       .then(function( res ){
         return res.data;
       })

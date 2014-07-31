@@ -13,6 +13,8 @@ app.directive('qtip', function(){
       var title = attrs.title;
       var classes = attrs.qtipClass;
       var showVal = attrs.qtipShow;
+      var posMy = attrs.qtipPosMy || 'top center';
+      var posAt = attrs.qtipPosAt || 'bottom center';
 
       if( attrs.showEvent === 'none' ){
         attrs.showEvent = '';
@@ -22,9 +24,7 @@ app.directive('qtip', function(){
         attrs.hideEvent = '';
       }
 
-      console.log($scope);
-
-      $callingScope.$watch(attrs.qtipShow, function(val){ console.log('watch', val)
+      $callingScope.$watch(attrs.qtipShow, function(val){
         var tooltip = $target.qtip('api').elements.tooltip;
         var shown = tooltip && tooltip.is(':visible');
         var show = !shown && val;
@@ -49,8 +49,8 @@ app.directive('qtip', function(){
 
         position: {
           container: $('body'),
-          my: 'top center',
-          at: 'bottom center',
+          my: posMy,
+          at: posAt,
           effect: false,
           viewport: true,
           adjust: {

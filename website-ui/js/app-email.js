@@ -1,6 +1,6 @@
 app.factory('$$email', 
-['$http',
-function( $http ){
+['$http', 'util',
+function( $http, util ){
 
   // name : name of person sending the email (from)
   // from : email address
@@ -11,7 +11,7 @@ function( $http ){
       return Promise.reject('A message must be specified to send an email');
     }
 
-    return $http.post( config.service.baseUrl + 'mail', opts )
+    return util.nativePromise( $http.post( config.service.baseUrl + 'mail', opts ) )
       .then(function( res ){
         return res.data;
       })

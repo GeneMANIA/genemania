@@ -1,13 +1,19 @@
 app.factory('$$features', 
-['$http',
-function( $http ){
+['$http', 'util',
+function( $http, util ){
+
+  var cache;
 
   var $$features = function(){
-    return $http.get( config.service.baseUrl + 'feature_groups', {
-      cache: true
-    } )
+    if( cache ){ return Promise.resolve(cache); }
+
+    return util.nativePromise( $http.get( config.service.baseUrl + 'feature_groups') )
       .then(function( res ){
         return res.data;
+      })
+
+      .then(function(features){
+        return cache = features;
       })
     ;
   };
