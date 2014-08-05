@@ -1,5 +1,7 @@
 @import 'constants.less';
 @import 'lesshat.less';
+@import 'animate.less';
+@import 'animate-extras.less';
 
 // container
 @qH: 2.5em;
@@ -30,7 +32,11 @@
 @qW: @qItemW * 4 + @qGenesW + @qGenesValW - @qOrgP;
 
 // more / advanced
+@qMoreW: @qW - 0.25em;
 @qMoreH: 20em;
+
+// networks
+@qNetP: 0.25em;
 
 #query {
 	position: absolute;
@@ -86,6 +92,7 @@
 	display: block;
 	height: @qH;
 	float: left;
+	position: relative;
 }
 
 .query-button {
@@ -93,10 +100,6 @@
 	width: @qItemW;
 	text-align: center;
 	cursor: pointer;
-
-	&:active {
-		background: darken(@qBg, 50%);
-	}
 }
 
 .query-organism-icon {
@@ -289,10 +292,103 @@
 }
 
 .query-more-content {
-	width: @qW - 0.25em;
+	width: @qMoreW;
 	height: @qMoreH;
 }
 
+.query-network-group {
+	position: relative;
+}
+
+.query-network-group,
+.query-network {
+	padding: @qNetP 0;
+}
+
+.query-network-group:not(:last-child) {
+	border-bottom: 1px solid @SEPARATOR_COLOR;
+}
+
+.query-network {
+	border-top: 1px solid @SEPARATOR_COLOR;
+}
+
+.query-network:first-child {
+	margin-top: @qNetP;
+}
+
+.query-network-expander,
+.query-network-group-expander, 
+.query-network-check,
+.query-network-group-check,
+.query-network-expander-target,
+.query-network-group-expander-target {
+	cursor: pointer;
+	display: inline-block;
+	position: relative;
+}
+
+.query-network-name {
+	width: @qMoreW - 7em;
+	// background: rgba(0, 255, 0, 0.5);
+}
+
+.query-network-group-name {
+	width: @qMoreW - 4em;
+	// background: rgba(255, 0, 0, 0.5);
+}
+
+.query-network-expander,
+.query-network-group-expander {
+	text-align: right;
+	width: 0.5em;
+}
+
+.query-network-check,
 .query-network-group-check {
-	margin-left: 0.333em;
+	width: 1em;
+	padding: 0 0.4em;
+}
+
+.query-network-name,
+.query-network-group-name {
+	@caretOverlap: 0.75em;
+
+	cursor: pointer;
+	display: inline-block;
+	position: relative;
+	padding-left: @caretOverlap;
+	margin-left: -@caretOverlap;
+}
+
+.query-network-group-count {
+	position: absolute;
+	right: 0.25em;
+	color: #888;
+}
+
+.query-networks {
+	margin-left: 3em;
+}
+
+.query-network-info.ng-hide-remove,
+.query-networks.ng-hide-remove {
+	display: block !important;
+
+	.animated;
+	.fadeInDownSmall;
+	.animation-duration( 200ms );
+}
+
+.query-network-info.ng-hide-add,
+.query-networks.ng-hide-add {
+	display: block !important;
+
+	.animated;
+	.fadeOutUpSmall;
+	.animation-duration( 200ms );
+}
+
+.query-network-info {
+	margin-left: 2.8em;
 }

@@ -1,8 +1,8 @@
 <div id="query" ng-controller="QueryCtrl" class="query-expanded-{{query.expanded}}">
-  <div class="query-item query-button query-expander" on-tap="query.toggleExpand()"><span class="query-expander-icon fa fa-chevron-right"></span></div>
+  <div class="query-item query-button query-expander activatable" on-tap="query.toggleExpand()"><span class="query-expander-icon fa fa-chevron-right"></span></div>
   
   <div class="query-item query-expander-content">
-    <div id="query-organism" class="query-item query-button query-organism">
+    <div id="query-organism" class="query-item query-button query-organism activatable">
       <span class="query-organism-icon {{query.organism.icon}}"></span>
     </div>
     <qtip target="query-organism" class="query-organism-select" qtip-class="qtip-no-padding qtip-query-aligned">
@@ -36,20 +36,26 @@
 
     </div>
 
-    <div id="query-more" class="query-item query-button query-more"><span class="fa fa-ellipsis-v"></span></div>
+    <div id="query-more" class="query-item query-button query-more activatable"><span class="fa fa-ellipsis-v"></span></div>
     <qtip target="query-more" class="query-more-content scrollable" qtip-class="qtip-no-padding qtip-query-aligned" qtip-pos-my="top right" qtip-pos-at="bottom center">
       
       <div class="query-input-data">
         <div class="query-network-group" bindonce ng-repeat="netGr in query.networkGroups track by netGr.id">
-          <span class="query-network-group-check check check-{{netGr.selected}}"></span>
-          <span class="query-network-group-name" bo-text="netGr.name"></span>
+          <span class="query-network-group-check" ng-class="{ 'activatable': netGr.interactionNetworks.length > 0 }" on-tap="query.toggleNetworkGroupSelection( netGr )"><span class="check check-{{netGr.selected}}"></span></span>
+          <span class="query-network-group-expander fa" ng-class="{ 'fa-caret-right': !netGr.expanded, 'fa-caret-down': netGr.expanded }"></span>
+          <span class="query-network-group-name activatable" bo-text="netGr.name" on-tap="query.toggleNetworkGroupExpansion( netGr )"></span>
+          <span class="query-network-group-count" ng-bind="netGr.selectedCount + ' / ' + (netGr.interactionNetworks.length || 0)"></span>
 
-          <div class="query-networks" ng-show="false">
+          <div class="query-networks" ng-show="netGr.expanded">
             <div class="query-network" bindonce ng-repeat="net in netGr.interactionNetworks track by net.id">
-              <span class="query-network-check check check-{{net.selected}}"></span>
-              <span class="query-network-name" bo-text="net.name"></span>
-              <a bo-href="net.metadata.url"><span class="query-network-title" bo-text="net.metadata.title"></span></a>
-              <span class="query-network-year">(<span bo-text="net.metadata.yearPublished"></span>)</span>
+              <span class="query-network-check activatable" on-tap="query.toggleNetworkSelection( net )"><span class="check check-{{net.selected}}"></span></span>
+              <span class="query-network-expander fa" ng-class="{ 'fa-caret-right': !net.expanded, 'fa-caret-down': net.expanded }"></span>
+              <span class="query-network-name activatable" bo-text="net.name" on-tap="query.toggleNetworkExpansion( net )"></span>
+              
+              <div class="query-network-info" ng-show="net.expanded">
+                <a bo-href="net.metadata.url"><span class="query-network-title" bo-text="net.metadata.title"></span></a>
+                <span class="query-network-year">(<span bo-text="net.metadata.yearPublished"></span>)</span>
+              </div>
             </div>
           </div>
         </div>
@@ -57,6 +63,6 @@
 
     </qtip>
     
-    <div class="query-item query-button query-submit"><span class="fa fa-search"></span></div>
+    <div class="query-item query-button query-submit activatable"><span class="fa fa-search"></span></div>
   </div>
 </div>

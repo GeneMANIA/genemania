@@ -39,6 +39,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     } ) || self.organisms[0]; // fallback on first org
 
     self.networkGroups = copy( networkGroups[ self.organism.id ] );
+    self.networkGroupsById = {};
 
     self.networks = [];
     self.networksById = {};
@@ -46,6 +47,10 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
       var group = self.networkGroups[i];
       var nets = group.interactionNetworks;
       var selCount = 0;
+
+      group.expanded = false;
+
+      self.networkGroupsById[ group.id ] = group;
 
       if( nets ){ for( var j = 0; j < nets.length; j++ ){
         var net = nets[j];
@@ -55,6 +60,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
 
         net.group = group;
         net.selected = net.defaultSelected;
+        net.expanded = false;
 
         if( net.selected ){
           selCount++;
@@ -99,6 +105,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
 
   var qfn = q.prototype;
 
+
   // 
   // EXPANDING AND COLLAPSING THE QUERY INTERFACE
 
@@ -128,17 +135,21 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
   // make this query the current/active one
   qfn.activate = function(){};
 
+  // search using this query, thereby superseding the previous query (i.e. this is current)
+  qfn.search = function(){};
   
+
   //
   // ORGANISM
 
   qfn.setOrganism = function( org ){ 
     this.organism = org;
 
-    PubSub.publish('query.set_organism', self);
+    PubSub.publish('query.setOrganism', self);
 
     this.validateGenes(); // new org => new genes validation
   };
+
 
   //
   // GENES
@@ -163,7 +174,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     var self = this;
 
     self.settingGenes = true;
-    PubSub.publish('query.set_genes_text', self);
+    PubSub.publish('query.setGenesText', self);
 
     self.validateGenesFromText();
   };
@@ -190,7 +201,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
 
     self.settingGenes = false;
     self.validatingGenes = true;
-    PubSub.publish('query.validate_genes_start', self);
+    PubSub.publish('query.validateGenesStart', self);
 
     if( prev ){
       prev.cancel('Cancelling stale gene validation query');
@@ -207,7 +218,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
           self.validatingGenes = false;
           self.geneValidations = t.genes;
 
-          PubSub.publish('query.validate_genes', self);
+          PubSub.publish('query.validateGenes', self);
         })
       ;
     } else {
@@ -215,7 +226,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
         self.validatingGenes = false;
         self.geneValidations = [];
         
-        PubSub.publish('query.validate_genes', self);
+        PubSub.publish('query.validateGenes', self);
       });
     }
 
@@ -225,19 +236,20 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
   qfn.expandGenes = function(){
     this.genesExpanded = true;
 
-    PubSub.publish('query.expand_genes', this);
+    PubSub.publish('query.expandGenes', this);
   };
 
   qfn.collapseGenes = function(){
     this.genesExpanded = false;
 
-    PubSub.publish('query.collapse_genes', this);
+    PubSub.publish('query.collapseGenes', this);
   };
 
   // weighting
   qfn.setWeighting = function( w ){
     this.weighting = w;
   };
+
 
   //
   // NETWORKS
@@ -255,36 +267,102 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     }
   }
 
-  qfn.selectNetwork = function( id ){
-    var net = this.networksById[ id ];
-    net.selected = true;
-
-    net.group.selectedCount++;
-    updateNetworkGroupSelection( net.group );
-
-    PubSub.publish( 'query.enable_network', net );
-    PubSub.publish( 'query.toggle_network', net );
+  qfn.getNetwork = function( idOrNet ){
+    if( $.isPlainObject( idOrNet ) ){
+      var net = idOrNet;
+      return net;
+    } else {
+      var id = idOrNet;
+      return this.networksById[ id ];
+    }
   };
 
-  qfn.unselectNetwork = function( id ){
-    var net = this.networksById[ id ];
-    net.selected = false;
-
-    net.group.selectedCount--;
-    updateNetworkGroupSelection( net.group );
-
-    PubSub.publish( 'query.disable_network', net );
-    PubSub.publish( 'query.toggle_network', net );
+  qfn.getNetworkGroup = function( idOrGr ){
+    if( $.isPlainObject( idOrGr ) ){
+      var gr = idOrGr;
+      return gr;
+    } else {
+      var id = idOrGr;
+      return this.networkGroupsById[ id ];
+    }
   };
 
-  // for an array of network objects { id, enabled }, set enabled
+  qfn.toggleNetworkSelection = function( net, sel ){
+    net = this.getNetwork( net );
+    sel = sel === undefined ? !net.selected : sel; // toggle if unspecified selection state
+
+    if( net.selected === sel ){ return; } // update unnecessary
+
+    net.selected = sel;
+    net.group.selectedCount += sel ? 1 : -1;
+    updateNetworkGroupSelection( net.group );
+
+    var pub = { network: net, query: this, selected: sel };
+    PubSub.publish( sel ? 'query.selectNetwork' : 'query.unselectNetwork', pub );
+    PubSub.publish( 'query.toggleNetworkSelection', pub );
+  };
+  qfn.selectNetwork = function( net ){ this.toggleNetworkSelection(net, true); };
+  qfn.unselectNetwork = function( net ){ this.toggleNetworkSelection(net, false); };
+
+  qfn.toggleNetworkGroupSelection = function( group, sel ){
+    group = this.getNetworkGroup( group );
+
+    if( sel === undefined ){ // toggle if unspecified selection state
+      sel = !group.selected || group.selected === 'semi' ? true : false;
+    }
+
+    var nets = group.interactionNetworks;
+    for( var i = 0; i < nets.length; i++ ){
+      var net = nets[i];
+
+      this.toggleNetworkSelection( net.id, sel );
+    }
+
+    var pub = { query: this, group: group, selected: sel };
+    PubSub.publish( sel ? 'query.selectNetworkGroup' : 'query.unselectNetworkGroup', pub );
+    PubSub.publish( 'query.toggleNetworkGroupSelection', pub );
+  };
+  qfn.selectNetworkGroup = function( gr ){ this.toggleNetworkGroupSelection(gr, true); };
+  qfn.unselectNetworkGroup = function( gr ){ this.toggleNetworkGroupSelection(gr, false); };
+
+  qfn.toggleNetworkExpansion = function( net, exp ){
+    net = this.getNetwork( net );
+    exp = exp === undefined ? !net.expanded : exp; // toggle if unspecified
+
+    if( net.expanded === exp ){ return; } // update unnecessary
+
+    net.expanded = exp;
+
+    var pub = { network: net, query: this, expanded: exp };
+    PubSub.publish( exp ? 'query.expandNetwork' : 'query.collapseNetwork', pub );
+    PubSub.publish( 'query.toggleNetworkExpansion', pub );
+  };
+  qfn.expandNetwork = function( net ){ this.toggleNetworkExpansion(net, true); };
+  qfn.collapseNetwork = function( net ){ this.toggleNetworkExpansion(net, false); };
+
+  qfn.toggleNetworkGroupExpansion = function( group, exp ){
+    group = this.getNetworkGroup( group );
+    exp = exp === undefined ? !group.expanded : exp; // toggle if unspecified
+
+    group.expanded = exp;
+
+    var pub = { group: group, query: this, expanded: exp };
+    PubSub.publish( exp ? 'query.expandNetworkGroup' : 'query.collapseNetworkGroup', pub );
+    PubSub.publish( 'query.toggleNetworkGroupExpansion', pub );
+  };
+
+  // for an array of network objects { id, selected }, set selected
   qfn.setNetworks = function( nets ){
     for( var i = 0; i < nets.length; i++ ){
       var net = nets[i];
 
-      net.enabled ? this.selectNetwork( net.id ) : this.unselectNetwork( net.id );
+      net.selected ? this.selectNetwork( net.id ) : this.unselectNetwork( net.id );
     }
   };
+
+
+  //
+  // MAX RETURN PARAMS
 
   // results genes size
   qfn.setMaxGenes = function( max ){
@@ -296,8 +374,6 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     this.maxAttrs = max;
   };
 
-  // search using this query, thereby superseding the previous query (i.e. this is current)
-  qfn.search = function(){};
 
   return q;
 
@@ -308,8 +384,10 @@ app.controller('QueryCtrl',
 [ '$scope', 'Query', '$timeout',
 function( $scope, Query, $timeout ){
 
+  var lastUpdate;
   function updateScope(){
-    $timeout(function(){});
+    lastUpdate && $timeout.cancel(lastUpdate);
+    lastUpdate = $timeout(function(){}, 0);
   }
 
   // initialise once whole app is ready
@@ -320,15 +398,20 @@ function( $scope, Query, $timeout ){
   }
 
   PubSub.subscribe('ready', init);
-  PubSub.subscribe('query.search_result', init);
+  PubSub.subscribe('query.searchResult', init);
 
-  PubSub.subscribe('query.validate_genes', updateScope);
-  PubSub.subscribe('query.validate_genes_start', updateScope);
-  PubSub.subscribe('query.set_genes_text', _.debounce(function(){
+  PubSub.subscribe('query.validateGenes', updateScope);
+  PubSub.subscribe('query.validateGenesStart', updateScope);
+  PubSub.subscribe('query.setGenesText', _.debounce(function(){
     updateScope();
   }, 50, {
     leading: true
   }));
+
+  PubSub.subscribe('query.toggleNetworkGroupExpansion', updateScope);
+  PubSub.subscribe('query.toggleNetworkExpansion', updateScope);
+  PubSub.subscribe('query.toggleNetworkGroupSelection', updateScope);
+  PubSub.subscribe('query.toggleNetworkSelection', updateScope);
 
 
 } ]);

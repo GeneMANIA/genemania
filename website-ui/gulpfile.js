@@ -53,6 +53,7 @@ var paths = {
     './css/popover.less',
     './css/widgets.less',
     './css/app.less',
+    './css/active.less',
     './css/cytoscape.less',
     './css/data.less',
     './css/query.less'
