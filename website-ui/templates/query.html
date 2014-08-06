@@ -14,8 +14,8 @@
     </qtip>
 
     <div class="query-item query-genes">
-      <a class="query-genes-example animate-fade" ng-show="!query.validatingGenes && !query.genesExpanded">e.g.</a>
-      <span class="query-genes-loader animate-fade" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
+      <a class="query-genes-example ng-animate-fade" ng-show="!query.validatingGenes && !query.genesExpanded">e.g.</a>
+      <span class="query-genes-loader ng-animate-fade" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
 
       <div class="query-genes-expander" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
         <div id="query-genes-validation" class="query-genes-validation" style="height: {{query.genesHeight}}px" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }">
@@ -30,7 +30,7 @@
         <textarea id="query-genes-textarea" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" style="height: {{query.genesHeight}}px"></textarea>
       </div>
 
-      <popover class="query-genes-expander-instr bottom popover-help animate-fade" ng-show="query.genesExpanded">
+      <popover class="query-genes-expander-instr bottom popover-help ng-animate-fade" ng-show="query.genesExpanded">
         <span class="fa fa-question-circle"></span> Enter one gene per line
       </popover>
 
@@ -39,18 +39,54 @@
     <div id="query-more" class="query-item query-button query-more activatable"><span class="fa fa-ellipsis-v"></span></div>
     <qtip target="query-more" class="query-more-content scrollable" qtip-class="qtip-no-padding qtip-query-aligned" qtip-pos-my="top right" qtip-pos-at="bottom center">
       
-      <div class="query-input-data">
+      <div class="query-network-groups-header">
+
+        <span class="query-network-groups-master-checker ng-animate-fade-inline-block" ng-hide="query.showingNetworkSortOptions">
+          <span class="query-network-groups-master-checker-icon activatable-relative" on-tap="query.toggleNetworkCheckOptions()">   
+            <span ng-if="!query.showingNetworkCheckOptions"><span class="fa fa-check"></span><span class="fa fa-ellipsis-h"></span></span>
+            <span ng-if="query.showingNetworkCheckOptions"><span class="fa fa-times"></span></span>
+          </span>
+
+          <span class="query-network-groups-master-checker-options ng-animate-fade-inline-block" ng-show="query.showingNetworkCheckOptions">
+            Enable: 
+            <a class="query-network-groups-master-checker-option">foo</a>
+            <a class="query-network-groups-master-checker-option">bar</a>
+            <a class="query-network-groups-master-checker-option">baz</a>
+          </span>
+        </span>
+
+        <span class="query-network-groups-title ng-animate-fade" ng-show="!query.showingNetworkSortOptions && !query.showingNetworkCheckOptions">
+          Networks
+        </span>
+
+        <span class="query-network-groups-sorter ng-animate-fade-inline-block" ng-hide="query.showingNetworkCheckOptions">
+          <span class="query-network-groups-sorter-options ng-animate-fade-inline-block" ng-show="query.showingNetworkSortOptions">
+            Sort by:
+            <a class="query-network-groups-sorter-option">foo</a>
+            <a class="query-network-groups-sorter-option">bar</a>
+            <a class="query-network-groups-sorter-option">baz</a>
+          </span>
+
+          <span class="query-network-groups-sorter-icon activatable-relative" on-tap="query.toggleNetworkSortOptions()">  
+            <span ng-if="!query.showingNetworkSortOptions"><span class="fa fa-sort"></span><span class="fa fa-ellipsis-h"></span></span>
+            <span ng-if="query.showingNetworkSortOptions"><span class="fa fa-times"></span></span>
+          </span>
+        </span>
+
+      </div>
+
+      <div class="query-network-groups scrollable">
         <div class="query-network-group" bindonce ng-repeat="netGr in query.networkGroups track by netGr.id">
-          <span class="query-network-group-check" ng-class="{ 'activatable': netGr.interactionNetworks.length > 0 }" on-tap="query.toggleNetworkGroupSelection( netGr )"><span class="check check-{{netGr.selected}}"></span></span>
+          <span class="query-network-group-check" ng-class="{ 'activatable-relative': netGr.interactionNetworks.length > 0 }" on-tap="query.toggleNetworkGroupSelection( netGr )"><span class="check check-{{netGr.selected}}"></span></span>
           <span class="query-network-group-expander fa" ng-class="{ 'fa-caret-right': !netGr.expanded, 'fa-caret-down': netGr.expanded }"></span>
-          <span class="query-network-group-name activatable" bo-text="netGr.name" on-tap="query.toggleNetworkGroupExpansion( netGr )"></span>
+          <span class="query-network-group-name activatable-relative" bo-text="netGr.name" on-tap="query.toggleNetworkGroupExpansion( netGr )"></span>
           <span class="query-network-group-count" ng-bind="netGr.selectedCount + ' / ' + (netGr.interactionNetworks.length || 0)"></span>
 
           <div class="query-networks" ng-show="netGr.expanded">
             <div class="query-network" bindonce ng-repeat="net in netGr.interactionNetworks track by net.id">
-              <span class="query-network-check activatable" on-tap="query.toggleNetworkSelection( net )"><span class="check check-{{net.selected}}"></span></span>
+              <span class="query-network-check activatable-relative" on-tap="query.toggleNetworkSelection( net )"><span class="check check-{{net.selected}}"></span></span>
               <span class="query-network-expander fa" ng-class="{ 'fa-caret-right': !net.expanded, 'fa-caret-down': net.expanded }"></span>
-              <span class="query-network-name activatable" bo-text="net.name" on-tap="query.toggleNetworkExpansion( net )"></span>
+              <span class="query-network-name activatable-relative" bo-text="net.name" on-tap="query.toggleNetworkExpansion( net )"></span>
               
               <div class="query-network-info" ng-show="net.expanded">
                 <a bo-href="net.metadata.url"><span class="query-network-title" bo-text="net.metadata.title"></span></a>

@@ -1,0 +1,44 @@
+@import 'query.less';
+
+.query-organism-icon {
+	font-size: 1.75em;
+}
+
+.query-organism-select {
+	width: @qW - 0.25em;
+}
+
+.query-organism-select-item {
+	cursor: pointer;
+	height: 2em;
+	position: relative;
+	float: left;
+	width: 100%;
+	border-radius: 0.25em;
+}
+
+.query-organism-select-item:not(:first-child) {
+	border-top: 1px solid #f0f0f0;
+}
+
+.query-organism-select-radio {
+	padding-left: @qOrgP;
+}
+
+.query-organism-select-radio,
+.query-organism-select-name {
+	display: block;
+	line-height: 2em;
+	height: 2em;
+	float: left;
+}
+
+.query-organism-select-icon {
+	font-size: 2em;
+	display: inline-block;
+	height: 100%;
+	line-height: 1em;
+	width: 1.25em;
+	text-align: center;
+	float: left;
+}

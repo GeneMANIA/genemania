@@ -360,6 +360,24 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     }
   };
 
+  qfn.toggleNetworkCheckOptions = function(){
+    this.showingNetworkCheckOptions = this.showingNetworkCheckOptions ? false : true;
+
+    PubSub.publish('query.toggleNetworkCheckOptions', {
+      shown: this.showingNetworkCheckOptions,
+      query: this
+    });
+  };
+
+  qfn.toggleNetworkSortOptions = function(){
+    this.showingNetworkSortOptions = this.showingNetworkSortOptions ? false : true;
+
+    PubSub.publish('query.toggleNetworkSortOptions', {
+      shown: this.showingNetworkSortOptions,
+      query: this
+    });
+  };
+
 
   //
   // MAX RETURN PARAMS
@@ -412,6 +430,8 @@ function( $scope, Query, $timeout ){
   PubSub.subscribe('query.toggleNetworkExpansion', updateScope);
   PubSub.subscribe('query.toggleNetworkGroupSelection', updateScope);
   PubSub.subscribe('query.toggleNetworkSelection', updateScope);
-
+  PubSub.subscribe('query.toggleNetworkCheckOptions', updateScope);
+  PubSub.subscribe('query.toggleNetworkSortOptions', updateScope);
+  
 
 } ]);

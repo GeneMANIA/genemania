@@ -1,4 +1,4 @@
-.animate-fade {
+.ng-animate-fade {
   transition-property: visibility, opacity;
   transition-duration: 0.25s;
   display: block !important;
@@ -9,7 +9,18 @@
   }
 }
 
-.animate-fade-slow {
+.ng-animate-fade-inline-block {
+  transition-property: visibility, opacity;
+  transition-duration: 0.25s;
+  display: inline-block !important;
+
+  &.ng-hide {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.ng-animate-fade-slow {
   transition-property: visibility, opacity;
   transition-duration: 0.5s;
   display: block !important;

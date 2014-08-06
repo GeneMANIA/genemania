@@ -56,7 +56,10 @@ var paths = {
     './css/active.less',
     './css/cytoscape.less',
     './css/data.less',
-    './css/query.less'
+    './css/query.less',
+    './css/query-genes.less',
+    './css/query-organisms.less',
+    './css/query-networks.less'
   ],
 
   // config for java project integration & debugging locally

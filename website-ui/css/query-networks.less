@@ -1,0 +1,157 @@
+@import 'query.less';
+
+.query-network-groups-header {
+	background: #f0f0f0;
+	border-bottom: 1px solid @SEPARATOR_COLOR;
+	height: @qNetGrsTitleH;
+}
+
+.query-network-groups-title {
+	font-weight: bold;
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	text-align: center;
+	pointer-events: none;
+}
+
+.query-network-groups-master-checker,
+.query-network-groups-sorter {
+	margin: 0 0.25em;
+	position: absolute;
+	display: inline-block;
+}
+
+.query-network-groups-sorter-icon,
+.query-network-groups-master-checker-icon {
+	display: inline-block;
+	width: 2em;
+	text-align: center;
+	cursor: pointer;
+	//background: red;
+}
+
+.query-network-groups-master-checker {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+
+.query-network-groups-sorter-options,
+.query-network-groups-master-checker-options {
+	margin: 0 0.5em;
+}
+
+.query-network-groups-sorter-option,
+.query-network-groups-master-checker-option {
+	margin-left: 0.5em;
+}
+
+.query-network-groups-sorter {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.query-network-groups {
+	height: @qNetGrsH;
+	border-bottom: 1px solid darken(@SEPARATOR_COLOR, 20%);
+}
+
+.query-network-group {
+	position: relative;
+}
+
+.query-network-group,
+.query-network {
+	padding: @qNetP 0;
+}
+
+.query-network-group:not(:last-child) {
+	border-bottom: 1px solid @SEPARATOR_COLOR;
+}
+
+.query-network {
+	border-top: 1px solid @SEPARATOR_COLOR;
+}
+
+.query-network:first-child {
+	margin-top: @qNetP;
+}
+
+.query-network-expander,
+.query-network-group-expander, 
+.query-network-check,
+.query-network-group-check,
+.query-network-expander-target,
+.query-network-group-expander-target {
+	cursor: pointer;
+	display: inline-block;
+	position: relative;
+}
+
+.query-network-name {
+	width: @qMoreW - 7em - @qNetNameSpacing;
+	// background: rgba(0, 255, 0, 0.5);
+}
+
+.query-network-group-name {
+	width: @qMoreW - 4em - @qNetNameSpacing;
+	// background: rgba(255, 0, 0, 0.5);
+}
+
+.query-network-expander,
+.query-network-group-expander {
+	text-align: right;
+	width: 0.5em;
+}
+
+.query-network-check,
+.query-network-group-check {
+	width: 1em;
+	padding: 0 0.4em;
+}
+
+.query-network-name,
+.query-network-group-name {
+	@caretOverlap: 0.75em;
+
+	cursor: pointer;
+	display: inline-block;
+	position: relative;
+	padding-left: @caretOverlap;
+	margin-left: -@caretOverlap;
+}
+
+.query-network-group-count {
+	position: absolute;
+	right: 0.25em;
+	color: #888;
+}
+
+.query-networks {
+	margin-left: 3em;
+}
+
+.query-network-info.ng-hide-remove,
+.query-networks.ng-hide-remove {
+	display: block !important;
+
+	.animated;
+	.fadeInDownSmall;
+	.animation-duration( 200ms );
+}
+
+.query-network-info.ng-hide-add,
+.query-networks.ng-hide-add {
+	display: block !important;
+
+	.animated;
+	.fadeOutUpSmall;
+	.animation-duration( 200ms );
+}
+
+.query-network-info {
+	margin-left: 2.8em;
+}
