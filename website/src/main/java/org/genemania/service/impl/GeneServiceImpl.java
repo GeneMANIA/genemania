@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.genemania.dao.GeneDao;
 import org.genemania.dao.OrganismDao;
@@ -247,12 +248,12 @@ public class GeneServiceImpl implements GeneService {
 
 	@Override
 	public GeneNames getGeneNames(Integer organismId, String geneLines) {
-		ValidationResult validationResult = validateGeneLines(
-				organismId, geneLines);
+		ValidationResult validationResult = validateGeneLines(organismId,
+				geneLines);
 		List<String> invalidGeneNames = new LinkedList<String>();
 		List<String> validGeneNames = new LinkedList<String>();
 		List<PossibleGene> genes = validationResult.getGenes();
-		
+
 		for (int line = 0; line < genes.size(); line++) {
 			PossibleGene pg = genes.get(line);
 
@@ -264,6 +265,22 @@ public class GeneServiceImpl implements GeneService {
 		}
 
 		return new GeneNames(validGeneNames, invalidGeneNames);
+	}
+
+	@Override
+	public AutocompleteResult autocompleteGene(int organismId, String query)
+			throws DataStoreException {
+		List<String> geneNames = new LinkedList<String>();
+		geneNames.add(query);
+
+		Collection<Gene> genes = this.findGenesForOrganism(organismId,
+				geneNames);
+		List<Gene> genesList = new Vector<Gene>();
+		genesList.addAll(genes);
+
+		AutocompleteResult result = new AutocompleteResult(query, genesList);
+
+		return result;
 	}
 
 }

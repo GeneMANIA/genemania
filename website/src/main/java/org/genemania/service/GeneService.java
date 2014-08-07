@@ -62,7 +62,7 @@ public interface GeneService {
 	}
 
 	/**
-	 * Represents a gene
+	 * Represents a gene validation
 	 */
 	public class PossibleGene {
 		public enum Type {
@@ -98,6 +98,9 @@ public interface GeneService {
 		}
 	}
 
+	/**
+	 * Represents a set of validated genes
+	 */
 	public class GeneNames {
 		List<String> validGenes;
 		List<String> invalidGenes;
@@ -122,6 +125,37 @@ public interface GeneService {
 			super();
 			this.validGenes = validGenes;
 			this.invalidGenes = invalidGenes;
+		}
+
+	}
+
+	/**
+	 * Represents the result of an autocomplete query for a single gene name
+	 */
+	public class AutocompleteResult {
+		String input;
+		List<Gene> genes;
+
+		public String getInput() {
+			return input;
+		}
+
+		public void setInput(String input) {
+			this.input = input;
+		}
+
+		public List<Gene> getGenes() {
+			return genes;
+		}
+
+		public void setGenes(List<Gene> genes) {
+			this.genes = genes;
+		}
+
+		public AutocompleteResult(String input, List<Gene> genes) {
+			super();
+			this.input = input;
+			this.genes = genes;
 		}
 
 	}
@@ -197,5 +231,19 @@ public interface GeneService {
 	 * @return The gene
 	 */
 	public Gene findGeneForId(int organismId, long id);
+
+	/**
+	 * Gets genes matching the query for autocompletion
+	 * 
+	 * @param organismId
+	 *            The internal ID of the organism to search against
+	 * @param query
+	 *            This string matches against the gene somehow (name, synonym,
+	 *            description, etc)
+	 * @return An autocompletion result, containing the gene names that could
+	 *         match
+	 */
+	public AutocompleteResult autocompleteGene(int organsismId, String query)
+			throws DataStoreException;
 
 }
