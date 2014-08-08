@@ -7,3 +7,4 @@ target
 .settings
 local.properties
 website-ui
+profiles.xml
