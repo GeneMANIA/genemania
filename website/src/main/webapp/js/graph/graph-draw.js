@@ -4,7 +4,7 @@ CytowebUtil.refresh = function() {
 	// Create a Cytoscape Lite instance:
 	// ---------------------------------------------------------------------------------------------
 	var options = {
-			swfPath: absoluteUrl("swf/CytoscapeWeb_1.0.2"),
+			swfPath: absoluteUrl("swf/CytoscapeWeb_1.0.4_01"),
 			flashInstallerPath: absoluteUrl("swf/playerProductInstall"),
 			flashAlternateContent: '<div class="ui-state-error ui-corner-all"><p>GeneMANIA requires the Adobe Flash Player to use all of its features.</p>' +
 			                       '<p><a href="http://get.adobe.com/flashplayer/"><img width="160" height="41" border="0" alt="Get Adobe Flash Player" src="http://www.adobe.com/macromedia/style_guide/images/160x41_Get_Flash_Player.jpg"></a></p></div>'

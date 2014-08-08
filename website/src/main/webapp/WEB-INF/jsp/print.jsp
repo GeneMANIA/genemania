@@ -62,9 +62,7 @@
 	    		<h2>Network image</h2>
 	    
 			    <div class="graph_area">		    	
-					<script type="image/svg+xml">
-						${svg}
-			 		</script>
+					${svg}
 			    </div>
 			    
 			    <div class="legend_area">
