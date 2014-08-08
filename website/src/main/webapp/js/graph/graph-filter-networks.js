@@ -71,7 +71,7 @@ CytowebUtil.filterNetworks = function() {
 				var grId = edge.data.networkGroupId;
 				var idAttr = "netid";
 				
-				if( grId === null || grId === undefined || grId === "" ){
+				if( grId === null || grId === undefined || grId === "" || (edge.data.attributeId != null && edge.data.attributeId + 0 === edge.data.attributeId) ){
 					grId = edge.data.attributeGroupId;
 					idAttr = "attrid";
 				}
