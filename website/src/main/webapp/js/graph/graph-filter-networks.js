@@ -12,15 +12,16 @@ CytowebUtil.filterNetworks = function() {
 	function filter(){
 		if (_vis) {
 			// Get checked network groups:
-			var checkedGr = {};
-			var halfcheckedGr = {};
+			var checkedGr = { netid: {}, attrid: {} };
+			var halfcheckedGr = { netid: {}, attrid: {} };
 			var count = 0;
 			var edges = CytowebUtil.edges();
 			var nodes = CytowebUtil.nodes();
 			
 			$("#networks_tab .checktree_top_level").each(function() {
-				var id = $(this).attr("netid") || $(this).attr("attrid");
 				var $this = $(this);
+				var id = $this.attr("netid") || $this.attr("attrid");
+				var idAttr = $this.attr("netid") ? "netid" : "attrid";
 				
 				if( $this.hasClass("checktree_attr_group") ){
 					id = $this.attr("attrid");
@@ -28,10 +29,10 @@ CytowebUtil.filterNetworks = function() {
 				
 				var $checkbox = $this.find(".checkbox:first");
 				if ( $checkbox.hasClass("checked") ) {
-					checkedGr[id] = true;
+					checkedGr[idAttr][id] = true;
 				}
 				if ( $checkbox.hasClass("half_checked") ) {
-					halfcheckedGr[id] = true;
+					halfcheckedGr[idAttr][id] = true;
 				}
 				if ( $checkbox.size() > 0 ) {
 					count++;
@@ -39,19 +40,20 @@ CytowebUtil.filterNetworks = function() {
 			});
 	
 			// Get checked individual networks: 
-			var checkedNet = {};
-			for(var grId in halfcheckedGr){			
+			var checkedNet = { netid: {}, attrid: {} };
+			for(var grId in halfcheckedGr['netid']){			
 				$("#networks_tab .checktree_network_group[netid=" + grId + "]").find(".checktree_network").each(function() {
 					var id = $(this).attr("netid");
 					if ($(this).find(".checked").length > 0) {
-						checkedNet[id] = true;
+						checkedNet['netid'][id] = true;
 					}
 				});
-				
+			}
+			for(var grId in halfcheckedGr['attrid']){	
 				$("#networks_tab .checktree_attr_group[attrid=" + grId + "]").find(".checktree_attr").each(function() {
 					var id = $(this).attr("attrid");
 					if ($(this).find(".checked").length > 0) {
-						checkedNet[id] = true;
+						checkedNet['attrid'][id] = true;
 					}
 				});
 			}
@@ -77,12 +79,12 @@ CytowebUtil.filterNetworks = function() {
 				}
 				
 				//console.log("Check the group " + edge.data.networkGroupId + " first, which is faster:");
-				if ( checkedGr[grId] ) {
+				if ( checkedGr[idAttr][grId] ) {
 					//console.log("all of group " + grId + " checked");
 //					console.log('checked group');
 					return true;
 					
-				} else if( halfcheckedGr[grId] ){
+				} else if( halfcheckedGr[idAttr][grId] ){
 //					console.log('half checked group');
 					
 					if( $("#networks_tab .checktree_top_level["+ idAttr +"=" + grId + "]").find(".checkbox.half_checked").size() > 0 ){
@@ -92,13 +94,13 @@ CytowebUtil.filterNetworks = function() {
 						//console.log(networksMap);
 						
 						for (var id in networksMap) {
-						    if ( checkedNet[id] ) {
+						    if ( checkedNet[idAttr][id] ) {
 						    	//console.log("The edge (" + edge.data.id + ") has at least one checked network (" + id + ")");
 						    	return true;
 						    }
 						}
 						
-						if( checkedNet[edge.data.attributeId] ){
+						if( checkedNet[idAttr][edge.data.attributeId] ){
 							return true;
 						}
 					} else {
