@@ -10,6 +10,8 @@
 	<fmt:formatNumber type="number" value="${stats.genes}" />
 	genes
 	
+	<!-- TODO re-enable once attribute stats are pulled from lucene
+
 	<br />and
 	<fmt:formatNumber type="number" value="${stats.attributeGroups}" />  
 	attribute groups
@@ -17,6 +19,8 @@
 	containing
 	<fmt:formatNumber type="number" value="${stats.attributes}" /> 
 	attributes
+
+	-->
 	
 	from
 	<fmt:formatNumber type="number" value="${stats.organisms}" /> 
