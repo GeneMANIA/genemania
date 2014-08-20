@@ -4,7 +4,7 @@
 	<groupId>org.genemania</groupId>
 	<artifactId>genemania-website</artifactId>
 	<packaging>war</packaging>
-	<version>3.1.2.7</version>
+	<version>3.1.2.8</version>
 	<name>GeneMANIA</name>
 	<url>http://genemania.org</url>
 	<properties>
@@ -176,17 +176,17 @@
 		<dependency>
 			<groupId>org.genemania</groupId>
 			<artifactId>genemania-common</artifactId>
-			<version>3.1.2.7</version>
+			<version>3.1.2.8</version>
 		</dependency>
 		<dependency>
 			<groupId>org.genemania</groupId>
 			<artifactId>genemania-engine</artifactId>
-			<version>3.1.2.7</version>
+			<version>3.1.2.8</version>
 		</dependency>
 		<dependency>
 			<groupId>org.genemania</groupId>
 			<artifactId>genemania-broker</artifactId>
-			<version>3.1.2.7</version>
+			<version>3.1.2.8</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.el</groupId>

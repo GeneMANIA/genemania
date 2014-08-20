@@ -4,7 +4,7 @@
     <groupId>org.genemania</groupId>
     <artifactId>genemania-engine</artifactId>
     <packaging>jar</packaging>
-    <version>3.1.2.7</version>
+    <version>3.1.2.8</version>
     <name>GeneManiaEngine</name>
     <url>http://localhost:8080/genemania</url>
     <repositories>
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>genemania-common</artifactId>
-            <version>3.1.2.7</version>
+            <version>3.1.2.8</version>
         </dependency>
         <!-- if we want to use the bundled apps against a derby db, need 
             these dependencies <dependency> <groupId>org.genemania</groupId> <artifactId>genemania-hibernate-support</artifactId> 
