@@ -189,7 +189,12 @@ public class LuceneAttributeMediator extends LuceneMediator implements
         attributeGroup.setName(document.get(LuceneMediator.ATTRIBUTEGROUP_NAME));
         attributeGroup.setCode(document.get(LuceneMediator.ATTRIBUTEGROUP_CODE));
         attributeGroup.setDescription(document.get(LuceneMediator.ATTRIBUTEGROUP_DESCRIPTION));
-        attributeGroup.setDefaultSelected(Boolean.parseBoolean(document.get(LuceneMediator.ATTRIBUTEGROUP_DEFAULT_SELECTED)));
+
+        // accept "true" or "1" as true
+        String fieldVal = document.get(LuceneMediator.ATTRIBUTEGROUP_DEFAULT_SELECTED);
+        boolean isDefaultSelected = Boolean.parseBoolean(fieldVal) || "1".equals(fieldVal);
+        attributeGroup.setDefaultSelected(isDefaultSelected);
+
         attributeGroup.setLinkoutLabel(document.get(LuceneMediator.ATTRIBUTEGROUP_LINKOUT_LABEL));
         attributeGroup.setLinkoutUrl(document.get(LuceneMediator.ATTRIBUTEGROUP_LINKOUT_URL));
         attributeGroup.setPublicationName(document.get(LuceneMediator.ATTRIBUTEGROUP_PUBLICATION_NAME));

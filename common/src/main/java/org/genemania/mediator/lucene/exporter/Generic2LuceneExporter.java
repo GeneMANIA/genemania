@@ -326,8 +326,9 @@ public class Generic2LuceneExporter {
                     @Override
                     public boolean process(String line) throws IOException {
                         String[] parts = line.split("\t", -1);
-                        long group_id = Long.parseLong(parts[1]);
-                        if (attribute_groups.contains(group_id)) {
+                        long organismId = Long.parseLong(parts[1]);
+                        long group_id = Long.parseLong(parts[2]);
+                        if (organismId == organism.getId() && attribute_groups.contains(group_id)) {
                             exportAttribute(writer, parts);
                             long attribute_id = Long.parseLong(parts[0]);
                             attributes.add(attribute_id);
