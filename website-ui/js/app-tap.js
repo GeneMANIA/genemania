@@ -12,6 +12,38 @@ app.directive('onTap', ['$parse', function ($parse) {
   };
 }]);
 
+app.directive('onTapScroll', ['$parse', function ($parse) {
+  return function (scope, $ele, attr){
+
+    var tapHandler = $parse(attr.onTapScroll);
+
+    $ele[0].addEventListener('tap', function (evt){
+      var parentSel = attr.onTapScrollParent;
+      var $parent = $( parentSel );
+      var condition = tapHandler(scope, { $event: evt });
+
+      if( !condition ){
+        return;
+      }
+
+      var scrollDiff = $ele.offset().top - $parent.offset().top;
+      var scrollTop = $parent.scrollTop() + scrollDiff;
+
+      // $ele.velocity("scroll", {
+      //   container: $parent,
+      //   duration: config.query.networkScrollDuration
+      // });
+
+      if( condition ){
+        $parent.animate({
+            scrollTop: scrollTop
+        }, config.query.networkScrollDuration);
+      }
+    });
+
+  };
+}]);
+
 $(function(){
   FastClick.attach(document); // so touch devices get click quick
 

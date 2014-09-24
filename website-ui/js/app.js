@@ -11,19 +11,18 @@
 
 var app = angular.module('app', ['templates', 'pasvaz.bindonce', 'ngAnimate']);
 
-(function(){
-  // promise from subscription
-  function subscribe( topic ){
-    return new Promise(function( resolve ){
-      PubSub.subscribe(topic, function(){
-        resolve();
-      });
+PubSub.promise = function( topic ){
+  return new Promise(function( resolve ){
+    PubSub.subscribe(topic, function( arg ){
+      resolve( arg );
     });
-  }
+  });
+};
 
+(function(){
   // when all pieces of the ui are ready, then the app overall is ready
   Promise.all([
-    subscribe('query.ready')
+    PubSub.promise('query.ready')
   ])
     .then(function(){
       console.log('app ready')

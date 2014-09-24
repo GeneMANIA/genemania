@@ -4,17 +4,21 @@ app.directive('qtip', function(){
     templateUrl: 'templates/qtip.html',
     transclude: true,
     replace: true,
-    scope: {},
+    scope: {
+    },
     link: function( $scope, $ele, attrs ){
       var $callingScope = $scope.$parent;
       var $target = $('#' + attrs.target);
       var showEvent = attrs.showEvent || 'click';
-      var hideEvent = attrs.hideEvent || 'unfocus';
+      var hideEvent = attrs.hideEvent || 'unfocus click';
       var title = attrs.title;
       var classes = attrs.qtipClass;
       var showVal = attrs.qtipShow;
       var posMy = attrs.qtipPosMy || 'top center';
       var posAt = attrs.qtipPosAt || 'bottom center';
+      var visible = false;
+      var qtipScopeId = attrs.qtipScopeId || Math.round( Math.random() * 1000000 );
+      var digestOnShow = attrs.qtipDigestOnShow === 'true' || attrs.qtipDigestOnShow === true;
 
       if( attrs.showEvent === 'none' ){
         attrs.showEvent = '';
@@ -36,6 +40,11 @@ app.directive('qtip', function(){
           $target.qtip('hide');
         }
       });
+
+      $callingScope.qtip = $callingScope.qtip || {};
+
+      var qtipScope = $callingScope.qtip[ qtipScopeId ] = $callingScope.qtip[ qtipScopeId ] || {};
+      qtipScope.visible = false;
 
       $ele.on('$destroy', function() {
         $target.qtip('destroy');
@@ -99,6 +108,27 @@ app.directive('qtip', function(){
           tip: {
             height: 10,
             width: 20
+          }
+        },
+
+        events: {
+          show: function(){
+            visible = true;
+
+            qtipScope.visible = true;
+
+            if( digestOnShow && !$callingScope.$$phase ){
+              $callingScope.$digest();
+            }
+          },
+          hide: function(){
+            visible = false;
+
+            qtipScope.visible = false;
+
+            // if( !$callingScope.$$phase ){
+            //   $callingScope.$digest();
+            // }
           }
         }
       });

@@ -57,6 +57,7 @@
 .query-network-groups {
 	height: @qNetGrsH;
 	border-bottom: 1px solid darken(@SEPARATOR_COLOR, 20%);
+	position: relative;
 }
 
 .query-network-group {
@@ -118,7 +119,7 @@
 	@caretOverlap: 0.75em;
 
 	cursor: pointer;
-	display: inline-block;
+	//display: inline-block;
 	position: relative;
 	padding-left: @caretOverlap;
 	margin-left: -@caretOverlap;
@@ -152,6 +153,27 @@
 	.animation-duration( 200ms );
 }
 
+.query-network-name {
+	font-size: 0.8em;
+}
+
 .query-network-info {
 	margin-left: 2.8em;
+}
+
+.query-network p {
+	margin: 0.666em 0;
+	font-size: 0.8em;
+	line-height: 1.5;
+}
+
+.query-network-tag {
+	margin-right: 0.5em; 
+	border: 1px solid #dadada;
+	border-radius: 0.5em;
+	padding: 0 0.25em;
+}
+
+.query-network-publication {
+	font-style: italic;
 }

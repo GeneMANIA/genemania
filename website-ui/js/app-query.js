@@ -3,6 +3,8 @@ app.factory('Query',
 function( $$organisms, $$networks, $$attributes, util, $$genes ){
   var copy = util.copy;
 
+  var netSortFactors = ['first author', 'last author', 'size', 'date'];
+
   var organisms;
   var networkGroups;
   var attributeGroups;
@@ -38,7 +40,13 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
       return o.id === 4;
     } ) || self.organisms[0]; // fallback on first org
 
+    updateQParamsFromOrg( self );
+  };
+  var q = Query;
+
+  function updateQParamsFromOrg( self ){
     self.networkGroups = copy( networkGroups[ self.organism.id ] );
+    self.organism.networkGroups = self.networkGroups;
     self.networkGroupsById = {};
 
     self.networks = [];
@@ -75,19 +83,10 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     }
 
     self.attributeGroups = copy( attributeGroups[ self.organism.id ] );
-  };
-  var q = Query;
+  }
 
   // flat list of weighting types
-  var wg = q.weightings = [
-    { name: 'Automatically selected weighting method', value: 'AUTOMATIC_SELECT' },
-    { name: 'Assigned based on query genes', value: 'AUTOMATIC' },
-    { name: 'Biological process based', value: 'BP' },
-    { name: 'Molecular function based', value: 'MF' },
-    { name: 'Cellular component based', value: 'CC' },
-    { name: 'Equal by network', value: 'AVERAGE' },
-    { name: 'Equal by data type', value: 'AVERAGE_CATEGORY' }
-  ];
+  var wg = q.weightings = config.networks.weightings;
 
   // allow getting weight by const/val
   for( var i = 0; i < q.weightings.length; i++ ){
@@ -97,11 +96,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
   }
 
   // categorised groups of weightings used in ui
-  q.weightingGroups = [
-    { name: 'Query-dependent weighting', weightings: [ wg.AUTOMATIC_SELECT, wg.AUTOMATIC ] },
-    { name: 'Gene Ontology (GO) weighting', weightings: [ wg.BP, wg.MF, wg.CC ] },
-    { name: 'Equal weighting', weightings: [ wg.AVERAGE, wg.AVERAGE_CATEGORY ] }
-  ];
+  q.weightingGroups = config.networks.weightingGroups;
 
   var qfn = q.prototype;
 
@@ -144,6 +139,8 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
 
   qfn.setOrganism = function( org ){ 
     this.organism = org;
+
+    updateQParamsFromOrg( this );
 
     PubSub.publish('query.setOrganism', self);
 
@@ -329,16 +326,18 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     net = this.getNetwork( net );
     exp = exp === undefined ? !net.expanded : exp; // toggle if unspecified
 
-    if( net.expanded === exp ){ return; } // update unnecessary
+    if( net.expanded === exp ){ return net.expanded; } // update unnecessary
 
     net.expanded = exp;
 
     var pub = { network: net, query: this, expanded: exp };
     PubSub.publish( exp ? 'query.expandNetwork' : 'query.collapseNetwork', pub );
     PubSub.publish( 'query.toggleNetworkExpansion', pub );
+
+    return net.expanded;
   };
-  qfn.expandNetwork = function( net ){ this.toggleNetworkExpansion(net, true); };
-  qfn.collapseNetwork = function( net ){ this.toggleNetworkExpansion(net, false); };
+  qfn.expandNetwork = function( net ){ return this.toggleNetworkExpansion(net, true); };
+  qfn.collapseNetwork = function( net ){ return this.toggleNetworkExpansion(net, false); };
 
   qfn.toggleNetworkGroupExpansion = function( group, exp ){
     group = this.getNetworkGroup( group );
@@ -349,6 +348,8 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     var pub = { group: group, query: this, expanded: exp };
     PubSub.publish( exp ? 'query.expandNetworkGroup' : 'query.collapseNetworkGroup', pub );
     PubSub.publish( 'query.toggleNetworkGroupExpansion', pub );
+
+    return group.expanded;
   };
 
   // for an array of network objects { id, selected }, set selected
@@ -376,6 +377,10 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
       shown: this.showingNetworkSortOptions,
       query: this
     });
+  };
+
+  qfn.sortNetworksBy = function( factor ){
+
   };
 
 
