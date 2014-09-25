@@ -28,23 +28,25 @@ app.directive('qtip', function(){
         attrs.hideEvent = '';
       }
 
-      $callingScope.$watch(attrs.qtipShow, function(val){
-        var tooltip = $target.qtip('api').elements.tooltip;
-        var shown = tooltip && tooltip.is(':visible');
-        var show = !shown && val;
-        var hide = shown && !val;
+      if( attrs.qtipShow ){
+        $callingScope.$watch(attrs.qtipShow, function(val){
+          var tooltip = $target.qtip('api').elements.tooltip;
+          var shown = tooltip && tooltip.is(':visible');
+          var show = !shown && val;
+          var hide = shown && !val;
 
-        if( show ){
-          $target.qtip('show');
-        } else if( hide ){
-          $target.qtip('hide');
-        }
-      });
+          if( show ){
+            $target.qtip('show');
+          } else if( hide ){
+            $target.qtip('hide');
+          }
+        });
+      }
 
-      $callingScope.qtip = $callingScope.qtip || {};
+      // $callingScope.qtip = $callingScope.qtip || {};
 
-      var qtipScope = $callingScope.qtip[ qtipScopeId ] = $callingScope.qtip[ qtipScopeId ] || {};
-      qtipScope.visible = false;
+      // var qtipScope = $callingScope.qtip[ qtipScopeId ] = $callingScope.qtip[ qtipScopeId ] || {};
+      // qtipScope.visible = false;
 
       $ele.on('$destroy', function() {
         $target.qtip('destroy');
@@ -113,18 +115,18 @@ app.directive('qtip', function(){
 
         events: {
           show: function(){
-            visible = true;
+            // visible = true;
 
-            qtipScope.visible = true;
+            // qtipScope.visible = true;
 
-            if( digestOnShow && !$callingScope.$$phase ){
-              $callingScope.$digest();
-            }
+            // if( digestOnShow && !$callingScope.$$phase ){
+            //   $callingScope.$digest();
+            // }
           },
           hide: function(){
-            visible = false;
+            // visible = false;
 
-            qtipScope.visible = false;
+            // qtipScope.visible = false;
 
             // if( !$callingScope.$$phase ){
             //   $callingScope.$digest();

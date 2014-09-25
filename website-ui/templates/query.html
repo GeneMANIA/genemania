@@ -75,7 +75,7 @@
 
       </div>
 
-      <div class="query-network-groups scrollable scrollable-y" id="query-network-groups" ng-if="qtip.queryMore.visible">
+      <div class="query-network-groups scrollable scrollable-y" id="query-network-groups">
         <div class="query-network-group" bindonce ng-repeat="netGr in query.networkGroups track by netGr.id">
           <span class="query-network-group-check" ng-class="{ 'activatable-relative': netGr.interactionNetworks.length > 0 }" on-tap="query.toggleNetworkGroupSelection( netGr )"><span class="check check-{{netGr.selected}}"></span></span>
           <span class="query-network-group-expander fa" ng-class="{ 'fa-caret-right': !netGr.expanded, 'fa-caret-down': netGr.expanded }"></span>
