@@ -2,16 +2,7 @@ app.factory('$$organisms',
 ['$http', 'util',
 function( $http, util ){
 
-  var id2icon = {
-    '1': 'bio-plant', // arabidopsis
-    '2': 'bio-worm', // c elegans
-    '3': 'bio-fly', // fruit fly
-    '4': 'bio-human', // human
-    '5': 'bio-mouse', // mouse
-    '6': 'bio-cells', // yeast
-    '7': 'bio-rat', // rat
-    '8': 'bio-fish', // zebrafish
-  };
+  var id2icon = config.organisms.icons;
 
   var cache;
 

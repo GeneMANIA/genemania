@@ -34,6 +34,19 @@ var config = {
       { name: 'Equal by network', value: 'AVERAGE' },
       { name: 'Equal by data type', value: 'AVERAGE_CATEGORY' }
     ]
+  },
+
+  organisms: {
+    icons: {
+      '1': 'bio-plant', // arabidopsis
+      '2': 'bio-worm', // c elegans
+      '3': 'bio-fly', // fruit fly
+      '4': 'bio-human', // human
+      '5': 'bio-mouse', // mouse
+      '6': 'bio-cells', // yeast
+      '7': 'bio-rat', // rat
+      '8': 'bio-fish', // zebrafish
+    }
   }
 };
 

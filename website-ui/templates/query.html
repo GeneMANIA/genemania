@@ -76,38 +76,40 @@
       </div>
 
       <div class="query-network-groups scrollable scrollable-y" id="query-network-groups">
-        <div class="query-network-group" bindonce ng-repeat="netGr in query.networkGroups track by netGr.id">
-          <span class="query-network-group-check" ng-class="{ 'activatable-relative': netGr.interactionNetworks.length > 0 }" on-tap="query.toggleNetworkGroupSelection( netGr )"><span class="check check-{{netGr.selected}}"></span></span>
-          <span class="query-network-group-expander fa" ng-class="{ 'fa-caret-right': !netGr.expanded, 'fa-caret-down': netGr.expanded }"></span>
-          <span class="query-network-group-name activatable-relative" bo-text="netGr.name" on-tap-scroll-parent="#query-network-groups" on-tap-scroll="query.toggleNetworkGroupExpansion( netGr )"></span>
-          <span class="query-network-group-count" ng-bind="netGr.selectedCount + ' / ' + (netGr.interactionNetworks.length || 0)"></span>
+        <div class="query-network-organism" bindonce ng-repeat="org in query.organisms track by org.id" ng-show="query.organism === org">
+          <div class="query-network-group" bindonce ng-repeat="netGr in org.networkGroups track by netGr.id">
+            <span class="query-network-group-check" ng-class="{ 'activatable-relative': netGr.interactionNetworks.length > 0 }" on-tap="query.toggleNetworkGroupSelection( netGr )"><span class="check check-{{netGr.selected}}"></span></span>
+            <span class="query-network-group-expander fa" ng-class="{ 'fa-caret-right': !netGr.expanded, 'fa-caret-down': netGr.expanded }"></span>
+            <span class="query-network-group-name activatable-relative" bo-text="netGr.name" on-tap-scroll-parent="#query-network-groups" on-tap-scroll="query.toggleNetworkGroupExpansion( netGr )"></span>
+            <span class="query-network-group-count" ng-bind="netGr.selectedCount + ' / ' + (netGr.interactionNetworks.length || 0)"></span>
 
-          <div class="query-networks" ng-show="netGr.expanded">
-            <div class="query-network" bindonce ng-repeat="net in netGr.interactionNetworks track by net.id">
-              <span class="query-network-check activatable-relative" on-tap="query.toggleNetworkSelection( net )"><span class="check check-{{net.selected}}"></span></span>
-              <span class="query-network-expander fa" ng-class="{ 'fa-caret-right': !net.expanded, 'fa-caret-down': net.expanded }"></span>
-              <span class="query-network-name activatable-relative" bo-text="net.name" on-tap-scroll-parent="#query-network-groups" on-tap-scroll="query.toggleNetworkExpansion( net )"></span>
-              
-              <div class="query-network-info" ng-show="net.expanded">
-                <p bo-if="net.metadata.title">
-                  <a target="_blank" bo-href="net.metadata.url"><span class="query-network-title" bo-text="net.metadata.title"></span></span></a>
-                  <span class="query-network-authors" bo-text="net.metadata.shortAuthors"></span>
-                  <span class="query-network-year">(<span bo-text="net.metadata.yearPublished"></span>)</span>.
-                  <span class="query-network-publication" bo-text="net.metadata.publicationName"></span>
-                </p>
+            <div class="query-networks" ng-if="netGr.expanded">
+              <div class="query-network" bindonce ng-repeat="net in netGr.interactionNetworks track by net.id">
+                <span class="query-network-check activatable-relative" on-tap="query.toggleNetworkSelection( net )"><span class="check check-{{net.selected}}"></span></span>
+                <span class="query-network-expander fa" ng-class="{ 'fa-caret-right': !net.expanded, 'fa-caret-down': net.expanded }"></span>
+                <span class="query-network-name activatable-relative" bo-text="net.name" on-tap-scroll-parent="#query-network-groups" on-tap-scroll="query.toggleNetworkExpansion( net )"></span>
+                
+                <div class="query-network-info" ng-if="net.expanded">
+                  <p bo-if="net.metadata.title">
+                    <a target="_blank" bo-href="net.metadata.url"><span class="query-network-title" bo-text="net.metadata.title"></span></span></a>
+                    <span class="query-network-authors" bo-text="net.metadata.shortAuthors"></span>
+                    <span class="query-network-year">(<span bo-text="net.metadata.yearPublished"></span>)</span>.
+                    <span class="query-network-publication" bo-text="net.metadata.publicationName"></span>
+                  </p>
 
-                <p>
-                  <span class="query-network-source">
-                    <span class="fa fa-info-circle"></span>
-                    <a target="_blank" href="http://pages.genemania.org/help/#GeneMANIA_network_categories"><span bo-text="net.metadata.networkType"></span></a>
-                    with <span bo-text="net.metadata.interactionCountFormatted"></span> interactions from
-                    <a target="_blank" bo-href="net.metadata.sourceUrl"><span bo-text="net.metadata.sourceName"></span></a>
-                  </span>
-                </p>
+                  <p>
+                    <span class="query-network-source">
+                      <span class="fa fa-info-circle"></span>
+                      <a target="_blank" href="http://pages.genemania.org/help/#GeneMANIA_network_categories"><span bo-text="net.metadata.networkType"></span></a>
+                      with <span bo-text="net.metadata.interactionCountFormatted"></span> interactions from
+                      <a target="_blank" bo-href="net.metadata.sourceUrl"><span bo-text="net.metadata.sourceName"></span></a>
+                    </span>
+                  </p>
 
-                <p>
-                  <span class="query-network-tag" ng-repeat="tag in net.tags"><span class="fa fa-tag"></span>&nbsp;<span bo-text="tag.nameFormatted"></span></span>
-                </p>
+                  <p>
+                    <span class="query-network-tag" bindonce ng-repeat="tag in net.tags"><span class="fa fa-tag"></span>&nbsp;<span bo-text="tag.nameFormatted"></span></span>
+                  </p>
+                </div>
               </div>
             </div>
           </div>

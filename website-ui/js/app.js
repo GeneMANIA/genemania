@@ -9,7 +9,7 @@
   }
 })();
 
-var app = angular.module('app', ['templates', 'pasvaz.bindonce', 'ngAnimate']);
+var app = angular.module('app', ['templates', 'pasvaz.bindonce']);
 
 PubSub.promise = function( topic ){
   return new Promise(function( resolve ){
