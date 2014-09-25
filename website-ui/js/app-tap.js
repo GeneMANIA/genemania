@@ -44,6 +44,19 @@ app.directive('onTapScroll', ['$parse', function ($parse) {
   };
 }]);
 
+app.directive('onTapPreventAll', ['$parse', function ($parse) {
+  return function (scope, ele, attr){
+
+    var tapHandler = $parse(attr.onTap);
+
+    ele.on('touchstart touchend touchmove mousedown mouseup click', function (evt){
+      evt.preventDefault();
+      evt.stopPropagation();
+    });
+
+  };
+}]);
+
 $(function(){
   FastClick.attach(document); // so touch devices get click quick
 

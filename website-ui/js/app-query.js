@@ -2,8 +2,51 @@ app.factory('Query',
 [ '$$organisms', '$$networks', '$$attributes', 'util', '$$genes',
 function( $$organisms, $$networks, $$attributes, util, $$genes ){
   var copy = util.copy;
+  var strcmp = util.strcmp;
 
-  var netSortFactors = ['first author', 'last author', 'size', 'date'];
+  var netSetOpts = ['all', 'none', 'default'];
+
+  var netSortFactors = [
+    {
+      name: 'first author',
+      sorter: function(a, b){
+        var aAuth = a.metadata.firstAuthor.toLowerCase();
+        var bAuth = b.metadata.firstAuthor.toLowerCase();
+
+        return strcmp(aAuth, bAuth);
+      }
+    },
+
+    {
+      name: 'last author',
+      sorter: function(a, b){
+        var aAuth = a.metadata.lastAuthor.toLowerCase();
+        var bAuth = b.metadata.lastAuthor.toLowerCase();
+
+        return strcmp(aAuth, bAuth);
+      }
+    },
+
+    {
+      name: 'size',
+      sorter: function(a, b){
+        var aSize = a.metadata.interactionCount;
+        var bSize = b.metadata.interactionCount;
+
+        return bSize - aSize; // bigger first
+      }
+    },
+
+    {
+      name: 'date',
+      sorter: function(a, b){
+        var aYr = parseInt( a.metadata.yearPublished, 10 );
+        var bYr = parseInt( b.metadata.yearPublished, 10 );
+
+        return bYr - aYr; // newer first
+      }
+    }
+  ];
 
   var organisms;
   var networkGroups;
@@ -40,7 +83,12 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
       return o.id === 4;
     } ) || self.organisms[0]; // fallback on first org
 
+    self.networkSortFactors = netSortFactors;
+    self.setNetworkOptions = netSetOpts;
+
     updateQParamsFromOrg( self );
+
+    self.sortNetworksBy('first author');
   };
   var q = Query;
 
@@ -176,18 +224,16 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     self.validateGenesFromText();
   };
 
-  var $textarea;
-  var $genesVal;
-  $(function(){
-    $textarea = $('#query-genes-textarea');
-    $genesVal = $('#query-genes-validation');
+  // PubSub.promise('query.ready').then(function(){
+  //   $textarea.autosize({
+  //     callback: function(){
+  //       var textarea = document.getElementById('query-genes-textarea');
+  //       var genesVal = document.getElementById('query-genes-validation');
 
-    $textarea.autosize({
-      callback: function(){
-        $genesVal[0].style.height = $textarea[0].style.height;
-      }
-    });
-  });
+  //       genesVal.style.height = textarea.style.height;
+  //     }
+  //   });
+  // });
 
   // validate genes directly
   qfn.validateGenes = function(){
@@ -284,7 +330,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     }
   };
 
-  qfn.toggleNetworkSelection = function( net, sel ){
+  qfn.toggleNetworkSelection = function( net, sel, pub ){
     net = this.getNetwork( net );
     sel = sel === undefined ? !net.selected : sel; // toggle if unspecified selection state
 
@@ -294,12 +340,14 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
     net.group.selectedCount += sel ? 1 : -1;
     updateNetworkGroupSelection( net.group );
 
-    var pub = { network: net, query: this, selected: sel };
-    PubSub.publish( sel ? 'query.selectNetwork' : 'query.unselectNetwork', pub );
-    PubSub.publish( 'query.toggleNetworkSelection', pub );
+    if( pub || pub === undefined ){
+      pub = { network: net, query: this, selected: sel };
+      PubSub.publish( sel ? 'query.selectNetwork' : 'query.unselectNetwork', pub );
+      PubSub.publish( 'query.toggleNetworkSelection', pub );
+    }
   };
-  qfn.selectNetwork = function( net ){ this.toggleNetworkSelection(net, true); };
-  qfn.unselectNetwork = function( net ){ this.toggleNetworkSelection(net, false); };
+  qfn.selectNetwork = function( net, pub ){ this.toggleNetworkSelection(net, true, pub); };
+  qfn.unselectNetwork = function( net, pub ){ this.toggleNetworkSelection(net, false, pub); };
 
   qfn.toggleNetworkGroupSelection = function( group, sel ){
     group = this.getNetworkGroup( group );
@@ -354,11 +402,29 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
 
   // for an array of network objects { id, selected }, set selected
   qfn.setNetworks = function( nets ){
-    for( var i = 0; i < nets.length; i++ ){
-      var net = nets[i];
+    if( _.isArray(nets) ){
+      for( var i = 0; i < nets.length; i++ ){
+        var net = nets[i];
 
-      net.selected ? this.selectNetwork( net.id ) : this.unselectNetwork( net.id );
+        net.selected ? this.selectNetwork( net.id, false ) : this.unselectNetwork( net.id, false );
+      }
+    } else if( _.isString(nets) ){
+      for( var i = 0; i < this.networks.length; i++ ){
+        var network = this.networks[i];
+
+        if( nets === 'all' || (nets === 'default' && network.defaultSelected) ){
+          this.selectNetwork( network, false );
+        } else {
+          this.unselectNetwork( network, false );
+        }
+      }
     }
+
+    this.showingNetworkCheckOptions = false; // because we set
+
+    PubSub.publish( 'query.setNetworks', {
+      query: this
+    } );
   };
 
   qfn.toggleNetworkCheckOptions = function(){
@@ -380,7 +446,30 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
   };
 
   qfn.sortNetworksBy = function( factor ){
+    factor = _.find(netSortFactors, function(f){
+      return f.name === factor || f === factor;
+    });
 
+    if( factor ){
+
+      this.selectedNetworkSortFactor = factor;
+
+      for( var i = 0; i < this.networkGroups.length; i++ ){
+        var gr = this.networkGroups[i];
+        var nets = gr.interactionNetworks;
+
+        if( nets ){
+          nets.sort( factor.sorter );
+        }
+      }
+
+      this.showingNetworkSortOptions = false; // because we've set it
+
+      PubSub.publish('query.sortNetworksBy', {
+        factor: factor,
+        query: this
+      });
+    }
   };
 
 
@@ -437,6 +526,8 @@ function( $scope, Query, $timeout ){
   PubSub.subscribe('query.toggleNetworkSelection', updateScope);
   PubSub.subscribe('query.toggleNetworkCheckOptions', updateScope);
   PubSub.subscribe('query.toggleNetworkSortOptions', updateScope);
+  PubSub.subscribe('query.sortNetworksBy', updateScope);
+  PubSub.subscribe('query.setNetworks', updateScope);
   
 
 } ]);

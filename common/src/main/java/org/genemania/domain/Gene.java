@@ -19,6 +19,8 @@
 
 package org.genemania.domain;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 /**
  * Gene
  */
@@ -95,6 +97,7 @@ public class Gene implements java.io.Serializable {
         this.node = node;
     }
 
+    @JsonIgnore
     public Organism getOrganism() {
         return this.organism;
     }

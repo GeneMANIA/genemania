@@ -3,6 +3,7 @@ app.factory('$$networks',
 function( $http, util ){
 
   var cache;
+  var strcmp = util.strcmp;
 
   function postprocessNetwork( net ){
     var meta = net.metadata;
@@ -32,6 +33,13 @@ function( $http, util ){
 
       tag.nameFormatted = tag.name.toLowerCase();
     }
+
+    tags.sort(function(a, b){
+      var aName = a.nameFormatted;
+      var bName = b.nameFormatted;
+
+      return strcmp( aName, bName );
+    });
   }
 
   var $$networks = function(){

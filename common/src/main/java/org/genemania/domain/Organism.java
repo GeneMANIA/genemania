@@ -121,7 +121,6 @@ public class Organism implements java.io.Serializable {
 		this.taxonomyId = taxonomyId;
 	}
 
-	@JsonIgnore
 	public Collection<Gene> getDefaultGenes() {
 		return defaultGenes;
 	}

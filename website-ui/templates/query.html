@@ -15,7 +15,7 @@
 
     <div class="query-item query-genes">
       <a class="query-genes-example ng-animate-fade" ng-show="!query.validatingGenes && !query.genesExpanded">e.g.</a>
-      <span class="query-genes-loader ng-animate-fade" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
+      <span class="query-genes-loader" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
 
       <div class="query-genes-expander" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
         <div id="query-genes-validation" class="query-genes-validation" style="height: {{query.genesHeight}}px" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }">
@@ -27,7 +27,7 @@
             <span class="bio-helix query-gene-duplicate-icon" ng-if="vEntry.type === 'DUPLICATE'"></span>
           </div>
         </div>
-        <textarea id="query-genes-textarea" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" style="height: {{query.genesHeight}}px"></textarea>
+        <textarea id="query-genes-textarea" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" style="height: {{query.genesHeight}}px" ng-jquery-plugin="{ autosize: {} }"></textarea>
       </div>
 
       <popover class="query-genes-expander-instr bottom popover-help ng-animate-fade" ng-show="query.genesExpanded">
@@ -41,30 +41,26 @@
       
       <div class="query-network-groups-header">
 
-        <span class="query-network-groups-master-checker ng-animate-fade-inline-block" ng-hide="query.showingNetworkSortOptions">
+        <span class="query-network-groups-master-checker" ng-hide="query.showingNetworkSortOptions">
           <span class="query-network-groups-master-checker-icon activatable-relative" on-tap="query.toggleNetworkCheckOptions()">   
             <span ng-if="!query.showingNetworkCheckOptions"><span class="fa fa-check"></span><span class="fa fa-ellipsis-h"></span></span>
             <span ng-if="query.showingNetworkCheckOptions"><span class="fa fa-times"></span></span>
           </span>
 
-          <span class="query-network-groups-master-checker-options ng-animate-fade-inline-block" ng-show="query.showingNetworkCheckOptions">
+          <span class="query-network-groups-master-checker-options" ng-show="query.showingNetworkCheckOptions">
             Enable: 
-            <a class="query-network-groups-master-checker-option">foo</a>
-            <a class="query-network-groups-master-checker-option">bar</a>
-            <a class="query-network-groups-master-checker-option">baz</a>
+            <a class="query-network-groups-master-checker-option" ng-repeat="opt in query.setNetworkOptions track by $index" bindonce bo-text="opt" on-tap="query.setNetworks(opt)"></a>
           </span>
         </span>
 
-        <span class="query-network-groups-title ng-animate-fade" ng-show="!query.showingNetworkSortOptions && !query.showingNetworkCheckOptions">
+        <span class="query-network-groups-title" ng-show="!query.showingNetworkSortOptions && !query.showingNetworkCheckOptions">
           Networks
         </span>
 
-        <span class="query-network-groups-sorter ng-animate-fade-inline-block" ng-hide="query.showingNetworkCheckOptions">
-          <span class="query-network-groups-sorter-options ng-animate-fade-inline-block" ng-show="query.showingNetworkSortOptions">
+        <span class="query-network-groups-sorter" ng-hide="query.showingNetworkCheckOptions">
+          <span class="query-network-groups-sorter-options" ng-show="query.showingNetworkSortOptions">
             Sort by:
-            <a class="query-network-groups-sorter-option">foo</a>
-            <a class="query-network-groups-sorter-option">bar</a>
-            <a class="query-network-groups-sorter-option">baz</a>
+            <a class="query-network-groups-sorter-option" ng-repeat="factor in query.networkSortFactors track by $index" bindonce bo-text="factor.name" on-tap="query.sortNetworksBy(factor)" ng-class="{ 'query-network-groups-sorter-option-selected': query.selectedNetworkSortFactor.name === factor.name }"></a>
           </span>
 
           <span class="query-network-groups-sorter-icon activatable-relative" on-tap="query.toggleNetworkSortOptions()">  
@@ -81,7 +77,11 @@
             <span class="query-network-group-check" ng-class="{ 'activatable-relative': netGr.interactionNetworks.length > 0 }" on-tap="query.toggleNetworkGroupSelection( netGr )"><span class="check check-{{netGr.selected}}"></span></span>
             <span class="query-network-group-expander fa" ng-class="{ 'fa-caret-right': !netGr.expanded, 'fa-caret-down': netGr.expanded }"></span>
             <span class="query-network-group-name activatable-relative" bo-text="netGr.name" on-tap-scroll-parent="#query-network-groups" on-tap-scroll="query.toggleNetworkGroupExpansion( netGr )"></span>
-            <span class="query-network-group-count" ng-bind="netGr.selectedCount + ' / ' + (netGr.interactionNetworks.length || 0)"></span>
+            <span class="query-network-group-count">
+              <span ng-bind="netGr.selectedCount"></span>
+              /
+              <span ng-bind="(netGr.interactionNetworks.length || 0)"></span>
+            </span>
 
             <div class="query-networks" ng-if="netGr.expanded">
               <div class="query-network" bindonce ng-repeat="net in netGr.interactionNetworks track by net.id">
@@ -91,6 +91,7 @@
                 
                 <div class="query-network-info" ng-if="net.expanded">
                   <p bo-if="net.metadata.title">
+                    <span class="fa fa-file-o"></span>
                     <a target="_blank" bo-href="net.metadata.url"><span class="query-network-title" bo-text="net.metadata.title"></span></span></a>
                     <span class="query-network-authors" bo-text="net.metadata.shortAuthors"></span>
                     <span class="query-network-year">(<span bo-text="net.metadata.yearPublished"></span>)</span>.
@@ -99,10 +100,17 @@
 
                   <p>
                     <span class="query-network-source">
-                      <span class="fa fa-info-circle"></span>
+                      <span class="fa fa-share-alt"></span>
                       <a target="_blank" href="http://pages.genemania.org/help/#GeneMANIA_network_categories"><span bo-text="net.metadata.networkType"></span></a>
                       with <span bo-text="net.metadata.interactionCountFormatted"></span> interactions from
                       <a target="_blank" bo-href="net.metadata.sourceUrl"><span bo-text="net.metadata.sourceName"></span></a>
+                    </span>
+                  </p>
+
+                  <p bo-if="net.metadata.comment">
+                    <span class="query-network-comment">
+                      <span class="fa fa-info-circle"></span>
+                      <span bo-text="net.metadata.comment"></span>
                     </span>
                   </p>
 
