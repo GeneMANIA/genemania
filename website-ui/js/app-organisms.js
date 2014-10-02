@@ -6,7 +6,7 @@ function( $http, util ){
 
   var cache;
 
-  var $$organisms = function(){
+  var $$organisms = window.$$organisms = function(){
     if( cache ){ return Promise.resolve(cache); }
 
     return util.nativePromise( $http.get(config.service.baseUrl + 'organisms') )

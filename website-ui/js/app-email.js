@@ -6,7 +6,7 @@ function( $http, util ){
   // from : email address
   // subject : email subject
   // message : string body of message
-  var $$email = function( opts ){
+  var $$email = window.$$email = function( opts ){
     if( !opts.message ){
       return Promise.reject('A message must be specified to send an email');
     }

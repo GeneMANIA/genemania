@@ -42,7 +42,7 @@ function( $http, util ){
     });
   }
 
-  var $$networks = function(){
+  var $$networks = window.$$networks = function(){
     if( cache ){ return Promise.resolve(cache); }
 
     return util.nativePromise( $http.get(config.service.baseUrl + 'network_groups') )

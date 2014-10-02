@@ -1,6 +1,6 @@
 app.factory('Query', 
-[ '$$organisms', '$$networks', '$$attributes', 'util', '$$genes',
-function( $$organisms, $$networks, $$attributes, util, $$genes ){
+[ '$$organisms', '$$networks', '$$attributes', 'util', '$$genes', 'Result',
+function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
   var copy = util.copy;
   var strcmp = util.strcmp;
 
@@ -75,6 +75,10 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
   });
 
   function Query( opts ){
+    if( !(this instanceof Query) ){
+      return new Query( opts );
+    }
+
     // set defaults
     var self = this;
 
@@ -179,7 +183,14 @@ function( $$organisms, $$networks, $$attributes, util, $$genes ){
   qfn.activate = function(){};
 
   // search using this query, thereby superseding the previous query (i.e. this is current)
-  qfn.search = function(){};
+  qfn.search = function(){
+    var query = this;
+    var result = query.result = new Result({
+      query: query
+    });
+
+    PubSub.publish('query.search', this);
+  };
   
 
   //

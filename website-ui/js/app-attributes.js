@@ -4,7 +4,7 @@ function( $http, util ){
 
   var cache;
 
-  var $$attributes = function(){
+  var $$attributes = window.$$attributes = function(){
     if( cache ){ return Promise.resolve(cache); }
 
     return util.nativePromise( $http.get(config.service.baseUrl + 'attribute_groups') )

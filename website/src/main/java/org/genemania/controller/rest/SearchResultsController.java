@@ -61,7 +61,7 @@ public class SearchResultsController {
 	private MappingJacksonHttpMessageConverter httpConverter;
 
 	// search req obj from web (could be xml, json, etc)
-	public class SearchRequest {
+	public static class SearchRequest {
 		private Long organism = 4L;
 		private String genes;
 		private CombiningMethod weighting = CombiningMethod.AUTOMATIC_SELECT;
@@ -70,21 +70,24 @@ public class SearchResultsController {
 		private Long[] networks;
 		private Long[] attrGroups;
 
+		public SearchRequest(){
+			super();
+		}
+		
 		public Long getOrganism() {
 			return organism;
 		}
 
-		public void setOrganism(Long organism) {
+		public void setOrganismFromLong(Long organism) {
 			this.organism = organism;
 		}
+		
+		public void setOrganism(Integer organism) {
+			this.organism = organism.longValue();
+		}
 
-		public void setOrganism(String organism) {
-			if (organism != null) {
-				try {
-					this.organism = Long.parseLong(organism);
-				} catch (Exception e) {
-				}
-			}
+		public void setOrganismFromString(String organism) {
+			this.organism = Long.parseLong(organism);
 		}
 
 		public String getGenes() {
@@ -99,17 +102,15 @@ public class SearchResultsController {
 			return weighting;
 		}
 
-		public void setWeighting(CombiningMethod weighting) {
+		public void setWeightingFromEnum(CombiningMethod weighting) {
 			this.weighting = weighting;
 		}
 
 		public void setWeighting(String weighting) {
-			if (weighting != null) {
-				CombiningMethod c = CombiningMethod.fromCode(weighting);
+			CombiningMethod c = CombiningMethod.fromCode(weighting);
 
-				if (c != CombiningMethod.UNKNOWN) {
-					this.weighting = c;
-				}
+			if (c != CombiningMethod.UNKNOWN) {
+				this.weighting = c;
 			}
 		}
 
@@ -121,13 +122,8 @@ public class SearchResultsController {
 			this.geneThreshold = geneThreshold;
 		}
 
-		public void setGeneThreshold(String t) {
-			if (t != null) {
-				try {
-					this.geneThreshold = Integer.parseInt(t);
-				} catch (Exception e) {
-				}
-			}
+		public void setGeneThresholdFromString(String t) {
+			this.geneThreshold = Integer.parseInt(t);
 		}
 
 		public Integer getAttrThreshold() {
@@ -138,13 +134,8 @@ public class SearchResultsController {
 			this.attrThreshold = attrThreshold;
 		}
 
-		public void setAttrThreshold(String t) {
-			if (t != null) {
-				try {
-					this.attrThreshold = Integer.parseInt(t);
-				} catch (Exception e) {
-				}
-			}
+		public void setAttrThresholdFromString(String t) {
+			this.attrThreshold = Integer.parseInt(t);
 		}
 
 		public Long[] getNetworks() {
@@ -155,8 +146,15 @@ public class SearchResultsController {
 			this.networks = networks;
 		}
 
-		public void setNetworks(String s) {
-			// TODO
+		public void setNetworksFromString(String s) {
+			String[] idStrs = s.split("\\s*,\\s*");
+			Long[] ids = new Long[idStrs.length];
+			
+			for( int i = 0; i < idStrs.length; i++ ){
+				ids[i] = Long.parseLong(idStrs[i]);
+			}
+			
+			this.networks = ids;
 		}
 
 		public Long[] getAttrGroups() {
@@ -167,19 +165,30 @@ public class SearchResultsController {
 			this.attrGroups = attrGroups;
 		}
 
-		public void setAttrGroups(String s) {
-			// TODO
+		public void setAttrGroupsFromString(String s) {
+			String[] idStrs = s.split("\\s*,\\s*");
+			Long[] ids = new Long[idStrs.length];
+			
+			for( int i = 0; i < idStrs.length; i++ ){
+				ids[i] = Long.parseLong(idStrs[i]);
+			}
+			
+			this.attrGroups = ids;
 		}
 		
-		public void assertParamsSet(){
-			// TODO
+		public boolean assertParamsSet() throws ApplicationException{
+			if (this.genes == null) {
+				throw new ApplicationException("`genes` not set");
+			}
+			
+			return true;
 		}
 
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/search_results")
 	@ResponseBody
-	public SearchResults list(HttpServletRequest req, HttpSession session) {
+	public SearchResults list(HttpServletRequest req, HttpSession session) throws ApplicationException {
 
 		SearchRequest sReq = null;
 
@@ -196,16 +205,13 @@ public class SearchResultsController {
 		} else {
 			sReq = new SearchRequest();
 
-			sReq.setOrganism(req.getParameter("organism"));
+			sReq.setOrganismFromString(req.getParameter("organism"));
 			sReq.setGenes(req.getParameter("genes"));
 			sReq.setWeighting(req.getParameter("weighting"));
-			sReq.setGeneThreshold(req.getParameter("geneThreshold"));
-			sReq.setAttrThreshold(req.getParameter("attrThreshold"));
-			sReq.setNetworks(req.getParameter("networks"));
-			sReq.setAttrGroups(req.getParameter("attrGroups"));
-
-			// TODO networks & attrs
-			// System.out.println(req.getParameter("networks"));
+			sReq.setGeneThresholdFromString(req.getParameter("geneThreshold"));
+			sReq.setAttrThresholdFromString(req.getParameter("attrThreshold"));
+			sReq.setNetworksFromString(req.getParameter("networks"));
+			sReq.setAttrGroupsFromString(req.getParameter("attrGroups"));
 		}
 		
 		sReq.assertParamsSet();

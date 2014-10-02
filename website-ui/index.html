@@ -36,7 +36,10 @@
   <script src="js/lib/angular.js"></script>
   <script src="js/lib/bindonce.js"></script>
   <script src="js/lib/bluebird.js"></script>
+  <script src="js/lib/cola.adaptor.js"></script>
+  <script src="js/lib/cola.v3.min.js"></script>
   <script src="js/lib/cytoscape.js"></script>
+  <script src="js/lib/dagre.js"></script>
   <script src="js/lib/jquery.autosize.js"></script>
   <script src="js/lib/jquery.qtip.js"></script>
   <script src="js/lib/jquery.velocity.js"></script>
@@ -47,6 +50,7 @@
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
   <script src="js/app-attributes.js"></script>
+  <script src="js/app-cy.js"></script>
   <script src="js/app-email.js"></script>
   <script src="js/app-features.js"></script>
   <script src="js/app-genes.js"></script>
@@ -55,6 +59,7 @@
   <script src="js/app-popover.js"></script>
   <script src="js/app-qtip.js"></script>
   <script src="js/app-query.js"></script>
+  <script src="js/app-result.js"></script>
   <script src="js/app-search.js"></script>
   <script src="js/app-tap.js"></script>
   <script src="js/app-util.js"></script>
@@ -68,15 +73,13 @@
 
   <div id="cy"></div>
 
-  <div id="data" ng-controller="Test">
+  <div id="data">
     <p on-tap="bar()">hello (foo = {{foo}})</p>
     <p id="world">world</p>
     <qtip target="world" qtip-show="foo === 'bar'" hide-event="none" show-event="none">
       qtip body {{foo}}
     </qtip>
   </div>
-
-  <div ng-controller="Test"></div>
 
   <style>
     #splash {

@@ -4,7 +4,7 @@ function( $http, util ){
 
   var cache;
 
-  var $$features = function(){
+  var $$features = window.$$features = function(){
     if( cache ){ return Promise.resolve(cache); }
 
     return util.nativePromise( $http.get( config.service.baseUrl + 'feature_groups') )

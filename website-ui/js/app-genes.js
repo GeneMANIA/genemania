@@ -2,7 +2,7 @@ app.factory('$$genes',
 ['$http', 'util',
 function( $http, util ){
 
-  var $$genes = {};
+  var $$genes = window.$$genes = {};
 
   // organism : id of organism
   // genes : newline separated string of genes

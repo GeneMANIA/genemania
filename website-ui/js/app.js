@@ -31,22 +31,3 @@ PubSub.promise = function( topic ){
   ;
 })();
 
-app.controller('Test', 
-[ '$$networks', '$$organisms', '$$attributes', '$$email', '$$features', '$$genes', 'Query', '$scope',
-function( $$networks, $$organisms, $$attributes, $$email, $$features, $$genes, Query, $scope ){
-
-  console.log('running test ctrl');
-
-  window.$$networks = $$networks;
-  window.$$organisms = $$organisms;
-  window.$$attributes = $$attributes;
-  window.$$email = $$email;
-  window.$$features = $$features;
-  window.$$genes = $$genes;
-
-  $scope.foo = 'init';
-
-  $scope.bar = function(){
-    $scope.foo = 'bar';
-  };
-} ]);
