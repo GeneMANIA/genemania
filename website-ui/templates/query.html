@@ -1,4 +1,4 @@
-<div id="query" ng-controller="QueryCtrl" class="query-expanded-{{query.expanded}}">
+<div id="query" ng-controller="QueryCtrl" class="query query-expanded-{{query.expanded ? true : false}} query-ready-{{query.ready ? true : false}} query-splashed-{{query.splashed ? true : false}}">
   <div class="query-item query-button query-expander activatable" on-tap="query.toggleExpand()"><span class="query-expander-icon fa fa-chevron-right"></span></div>
   
   <div class="query-item query-expander-content">

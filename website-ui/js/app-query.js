@@ -70,6 +70,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
   ]).then(function(){
     // current query (only one at a time)
     q.current = new q();
+    qfn.ready = true;
 
     PubSub.publish('query.ready', q.current);
   });
@@ -188,6 +189,8 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
     var result = query.result = new Result({
       query: query
     });
+
+    qfn.splashed = true;
 
     PubSub.publish('query.search', this);
   };

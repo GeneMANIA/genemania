@@ -45,6 +45,8 @@ var paths = {
     './css/constants.less',
     './css/reset.css',
     './css/lesshat.less',
+    './css/animate.less',
+    './css/animate-extras.less',
     './css/font-awesome.css',
     './css/bio-icons.css',
     './css/jquery.qtip.css',
@@ -79,6 +81,14 @@ var debugLessOpts = {
   sourceMapBasepath: process.cwd()
 };
 
+var prodLessOpts = {
+  paths: ['./css'],
+  sourceMap: false,
+  relativeUrls: true,
+  sourceMapRootpath: '../',
+  sourceMapBasepath: process.cwd()
+};
+
 function handleError(err) {
   console.log(err.toString());
   this.emit('end');
@@ -99,6 +109,8 @@ paths.cssOnly = paths.css.filter(function( path ){
 paths.lessOnly = paths.css.filter(function( path ){
   return path.match(/\.less$/);
 });
+
+paths.cssCombined = './css-build/all.css';
 
 
 function isLessFile( file ){
@@ -188,7 +200,7 @@ gulp.task('build', ['minify'], function(next){
 // update path refs
 gulp.task('htmlrefs', function(){
   return gulp.src( './index.html' )
-    .pipe(inject( gulp.src(paths.js.concat(paths.debug).concat(paths.cssBuild), { read: false }), {
+    .pipe(inject( gulp.src(paths.js.concat(paths.debug).concat(paths.cssCombined), { read: false }), {
       addRootSlash: false
     } ))
 
@@ -245,42 +257,25 @@ gulp.task('js', ['templates'], function(){
 
 });
 
-
-// less => css
-gulp.task('less', function(){
+gulp.task('css-unmin', function(){
   return gulp.src( paths.css )
-    .pipe( 
-      gulpif( isLessFile, less(debugLessOpts) )
-    )
+
+    .pipe( concat('all.css') )
+
+    .pipe( less(debugLessOpts) )
+      .on('error', handleError)
+    
     .pipe( gulp.dest('./css-build') )
   ;
-});
-
-// compile less but don't die from errors
-gulp.task('less-safe', function(){
-  var all = combine(
-    gulp.src( paths.css )
-      .pipe( 
-        gulpif( isLessFile, less(debugLessOpts) )
-      ).on('error', handleError)
-
-      .pipe( gulp.dest('./css-build') )
-  );
-
-  all.on('error', function(err){
-    console.warn(err);
-  });
-
-  return all;
 });
 
 // minify css
 gulp.task('css', function(){
   return gulp.src( paths.css )
 
-    .pipe( less() )
-
     .pipe( concat('all.min.css') )
+
+    .pipe( less(prodLessOpts) )
 
     .pipe( mincss() )
 
@@ -290,7 +285,7 @@ gulp.task('css', function(){
 
 // make sure everything is uptodate before watching
 gulp.task('prewatch', function( next ){
-  return runSequence( 'less', 'htmlrefs', next );
+  return runSequence( 'css-unmin', 'htmlrefs', next );
 });
 
 // auto less compilation & livereload
@@ -302,25 +297,11 @@ gulp.task('watch', ['prewatch'], function(){
     .on('change', livereload.changed)
   ;
 
-  // rebuild less files on a per-file basis
-  gulp.src( paths.lessOnly )
-    .pipe( watch() )
-    .pipe( less(debugLessOpts) )
-      .on('error', handleError)
-    .pipe( gulp.dest('./css-build') )
-  ;
-
-  // directly put plain css files
-  gulp.src( paths.cssOnly )
-    .pipe( watch() )
-    .pipe( gulp.dest('./css-build') )
-  ;
-
   // rebuild all less when at least one file changed
-  // gulp.watch( paths.css, ['less-safe'] );
+  gulp.watch( paths.css, function(e){
+    runSequence( 'css-unmin', function(){
+      livereload.changed( e );
+    } );
+  } );
 
-  // reload all css when any css changed
-  gulp.watch( paths.cssBuild )
-    .on('change', livereload.changed)
-  ;
 });

@@ -9,63 +9,6 @@
 
   <title>GeneMANIA</title>
 
-  <!-- inject:css -->
-  <link rel="stylesheet" href="css-build/constants.css">
-  <link rel="stylesheet" href="css-build/reset.css">
-  <link rel="stylesheet" href="css-build/lesshat.css">
-  <link rel="stylesheet" href="css-build/font-awesome.css">
-  <link rel="stylesheet" href="css-build/bio-icons.css">
-  <link rel="stylesheet" href="css-build/jquery.qtip.css">
-  <link rel="stylesheet" href="css-build/qtip-config.css">
-  <link rel="stylesheet" href="css-build/ng-animations.css">
-  <link rel="stylesheet" href="css-build/popover.css">
-  <link rel="stylesheet" href="css-build/widgets.css">
-  <link rel="stylesheet" href="css-build/app.css">
-  <link rel="stylesheet" href="css-build/active.css">
-  <link rel="stylesheet" href="css-build/cytoscape.css">
-  <link rel="stylesheet" href="css-build/data.css">
-  <link rel="stylesheet" href="css-build/query.css">
-  <link rel="stylesheet" href="css-build/query-genes.css">
-  <link rel="stylesheet" href="css-build/query-organisms.css">
-  <link rel="stylesheet" href="css-build/query-networks.css">
-  <!-- endinject -->
-
-  <!-- inject:js -->
-  <script src="js/lib/jquery-2.1.1.js"></script>
-  <script src="js/lib/fastclick.js"></script>
-  <script src="js/lib/angular.js"></script>
-  <script src="js/lib/bindonce.js"></script>
-  <script src="js/lib/bluebird.js"></script>
-  <script src="js/lib/cola.adaptor.js"></script>
-  <script src="js/lib/cola.v3.min.js"></script>
-  <script src="js/lib/cytoscape.js"></script>
-  <script src="js/lib/dagre.js"></script>
-  <script src="js/lib/jquery.autosize.js"></script>
-  <script src="js/lib/jquery.qtip.js"></script>
-  <script src="js/lib/jquery.velocity.js"></script>
-  <script src="js/lib/lodash.js"></script>
-  <script src="js/lib/numeral.js"></script>
-  <script src="js/lib/pragmatic-angular.js"></script>
-  <script src="js/lib/pubsub.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/app-attributes.js"></script>
-  <script src="js/app-cy.js"></script>
-  <script src="js/app-email.js"></script>
-  <script src="js/app-features.js"></script>
-  <script src="js/app-genes.js"></script>
-  <script src="js/app-networks.js"></script>
-  <script src="js/app-organisms.js"></script>
-  <script src="js/app-popover.js"></script>
-  <script src="js/app-qtip.js"></script>
-  <script src="js/app-query.js"></script>
-  <script src="js/app-result.js"></script>
-  <script src="js/app-search.js"></script>
-  <script src="js/app-tap.js"></script>
-  <script src="js/app-util.js"></script>
-  <script src="js/debug/livereload.js"></script>
-  <!-- endinject -->
-
 </head>
 <body ng-app="app" ontouchstart="/* force mobile to use :active state */">
 
@@ -83,30 +26,105 @@
 
   <style>
     #splash {
-      display: none; /* disable until splash impl */
+      /*display: table;*/
       position: absolute;
       left: 0;
       top: 0;
-      z-index: 9999999;
+      z-index: 99;
       width: 100%;
       height: 100%;
       background: #fff;
       font-family: helvetica neue, helvetica, arial, sans-serif;
       font-size: 16px;
+      text-align: center;
+    }
+
+    #splash-content {
+      /*display: table-cell;
+      vertical-align: middle;*/
     }
 
     #app-logo {
-      width: 300px;
-      height: 60px;
-      position: absolute;
-      left: 50%;
-      top: 100px;
-      margin-left: -150px;
-      margin-top: -20px;
+      margin-top: 1em;
+      width: 15em;
+      height: 3em;
+      display: inline-block;
+    }
+
+    #app-loader {
+      width: 3em;
+      height: 3em;
+      display: inline-block;
+    }
+
+    #splash.splash-ready #app-loader {
+      visibility: hidden;
+    }
+
+    #splash.splash-splashed {
+      display: none;
+    }
+
+    #splash-copy {
+      margin-top: 0.5em;
+      font-size: 0.8em;
+    }
+
+    #linkouts {
+      margin-top: 1em;
+      font-size: 0.8em;
+      color: #ccc;
+    }
+
+    #splash a {
+      color: #8BB0D0;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .splash-spin {
+      -webkit-animation: splash-spin 2s infinite linear;
+      -moz-animation: splash-spin 2s infinite linear;
+      -o-animation: splash-spin 2s infinite linear;
+      animation: splash-spin 2s infinite linear;
+    }
+    @-moz-keyframes splash-spin {
+      0% {
+        -moz-transform: rotate(0deg);
+      }
+      100% {
+        -moz-transform: rotate(359deg);
+      }
+    }
+    @-webkit-keyframes splash-spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(359deg);
+      }
+    }
+    @-o-keyframes splash-spin {
+      0% {
+        -o-transform: rotate(0deg);
+      }
+      100% {
+        -o-transform: rotate(359deg);
+      }
+    }
+    @keyframes splash-spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+      }
     }
 
   </style>
-  <div id="splash">
+  <div id="splash" ng-controller="SplashCtrl" ng-class="{ 'splash-ready': ready, 'splash-splashed': splashed }"><div id="splash-content">
     <svg version="1.1" id="app-logo" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="880.895px" height="181.633px" viewBox="7.863 10.157 880.895 181.633" enable-background="new 7.863 10.157 880.895 181.633" xml:space="preserve">
       <g id="outline" display="none">
         <g display="inline">
@@ -449,8 +467,79 @@
         <path d="M888.757,189.76h-28.158l-4.818-32.217h-34.248l-4.818,32.217h-25.623l28.412-177.573h40.842L888.757,189.76z
            M825.083,133.444h26.891l-13.443-89.802L825.083,133.444z"/>
       </g>
+    </svg><br />
+
+    <svg version="1.1" id="app-loader" class="splash-spin" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+   width="216px" height="146px" viewBox="0 0 216 146" enable-background="new 0 0 216 146" xml:space="preserve">
+      <g>
+        <path d="M169.023,17.191c-1.031-1.031-2.254-1.548-3.666-1.548s-2.633,0.517-3.666,1.548L151.1,27.702
+          c-5.812-5.486-12.466-9.737-19.961-12.751C123.645,11.937,115.93,10.43,108,10.43c-14.937,0-27.972,4.521-39.107,13.565
+          c-11.135,9.043-18.467,20.842-21.998,35.399v0.57c0,0.706,0.258,1.317,0.774,1.833c0.516,0.516,1.127,0.774,1.833,0.774h16.213
+          c1.195,0,2.009-0.625,2.444-1.874c2.281-5.431,3.72-8.608,4.318-9.532c3.802-6.192,8.853-11.053,15.154-14.584
+          c6.301-3.53,13.09-5.296,20.368-5.296c10.918,0,20.396,3.721,28.435,11.162L125.189,53.69c-1.03,1.032-1.547,2.255-1.547,3.667
+          c0,1.412,0.517,2.634,1.547,3.666c1.033,1.032,2.256,1.548,3.668,1.548h36.5c1.412,0,2.634-0.516,3.666-1.548
+          c1.031-1.032,1.547-2.254,1.547-3.666v-36.5C170.57,19.445,170.057,18.223,169.023,17.191z"/>
+        <path d="M165.926,83.429h-15.644c-1.194,0-2.009,0.624-2.443,1.874c-2.28,5.432-3.72,8.608-4.317,9.532
+          c-3.803,6.19-8.854,11.053-15.154,14.583c-6.301,3.531-13.09,5.296-20.368,5.296c-5.268,0-10.347-0.977-15.235-2.933
+          c-4.888-1.956-9.261-4.727-13.117-8.312l11.162-11.161c1.032-1.031,1.548-2.255,1.548-3.666c0-1.412-0.516-2.635-1.548-3.666
+          c-1.032-1.033-2.254-1.549-3.666-1.549h-36.5c-1.413,0-2.635,0.516-3.667,1.549c-1.032,1.031-1.548,2.254-1.548,3.666v36.5
+          c0,1.411,0.516,2.635,1.548,3.666c1.033,1.031,2.255,1.549,3.667,1.549s2.634-0.518,3.666-1.549l10.51-10.511
+          c5.812,5.54,12.425,9.804,19.839,12.791c7.414,2.988,15.086,4.481,23.016,4.481c14.883,0,27.864-4.521,38.944-13.565
+          c11.08-9.043,18.358-20.843,21.835-35.399c0.055-0.108,0.081-0.299,0.081-0.57c0-0.706-0.259-1.316-0.775-1.833
+          C167.243,83.688,166.632,83.429,165.926,83.429z"/>
+      </g>
     </svg>
-  </div>
+
+    <div id="linkouts">
+      <a href="http://pages.genemania.org/help/">Help</a> |
+      <a href="http://pages.genemania.org/contact/">Contact</a> |
+      <a href="http://pages.genemania.org/">About</a>
+    </div>
+
+    <div id="splash-copy">
+      <a href="http://www.utoronto.ca/">&copy; University of Toronto</a>
+    </div>
+  </div></div>
+
+  <!-- inject:css -->
+  <link rel="stylesheet" href="css-build/all.css">
+  <!-- endinject -->
+
+  <!-- inject:js -->
+  <script src="js/lib/jquery-2.1.1.js"></script>
+  <script src="js/lib/fastclick.js"></script>
+  <script src="js/lib/angular.js"></script>
+  <script src="js/lib/bindonce.js"></script>
+  <script src="js/lib/bluebird.js"></script>
+  <script src="js/lib/cola.adaptor.js"></script>
+  <script src="js/lib/cola.v3.min.js"></script>
+  <script src="js/lib/cytoscape.js"></script>
+  <script src="js/lib/dagre.js"></script>
+  <script src="js/lib/jquery.autosize.js"></script>
+  <script src="js/lib/jquery.qtip.js"></script>
+  <script src="js/lib/jquery.velocity.js"></script>
+  <script src="js/lib/lodash.js"></script>
+  <script src="js/lib/numeral.js"></script>
+  <script src="js/lib/pragmatic-angular.js"></script>
+  <script src="js/lib/pubsub.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/app-attributes.js"></script>
+  <script src="js/app-cy.js"></script>
+  <script src="js/app-email.js"></script>
+  <script src="js/app-features.js"></script>
+  <script src="js/app-genes.js"></script>
+  <script src="js/app-networks.js"></script>
+  <script src="js/app-organisms.js"></script>
+  <script src="js/app-popover.js"></script>
+  <script src="js/app-qtip.js"></script>
+  <script src="js/app-query.js"></script>
+  <script src="js/app-result.js"></script>
+  <script src="js/app-search.js"></script>
+  <script src="js/app-tap.js"></script>
+  <script src="js/app-util.js"></script>
+  <script src="js/debug/livereload.js"></script>
+  <!-- endinject -->
 
 </body>
 </html>

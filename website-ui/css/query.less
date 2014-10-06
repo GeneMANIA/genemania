@@ -1,8 +1,3 @@
-@import 'constants.less';
-@import 'lesshat.less';
-@import 'animate.less';
-@import 'animate-extras.less';
-
 // container
 @qH: 2.5em;
 @qItemW: @qH * 1.25;
@@ -29,7 +24,7 @@
 @qExpW: 3*@qItemW + @qGenesW + 2*@qGenesMargin + 0.25em;
 
 // calculated query width
-@qW: @qItemW * 4 + @qGenesW + @qGenesValW - @qOrgP;
+@qW: 4*@qItemW + @qGenesW + 2*@qGenesMargin + 0.25em;
 
 // more / advanced
 @qMoreW: @qW - 0.25em;
@@ -41,19 +36,29 @@
 @qNetGrsH: 16em;
 @qNetGrsTitleH: 1.5em;
 
-#query {
+.query {
 	position: absolute;
 	left: 0;
 	top: 0;
 	margin: 0.25em;
-	z-index: 9999;
+	z-index: 1;
 	background: @qBg;
 	border: 1px solid @qBorderColor;
 	border-radius: @qBorderRadius;
 	float: left;
-	border-bottom: 2px solid darken(@qBorderColor, 30%);
-	border-left-color: darken(@qBorderColor, 15%);
-	border-right-color: darken(@qBorderColor, 15%);
+	border-bottom: 2px solid darken(@qBorderColor, 15%);
+	border-left-color: darken(@qBorderColor, 10%);
+	border-right-color: darken(@qBorderColor, 10%);
+}
+
+.query-ready-true {
+	z-index: 999;
+}
+
+.query-splashed-false {
+	top: 5em;
+	left: 50%;
+	margin-left: -0.5 * @qW;
 }
 
 .query-expander {

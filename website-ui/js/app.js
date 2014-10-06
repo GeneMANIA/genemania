@@ -25,9 +25,31 @@ PubSub.promise = function( topic ){
     PubSub.promise('query.ready')
   ])
     .then(function(){
-      console.log('app ready')
+      console.log('GeneMANIA app ready')
       PubSub.publish('ready'); // all app ready
     })
   ;
 })();
 
+// because angularjs depends on this and it's not reliable
+window.scrollTo = window.scrollTo || function(){};
+
+app.controller('SplashCtrl', ['$scope', '$timeout', function( $scope, $timeout ){
+
+  function applyScope(){
+    $timeout(function(){}, 0);
+  }
+
+  PubSub.promise('query.ready').then(function(){
+    $scope.ready = true;
+
+    applyScope();
+  });
+
+  PubSub.promise('query.search').then(function(){
+    $scope.splashed = true;
+
+    applyScope();
+  });
+
+} ]);
