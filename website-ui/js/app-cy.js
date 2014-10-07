@@ -7,6 +7,15 @@ function(  ){
 
     style: [
       {
+        selector: 'core',
+        css: {
+          'selection-box-color': '#AAD8FF',
+          'selection-box-border-color': '#8BB0D0',
+          'selection-box-opacity': 0.5
+        }
+      },
+
+      {
         selector: 'node',
         css: {
           'width': 'mapData(score, 0, 1, 20, 60)',
@@ -20,6 +29,17 @@ function(  ){
           'text-outline-width': 2,
           'color': '#fff',
           'overlay-padding': 6
+        }
+      },
+
+      {
+        selector: 'node:selected',
+        css: {
+          'border-width': 6,
+          'border-color': '#AAD8FF',
+          'border-opacity': 0.5,
+          'background-color': '#777',
+          'text-outline-color': '#777'
         }
       },
 

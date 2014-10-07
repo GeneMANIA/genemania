@@ -1,10 +1,11 @@
 // container
 @qH: 2.5em;
 @qItemW: @qH * 1.25;
-@qBg: #eee;
+@qBg: rgba(240, 240, 240, 0.85); //#eee;
 @qSepColor: darken(@qBg, 10%);
 @qBorderColor: darken(@qBg, 1%);
 @qBorderRadius: 0.5em;
+@qMoveAniSpd: 0.25s;
 
 // organism
 @qOrgP: 0.5em;
@@ -46,9 +47,12 @@
 	border: 1px solid @qBorderColor;
 	border-radius: @qBorderRadius;
 	float: left;
-	border-bottom: 2px solid darken(@qBorderColor, 15%);
-	border-left-color: darken(@qBorderColor, 10%);
-	border-right-color: darken(@qBorderColor, 10%);
+	border-bottom: 2px solid darken(@qBorderColor, 10%);
+	border-left-color: darken(@qBorderColor, 5%);
+	border-right-color: darken(@qBorderColor, 5%);
+
+	.transition-property( left, top );
+	.transition-duration( @qMoveAniSpd );
 }
 
 .query-ready-true {
@@ -56,7 +60,7 @@
 }
 
 .query-splashed-false {
-	top: 5em;
+	top: 4.75em;
 	left: 50%;
 	margin-left: -0.5 * @qW;
 }
@@ -83,17 +87,32 @@
 .query-expander-content {
 	border-left: 1px solid @qSepColor;
 
-	.transition-property( width, opacity, transform, margin-left );
+	.transition-property( opacity, margin-left );
 	.transition-duration( @qExpAniDur );
 
 	margin-left: 0;
 	opacity: 1;
+
+	.transform( translate3d(0, 0, 0) ); // hopefully makes ani faster
 }
 
 .query-expanded-false .query-expander-content {
 	@offset: @qExpW + @qItemW;
+
 	opacity: 0;
 	margin-left: -@offset;
+}
+
+.query-slide-hider {
+	@w: @qW;
+
+	position: absolute;
+	left: -@w - 0.25em;
+	top: 0;
+	height: 2*@qH + @qGenesExpH;
+	width: @w;
+	background: @BG_COLOR;
+	z-index: 99;
 }
 
 .query-item {
@@ -119,12 +138,12 @@
 
 	margin: -1px;
 	margin-left: 1px;
-	border: 1px solid @BUTTON_COLOR;
+	border: 1px solid @BUTTON_COLOR_SEMI;
 	border-left: 1px solid @qSepColor;
 	border-top-right-radius: @qBorderRadius;
 	border-bottom-right-radius: @qBorderRadius;
 
-	background: @BUTTON_COLOR;
+	background: @BUTTON_COLOR_SEMI;
 	color: #fff;
 }
 
@@ -132,4 +151,27 @@
 	width: @qMoreW;
 	height: @qMoreH;
 	overflow: hidden;
+}
+
+.query-progress {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: @qH;
+	width: @qExpW;
+	opacity: 0.5;
+	z-index: 99999;
+	pointer-events: none;
+	border-top-left-radius: @qBorderRadius;
+	border-bottom-left-radius: @qBorderRadius;
+	overflow: hidden;
+}
+
+.query-progress-value {
+	background: @BUTTON_COLOR;
+	width: 0;
+	height: 100%;
+
+	.transition-property( width, opacity );
+	.transition-duration( 50ms );
 }

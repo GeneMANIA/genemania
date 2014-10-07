@@ -1,6 +1,7 @@
 var config = {
   service: {
-    baseUrl: 'http://localhost:8080/genemania/json/'
+    // baseUrl: 'http://localhost:8080/genemania/json/',
+    baseUrl: 'http://192.168.81.196:8080/genemania/json/'
   },
 
   query: {

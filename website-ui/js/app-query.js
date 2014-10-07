@@ -72,7 +72,12 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
     q.current = new q();
     qfn.ready = true;
 
+    console.log('Query ready');
     PubSub.publish('query.ready', q.current);
+  });
+
+  PubSub.subscribe('ready', function(){
+    qfn.appReady = true;
   });
 
   function Query( opts ){
@@ -153,6 +158,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
 
   var qfn = q.prototype;
 
+  qfn.$$search = $$search;
 
   // 
   // EXPANDING AND COLLAPSING THE QUERY INTERFACE
@@ -194,6 +200,16 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
 
     PubSub.publish('query.search', this);
   };
+
+  qfn.searchOrCancel = function(){
+    var query = this;
+
+    if( query.result && query.result.cancellable() ){
+      query.result.cancel();
+    } else {
+      query.search();
+    }
+  };
   
 
   //
@@ -233,9 +249,26 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
     var self = this;
 
     self.settingGenes = true;
-    PubSub.publish('query.setGenesText', self);
 
+    PubSub.publish('query.setGenesText', self);
     self.validateGenesFromText();
+  };
+
+  qfn.setExampleGenes = function(){
+    var self = this;
+
+    self.settingGenes = true;
+
+    self.genesText = self.organism.defaultGenes.map(function( g ){
+      return g.symbol;
+    }).join('\n');
+
+    PubSub.publish('query.setGenesTextFromCode', self);
+    self.validateGenesFromText();
+  };
+
+  qfn.updateGenesArea = function(){
+    $('#query-genes-textarea').trigger('autosize.resize');
   };
 
   // PubSub.promise('query.ready').then(function(){
@@ -507,14 +540,8 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
 
 
 app.controller('QueryCtrl',
-[ '$scope', 'Query', '$timeout',
-function( $scope, Query, $timeout ){
-
-  var lastUpdate;
-  function updateScope(){
-    lastUpdate && $timeout.cancel(lastUpdate);
-    lastUpdate = $timeout(function(){}, 0);
-  }
+[ '$scope', 'Query', 'updateScope',
+function( $scope, Query, updateScope ){
 
   // initialise once whole app is ready
   function init(){
@@ -528,8 +555,16 @@ function( $scope, Query, $timeout ){
 
   PubSub.subscribe('query.validateGenes', updateScope);
   PubSub.subscribe('query.validateGenesStart', updateScope);
+
   PubSub.subscribe('query.setGenesText', _.debounce(function(){
     updateScope();
+  }, 50, {
+    leading: true
+  }));
+
+  PubSub.subscribe('query.setGenesTextFromCode', _.debounce(function(){
+    updateScope();
+    $scope.query.updateGenesArea();
   }, 50, {
     leading: true
   }));
@@ -542,6 +577,12 @@ function( $scope, Query, $timeout ){
   PubSub.subscribe('query.toggleNetworkSortOptions', updateScope);
   PubSub.subscribe('query.sortNetworksBy', updateScope);
   PubSub.subscribe('query.setNetworks', updateScope);
+
+  PubSub.subscribe('ready', updateScope);
+
+  PubSub.subscribe('result.searched', updateScope);
+  PubSub.subscribe('result.cancel', updateScope);
+  PubSub.subscribe('$$search.progress', updateScope);
   
 
 } ]);

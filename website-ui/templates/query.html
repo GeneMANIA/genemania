@@ -1,4 +1,10 @@
-<div id="query" ng-controller="QueryCtrl" class="query query-expanded-{{query.expanded ? true : false}} query-ready-{{query.ready ? true : false}} query-splashed-{{query.splashed ? true : false}}">
+<div id="query" ng-controller="QueryCtrl" class="query query-expanded-{{query.expanded ? true : false}} query-ready-{{query.ready ? true : false}} query-app-ready-{{query.appReady ? true : false}} query-splashed-{{query.splashed ? true : false}} query-searching-{{query.result && query.result.searching ? true : false}}">
+  <div class="query-slide-hider"></div>
+
+  <div class="query-progress">
+    <div class="query-progress-value" style="width: {{query.$$search.progress}}%"></div>
+  </div>
+
   <div class="query-item query-button query-expander activatable" on-tap="query.toggleExpand()"><span class="query-expander-icon fa fa-chevron-right"></span></div>
   
   <div class="query-item query-expander-content">
@@ -14,11 +20,11 @@
     </qtip>
 
     <div class="query-item query-genes">
-      <a class="query-genes-example ng-animate-fade" ng-show="!query.validatingGenes && !query.genesExpanded">e.g.</a>
+      <a class="query-genes-example ng-animate-fade plain-link" ng-show="!query.validatingGenes && !query.genesExpanded" on-tap="query.setExampleGenes()">e.g.</a>
       <span class="query-genes-loader" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
 
       <div class="query-genes-expander" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
-        <div id="query-genes-validation" class="query-genes-validation" style="height: {{query.genesHeight}}px" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }">
+        <div id="query-genes-validation" class="query-genes-validation" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }">
           <div class="query-genes-validation-entry" ng-repeat="vEntry in query.geneValidations">
             <span class="bio-helix query-gene-valid-icon" ng-if="vEntry.type === 'VALID'"></span>
             <span class="fa fa-question query-gene-invalid-icon" ng-if="vEntry.type === 'INVALID'"></span>
@@ -27,7 +33,7 @@
             <span class="bio-helix query-gene-duplicate-icon" ng-if="vEntry.type === 'DUPLICATE'"></span>
           </div>
         </div>
-        <textarea id="query-genes-textarea" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" style="height: {{query.genesHeight}}px" ng-jquery-plugin="{ autosize: {} }"></textarea>
+        <textarea id="query-genes-textarea" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" ng-jquery-plugin="{ autosize: {} }"></textarea>
       </div>
 
       <popover class="query-genes-expander-instr bottom popover-help ng-animate-fade" ng-show="query.genesExpanded">
@@ -126,6 +132,9 @@
 
     </qtip>
     
-    <div class="query-item query-button query-submit activatable" on-tap="query.search()"><span class="fa fa-search"></span></div>
+    <div class="query-item query-button query-submit activatable" on-tap="query.searchOrCancel()">
+      <span ng-show="query.result && query.result.searchPromise" class="fa fa-circle-o-notch fa-spin"></span>
+      <span ng-show="!query.result || !query.result.searchPromise" class="fa fa-search"></span>
+    </div>
   </div>
 </div>

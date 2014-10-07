@@ -22,7 +22,11 @@ PubSub.promise = function( topic ){
 (function(){
   // when all pieces of the ui are ready, then the app overall is ready
   Promise.all([
-    PubSub.promise('query.ready')
+    PubSub.promise('query.ready'),
+
+    new Promise(function( resolve ){
+      window.addEventListener('load', function(){ console.log('Window ready'); resolve(); });
+    })
   ])
     .then(function(){
       console.log('GeneMANIA app ready')
@@ -34,22 +38,28 @@ PubSub.promise = function( topic ){
 // because angularjs depends on this and it's not reliable
 window.scrollTo = window.scrollTo || function(){};
 
-app.controller('SplashCtrl', ['$scope', '$timeout', function( $scope, $timeout ){
-
-  function applyScope(){
-    $timeout(function(){}, 0);
+app.factory('updateScope', [ '$timeout', function( $timeout ){
+  var lastUpdate;
+  function updateScope(){
+    lastUpdate && $timeout.cancel(lastUpdate);
+    lastUpdate = $timeout(function(){}, 0);
   }
+
+  return updateScope;
+} ]);
+
+app.controller('SplashCtrl', ['$scope', 'updateScope', function( $scope, updateScope ){
 
   PubSub.promise('query.ready').then(function(){
     $scope.ready = true;
 
-    applyScope();
+    updateScope();
   });
 
   PubSub.promise('query.search').then(function(){
     $scope.splashed = true;
 
-    applyScope();
+    updateScope();
   });
 
 } ]);

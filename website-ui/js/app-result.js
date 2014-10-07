@@ -24,11 +24,15 @@ function( $$search, cy ){
     var q = this.query;
     var self = this;
 
+    self.searching = true;
+
     PubSub.publish('result.search', self);
 
-    $$search({
-      organism: q.organism.id,
-      genes: q.genesText
+    return self.searchPromise = Promise.resolve().cancellable().then(function(){
+      return $$search({
+        organism: q.organism.id,
+        genes: q.genesText
+      });
     }).then(function( searchResult ){
       for( var i in searchResult ){
         self[i] = searchResult[i];
@@ -36,9 +40,30 @@ function( $$search, cy ){
 
       self.loadGraph();
 
+      self.searching = false;
+      self.searchPromise = null;
+
       PubSub.publish('result.searched', self);
+    }).catch(function( err ){
+      self.searching = false;
+      self.searchPromise = null;
+
+      throw err;
     });
 
+  };
+
+  rfn.cancel = function(){
+    var self = this;
+
+    if( self.searchPromise ){
+      PubSub.publish('result.cancel', self);
+      self.searchPromise.cancel('A search was cancelled');
+    }
+  };
+
+  rfn.cancellable = function(){
+    return this.searchPromise != null;
   };
 
   rfn.loadGraph = function(){
