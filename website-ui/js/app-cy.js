@@ -21,7 +21,7 @@ function(  ){
           'width': 'mapData(score, 0, 1, 20, 60)',
           'height': 'mapData(score, 0, 1, 20, 60)',
           'content': 'data(symbol)',
-          'font-size': 6,
+          'font-size': 8,
           'text-valign': 'center',
           'text-halign': 'center',
           'background-color': '#888',
@@ -38,8 +38,8 @@ function(  ){
           'border-width': 6,
           'border-color': '#AAD8FF',
           'border-opacity': 0.5,
-          'background-color': '#777',
-          'text-outline-color': '#777'
+          'background-color': '#77828C',
+          'text-outline-color': '#77828C'
         }
       },
 

@@ -259,6 +259,8 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
 
     self.settingGenes = true;
 
+    //$('#query-genes-textarea').css('white-space', 'normal'); // ios8 hack
+
     self.genesText = self.organism.defaultGenes.map(function( g ){
       return g.symbol;
     }).join('\n');

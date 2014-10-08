@@ -1,9 +1,9 @@
 <div id="query" ng-controller="QueryCtrl" class="query query-expanded-{{query.expanded ? true : false}} query-ready-{{query.ready ? true : false}} query-app-ready-{{query.appReady ? true : false}} query-splashed-{{query.splashed ? true : false}} query-searching-{{query.result && query.result.searching ? true : false}}">
-  <div class="query-slide-hider"></div>
-
   <div class="query-progress">
     <div class="query-progress-value" style="width: {{query.$$search.progress}}%"></div>
   </div>
+
+  <div id="query-qtip-viewport" class="query-qtip-viewport"></div>
 
   <div class="query-item query-button query-expander activatable" on-tap="query.toggleExpand()"><span class="query-expander-icon fa fa-chevron-right"></span></div>
   
@@ -11,7 +11,7 @@
     <div id="query-organism" class="query-item query-button query-organism activatable">
       <span class="query-organism-icon {{query.organism.icon}}"></span>
     </div>
-    <qtip target="query-organism" class="query-organism-select" qtip-class="qtip-no-padding qtip-query-aligned">
+    <qtip qtip-target="query-organism" qtip-viewport-target="query-qtip-viewport" class="query-organism-select" qtip-class="qtip-no-padding qtip-query-aligned">
       <div class="query-organism-select-item clearfix activatable-bg" ng-repeat="org in query.organisms track by org.id" on-tap="query.setOrganism( org )">
         <span class="query-organism-select-radio radio radio-{{query.organism === org}}"></span>
         <span class="query-organism-select-icon" bindonce bo-class="org.icon"></span>
@@ -20,10 +20,10 @@
     </qtip>
 
     <div class="query-item query-genes">
-      <a class="query-genes-example ng-animate-fade plain-link" ng-show="!query.validatingGenes && !query.genesExpanded" on-tap="query.setExampleGenes()">e.g.</a>
+      <a class="query-genes-example ng-animate-fade plain-link" ng-show="!query.validatingGenes && !query.genesExpanded && !query.genesText" on-tap="query.setExampleGenes()">e.g.</a>
       <span class="query-genes-loader" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
 
-      <div class="query-genes-expander" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
+      <div class="query-genes-expander scrollable" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
         <div id="query-genes-validation" class="query-genes-validation" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }">
           <div class="query-genes-validation-entry" ng-repeat="vEntry in query.geneValidations">
             <span class="bio-helix query-gene-valid-icon" ng-if="vEntry.type === 'VALID'"></span>
@@ -33,7 +33,7 @@
             <span class="bio-helix query-gene-duplicate-icon" ng-if="vEntry.type === 'DUPLICATE'"></span>
           </div>
         </div>
-        <textarea id="query-genes-textarea" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" ng-jquery-plugin="{ autosize: {} }"></textarea>
+        <textarea id="query-genes-textarea" wrap="off" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" ng-jquery-plugin="{ autosize: {} }"></textarea>
       </div>
 
       <popover class="query-genes-expander-instr bottom popover-help ng-animate-fade" ng-show="query.genesExpanded">
@@ -43,7 +43,7 @@
     </div>
 
     <div id="query-more" class="query-item query-button query-more activatable"><span class="fa fa-ellipsis-v"></span></div>
-    <qtip target="query-more" class="query-more-content scrollable" qtip-class="qtip-no-padding qtip-query-aligned" qtip-pos-my="top right" qtip-pos-at="bottom center" qtip-scope-id="queryMore" qtip-digest-on-show="true">
+    <qtip qtip-target="query-more" qtip-viewport-target="query-qtip-viewport" class="query-more-content scrollable" qtip-class="qtip-no-padding qtip-query-aligned" qtip-scope-id="queryMore" qtip-digest-on-show="true">
       
       <div class="query-network-groups-header">
 
@@ -54,7 +54,7 @@
           </span>
 
           <span class="query-network-groups-master-checker-options" ng-show="query.showingNetworkCheckOptions">
-            Enable: 
+            <span class="fa fa-check"></span> Enable: 
             <a class="query-network-groups-master-checker-option" ng-repeat="opt in query.setNetworkOptions track by $index" bindonce bo-text="opt" on-tap="query.setNetworks(opt)"></a>
           </span>
         </span>
@@ -65,7 +65,7 @@
 
         <span class="query-network-groups-sorter" ng-hide="query.showingNetworkCheckOptions">
           <span class="query-network-groups-sorter-options" ng-show="query.showingNetworkSortOptions">
-            Sort by:
+            <span class="fa fa-sort"></span> Sort by:
             <a class="query-network-groups-sorter-option" ng-repeat="factor in query.networkSortFactors track by $index" bindonce bo-text="factor.name" on-tap="query.sortNetworksBy(factor)" ng-class="{ 'query-network-groups-sorter-option-selected': query.selectedNetworkSortFactor.name === factor.name }"></a>
           </span>
 

@@ -300,7 +300,7 @@ gulp.task('watch', ['prewatch'], function(){
   // rebuild all less when at least one file changed
   gulp.watch( paths.css, function(e){
     runSequence( 'css-unmin', function(){
-      livereload.changed( e );
+      livereload.changed('css-build/all.css');
     } );
   } );
 

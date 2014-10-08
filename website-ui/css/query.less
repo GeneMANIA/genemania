@@ -1,6 +1,6 @@
 // container
 @qH: 2.5em;
-@qItemW: @qH * 1.25;
+@qItemW: @qH * 1.125;
 @qBg: rgba(240, 240, 240, 0.85); //#eee;
 @qSepColor: darken(@qBg, 10%);
 @qBorderColor: darken(@qBg, 1%);
@@ -16,12 +16,12 @@
 @qGenesH: @qH - 2 * @qGenesMargin;
 @qGenesExpH: 10em;
 @qGenesValW: 1.333em;
-@qGenesLineHeight: 1.25em;
+@qGenesLineHeight: 18px;
 @qGenesPaddingLeft: 3em;
 @qGenesAniDelay: 0.25s;
 
 // expander
-@qExpAniDur: 0.15s;
+@qExpAniDur: 0.25s;
 @qExpW: 3*@qItemW + @qGenesW + 2*@qGenesMargin + 0.25em;
 
 // calculated query width
@@ -51,7 +51,8 @@
 	border-left-color: darken(@qBorderColor, 5%);
 	border-right-color: darken(@qBorderColor, 5%);
 
-	.transition-property( left, top );
+	.transform( translate3d(0, 0, 0) ); // hopefully makes (left,top) ani faster
+	.transition-property( transform );
 	.transition-duration( @qMoveAniSpd );
 }
 
@@ -60,9 +61,7 @@
 }
 
 .query-splashed-false {
-	top: 4.75em;
-	left: 50%;
-	margin-left: -0.5 * @qW;
+	.transform( translate3d(0, 75px, 0) );
 }
 
 .query-expander {
@@ -87,20 +86,26 @@
 .query-expander-content {
 	border-left: 1px solid @qSepColor;
 
-	.transition-property( opacity, margin-left );
-	.transition-duration( @qExpAniDur );
+	//.transition-property( opacity, left );
+	//.transition-duration( @qExpAniDur );
 
-	margin-left: 0;
-	opacity: 1;
+	// margin-left: 0;
+	// opacity: 1;
 
-	.transform( translate3d(0, 0, 0) ); // hopefully makes ani faster
+	//.transform( translate3d(0, 0, 0) ); // hopefully makes ani faster
+
+	.animated;
+	.fadeIn;
 }
 
 .query-expanded-false .query-expander-content {
-	@offset: @qExpW + @qItemW;
+	display: none;
+}
 
-	opacity: 0;
-	margin-left: -@offset;
+.query-expanded-false {
+	// .animated;
+	// .fadeOutLeft;
+	// pointer-events: none;
 }
 
 .query-slide-hider {
@@ -149,7 +154,7 @@
 
 .query-more-content {
 	width: @qMoreW;
-	height: @qMoreH;
+	max-height: 80%;
 	overflow: hidden;
 }
 
@@ -174,4 +179,14 @@
 
 	.transition-property( width, opacity );
 	.transition-duration( 50ms );
+}
+
+.query-qtip-viewport {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 100%;
+	height: 999999px;
+	// background: red;
+	pointer-events: none;
 }

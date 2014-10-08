@@ -8,7 +8,9 @@ app.directive('qtip', function(){
     },
     link: function( $scope, $ele, attrs ){
       var $callingScope = $scope.$parent;
-      var $target = $('#' + attrs.target);
+      var $target = $('#' + attrs.qtipTarget);
+      var $posTarget = attrs.qtipPosTarget ? $('#' + attrs.qtipPosTarget) : undefined;
+      var $vpTarget = attrs.qtipViewportTarget ? $('#' + attrs.qtipViewportTarget) : undefined;
       var showEvent = attrs.showEvent || 'click';
       var hideEvent = attrs.hideEvent || 'unfocus click';
       var title = attrs.title;
@@ -30,7 +32,10 @@ app.directive('qtip', function(){
 
       if( attrs.qtipShow ){
         $callingScope.$watch(attrs.qtipShow, function(val){
-          var tooltip = $target.qtip('api').elements.tooltip;
+          var api = $target.qtip('api');
+          if( !api ){ return; } // or else err
+
+          var tooltip = api.elements.tooltip;
           var shown = tooltip && tooltip.is(':visible');
           var show = !shown && val;
           var hide = shown && !val;
@@ -63,11 +68,12 @@ app.directive('qtip', function(){
           my: posMy,
           at: posAt,
           effect: false,
-          viewport: true,
+          viewport: $vpTarget ? $vpTarget : true,
           adjust: {
             method: 'shift flipinvert flip',
             scroll: false
-          }
+          },
+          target: $posTarget
         },
 
         show: {

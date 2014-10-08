@@ -9,6 +9,7 @@
 	@c: #fff;
 	@bw: 1px;
 
+	//box-sizing: border-box;
 	background: @c;
 	border: @bw solid darken(@c, 10%);
 	position: absolute;
@@ -19,8 +20,8 @@
 	overflow: hidden;
 	overflow-y: scroll;
 
-	.transition-property( height );
-	.transition-duration( @qExpAniDur );
+	// .transition-property( height );
+	// .transition-duration( @qExpAniDur );
 }
 
 .query-genes-expander-expanded {
@@ -41,6 +42,8 @@
 }
 
 .query-genes-validation {
+	.monospace;
+
 	position: absolute;
 	left: 0;
 	top: 0;
@@ -63,13 +66,21 @@
 	opacity: 0.333;
 }
 
+.query-genes-validation-entry {
+	height: @qGenesLineHeight;
+	line-height: @qGenesLineHeight;
+}
+
 .query-genes-validation-entry * {
 	//font-size: 0.8em;
 }
 
 .query-genes-textarea {
+	.monospace;
+
 	@padding: 0.125em;
 
+	resize: none;
 	position: absolute;
 	left: 0;
 	padding-left: @qGenesValW;
@@ -78,7 +89,8 @@
 	height: @qGenesExpH;
 	overflow: hidden;
 	line-height: @qGenesLineHeight;
-	white-space: nowrap;
+	//white-space: nowrap;
+	width: 999999px; // workaround for nowrap
 
 	// background: rgba(255, 0, 0, 0.5);
 	// background: #fff;
@@ -87,12 +99,11 @@
 .query-genes-example {
 	position: absolute;
 	right: 0;
-	top: 1px;
+	top: 0;
 	padding: 0 0.25em;
 	height: @qGenesH;
 	line-height: @qGenesH;
 	z-index: 999;
-	background: #fff;
 	border-bottom-left-radius: 0.25em;
 
 	.transition-delay( @qGenesAniDelay );
@@ -107,7 +118,7 @@
 	line-height: @qGenesH;
 	padding: 0 0.25em;
 	z-index: 999999;
-	background: rgba(255, 255, 255, 0.8);
+	//text-shadow: 0 2px 1px #fff, 0 -2px 1px #fff, -2px 0 1px #fff, 2px 0 1px #fff;
 	border-bottom-left-radius: 0.25em;
 
 	.transition-delay( @qGenesAniDelay );
