@@ -152,6 +152,25 @@
 	color: #fff;
 }
 
+.query-search-icon {
+	font-size: 2em;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -0.5em;
+	margin-top: -0.5em;
+	opacity: 0.666;
+}
+
+.query-searching-true .query-submit {
+
+}
+
+.query-searching-true .query-search-icon {
+	.fa-spin;
+	opacity: 1;
+}
+
 .query-more-content {
 	width: @qMoreW;
 	max-height: 80%;
@@ -172,6 +191,11 @@
 	overflow: hidden;
 }
 
+.query-expanded-false .query-progress {
+	width: @qItemW;
+	border-radius: @qBorderRadius;
+}
+
 .query-progress-value {
 	background: @BUTTON_COLOR;
 	width: 0;
@@ -190,3 +214,5 @@
 	// background: red;
 	pointer-events: none;
 }
+
+

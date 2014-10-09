@@ -1,4 +1,4 @@
-<div id="query" ng-controller="QueryCtrl" class="query query-expanded-{{query.expanded ? true : false}} query-ready-{{query.ready ? true : false}} query-app-ready-{{query.appReady ? true : false}} query-splashed-{{query.splashed ? true : false}} query-searching-{{query.result && query.result.searching ? true : false}}">
+<div id="query" ng-controller="QueryCtrl" class="query query-expanded-{{query.expanded ? true : false}} query-ready-{{query.ready ? true : false}} query-app-ready-{{query.appReady ? true : false}} query-splashed-{{query.splashed ? true : false}} query-searching-{{query.result && query.result.searchPromise ? true : false}}">
   <div class="query-progress">
     <div class="query-progress-value" style="width: {{query.$$search.progress}}%"></div>
   </div>
@@ -20,7 +20,7 @@
     </qtip>
 
     <div class="query-item query-genes">
-      <a class="query-genes-example ng-animate-fade plain-link" ng-show="!query.validatingGenes && !query.genesExpanded && !query.genesText" on-tap="query.setExampleGenes()">e.g.</a>
+      <a class="query-genes-example ng-animate-fade plain-link" ng-show="!query.validatingGenes && !query.genesExpanded || !query.genesText" on-tap="query.setExampleGenes()">e.g.</a>
       <span class="query-genes-loader" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
 
       <div class="query-genes-expander scrollable" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
@@ -133,8 +133,11 @@
     </qtip>
     
     <div class="query-item query-button query-submit activatable" on-tap="query.searchOrCancel()">
+      <span class="query-search-icon spiral fa"></span>
+    <!--
       <span ng-show="query.result && query.result.searchPromise" class="fa fa-circle-o-notch fa-spin"></span>
       <span ng-show="!query.result || !query.result.searchPromise" class="fa fa-search"></span>
+    -->
     </div>
   </div>
 </div>
