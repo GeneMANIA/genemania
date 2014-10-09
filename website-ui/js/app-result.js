@@ -31,7 +31,8 @@ function( $$search, cy ){
     return self.searchPromise = Promise.resolve().cancellable().then(function(){
       return $$search({
         organism: q.organism.id,
-        genes: q.genesText
+        genes: q.genesText,
+        weighting: q.weighting.value
       });
     }).then(function( searchResult ){
       for( var i in searchResult ){

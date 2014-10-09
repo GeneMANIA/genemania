@@ -34,12 +34,14 @@
 
 .query-genes-expander-expanded .query-genes-validation,
 .query-genes-expander-expanded .query-genes-textarea {
-	min-height: @qGenesExpH;
+	height: @qGenesExpH;
 }
 
 .query-genes-expander-instr {
+	top: @qGenesExpH;
+
 	position: absolute;
-	top: @qGenesExpH - 0.25em;
+	margin-top: -0.25em;
 	width: 130%;
 	margin-left: -15%;
 }
@@ -89,14 +91,17 @@
 	padding-left: @qGenesValW;
 	top: 0;
 	width: @qGenesW - @qGenesValW - @padding;
-	height: @qGenesExpH;
 	overflow: hidden;
 	line-height: @qGenesLineHeight;
 	//white-space: nowrap;
 	width: 999999px; // workaround for nowrap
 
-	// background: rgba(255, 0, 0, 0.5);
+	//background: rgba(255, 0, 0, 0.5);
 	// background: #fff;
+}
+
+.query-genes-expander-expanded .query-genes-textarea {
+	min-height: @qGenesExpH;
 }
 
 .query-genes-example {
@@ -146,3 +151,4 @@
 .query-gene-invalid-icon {
 	color: @VALIDATION_ERROR_COLOR;
 }
+

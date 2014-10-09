@@ -95,12 +95,14 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
 
     self.networkSortFactors = netSortFactors;
     self.setNetworkOptions = netSetOpts;
+    self.weighting = config.networks.defaultWeighting;
 
     updateQParamsFromOrg( self );
 
     self.sortNetworksBy('first author');
   };
   var q = Query;
+  var qfn = q.prototype;
 
   function updateQParamsFromOrg( self ){
     self.networkGroups = copy( networkGroups[ self.organism.id ] );
@@ -143,21 +145,9 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
     self.attributeGroups = copy( attributeGroups[ self.organism.id ] );
   }
 
-  // flat list of weighting types
-  var wg = q.weightings = config.networks.weightings;
-
-  // allow getting weight by const/val
-  for( var i = 0; i < q.weightings.length; i++ ){
-    var w = q.weightings[i];
-
-    q.weightings[ w.value ] = w;
-  }
-
-  // categorised groups of weightings used in ui
-  q.weightingGroups = config.networks.weightingGroups;
-
-  var qfn = q.prototype;
-
+  // ref some stuff into query
+  qfn.weightings = config.networks.weightings; // flat list of weighting types
+  qfn.weightingGroups = config.networks.weightingGroups; // categorised groups of weightings used in ui
   qfn.$$search = $$search;
 
   // 
@@ -340,6 +330,10 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
   // weighting
   qfn.setWeighting = function( w ){
     this.weighting = w;
+  };
+
+  qfn.toggleEditWeighting = function(){
+    this.editingWeighting = this.editingWeighting ? false : true;
   };
 
 

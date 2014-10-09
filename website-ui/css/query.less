@@ -14,7 +14,7 @@
 @qGenesW: 10em;
 @qGenesMargin: 0.25em;
 @qGenesH: @qH - 2 * @qGenesMargin;
-@qGenesExpH: 10em;
+@qGenesExpH: 140px;
 @qGenesValW: 1.333em;
 @qGenesLineHeight: 18px;
 @qGenesPaddingLeft: 3em;
@@ -215,4 +215,36 @@
 	pointer-events: none;
 }
 
+.query-weighting-group + .query-weighting-group {
+	margin-top: 0.5em;
+}
 
+.query-weightings-footer {
+	text-align: center;
+	background: @HEADER_COLOR;
+}
+
+.query-weighting-group-name {
+	padding-left: 0.25em;
+}
+
+.query-weighting {
+	font-size: 0.85em;
+	cursor: pointer;
+}
+
+.query-weighting {
+	border-top: 1px solid @SEPARATOR_COLOR;
+}
+
+.query-weighting:last-child {
+	border-bottom: 1px solid @SEPARATOR_COLOR;
+}
+
+.query-weighting-radio {
+	margin-left: 0.5em;
+}
+
+.query-weightings-edit-link {
+	margin-left: 0.25em;
+}

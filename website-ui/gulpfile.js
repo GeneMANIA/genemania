@@ -60,6 +60,7 @@ var paths = {
     './css/data.less',
     './css/query.less',
     './css/query-genes.less',
+    './css/query-genes-sizes.less',
     './css/query-organisms.less',
     './css/query-networks.less'
   ],

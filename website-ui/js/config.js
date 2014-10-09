@@ -1,7 +1,7 @@
 var config = {
   service: {
-    // baseUrl: 'http://localhost:8080/genemania/json/',
-    baseUrl: 'http://192.168.81.196:8080/genemania/json/'
+    // baseUrl: 'http://localhost:8080/genemania/json/'
+    baseUrl: 'http://192.168.81.119:8080/genemania/json/'
   },
 
   query: {
@@ -63,4 +63,6 @@ var config = {
     { name: 'Gene Ontology (GO) weighting', weightings: [ wg.BP, wg.MF, wg.CC ] },
     { name: 'Equal weighting', weightings: [ wg.AVERAGE, wg.AVERAGE_CATEGORY ] }
   ];
+
+  config.networks.defaultWeighting = wg.AUTOMATIC_SELECT;
 })();

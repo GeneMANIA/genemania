@@ -1,6 +1,5 @@
 .query-network-groups-header {
-	background: #f0f0f0;
-	border-bottom: 1px solid @SEPARATOR_COLOR;
+	background: @HEADER_COLOR;
 	height: @qNetGrsTitleH;
 }
 
@@ -59,8 +58,14 @@
 
 .query-network-groups {
 	height: @qNetGrsH;
-	border-bottom: 1px solid darken(@SEPARATOR_COLOR, 20%);
 	position: relative;
+}
+
+@media all
+and ( min-height : (3 * @qNetGrsH) ) {
+	.query-network-groups {
+		height: 2 * @qNetGrsH;
+	}
 }
 
 .query-network-group {
@@ -96,13 +101,15 @@
 }
 
 .query-network-name {
-	width: @qMoreW - 7em - @qNetNameSpacing;
-	// background: rgba(0, 255, 0, 0.5);
+	width: @qMoreW - @qNetNameSpacing;
+	//background: rgba(0, 255, 0, 0.5);
+	display: inline-block;
 }
 
 .query-network-group-name {
-	width: @qMoreW - 4em - @qNetNameSpacing;
-	// background: rgba(255, 0, 0, 0.5);
+	width: @qMoreW - @qNetNameSpacing;
+	//background: rgba(255, 0, 0, 0.5);
+	display: inline-block;
 }
 
 .query-network-expander,
