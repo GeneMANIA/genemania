@@ -11,4 +11,12 @@
 	border-color: #d8d8d8;
 	border-bottom-width: 2px;
 	background: rgba(255, 255, 255, 0.93) !important;
+
+	.transform( translate3d(0, 0, 0) ); // workaround for chrome scroll
+}
+
+// hacky workaround for buggy qtips on resize
+.qtip-top-pointing-fix .qtip-tip {
+	display: block !important;
+	top: -12px !important;
 }

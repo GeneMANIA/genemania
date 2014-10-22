@@ -6,6 +6,11 @@
 @qBorderColor: darken(@qBg, 1%);
 @qBorderRadius: 0.5em;
 @qMoveAniSpd: 0.25s;
+@qMargin: 0.25em;
+
+// splash
+@qSplashX: 0;
+@qSplashY: 75px;
 
 // organism
 @qOrgP: 0.5em;
@@ -37,6 +42,9 @@
 @qNetGrsH: 16em;
 @qNetGrsTitleH: 1.5em;
 
+// qtips
+@qQtipVpOffset: 10px;
+
 .query {
 	position: absolute;
 	left: 0;
@@ -61,7 +69,7 @@
 }
 
 .query-splashed-false {
-	.transform( translate3d(0, 75px, 0) );
+	.transform( translate3d(@qSplashX, @qSplashY, 0) );
 }
 
 .query-expander {
@@ -173,8 +181,9 @@
 
 .query-more-content {
 	width: @qMoreW;
-	max-height: 80%;
-	overflow: hidden;
+	//height: 100%;
+	//max-height: 80%;
+	//overflow: hidden;
 }
 
 .query-progress {
@@ -207,12 +216,18 @@
 
 .query-qtip-viewport {
 	position: absolute;
+	margin: 0 @qMargin;
 	left: 0;
-	right: 0;
-	top: 100%;
-	height: 999999px;
-	// background: red;
+	top: @qH;
+	width: @qW;
+	bottom: 0;
+	//background: rgba(255, 0, 0, 0.25);
 	pointer-events: none;
+	z-index: 9999999;
+}
+
+.query-qtip-viewport-splashed-false {
+	margin-top: @qSplashY + 0;
 }
 
 .query-weighting-group + .query-weighting-group {

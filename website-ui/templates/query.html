@@ -1,159 +1,167 @@
-<div id="query" ng-controller="QueryCtrl" class="query query-expanded-{{query.expanded ? true : false}} query-ready-{{query.ready ? true : false}} query-app-ready-{{query.appReady ? true : false}} query-splashed-{{query.splashed ? true : false}} query-searching-{{query.result && query.result.searchPromise ? true : false}}">
-  <div class="query-progress">
-    <div class="query-progress-value" style="width: {{query.$$search.progress}}%"></div>
-  </div>
+<div ng-controller="QueryCtrl">
 
-  <div id="query-qtip-viewport" class="query-qtip-viewport"></div>
-
-  <div class="query-item query-button query-expander activatable" on-tap="query.toggleExpand()"><span class="query-expander-icon fa fa-chevron-right"></span></div>
-  
-  <div class="query-item query-expander-content">
-    <div id="query-organism" class="query-item query-button query-organism activatable">
-      <span class="query-organism-icon {{query.organism.icon}}"></span>
+  <div id="query" class="query query-expanded-{{query.expanded ? true : false}} query-ready-{{query.ready ? true : false}} query-app-ready-{{query.appReady ? true : false}} query-splashed-{{query.splashed ? true : false}} query-searching-{{query.result && query.result.searchPromise ? true : false}}">
+    <div class="query-progress">
+      <div class="query-progress-value" style="width: {{query.$$search.progress}}%"></div>
     </div>
-    <qtip qtip-target="query-organism" qtip-viewport-target="query-qtip-viewport" class="query-organism-select" qtip-class="qtip-no-padding qtip-query-aligned">
-      <div class="query-organism-select-item clearfix activatable-bg" ng-repeat="org in query.organisms track by org.id" on-tap="query.setOrganism( org )">
-        <span class="query-organism-select-radio radio radio-{{query.organism === org}}"></span>
-        <span class="query-organism-select-icon" bindonce bo-class="org.icon"></span>
-        <span class="query-organism-select-name" bindonce bo-bind="org.alias"></span>
+
+    <div class="query-item query-button query-expander activatable" on-tap="query.toggleExpand()"><span class="query-expander-icon fa fa-chevron-right"></span></div>
+    
+    <div class="query-item query-expander-content">
+      <div id="query-organism" class="query-item query-button query-organism activatable">
+        <span class="query-organism-icon {{query.organism.icon}}"></span>
       </div>
-    </qtip>
-
-    <div class="query-item query-genes">
-      <a class="query-genes-example ng-animate-fade plain-link" ng-show="!query.validatingGenes && !query.genesExpanded || !query.genesText" on-tap="query.setExampleGenes()">e.g.</a>
-      <span class="query-genes-loader" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
-
-      <div class="query-genes-expander scrollable" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
-        <div id="query-genes-validation" class="query-genes-validation" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }">
-          <div class="query-genes-validation-entry" ng-repeat="vEntry in query.geneValidations">
-            <span class="bio-helix query-gene-valid-icon" ng-if="vEntry.type === 'VALID'"></span>
-            <span class="fa fa-question query-gene-invalid-icon" ng-if="vEntry.type === 'INVALID'"></span>
-            <span class="fa fa-minus query-gene-empty-icon" ng-if="vEntry.type === 'EMPTY'"></span>
-            <span class="fa fa-tag query-gene-tag-icon" ng-if="vEntry.type === 'TAG'"></span>
-            <span class="bio-helix query-gene-duplicate-icon" ng-if="vEntry.type === 'DUPLICATE'"></span>
+      <qtip qtip-target="query-organism" qtip-viewport-target="query-qtip-viewport" qtip-id="query-organism" qtip-adjust-method="shift" qtip-adjust-resize="false" qtip-class="qtip-no-padding qtip-query-aligned qtip-top-pointing-fix">
+        <div id="query-organism-select" class="query-organism-select scrollable">
+          <div class="query-organism-select-item clearfix activatable-bg" ng-repeat="org in query.organisms track by org.id" on-tap="query.setOrganism( org )">
+            <span class="query-organism-select-radio radio radio-{{query.organism === org}}"></span>
+            <span class="query-organism-select-icon" bindonce bo-class="org.icon"></span>
+            <span class="query-organism-select-name" bindonce bo-bind="org.alias"></span>
           </div>
         </div>
-        <textarea id="query-genes-textarea" wrap="off" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" ng-jquery-plugin="{ autosize: {} }"></textarea>
-      </div>
+      </qtip>
 
-      <popover class="query-genes-expander-instr bottom popover-help ng-animate-fade" ng-show="query.genesExpanded">
-        <span class="fa fa-info-circle"></span> Enter one gene per line
-      </popover>
+      <div class="query-item query-genes">
+        <a class="query-genes-example ng-animate-fade plain-link" ng-show="!query.validatingGenes && !query.genesExpanded || !query.genesText" on-tap="query.setExampleGenes()">e.g.</a>
+        <span class="query-genes-loader" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
 
-    </div>
+        <div class="query-genes-expander scrollable" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
+          <div id="query-genes-validation" class="query-genes-validation" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }">
+            <div class="query-genes-validation-entry" ng-repeat="vEntry in query.geneValidations">
+              <span class="bio-helix query-gene-valid-icon" ng-if="vEntry.type === 'VALID'"></span>
+              <span class="fa fa-question query-gene-invalid-icon" ng-if="vEntry.type === 'INVALID'"></span>
+              <span class="fa fa-minus query-gene-empty-icon" ng-if="vEntry.type === 'EMPTY'"></span>
+              <span class="fa fa-tag query-gene-tag-icon" ng-if="vEntry.type === 'TAG'"></span>
+              <span class="bio-helix query-gene-duplicate-icon" ng-if="vEntry.type === 'DUPLICATE'"></span>
+            </div>
+          </div>
+          <textarea id="query-genes-textarea" wrap="off" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" ng-jquery-plugin="{ autosize: {} }"></textarea>
+        </div>
 
-    <div id="query-more" class="query-item query-button query-more activatable"><span class="fa fa-ellipsis-v"></span></div>
-    <qtip qtip-target="query-more" qtip-viewport-target="query-qtip-viewport" class="query-more-content" qtip-class="qtip-no-padding qtip-query-aligned" qtip-scope-id="queryMore" qtip-digest-on-show="true">
-      
-      <div ng-show="!query.editingWeighting" class="query-network-groups-header">
-
-        <span class="query-network-groups-master-checker" ng-hide="query.showingNetworkSortOptions">
-          <span class="query-network-groups-master-checker-icon activatable-relative" on-tap="query.toggleNetworkCheckOptions()">   
-            <span ng-if="!query.showingNetworkCheckOptions"><span class="fa fa-check"></span><span class="fa fa-ellipsis-h"></span></span>
-            <span ng-if="query.showingNetworkCheckOptions"><span class="fa fa-times"></span></span>
-          </span>
-
-          <span class="query-network-groups-master-checker-options" ng-show="query.showingNetworkCheckOptions">
-            <span class="fa fa-check"></span> Enable: 
-            <a class="query-network-groups-master-checker-option" ng-repeat="opt in query.setNetworkOptions track by $index" bindonce bo-text="opt" on-tap="query.setNetworks(opt)"></a>
-          </span>
-        </span>
-
-        <span class="query-network-groups-title" ng-show="!query.showingNetworkSortOptions && !query.showingNetworkCheckOptions">
-          Networks
-        </span>
-
-        <span class="query-network-groups-sorter" ng-hide="query.showingNetworkCheckOptions">
-          <span class="query-network-groups-sorter-options" ng-show="query.showingNetworkSortOptions">
-            <span class="fa fa-sort"></span> Sort by:
-            <a class="query-network-groups-sorter-option" ng-repeat="factor in query.networkSortFactors track by $index" bindonce bo-text="factor.name" on-tap="query.sortNetworksBy(factor)" ng-class="{ 'query-network-groups-sorter-option-selected': query.selectedNetworkSortFactor.name === factor.name }"></a>
-          </span>
-
-          <span class="query-network-groups-sorter-icon activatable-relative" on-tap="query.toggleNetworkSortOptions()">  
-            <span ng-if="!query.showingNetworkSortOptions"><span class="fa fa-sort"></span><span class="fa fa-ellipsis-h"></span></span>
-            <span ng-if="query.showingNetworkSortOptions"><span class="fa fa-times"></span></span>
-          </span>
-        </span>
+        <popover class="query-genes-expander-instr bottom popover-help ng-animate-fade" ng-show="query.genesExpanded">
+          <span class="fa fa-info-circle"></span> Enter one gene per line
+        </popover>
 
       </div>
 
-      <div ng-show="!query.editingWeighting" class="query-network-groups scrollable scrollable-y" id="query-network-groups">
-        <div class="query-network-organism" bindonce ng-repeat="org in query.organisms track by org.id" ng-show="query.organism === org">
-          <div class="query-network-group" bindonce ng-repeat="netGr in org.networkGroups track by netGr.id">
-            <span class="query-network-group-check" ng-class="{ 'activatable-relative': netGr.interactionNetworks.length > 0 }" on-tap="query.toggleNetworkGroupSelection( netGr )"><span class="check check-{{netGr.selected}}"></span></span>
-            <span class="query-network-group-expander fa" ng-class="{ 'fa-caret-right': !netGr.expanded, 'fa-caret-down': netGr.expanded }"></span>
-            <span class="query-network-group-name activatable-relative" bo-text="netGr.name" on-tap-scroll-parent="#query-network-groups" on-tap-scroll="query.toggleNetworkGroupExpansion( netGr )"></span>
-            <span class="query-network-group-count">
-              <span ng-bind="netGr.selectedCount"></span>
-              /
-              <span ng-bind="(netGr.interactionNetworks.length || 0)"></span>
+      <div id="query-more" class="query-item query-button query-more activatable"><span class="fa fa-ellipsis-v"></span></div>
+      <qtip qtip-target="query-more" qtip-id="query-more" qtip-adjust-method="shift" qtip-adjust-resize="false" qtip-viewport-target="query-qtip-viewport" class="query-more-content" qtip-class="qtip-no-padding qtip-query-aligned qtip-top-pointing-fix" qtip-scope-id="queryMore" qtip-digest-on-show="true">
+        
+        <div ng-show="!query.editingWeighting" class="query-network-groups-header">
+
+          <span class="query-network-groups-master-checker" ng-hide="query.showingNetworkSortOptions">
+            <span class="query-network-groups-master-checker-icon activatable-relative" on-tap="query.toggleNetworkCheckOptions()">   
+              <span ng-if="!query.showingNetworkCheckOptions"><span class="fa fa-check"></span><span class="fa fa-ellipsis-h"></span></span>
+              <span ng-if="query.showingNetworkCheckOptions"><span class="fa fa-times"></span></span>
             </span>
 
-            <div class="query-networks" ng-if="netGr.expanded">
-              <div class="query-network" bindonce ng-repeat="net in netGr.interactionNetworks track by net.id">
-                <span class="query-network-check activatable-relative" on-tap="query.toggleNetworkSelection( net )"><span class="check check-{{net.selected}}"></span></span>
-                <span class="query-network-expander fa" ng-class="{ 'fa-caret-right': !net.expanded, 'fa-caret-down': net.expanded }"></span>
-                <span class="query-network-name activatable-relative" bo-text="net.name" on-tap-scroll-parent="#query-network-groups" on-tap-scroll="query.toggleNetworkExpansion( net )"></span>
-                
-                <div class="query-network-info" ng-if="net.expanded">
-                  <p bo-if="net.metadata.title">
-                    <span class="fa fa-file-o"></span>
-                    <span class="query-network-title" bo-text="net.metadata.title"></span>
-                    <span class="query-network-authors" bo-text="net.metadata.shortAuthors"></span>
-                    <span class="query-network-year">(<span bo-text="net.metadata.yearPublished"></span>)</span>.
-                    <span class="query-network-publication" bo-text="net.metadata.publicationName"></span>
-                    <a target="_blank" bo-href="net.metadata.url"><span class="fa fa-external-link"></span></a>
-                  </p>
+            <span class="query-network-groups-master-checker-options" ng-show="query.showingNetworkCheckOptions">
+              <span class="fa fa-check"></span> Enable: 
+              <a class="query-network-groups-master-checker-option" ng-repeat="opt in query.setNetworkOptions track by $index" bindonce bo-text="opt" on-tap="query.setNetworks(opt)"></a>
+            </span>
+          </span>
 
-                  <p>
-                    <span class="query-network-source">
-                      <span class="fa fa-share-alt"></span>
-                      <span bo-text="net.metadata.networkType"></span>
-                      <a target="_blank" href="http://pages.genemania.org/help/#GeneMANIA_network_categories"><spam class="fa fa-info-circle"></span></a>
-                      with <span bo-text="net.metadata.interactionCountFormatted"></span> interactions from
-                      <span bo-text="net.metadata.sourceName"></span> <a target="_blank" bo-href="net.metadata.sourceUrl"><span class="fa fa-external-link"></span></a>
-                    </span>
-                  </p>
+          <span class="query-network-groups-title" ng-show="!query.showingNetworkSortOptions && !query.showingNetworkCheckOptions">
+            Networks
+          </span>
 
-                  <p bo-if="net.metadata.comment">
-                    <span class="query-network-comment">
-                      <span class="fa fa-info-circle"></span>
-                      <span bo-text="net.metadata.comment"></span>
-                    </span>
-                  </p>
+          <span class="query-network-groups-sorter" ng-hide="query.showingNetworkCheckOptions">
+            <span class="query-network-groups-sorter-options" ng-show="query.showingNetworkSortOptions">
+              <span class="fa fa-sort"></span> Sort by:
+              <a class="query-network-groups-sorter-option" ng-repeat="factor in query.networkSortFactors track by $index" bindonce bo-text="factor.name" on-tap="query.sortNetworksBy(factor)" ng-class="{ 'query-network-groups-sorter-option-selected': query.selectedNetworkSortFactor.name === factor.name }"></a>
+            </span>
 
-                  <p>
-                    <span class="query-network-tag" bindonce ng-repeat="tag in net.tags"><span class="fa fa-tag"></span>&nbsp;<span bo-text="tag.nameFormatted"></span></span>
-                  </p>
+            <span class="query-network-groups-sorter-icon activatable-relative" on-tap="query.toggleNetworkSortOptions()">  
+              <span ng-if="!query.showingNetworkSortOptions"><span class="fa fa-sort"></span><span class="fa fa-ellipsis-h"></span></span>
+              <span ng-if="query.showingNetworkSortOptions"><span class="fa fa-times"></span></span>
+            </span>
+          </span>
+
+        </div>
+
+        <div ng-show="!query.editingWeighting" class="query-network-groups scrollable scrollable-y" id="query-network-groups">
+          <div class="query-network-organism" bindonce ng-repeat="org in query.organisms track by org.id" ng-show="query.organism === org">
+            <div class="query-network-group" bindonce ng-repeat="netGr in org.networkGroups track by netGr.id">
+              <span class="query-network-group-check" ng-class="{ 'activatable-relative': netGr.interactionNetworks.length > 0 }" on-tap="query.toggleNetworkGroupSelection( netGr )"><span class="check check-{{netGr.selected}}"></span></span>
+              <span class="query-network-group-expander fa" ng-class="{ 'fa-caret-right': !netGr.expanded, 'fa-caret-down': netGr.expanded }"></span>
+              <span class="query-network-group-name activatable-relative" bo-text="netGr.name" on-tap-scroll-parent="#query-network-groups" on-tap-scroll="query.toggleNetworkGroupExpansion( netGr )"></span>
+              <span class="query-network-group-count">
+                <span ng-bind="netGr.selectedCount"></span>
+                /
+                <span ng-bind="(netGr.interactionNetworks.length || 0)"></span>
+              </span>
+
+              <div class="query-networks" ng-if="netGr.expanded">
+                <div class="query-network" bindonce ng-repeat="net in netGr.interactionNetworks track by net.id">
+                  <span class="query-network-check activatable-relative" on-tap="query.toggleNetworkSelection( net )"><span class="check check-{{net.selected}}"></span></span>
+                  <span class="query-network-expander fa" ng-class="{ 'fa-caret-right': !net.expanded, 'fa-caret-down': net.expanded }"></span>
+                  <span class="query-network-name activatable-relative" bo-text="net.name" on-tap-scroll-parent="#query-network-groups" on-tap-scroll="query.toggleNetworkExpansion( net )"></span>
+                  
+                  <div class="query-network-info" ng-if="net.expanded">
+                    <p bo-if="net.metadata.title">
+                      <span class="fa fa-file-o"></span>
+                      <span class="query-network-title" bo-text="net.metadata.title"></span>
+                      <span class="query-network-authors" bo-text="net.metadata.shortAuthors"></span>
+                      <span class="query-network-year">(<span bo-text="net.metadata.yearPublished"></span>)</span>.
+                      <span class="query-network-publication" bo-text="net.metadata.publicationName"></span>
+                      <a target="_blank" bo-href="net.metadata.url"><span class="fa fa-external-link"></span></a>
+                    </p>
+
+                    <p>
+                      <span class="query-network-source">
+                        <span class="fa fa-share-alt"></span>
+                        <span bo-text="net.metadata.networkType"></span>
+                        <a target="_blank" href="http://pages.genemania.org/help/#GeneMANIA_network_categories"><spam class="fa fa-info-circle"></span></a>
+                        with <span bo-text="net.metadata.interactionCountFormatted"></span> interactions from
+                        <span bo-text="net.metadata.sourceName"></span> <a target="_blank" bo-href="net.metadata.sourceUrl"><span class="fa fa-external-link"></span></a>
+                      </span>
+                    </p>
+
+                    <p bo-if="net.metadata.comment">
+                      <span class="query-network-comment">
+                        <span class="fa fa-info-circle"></span>
+                        <span bo-text="net.metadata.comment"></span>
+                      </span>
+                    </p>
+
+                    <p>
+                      <span class="query-network-tag" bindonce ng-repeat="tag in net.tags"><span class="fa fa-tag"></span>&nbsp;<span bo-text="tag.nameFormatted"></span></span>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div ng-show="query.editingWeighting" class="query-weighting-group" ng-repeat="wgGr in query.weightingGroups track by $index">
-        <div class="query-weighting-group-name" bindonce bo-text="wgGr.name"></div>
+        <div ng-show="query.editingWeighting" class="query-weighting-groups">
+          <div class="query-weighting-group" ng-repeat="wgGr in query.weightingGroups track by $index">
+            <div class="query-weighting-group-name" bindonce bo-text="wgGr.name"></div>
 
-        <div class="query-weighting activatable-bg" ng-repeat="wg in wgGr.weightings track by $index" on-tap="query.setWeighting(wg); query.toggleEditWeighting()">
-          <span class="query-weighting-radio radio radio-{{wg.value === query.weighting.value}}"></span>
-          <span class="query-weighting-name" bindonce bo-text="wg.name"></span>
+            <div class="query-weighting activatable-bg" ng-repeat="wg in wgGr.weightings track by $index" on-tap="query.setWeighting(wg); query.toggleEditWeighting()">
+              <span class="query-weighting-radio radio radio-{{wg.value === query.weighting.value}}"></span>
+              <span class="query-weighting-name" bindonce bo-text="wg.name"></span>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="query-weightings-footer" on-tap="query.toggleEditWeighting()">
-        <a ng-show="!query.editingWeighting" class="plain-link query-weightings-edit-link"><span class="fa fa-wrench"></span> Customise network weighting</a>
-        <a ng-show="query.editingWeighting" class="plain-link query-weightings-edit-link">Done</a>
-      </div>
+        <div class="query-weightings-footer" on-tap="query.toggleEditWeighting()">
+          <a ng-show="!query.editingWeighting" class="plain-link query-weightings-edit-link"><span class="fa fa-wrench"></span> Customise network weighting</a>
+          <a ng-show="query.editingWeighting" class="plain-link query-weightings-edit-link">Done</a>
+        </div>
 
-    </qtip>
-    
-    <div class="query-item query-button query-submit activatable" on-tap="query.searchOrCancel()">
-      <span class="query-search-icon spiral fa"></span>
-    <!--
-      <span ng-show="query.result && query.result.searchPromise" class="fa fa-circle-o-notch fa-spin"></span>
-      <span ng-show="!query.result || !query.result.searchPromise" class="fa fa-search"></span>
-    -->
+      </qtip>
+      
+      <div class="query-item query-button query-submit activatable" on-tap="query.searchOrCancel()">
+        <span class="query-search-icon spiral fa"></span>
+      <!--
+        <span ng-show="query.result && query.result.searchPromise" class="fa fa-circle-o-notch fa-spin"></span>
+        <span ng-show="!query.result || !query.result.searchPromise" class="fa fa-search"></span>
+      -->
+      </div>
     </div>
   </div>
+
+  <div id="query-qtip-viewport" class="query-qtip-viewport query-qtip-viewport-splashed-{{query.splashed ? true : false}}"></div>
+
 </div>
