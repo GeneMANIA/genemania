@@ -11,7 +11,7 @@
         var vp = document.getElementById('query-qtip-viewport');
 
         return [ 
-          { name: 'height', value: vp.clientHeight - 70 + 'px' }
+          { name: 'max-height', value: vp.clientHeight - 70 + 'px' }
         ];
       },
       after: qtipFix
@@ -27,7 +27,19 @@
         ];
       },
       after: qtipFix
-    }
+    },
+
+    {
+      id: 'query-weighting-groups',
+      handler: function( eles, e ){
+        var vp = document.getElementById('query-qtip-viewport');
+
+        return [ 
+          { name: 'max-height', value: vp.clientHeight - 50 + 'px' }
+        ];
+      },
+      after: qtipFix
+    },
   ];
 
   function getQueryQtipViewportHeight(){
@@ -51,6 +63,7 @@
 
   var handleDefns = _.debounce( function( e ){
     var css = '';
+    var afters = [];
 
     for( var i = 0; i < defns.length; i++ ){
       var defn = defns[i];
@@ -69,12 +82,22 @@
         css += selector + ' { ' + propsStr + ' } \n'; 
       }
 
-      setTimeout(function(){ // defer
-        defn.after && defn.after( eles, e );
-      }, 0);
+      if( defn.after ){
+        afters.push({
+          eles: eles,
+          fn: defn.after
+        });
+      }
     }
 
     stylesheet.textContent = css;
+
+    // call all the afters on next tick
+    setTimeout(function(){
+      for( var i = 0; i < afters.length; i++ ){
+        afters[i].fn( afters[i].eles, e );
+      }
+    }, 1);
   }, 150 );
 
   // when responsiveness should be applied

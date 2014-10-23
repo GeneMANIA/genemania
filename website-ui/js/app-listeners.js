@@ -57,6 +57,50 @@ app.directive('onTapPreventAll', ['$parse', function ($parse) {
   };
 }]);
 
+app.directive('onCtrlEnter', ['$parse', function ($parse) {
+  return function (scope, $ele, attr){
+
+    var handler = $parse(attr.onCtrlEnter);
+
+    $ele[0].addEventListener('keydown', function(evt){
+      if( (evt.keyCode == 10 || evt.keyCode == 13) && (evt.ctrlKey || evt.metaKey || evt.altKey) ){
+        evt.preventDefault();
+        handler(scope, { $event: evt });
+      }
+    });
+
+  };
+}]);
+
+app.directive('onLineSelect', ['$parse', function ($parse) {
+  return function (scope, $ele, attr){
+    var handler = $parse(attr.onLineSelect);
+    var ele = $ele[0];
+
+    var next = function(evt){
+      var chi = ele.selectionStart; // character i
+      var li = 0; // line i
+      var text = ele.value;
+
+      for( var i = 0; i < chi; i++ ){
+        if( text[i] === '\n' ){
+          li++;
+        }
+      }
+      console.log(i, li);
+
+      handler(scope, { $event: evt });
+    };
+
+    ele.addEventListener('change', next);
+    ele.addEventListener('selectstart', next);
+    ele.addEventListener('keydown', next);
+    ele.addEventListener('keypress', next);
+    ele.addEventListener('keyup', next);
+    ele.addEventListener('click', next);
+  };
+}]);
+
 $(function(){
   FastClick.attach(document); // so touch devices get click quick
 

@@ -29,13 +29,15 @@
           <div id="query-genes-validation" class="query-genes-validation" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }">
             <div class="query-genes-validation-entry" ng-repeat="vEntry in query.geneValidations">
               <span class="bio-helix query-gene-valid-icon" ng-if="vEntry.type === 'VALID'"></span>
-              <span class="fa fa-question query-gene-invalid-icon" ng-if="vEntry.type === 'INVALID'"></span>
+              <span class="fa query-gene-invalid-icon" ng-if="vEntry.type === 'INVALID'"></span>
               <span class="fa fa-minus query-gene-empty-icon" ng-if="vEntry.type === 'EMPTY'"></span>
               <span class="fa fa-tag query-gene-tag-icon" ng-if="vEntry.type === 'TAG'"></span>
               <span class="bio-helix query-gene-duplicate-icon" ng-if="vEntry.type === 'DUPLICATE'"></span>
             </div>
           </div>
-          <textarea id="query-genes-textarea" wrap="off" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" ng-jquery-plugin="{ autosize: {} }"></textarea>
+          <div id="query-genes-spellchecks" class="query-genes-spellchecks" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }" ng-bind="query.geneSpellchecks">
+          </div>
+          <textarea id="query-genes-textarea" wrap="off" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" ng-jquery-plugin="{ autosize: {} }" on-ctrl-enter="query.search()" on-line-select="query.describeGeneLine()"></textarea>
         </div>
 
         <popover class="query-genes-expander-instr bottom popover-help ng-animate-fade" ng-show="query.genesExpanded">
@@ -134,7 +136,7 @@
           </div>
         </div>
 
-        <div ng-show="query.editingWeighting" class="query-weighting-groups">
+        <div id="query-weighting-groups" class="query-weighting-groups scrollable" ng-show="query.editingWeighting">
           <div class="query-weighting-group" ng-repeat="wgGr in query.weightingGroups track by $index">
             <div class="query-weighting-group-name" bindonce bo-text="wgGr.name"></div>
 
@@ -145,15 +147,16 @@
           </div>
         </div>
 
-        <div class="query-weightings-footer" on-tap="query.toggleEditWeighting()">
-          <a ng-show="!query.editingWeighting" class="plain-link query-weightings-edit-link"><span class="fa fa-wrench"></span> Customise network weighting</a>
-          <a ng-show="query.editingWeighting" class="plain-link query-weightings-edit-link">Done</a>
+        <div class="query-weightings-footer activatable-bg" on-tap="query.toggleEditWeighting()">
+          <span ng-show="!query.editingWeighting" class="query-weightings-edit-link"><span class="fa fa-wrench"></span> Customise network weighting</span>
+          <span ng-show="query.editingWeighting" class="query-weightings-edit-link">Done</span>
         </div>
 
       </qtip>
       
       <div class="query-item query-button query-submit activatable" on-tap="query.searchOrCancel()">
-        <span class="query-search-icon spiral fa"></span>
+        <span class="query-search-icon spiral-white fa"></span>
+        <span class="query-submit-icon fa fa-search" ng-show="!query.result || !query.result.searchPromise"></span>
       <!--
         <span ng-show="query.result && query.result.searchPromise" class="fa fa-circle-o-notch fa-spin"></span>
         <span ng-show="!query.result || !query.result.searchPromise" class="fa fa-search"></span>

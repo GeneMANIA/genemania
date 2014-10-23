@@ -50,7 +50,14 @@
       width: 304px;
       height: 64px;
       display: inline-block;
+      transition-property: opacity;
+      transition-duration: 0.5s;
+      opacity: 0.5;
     }
+
+     #splash.splash-ready #app-logo {
+      opacity: 0.2;
+     }
 
     #app-loader {
       display: inline-block;
@@ -538,6 +545,7 @@
   <script src="js/app-email.js"></script>
   <script src="js/app-features.js"></script>
   <script src="js/app-genes.js"></script>
+  <script src="js/app-listeners.js"></script>
   <script src="js/app-networks.js"></script>
   <script src="js/app-organisms.js"></script>
   <script src="js/app-popover.js"></script>
@@ -545,7 +553,6 @@
   <script src="js/app-query.js"></script>
   <script src="js/app-result.js"></script>
   <script src="js/app-search.js"></script>
-  <script src="js/app-tap.js"></script>
   <script src="js/app-util.js"></script>
   <script src="js/responsive.js"></script>
   <script src="js/debug/livereload.js"></script>

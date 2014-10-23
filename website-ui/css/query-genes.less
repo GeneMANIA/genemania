@@ -85,6 +85,7 @@
 
 	@padding: 0.125em;
 
+	font-size: inherit;
 	resize: none;
 	position: absolute;
 	left: 0;
@@ -99,6 +100,26 @@
 	//background: rgba(255, 0, 0, 0.5);
 	// background: #fff;
 }
+
+.query-genes-spellchecks {
+	.monospace;
+
+	position: absolute;
+	left: 0;
+	top: 0;
+	padding-left: @qGenesValW;
+	pointer-events: none;
+	z-index: 99999;
+	color: @VALIDATION_ERROR_COLOR;
+	line-height: @qGenesLineHeight;
+	white-space: pre;
+}
+
+.query-genes-spellchecks-entry {
+	white-space: pre;
+	height: @qGenesLineHeight;
+}
+
 
 .query-genes-expander-expanded .query-genes-textarea {
 	min-height: @qGenesExpH;

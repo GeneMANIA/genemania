@@ -224,6 +224,9 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
   qfn.setGenes = function(){};
   qfn.removeAllGenes = function(){};
 
+  qfn.describeGeneLine = function(){
+    // TODO
+  };
 
   // internal helper function for setGenesFromText()
   qfn.validateGenesFromText = _.debounce( function(){
@@ -298,7 +301,23 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
 
         .then(function( t ){
           self.validatingGenes = false;
-          self.geneValidations = t.genes;
+          var geneValns = self.geneValidations = t.genes;
+
+          var geneSpcks = '';
+          for( var i = 0; i < geneValns.length; i++ ){
+            var geneValn = geneValns[i];
+            var last = i === geneValns.length - 1;
+            var spck = '';
+
+            if( geneValn.type === 'INVALID' ){
+              while( spck.length < geneValn.name.length ){
+                spck += '_';
+              }
+            }
+
+            geneSpcks += spck + ( last ? '' : '\n' );
+          }
+          self.geneSpellchecks = geneSpcks;
 
           PubSub.publish('query.validateGenes', self);
         })
@@ -307,6 +326,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
       p = Promise.resolve().cancellable().then(function(){
         self.validatingGenes = false;
         self.geneValidations = [];
+        self.geneSpellchecks = '';
         
         PubSub.publish('query.validateGenes', self);
       });

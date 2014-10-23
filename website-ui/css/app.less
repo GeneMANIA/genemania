@@ -109,3 +109,25 @@ a {
 	width: 1em;
 	height: 1em;
 }
+
+.spiral-white {
+	.spiral;
+	background-image: url('../img/spiral-white.svg');
+}
+
+.spiral-spin {
+	.animation( spin 1s infinite linear );
+	//.animation-direction( reverse );
+	.transform-origin( 48% 50% );
+}
+
+
+.list-extremity {
+	display: block;
+	border-bottom: double 4px #ddd;
+	height: 1px;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	clear: both;
+}

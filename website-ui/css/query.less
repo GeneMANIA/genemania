@@ -167,7 +167,9 @@
 	top: 50%;
 	margin-left: -0.5em;
 	margin-top: -0.5em;
-	opacity: 0.666;
+	opacity: 0;
+	transition-property: opacity;
+	transition-duration: 250ms;
 }
 
 .query-searching-true .query-submit {
@@ -175,8 +177,14 @@
 }
 
 .query-searching-true .query-search-icon {
-	.fa-spin;
+	.spiral-spin;
 	opacity: 1;
+}
+
+.query-submit-icon {
+	position: relative;
+	z-index: 9999;
+	font-size: 1.25em;
 }
 
 .query-more-content {
@@ -237,6 +245,7 @@
 .query-weightings-footer {
 	text-align: center;
 	background: @HEADER_COLOR;
+	cursor: pointer;
 }
 
 .query-weighting-group-name {
