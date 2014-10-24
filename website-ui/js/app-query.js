@@ -224,8 +224,15 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
   qfn.setGenes = function(){};
   qfn.removeAllGenes = function(){};
 
-  qfn.describeGeneLine = function(){
-    // TODO
+  qfn.describeGeneLine = function( lineIndex ){
+    if( lineIndex != null ){
+      this.geneLineIndex = lineIndex;
+    }
+
+    // console.log('describeGeneLine', lineIndex);
+    this.geneLineDescr = this.geneValidations ? this.geneValidations[ this.geneLineIndex ] : null;
+
+    PubSub.publish('query.describeGeneLine', self);
   };
 
   // internal helper function for setGenesFromText()
@@ -331,6 +338,10 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Result ){
         PubSub.publish('query.validateGenes', self);
       });
     }
+
+    p = p.then(function(){
+      self.describeGeneLine();
+    });
 
     return self.prevValidateGenes = p;
   };
@@ -571,6 +582,7 @@ function( $scope, Query, updateScope ){
 
   PubSub.subscribe('query.validateGenes', updateScope);
   PubSub.subscribe('query.validateGenesStart', updateScope);
+  PubSub.subscribe('query.describeGeneLine', updateScope);
 
   PubSub.subscribe('query.setGenesText', _.debounce(function(){
     updateScope();
@@ -600,5 +612,8 @@ function( $scope, Query, updateScope ){
   PubSub.subscribe('result.cancel', updateScope);
   PubSub.subscribe('$$search.progress', updateScope);
   
+  $scope.respRestyle = function(){ // allow access to resp restyle inside template
+    responsive.restyle();
+  };
 
 } ]);

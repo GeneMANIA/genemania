@@ -5,57 +5,7 @@
   // defitions of elements to update
   // { id|selector, handler, useStyleAttr }
   var defns = [
-    {
-      id: 'query-network-groups',
-      handler: function( eles, e ){
-        var vp = document.getElementById('query-qtip-viewport');
-
-        return [ 
-          { name: 'max-height', value: vp.clientHeight - 70 + 'px' }
-        ];
-      },
-      after: qtipFix
-    },
-
-    {
-      id: 'query-organism-select',
-      handler: function( eles, e ){
-        var vp = document.getElementById('query-qtip-viewport');
-
-        return [ 
-          { name: 'max-height', value: vp.clientHeight - 30 + 'px' }
-        ];
-      },
-      after: qtipFix
-    },
-
-    {
-      id: 'query-weighting-groups',
-      handler: function( eles, e ){
-        var vp = document.getElementById('query-qtip-viewport');
-
-        return [ 
-          { name: 'max-height', value: vp.clientHeight - 50 + 'px' }
-        ];
-      },
-      after: qtipFix
-    },
   ];
-
-  function getQueryQtipViewportHeight(){
-
-  }
-
-  function qtipFix( eles, e ){
-    for( var i = 0; i < eles.length; i++ ){
-      var ele = eles[i];
-      var $qtip = $(ele).parents('.qtip:first');
-
-      if( $qtip.length > 0 && $qtip.is(':visible') ){
-        $qtip.qtip('api').reposition(); // ask the qtip to rerender since it's buggy
-      }
-    }
-  }
 
   var stylesheet = document.createElement('style');
   stylesheet.id = 'responsive.js-stylesheet';
@@ -67,7 +17,11 @@
 
     for( var i = 0; i < defns.length; i++ ){
       var defn = defns[i];
-      var eles = defn.id ? [ document.getElementById( defn.id ) ] : document.querySelectorAll( defn.selector );
+      var eles = null;
+      if( defn.getMatchingEles == null || defn.getMatchingEles ){
+        eles = defn.id ? [ document.getElementById( defn.id ) ] : document.querySelectorAll( defn.selector );
+      }
+      
       var props = defn.handler( eles, e );
       var selector = defn.id ? ('#' + defn.id) : defn.selector;
       var propsStr = props.map(function( prop ){
@@ -104,6 +58,20 @@
   window.addEventListener( 'resize', handleDefns );
   window.addEventListener( 'orientationchanged', handleDefns );
   window.addEventListener( 'load', handleDefns );
-  PubSub.subscribe( 'query.search', handleDefns );
+  window.addEventListener( 'DOMContentLoaded', handleDefns );
+
+  var responsive = window.responsive = {
+    define: function( d ){
+      defns.push( d );
+    },
+
+    defines: function( ds ){
+      Array.prototype.push.apply( defns, ds );
+    },
+
+    restyle: function(){
+      handleDefns();
+    }
+  };
 
 })();

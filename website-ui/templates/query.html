@@ -25,7 +25,7 @@
         <a class="query-genes-example ng-animate-fade plain-link" ng-show="!query.validatingGenes && !query.genesExpanded || !query.genesText" on-tap="query.setExampleGenes()">e.g.</a>
         <span class="query-genes-loader" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
 
-        <div class="query-genes-expander scrollable" ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
+        <div class="query-genes-expander scrollable" on-self-tap-prevent-default ng-class="{ 'query-genes-expander-expanded': query.genesExpanded }">
           <div id="query-genes-validation" class="query-genes-validation" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }">
             <div class="query-genes-validation-entry" ng-repeat="vEntry in query.geneValidations">
               <span class="bio-helix query-gene-valid-icon" ng-if="vEntry.type === 'VALID'"></span>
@@ -37,11 +37,23 @@
           </div>
           <div id="query-genes-spellchecks" class="query-genes-spellchecks" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }" ng-bind="query.geneSpellchecks">
           </div>
-          <textarea id="query-genes-textarea" wrap="off" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" ng-jquery-plugin="{ autosize: {} }" on-ctrl-enter="query.search()" on-line-select="query.describeGeneLine()"></textarea>
+          <textarea id="query-genes-textarea" wrap="off" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" ng-jquery-plugin="{ autosize: { callback: respRestyle } }" on-ctrl-enter="query.search()" on-line-select="query.describeGeneLine( $lineIndex )"></textarea>
         </div>
 
         <popover class="query-genes-expander-instr bottom popover-help ng-animate-fade" ng-show="query.genesExpanded">
-          <span class="fa fa-info-circle"></span> Enter one gene per line
+          <span ng-if="!query.geneLineDescr || query.geneLineDescr.type === 'EMPTY'">
+            <span class="fa fa-info-circle"></span> Enter one gene per line
+          </span>
+          <span ng-if="query.geneLineDescr">
+            <span ng-if="query.geneLineDescr.type === 'VALID' || query.geneLineDescr.type === 'DUPLICATE'">
+              <span class="bio-helix"></span> {{query.geneLineDescr.name}} <br />
+              <span class="query-genes-expander-descr">recognised gene</span>
+            </span>
+            <span ng-if="query.geneLineDescr.type === 'INVALID'">
+              <span class="fa fa-question-circle"></span> {{query.geneLineDescr.name}} <br />
+              <span class="query-genes-expander-descr query-genes-expander-descr-invalid">unrecognised gene</span>
+            </span>
+          </span>
         </popover>
 
       </div>

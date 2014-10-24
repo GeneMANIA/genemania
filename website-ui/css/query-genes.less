@@ -19,14 +19,14 @@
 	height: @qGenesH;
 	overflow: hidden;
 	overflow-y: scroll;
+	cursor: text;
 
 	// .transition-property( height );
 	// .transition-duration( @qExpAniDur );
 }
 
 .query-genes-expander-expanded {
-	height: @qGenesExpH;
-	background: #fff;
+	//height: @qGenesExpH;
 
 	.animated;
 	.fadeIn;
@@ -34,11 +34,11 @@
 
 .query-genes-expander-expanded .query-genes-validation,
 .query-genes-expander-expanded .query-genes-textarea {
-	height: @qGenesExpH;
+	//height: @qGenesExpH;
 }
 
 .query-genes-expander-instr {
-	top: @qGenesExpH;
+	//top: @qGenesExpH;
 
 	position: absolute;
 	margin-top: -0.25em;
@@ -52,7 +52,7 @@
 	position: absolute;
 	left: 0;
 	top: 0;
-	height: @qGenesExpH;
+	//height: @qGenesExpH;
 	width: @qGenesValW;
 	line-height: @qGenesLineHeight;
 	text-align: center;
@@ -122,7 +122,7 @@
 
 
 .query-genes-expander-expanded .query-genes-textarea {
-	min-height: @qGenesExpH;
+	//min-height: @qGenesExpH;
 }
 
 .query-genes-example {
@@ -173,3 +173,12 @@
 	color: @VALIDATION_ERROR_COLOR;
 }
 
+.query-genes-expander-descr {
+	font-size: 0.8em;
+	display: inline-block;
+	border-bottom: 2px solid transparent;
+}
+
+.query-genes-expander-descr-invalid {
+	border-color: @VALIDATION_ERROR_COLOR;
+}

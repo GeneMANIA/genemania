@@ -57,6 +57,20 @@ app.directive('onTapPreventAll', ['$parse', function ($parse) {
   };
 }]);
 
+app.directive('onSelfTapPreventDefault', ['$parse', function ($parse) {
+  return function (scope, $ele, attr){
+
+    var tapHandler = $parse(attr.onTap);
+
+    $ele.on('touchstart touchend touchmove mousedown mouseup click', function (evt){
+      if( evt.target === $ele[0] ){
+        evt.preventDefault();
+      }
+    });
+
+  };
+}]);
+
 app.directive('onCtrlEnter', ['$parse', function ($parse) {
   return function (scope, $ele, attr){
 
@@ -87,9 +101,9 @@ app.directive('onLineSelect', ['$parse', function ($parse) {
           li++;
         }
       }
-      console.log(i, li);
+      //console.log(i, li);
 
-      handler(scope, { $event: evt });
+      handler(scope, { $event: evt, $lineIndex: li, $charIndex: chi });
     };
 
     ele.addEventListener('change', next);
