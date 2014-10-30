@@ -34,6 +34,29 @@ var config = {
       { name: 'Cellular component based', value: 'CC' },
       { name: 'Equal by network', value: 'AVERAGE' },
       { name: 'Equal by data type', value: 'AVERAGE_CATEGORY' }
+    ],
+
+    setters: [
+      {
+        name: 'none',
+        setter: function( net ){
+          return false;
+        }
+      },
+
+      {
+        name: 'default',
+        setter: function( net ){
+          return net.defaultSelected;
+        }
+      },
+
+      {
+        name: 'all',
+        setter: function( net ){
+          return true;
+        }
+      }
     ]
   },
 
@@ -47,6 +70,7 @@ var config = {
       '6': 'bio-cells', // yeast
       '7': 'bio-rat', // rat
       '8': 'bio-fish', // zebrafish
+      '9': 'bio-cells', // e coli
     }
   }
 };
@@ -65,4 +89,52 @@ var config = {
   ];
 
   config.networks.defaultWeighting = wg.AUTOMATIC_SELECT;
+})();
+
+(function(){
+  var strcmp = function( str1, str2 ){
+    return ( ( str1 == str2 ) ? 0 : ( ( str1 > str2 ) ? 1 : -1 ) );
+  };
+
+  config.networks.sorters = [
+    {
+      name: 'first author',
+      sorter: function(a, b){
+        var aAuth = a.metadata.firstAuthor.toLowerCase();
+        var bAuth = b.metadata.firstAuthor.toLowerCase();
+
+        return strcmp(aAuth, bAuth);
+      }
+    },
+
+    {
+      name: 'last author',
+      sorter: function(a, b){
+        var aAuth = a.metadata.lastAuthor.toLowerCase();
+        var bAuth = b.metadata.lastAuthor.toLowerCase();
+
+        return strcmp(aAuth, bAuth);
+      }
+    },
+
+    {
+      name: 'size',
+      sorter: function(a, b){
+        var aSize = a.metadata.interactionCount;
+        var bSize = b.metadata.interactionCount;
+
+        return bSize - aSize; // bigger first
+      }
+    },
+
+    {
+      name: 'date',
+      sorter: function(a, b){
+        var aYr = parseInt( a.metadata.yearPublished, 10 );
+        var bYr = parseInt( b.metadata.yearPublished, 10 );
+
+        return bYr - aYr; // newer first
+      }
+    }
+  ];
 })();

@@ -41,9 +41,8 @@
 	//top: @qGenesExpH;
 
 	position: absolute;
-	margin-top: -0.25em;
-	width: 130%;
-	margin-left: -15%;
+	width: 100% + 2*25%;
+	margin-left: -25%;
 }
 
 .query-genes-validation {
@@ -125,17 +124,32 @@
 	//min-height: @qGenesExpH;
 }
 
-.query-genes-example {
+.query-genes-example,
+.query-genes-invalid-count {
 	position: absolute;
 	right: 0;
-	top: 0;
+	top: 1px;
 	padding: 0 0.25em;
 	height: @qGenesH;
 	line-height: @qGenesH;
-	z-index: 999;
+	z-index: 99999;
 	border-bottom-left-radius: 0.25em;
+	background: rgba(255, 255, 255, 0.9);
 
 	.transition-delay( @qGenesAniDelay );
+}
+
+.query-genes-invalid-count {
+	//background: rgba(127, 127, 127, 0.1);
+	border-bottom: 1px solid rgba(127, 127, 127, 0.25);
+	border-left: 1px solid rgba(127, 127, 127, 0.25);
+}
+
+.query-genes-invalid-count-number {
+	.monospace;
+
+	border-bottom: 2px solid @VALIDATION_ERROR_COLOR;
+	margin: 0 0.25em;
 }
 
 .query-genes-loader {

@@ -72,6 +72,7 @@ public interface GeneService {
 		private Type type;
 		private String name;
 		private String other;
+		private String description;
 
 		public PossibleGene(String name, Type type) {
 			this.type = type;
@@ -95,6 +96,14 @@ public interface GeneService {
 
 		public String getOther() {
 			return this.other;
+		}
+		
+		public String getDescription(){
+			return this.description;
+		}
+		
+		public void setDescription(String description){
+			this.description = description;
 		}
 	}
 

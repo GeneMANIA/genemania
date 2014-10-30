@@ -77,7 +77,7 @@
     var h = document.getElementById('query-genes-textarea').clientHeight;
     var vpH = document.getElementById('query-qtip-viewport').clientHeight;
     var min = 100;
-    var max = vpH - 30;
+    var max = vpH - 40;
 
     //console.log( '---', min, max, h );
 

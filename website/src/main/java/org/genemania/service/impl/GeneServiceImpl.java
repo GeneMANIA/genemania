@@ -209,6 +209,12 @@ public class GeneServiceImpl implements GeneService {
 				} else {
 					possibleGene = new PossibleGene(gene,
 							PossibleGene.Type.VALID);
+					
+					// set the optional description for the valid gene
+					Long geneId = geneDao.getNodeId(organismId, gene);
+					Gene geneObj = geneDao.findGeneForId(organismId, geneId);
+					String descr = geneObj.getNode().getGeneData().getDescription();
+					possibleGene.setDescription(descr);
 				}
 
 			} else {
