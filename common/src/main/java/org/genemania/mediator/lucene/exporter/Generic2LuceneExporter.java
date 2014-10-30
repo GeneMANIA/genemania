@@ -89,7 +89,7 @@ public class Generic2LuceneExporter {
 	public static void main(String[] args) throws Exception {
 		if (args.length < 3) {
 			System.out.println("Usage:");
-			System.out.printf("%s <db-config.cfg> <raw-data-path> <colours.txt> [<profile>]\n", Generic2LuceneExporter.class.getName());
+			System.out.printf("%s <db-config.cfg> <raw-data-path> <colours.txt> [<profile> [<index-path>]]\n", Generic2LuceneExporter.class.getName());
 			System.out.println();
 			return;
 		}
@@ -97,13 +97,19 @@ public class Generic2LuceneExporter {
 		String configurationPath = args[0];
 		String basePath = args[1];
 		String colourConfigPath = args[2];
-		String profileName;
+		String profileName = null;
+        String indexPath = "lucene_index";
 
-		if (args.length == 4) {
-			profileName = args[3];
-		} else {
-			profileName = null;
+		if (args.length >= 4) {
+            // leave default (null) profile if given "none" or "null" as profile name
+            if (!"none".equalsIgnoreCase(profileName) && !"null".equalsIgnoreCase(profileName)) {
+                profileName = args[3];
+            }
 		}
+
+        if (args.length == 5) {
+            indexPath = args[4];
+        }
 
 		final Map<String, String> colours = loadColours(colourConfigPath);
 		
@@ -116,7 +122,7 @@ public class Generic2LuceneExporter {
 		exporter.setGenericDbPath(genericDbPath);
 		exporter.setProfileName(profileName);
 		exporter.setConfig(config);
-		exporter.setIndexPath("lucene_index");
+		exporter.setIndexPath(indexPath);
 		exporter.export();
 	}
 
