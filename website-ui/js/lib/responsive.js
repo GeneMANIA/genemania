@@ -7,9 +7,13 @@
   var defns = [
   ];
 
-  var stylesheet = document.createElement('style');
-  stylesheet.id = 'responsive.js-stylesheet';
-  document.head.appendChild( stylesheet );
+  var stylesheet = document.getElementById('responsive.js-stylesheet');
+
+  if( !stylesheet ){
+    stylesheet = document.createElement('style');
+    stylesheet.id = 'responsive.js-stylesheet';
+    document.documentElement.appendChild( stylesheet ); // so it's always last
+  }
 
   var handleDefns = _.debounce( function( e ){
     var css = '';

@@ -100,6 +100,40 @@
 
         <div ng-show="!query.editingWeighting" class="query-network-groups scrollable scrollable-y" id="query-network-groups">
           <div class="query-network-organism" bindonce ng-repeat="org in query.organisms track by org.id" ng-show="query.organism === org">
+            <div class="query-network-group">
+              <span class="query-network-group-check activatable-relative" on-tap="query.toggleAttributeGroupsSelection()"><span class="check check-{{query.attributeGroupsSelected}}"></span></span>
+              <span class="query-network-group-expander fa" ng-class="{ 'fa-caret-right': !query.attributeGroupsExpanded, 'fa-caret-down': query.attributeGroupsExpanded }"></span>
+              <span class="query-network-group-name activatable-relative" on-tap-scroll-parent="#query-network-groups" on-tap="query.toggleAttributeGroupsExpansion()">Attributes</span>
+              <span class="query-network-group-count">
+                <span ng-bind="query.selectedAttributeGroupCount"></span>
+                /
+                <span ng-bind="(query.attributeGroups.length || 0)"></span>
+              </span>
+
+              <div class="query-networks" ng-if="query.attributeGroupsExpanded">
+                <div class="query-network" bindonce ng-repeat="attrGr in query.attributeGroups track by attrGr.id">
+                  <span class="query-network-check activatable-relative" on-tap="query.toggleAttributeGroupSelection( attrGr )"><span class="check check-{{attrGr.selected}}"></span></span>
+                  <span class="query-network-expander fa" ng-class="{ 'fa-caret-right': !attrGr.expanded, 'fa-caret-down': attrGr.expanded }"></span>
+                  <span class="query-network-name activatable-relative" bo-text="attrGr.name" on-tap-scroll-parent="#query-network-groups" on-tap="query.toggleAttributeGroupExpansion( attrGr )"></span>
+                  
+                  <div class="query-network-info" ng-if="attrGr.expanded">
+                    <p>
+                      <span class="query-network-comment">
+                        <span class="fa fa-info-circle"></span>
+                        <span bo-text="attrGr.description"></span>
+                      </span>
+                    </p>
+
+                    <p>
+                      <span class="fa fa-file-o"></span>
+                      <span class="query-network-publication" bo-text="attrGr.publicationName"></span>
+                      <a target="_blank" bo-href="attrGr.publicationUrl"><span class="fa fa-external-link"></span></a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="query-network-group" bindonce ng-repeat="netGr in org.networkGroups track by netGr.id">
               <span class="query-network-group-check" ng-class="{ 'activatable-relative': netGr.interactionNetworks.length > 0 }" on-tap="query.toggleNetworkGroupSelection( netGr )"><span class="check check-{{netGr.selected}}"></span></span>
               <span class="query-network-group-expander fa" ng-class="{ 'fa-caret-right': !netGr.expanded, 'fa-caret-down': netGr.expanded }"></span>

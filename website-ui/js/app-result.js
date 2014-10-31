@@ -29,10 +29,30 @@ function( $$search, cy ){
     PubSub.publish('result.search', self);
 
     return self.searchPromise = Promise.resolve().cancellable().then(function(){
+      var netIds = [];
+      for( var i = 0; i < q.networks.length; i++ ){
+        var net = q.networks[i];
+
+        if( net.selected ){
+          netIds.push( net.id );
+        }
+      }
+
+      var attrGrIds = [];
+      for( var i = 0; i < q.attributeGroups.length; i++ ){
+        var gr = q.attributeGroups[i];
+
+        if( gr.selected ){
+          attrGrIds.push( gr.id );
+        }
+      }
+
       return $$search({
         organism: q.organism.id,
         genes: q.genesText,
-        weighting: q.weighting.value
+        weighting: q.weighting.value,
+        networks: netIds,
+        attrGroups: attrGrIds
       });
     }).then(function( searchResult ){
       for( var i in searchResult ){

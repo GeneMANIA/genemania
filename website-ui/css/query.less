@@ -201,7 +201,7 @@
 	height: @qH;
 	width: @qExpW;
 	opacity: 0.5;
-	z-index: 99999;
+	z-index: 99999999;
 	pointer-events: none;
 	border-top-left-radius: @qBorderRadius;
 	border-bottom-left-radius: @qBorderRadius;
@@ -238,6 +238,10 @@
 	margin-top: @qSplashY + 0;
 }
 
+.query-weighting-groups {
+	background: @HEADER_COLOR;
+}
+
 .query-weighting-group + .query-weighting-group {
 	margin-top: 0.5em;
 }
@@ -255,6 +259,7 @@
 .query-weighting {
 	font-size: 0.85em;
 	cursor: pointer;
+	background: @BG_COLOR;
 }
 
 .query-weighting {

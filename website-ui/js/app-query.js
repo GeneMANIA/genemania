@@ -1,11 +1,11 @@
 app.factory('Query', 
-[ '$$organisms', '$$networks', '$$attributes', 'util', '$$genes', 'Query_genes', 'Query_history', 'Query_networks', 'Result',
-function( $$organisms, $$networks, $$attributes, util, $$genes, Query_genes, Query_history, Query_networks, Result ){
+[ '$$organisms', '$$networks', '$$attributes', 'util', '$$genes', 'Query_genes', 'Query_history', 'Query_networks', 'Query_attributes', 'Result',
+function( $$organisms, $$networks, $$attributes, util, $$genes, Query_genes, Query_history, Query_networks, Query_attributes, Result ){
   var copy = util.copy;
   var strcmp = util.strcmp;
 
   // list of query submodules to inject
-  var qmods = [ Query_genes, Query_history, Query_networks ];
+  var qmods = [ Query_genes, Query_history, Query_networks, Query_attributes ];
 
   var organisms;
   var networkGroups;
@@ -132,6 +132,26 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Query_genes, Que
     }
 
     self.attributeGroups = copy( attributeGroups[ self.organism.id ] );
+    self.organism.attributeGroups = self.attributeGroups;
+    self.attributeGroupsById = {};
+
+    var selCount = 0;
+    for( var i = 0; i < self.attributeGroups.length; i++ ){
+      var group = self.attributeGroups[i];
+
+      group.selected = group.defaultSelected;
+      group.expanded = false;
+
+      if( group.selected ){
+        selCount++;
+      }
+
+      self.attributeGroupsById[ group.id ] = group;
+    }
+
+    self.selectedAttributeGroupCount = selCount;
+    self.attributeGroupsExpanded = false;
+    self.updateAttributeGroupsSelection();
 
     if( pub === undefined || pub ){
       PubSub.publish('query.setOrganism', self);
@@ -207,10 +227,10 @@ function( $scope, updateScope, Query ){
     leading: true
   }));
 
-  PubSub.subscribe('query.toggleNetworkGroupExpansion', updateScope);
-  PubSub.subscribe('query.toggleNetworkExpansion', updateScope);
-  PubSub.subscribe('query.toggleNetworkGroupSelection', updateScope);
-  PubSub.subscribe('query.toggleNetworkSelection', updateScope);
+  // PubSub.subscribe('query.toggleNetworkGroupExpansion', updateScope);
+  // PubSub.subscribe('query.toggleNetworkExpansion', updateScope);
+  // PubSub.subscribe('query.toggleNetworkGroupSelection', updateScope);
+  // PubSub.subscribe('query.toggleNetworkSelection', updateScope);
   PubSub.subscribe('query.toggleNetworkCheckOptions', updateScope);
   PubSub.subscribe('query.toggleNetworkSortOptions', updateScope);
   PubSub.subscribe('query.sortNetworksBy', updateScope);
