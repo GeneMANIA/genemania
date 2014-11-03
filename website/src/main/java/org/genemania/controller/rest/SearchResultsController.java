@@ -295,11 +295,11 @@ public class SearchResultsController {
 		Collection<AttributeGroup> attrs;
 		try {
 			if (attrGroupIds == null) {
-				attrs = attributeGroupService.findAttributeGroups(organismId,
-						attrGroupIds);
-			} else {
 				attrs = attributeGroupService
 						.findDefaultAttributeGroups(organismId);
+			} else {
+				attrs = attributeGroupService.findAttributeGroups(organismId,
+						attrGroupIds);
 			}
 
 			params.setAttributeGroups(attrs);
