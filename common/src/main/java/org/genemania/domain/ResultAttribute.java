@@ -3,6 +3,7 @@ package org.genemania.domain;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.genemania.domain.ResultGene.Link;
 
 public class ResultAttribute {
@@ -119,6 +120,7 @@ public class ResultAttribute {
 		this.attribute = attribute;
 	}
 
+	@JsonIgnore
 	public ResultAttributeGroup getResultAttributeGroup() {
 		return resultAttributeGroup;
 	}

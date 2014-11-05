@@ -26,7 +26,15 @@
         eles = defn.id ? [ document.getElementById( defn.id ) ] : document.querySelectorAll( defn.selector );
       }
       
-      var props = defn.handler( eles, e );
+      var props;
+
+      try{
+        props = defn.handler( eles, e );
+      } catch(err){
+        console.error('responsive.js detected an error in a style block definition');
+        console.error( err );
+      }
+
       var selector = defn.id ? ('#' + defn.id) : defn.selector;
       var propsStr = props.map(function( prop ){
         return prop.name + ': ' + prop.value + '; ';

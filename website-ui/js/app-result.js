@@ -1,6 +1,6 @@
 app.factory('Result', 
-[ '$$search', 'cy',
-function( $$search, cy ){
+[ '$$search', 'cy', 'cyStylesheet',
+function( $$search, cy, cyStylesheet ){
 
   var Result = function( opts ){
     if( !(this instanceof Result) ){
@@ -90,26 +90,60 @@ function( $$search, cy ){
   rfn.loadGraph = function(){
     var self = this;
     var eles = [];
+    var id2AttrEle = {};
 
+    cy.startBatch();
     cy.elements().remove();
 
-    // nodes
+    // gene nodes
     for( var i = 0; i < self.resultGenes.length; i++ ){
       var rGene = self.resultGenes[i];
       var gene = rGene.gene;
+      var ele;
 
-      eles.push({
+      eles.push( ele = {
         group: 'nodes',
         data: {
           id: '' + gene.id,
           idInt: gene.id,
-          symbol: rGene.typedName || gene.symbol,
-          score: rGene.score
+          name: rGene.typedName || gene.symbol,
+          score: rGene.score,
+          query: rGene.queryGene
         }
-      });
+      } );
+
+      // attribute nodes & edges
+      var rAttrs = rGene.resultAttributes;
+      for( var j = 0; j < rAttrs.length; j++ ){
+        var rAttr = rAttrs[j];
+        var attr = rAttr.attribute;
+        var attrEle = id2AttrEle[ attr.id ]; 
+        var attrEdge;
+
+        if( !attrEle ){
+          eles.push( attrEle = {
+            group: 'nodes',
+            data: {
+              id: '' + attr.id,
+              idInt: attr.id,
+              name: attr.name,
+              attr: true
+            }
+          } );
+        }
+
+        eles.push( attrEdge = {
+          group: 'edges',
+          data: {
+            source: '' + gene.id,
+            target: '' + attr.id,
+            group: 'attr'
+          }
+        } );
+      }
     }
 
-    // edges
+    // interaction edges
     for( var i = 0; i < self.resultNetworkGroups.length; i++ ){
       var rGr = self.resultNetworkGroups[i];
       var gr = rGr.networkGroup;
@@ -121,8 +155,9 @@ function( $$search, cy ){
 
         for( var k = 0; k < rIntns.length; k++ ){
           var rIntn = rIntns[k];
+          var ele;
 
-          eles.push({
+          eles.push( ele = {
             group: 'edges',
             data: {
               source: '' + rIntn.fromGene.gene.id,
@@ -130,12 +165,24 @@ function( $$search, cy ){
               weight: rIntn.interaction.weight,
               group: gr.code
             }
-          });
+          } );
         }
       }
     }
 
     cy.add( eles );
+
+    // normalise scores
+    var qNodes = cy.$('node[?query]');
+    var nqNodes = cy.$('node[!query]');
+    var maxScore = nqNodes.max(function( n ){ return n.data('score'); }).value;
+    qNodes.data('score', maxScore);
+
+    // generate the stylesheet for the graph
+    var stylesheet = cyStylesheet(cy);
+    cy.style().fromJson( stylesheet );
+
+    cy.endBatch();
     
     cy.elements().stdFilter(function( ele ){
       return ele.isNode() || ele.data('group') !== 'coexp';
