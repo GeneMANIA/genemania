@@ -38,6 +38,35 @@ function( util, Result ){ return function( Query ){
       query.search();
     }
   };
+
+  // get search params as new json obj
+  qfn.params = function(){
+    var attrGrIds = [];
+    for( var i = 0; i < this.attributeGroups.length; i++ ){
+      var attrGr = this.attributeGroups[i];
+
+      if( attrGr.selected ){
+        attrGrIds.push( attrGr.id );
+      }
+    }
+
+    var netIds = [];
+    for( var i = 0; i < this.networks.length; i++ ){
+      var net = this.networks[i];
+
+      if( net.selected ){
+        netIds.push( net.id );
+      }
+    }
+
+    return {
+      organismId: this.organism.id,
+      genesText: this.genesText,
+      attributeGroupIds: attrGrIds,
+      networkIds: netIds,
+      weighting: this.weighting.value
+    };
+  };
   
 
 } } ]);

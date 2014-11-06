@@ -182,7 +182,7 @@ function( $$search, cy, cyStylesheet ){
     var stylesheet = cyStylesheet(cy);
     cy.style().fromJson( stylesheet );
 
-    cy.endBatch();
+    cy.endBatch(); // will trigger new stylesheet etc
     
     cy.elements().stdFilter(function( ele ){
       return ele.isNode() || ele.data('group') !== 'coexp';

@@ -41,6 +41,8 @@ function(){
         selector: 'node[?attr]',
         css: {
           'shape': 'rectangle',
+          'background-color': '#aaa',
+          'text-outline-color': '#aaa',
           'width': 16,
           'height': 16,
           'font-size': 6,
