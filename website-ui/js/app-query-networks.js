@@ -8,6 +8,23 @@ function( util ){ return function( Query ){
   //
   // NETWORKS
 
+  qfn.toggleNetworksToMatchQuery = function( q2, pub ){
+    var q1 = this;
+
+    for( var i = 0; i < q2.networks.length; i++ ){
+      var net = q2.networks[i];
+
+      q1.toggleNetworkSelection( net.id, net.selected, false );
+    }
+
+    if( pub || pub === undefined ){
+      PubSub.publish( 'query.toggleNetworkSelection', {
+        query: q1,
+        otherQuery: q2
+      } );
+    }
+  };
+
   qfn.updateNetworkGroupSelection = function( group ){
     var selCount = group.selectedCount;
     var netCount = group.interactionNetworks ? group.interactionNetworks.length : 0;

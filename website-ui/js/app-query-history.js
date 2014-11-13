@@ -1,12 +1,41 @@
 app.factory('Query_history', 
-[ 'util', 'Result',
-function( util, Result ){ return function( Query ){
+[ 'util', 'Result', 'io', 'cy',
+function( util, Result, io, cy ){ return function( Query ){
   
   var q = Query;
   var qfn = q.prototype;
 
   //
   // NAVIGATING THE QUERY HISTORY
+
+  qfn.store = function(){
+    var query = this;
+    var ioq = io('queries');
+
+    // store query data params in clientside datastore
+    return util.delayPromise(1000).then(function(){
+      return ioq.read();
+    }).then(function( qJson ){
+      var history = qJson.history = qJson.history || [];
+
+      history.unshift({
+        params: query.params(),
+        image: cy.png({ scale: 0.25 }),
+        timestamp: Date.now()
+      });
+
+      return ioq.write();
+    }).then(function(){
+      PubSub.publish('query.store', this);
+    });
+
+  };
+
+  qfn.clearHistory = function(){
+    return io('queries').delete().then(function(){
+      PubSub.publish('query.clearHistory', this);
+    });
+  };
 
   // get the next query in the history
   qfn.next = function(){};

@@ -10,8 +10,18 @@ function( util ){ return function( Query ){
 
   qfn.addGenes = function(){};
   qfn.removeGenes = function(){};
-  qfn.setGenes = function(){};
   qfn.removeAllGenes = function(){};
+
+  qfn.setGenes = function( genes ){
+    var self = this;
+
+    self.settingGenes = true;
+
+    self.genesText = _.isArray( genes ) ? genes.join('\n') : genes;
+
+    PubSub.publish('query.setGenes', self);
+    self.validateGenesFromText();
+  };
 
   qfn.describeGeneLine = function( lineIndex ){
     if( lineIndex != null ){

@@ -1,4 +1,6 @@
 var config = {
+  debug: false,
+
   service: {
     // baseUrl: 'http://localhost:8080/genemania/json/'
     baseUrl: 'http://192.168.81.119:8080/genemania/json/'
@@ -137,4 +139,8 @@ var config = {
       }
     }
   ];
+
+  if( config.debug ){
+    Promise.longStackTraces(); // enable long stack traces in bluebird for debugging
+  }
 })();

@@ -21,6 +21,14 @@ app.factory('util', [ function(){
 
     strcmp: function( str1, str2 ){
       return ( ( str1 == str2 ) ? 0 : ( ( str1 > str2 ) ? 1 : -1 ) );
+    },
+
+    delayPromise: function( ms ){
+      return new Promise(function( resolve ){
+        setTimeout(function(){
+          resolve();
+        }, ms);
+      });
     }
   };
 } ]);

@@ -13,6 +13,7 @@
 <body ng-app="app" ontouchstart="/* force mobile to use :active state */">
 
   <div ng-include="'templates/query.html'"></div>
+  <div ng-include="'templates/query-history.html'"></div>
 
   <div id="cy"></div>
 
@@ -40,8 +41,8 @@
     }
 
     #splash-content {
-      /*display: table-cell;
-      vertical-align: middle;*/
+      /*display: table-cell;*/
+      /*vertical-align: middle;*/
     }
 
     #app-logo {
@@ -531,9 +532,11 @@
   <script src="js/lib/cola.v3.min.js"></script>
   <script src="js/lib/cytoscape.js"></script>
   <script src="js/lib/dagre.js"></script>
+  <script src="js/lib/dropbox.js"></script>
   <script src="js/lib/jquery.autosize.js"></script>
   <script src="js/lib/jquery.qtip.js"></script>
   <script src="js/lib/jquery.velocity.js"></script>
+  <script src="js/lib/localforage.js"></script>
   <script src="js/lib/lodash.js"></script>
   <script src="js/lib/mousetrap.js"></script>
   <script src="js/lib/numeral.js"></script>
@@ -548,6 +551,7 @@
   <script src="js/app-email.js"></script>
   <script src="js/app-features.js"></script>
   <script src="js/app-genes.js"></script>
+  <script src="js/app-io.js"></script>
   <script src="js/app-listeners.js"></script>
   <script src="js/app-networks.js"></script>
   <script src="js/app-organisms.js"></script>

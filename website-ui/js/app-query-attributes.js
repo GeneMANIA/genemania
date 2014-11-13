@@ -8,6 +8,23 @@ function( util ){ return function( Query ){
   //
   // ATTRIBUTES
 
+  qfn.toggleAttributesToMatchQuery = function( q2, pub ){
+    var q1 = this;
+
+    for( var i = 0; i < q2.attributeGroups.length; i++ ){
+      var attrGr = q2.attributeGroups[i];
+
+      q1.toggleAttributeGroupSelection( attrGr.id, attrGr.selected, false );
+    }
+
+    if( pub || pub === undefined ){
+      PubSub.publish( 'query.toggleAttributesToMatchQuery', {
+        query: q1,
+        otherQuery: q2
+      } );
+    }
+  };
+
   qfn.updateAttributeGroupsSelection = function(){
     var selCount = this.selectedAttributeGroupCount;
     var grsCount = this.attributeGroups.length;

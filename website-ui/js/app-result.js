@@ -2,7 +2,7 @@ app.factory('Result',
 [ '$$search', 'cy', 'cyStylesheet',
 function( $$search, cy, cyStylesheet ){
 
-  var Result = function( opts ){
+  var Result = window.Result = function( opts ){
     if( !(this instanceof Result) ){
       return new Result( opts );
     }
@@ -63,6 +63,8 @@ function( $$search, cy, cyStylesheet ){
 
       self.searching = false;
       self.searchPromise = null;
+
+      q.store();
 
       PubSub.publish('result.searched', self);
     }).catch(function( err ){

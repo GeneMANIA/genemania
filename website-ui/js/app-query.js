@@ -1,6 +1,6 @@
 app.factory('Query', 
-[ '$$organisms', '$$networks', '$$attributes', 'util', '$$genes', 'Query_genes', 'Query_history', 'Query_networks', 'Query_attributes', 'Result',
-function( $$organisms, $$networks, $$attributes, util, $$genes, Query_genes, Query_history, Query_networks, Query_attributes, Result ){
+[ '$$organisms', '$$networks', '$$attributes', 'util', '$$genes', 'Query_genes', 'Query_history', 'Query_networks', 'Query_attributes', 'Result', 'io',
+function( $$organisms, $$networks, $$attributes, util, $$genes, Query_genes, Query_history, Query_networks, Query_attributes, Result, io ){
   var copy = util.copy;
   var strcmp = util.strcmp;
 
@@ -39,26 +39,45 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Query_genes, Que
     qfn.appReady = true;
   });
 
-  function Query( opts ){
+  var Query = window.Query = function( opts ){
     if( !(this instanceof Query) ){
       return new Query( opts );
     }
+    opts = opts || {};
 
-    // set defaults
     var self = this;
-
-    self.organisms = copy( organisms );
-    self.organism = _.find( self.organisms, function( o ){ // default org is human
-      return o.id === 4;
-    } ) || self.organisms[0]; // fallback on first org
 
     self.networkSortFactors = config.networks.sorters;
     self.setNetworkOptions = config.networks.setters;
-    self.weighting = config.networks.defaultWeighting;
+    self.organisms = copy( organisms );
+
+    var otherQ = opts.copyParamsFrom;
+    if( otherQ ){ // set from other query
+      
+      self.organism = _.find( self.organisms, function( o ){ 
+        return o.id === otherQ.organism.id;
+      } );
+
+      self.weighting = otherQ.weighting;
+
+    } else { // set defaults
+      self.organism = _.find( self.organisms, function( o ){ // default org is human
+        return o.id === 4;
+      } ) || self.organisms[0]; // fallback on first org
+
+      self.weighting = config.networks.defaultWeighting;
+    }
 
     self.setOrganism( self.organism, false ); // update org related deps
 
     self.sortNetworksBy('first author');
+
+    if( otherQ ){
+      self.toggleNetworksToMatchQuery( otherQ );
+      self.toggleAttributesToMatchQuery( otherQ );
+      self.setGenes( otherQ.genesText );
+    }
+
   };
   var q = Query;
   var qfn = q.prototype;
@@ -200,15 +219,24 @@ app.controller('QueryCtrl',
 [ '$scope', 'updateScope', 'Query', 
 function( $scope, updateScope, Query ){
 
+  function updateHistory(){
+    io('queries').read().then(function( qJson ){
+      $scope.history = window.queryHistory = qJson.history;
+
+      updateScope();
+    });
+  }
+
   // initialise once whole app is ready
   function init(){
     window.query = $scope.query = Query.current;
 
-    updateScope();
+    updateHistory();
   }
 
   PubSub.subscribe('ready', init);
   PubSub.subscribe('query.searchResult', init);
+  PubSub.subscribe('query.store', updateHistory);
 
   PubSub.subscribe('query.validateGenes', updateScope);
   PubSub.subscribe('query.validateGenesStart', updateScope);
