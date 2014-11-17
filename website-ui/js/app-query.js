@@ -1,6 +1,6 @@
 app.factory('Query', 
-[ '$$organisms', '$$networks', '$$attributes', 'util', '$$genes', 'Query_genes', 'Query_history', 'Query_networks', 'Query_attributes', 'Result', 'io',
-function( $$organisms, $$networks, $$attributes, util, $$genes, Query_genes, Query_history, Query_networks, Query_attributes, Result, io ){
+[ '$$organisms', '$$networks', '$$attributes', '$$version', 'util', '$$genes', 'Query_genes', 'Query_history', 'Query_networks', 'Query_attributes', 'Result', 'io',
+function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query_genes, Query_history, Query_networks, Query_attributes, Result, io ){
   var copy = util.copy;
   var strcmp = util.strcmp;
 
@@ -10,6 +10,7 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Query_genes, Que
   var organisms;
   var networkGroups;
   var attributeGroups;
+  var version;
 
   // when all resources are pulled in, the query is ready
   Promise.all([
@@ -24,6 +25,10 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Query_genes, Que
 
     $$attributes().then(function( attrs ){
       attributeGroups = attrs;
+    }),
+
+    $$version().then(function( v ){
+      version = v;
     })
 
   ]).then(function(){
@@ -50,15 +55,22 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Query_genes, Que
     self.networkSortFactors = config.networks.sorters;
     self.setNetworkOptions = config.networks.setters;
     self.organisms = copy( organisms );
+    self.version = copy( version );
 
+    var params = opts.params;
     var otherQ = opts.copyParamsFrom;
-    if( otherQ ){ // set from other query
+
+    if( otherQ ){
+      params = otherQ.params();
+    }
+
+    if( params ){ // set from other query
       
       self.organism = _.find( self.organisms, function( o ){ 
-        return o.id === otherQ.organism.id;
+        return o.id === params.organismId;
       } );
 
-      self.weighting = otherQ.weighting;
+      self.weighting = params.weighting;
 
     } else { // set defaults
       self.organism = _.find( self.organisms, function( o ){ // default org is human
@@ -72,10 +84,15 @@ function( $$organisms, $$networks, $$attributes, util, $$genes, Query_genes, Que
 
     self.sortNetworksBy('first author');
 
-    if( otherQ ){
-      self.toggleNetworksToMatchQuery( otherQ );
-      self.toggleAttributesToMatchQuery( otherQ );
-      self.setGenes( otherQ.genesText );
+    if( params ){
+      if( opts.version && self.version.dbVersion === opts.version.dbVersion ){
+        self.toggleNetworksToMatchParams( params );
+        self.toggleAttributesToMatchParams( params );
+      } else {
+        console.log('Unable to set nets and attrs from params, because param dbver `'+ ( opts.version ? opts.version.dbVersion : null) +'` does not match current `'+ self.version.dbVersion +'`');
+      }
+
+      self.setGenes( params.genesText );
     }
 
   };
@@ -232,15 +249,19 @@ function( $scope, updateScope, Query ){
     window.query = $scope.query = Query.current;
 
     updateHistory();
+    $scope.$apply();
   }
 
   PubSub.subscribe('ready', init);
   PubSub.subscribe('query.searchResult', init);
   PubSub.subscribe('query.store', updateHistory);
+  PubSub.subscribe('query.succeed', init);
+  PubSub.subscribe('query.clearHistory', updateHistory);
 
   PubSub.subscribe('query.validateGenes', updateScope);
   PubSub.subscribe('query.validateGenesStart', updateScope);
   PubSub.subscribe('query.describeGeneLine', updateScope);
+
 
   PubSub.subscribe('query.setGenesText', _.debounce(function(){
     updateScope();
@@ -253,6 +274,12 @@ function( $scope, updateScope, Query ){
     $scope.query.updateGenesArea();
   }, 50, {
     leading: true
+  }));
+
+  PubSub.subscribe('query.expandGenes', _.debounce(function(){
+    $scope.query.updateGenesArea();
+  }, 50, {
+    trailing: true
   }));
 
   // PubSub.subscribe('query.toggleNetworkGroupExpansion', updateScope);

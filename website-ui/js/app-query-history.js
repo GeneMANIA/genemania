@@ -4,6 +4,7 @@ function( util, Result, io, cy ){ return function( Query ){
   
   var q = Query;
   var qfn = q.prototype;
+  var copy = util.copy;
 
   //
   // NAVIGATING THE QUERY HISTORY
@@ -13,15 +14,22 @@ function( util, Result, io, cy ){ return function( Query ){
     var ioq = io('queries');
 
     // store query data params in clientside datastore
-    return util.delayPromise(1000).then(function(){
+
+    //return util.delayPromise(1000).then(function(){
+    return Promise.resolve().then(function(){
       return ioq.read();
     }).then(function( qJson ){
       var history = qJson.history = qJson.history || [];
+      var bb = cy.elements().boundingBox();
+      var l = Math.max( bb.w, bb.h );
+      var idealL = 800;
+      var scale = idealL / l;
 
       history.unshift({
         params: query.params(),
-        image: cy.png({ scale: 0.25 }),
-        timestamp: Date.now()
+        image: cy.png({ scale: scale }),
+        timestamp: Date.now(),
+        version: copy( query.version )
       });
 
       return ioq.write();
@@ -31,20 +39,30 @@ function( util, Result, io, cy ){ return function( Query ){
 
   };
 
+  qfn.succeed = function( historyEntry ){
+    var hEnt = historyEntry;
+
+    var newQuery = Query.current = new Query({
+      params: hEnt.params,
+      version: hEnt.version
+    });
+
+    var result = newQuery.result = new Result({
+      query: newQuery,
+      store: false
+    });
+
+    qfn.splashed = true;
+
+    PubSub.publish('query.succeed', newQuery);
+    PubSub.publish('query.search', newQuery);
+  };
+
   qfn.clearHistory = function(){
     return io('queries').delete().then(function(){
       PubSub.publish('query.clearHistory', this);
     });
   };
-
-  // get the next query in the history
-  qfn.next = function(){};
-
-  // get the previous query in the history
-  qfn.prev = function(){};
-
-  // make this query the current/active one
-  qfn.activate = function(){};
 
   // search using this query, thereby superseding the previous query (i.e. this is current)
   qfn.search = function(){

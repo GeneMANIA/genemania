@@ -15,12 +15,14 @@ function( $$search, cy, cyStylesheet ){
       console.error('A result must have a query specified');
     }
 
-    this.search();
+    this.search({
+      store: opts.store || opts.store === undefined ? true : false
+    });
   };
   var r = Result;
   var rfn = Result.prototype;
 
-  rfn.search = function(){
+  rfn.search = function( opts ){
     var q = this.query;
     var self = this;
 
@@ -59,12 +61,14 @@ function( $$search, cy, cyStylesheet ){
         self[i] = searchResult[i];
       }
 
-      self.loadGraph();
+      self.loadGraph().then(function(){
+        if( opts.store ){
+          q.store();
+        }
+      });
 
       self.searching = false;
       self.searchPromise = null;
-
-      q.store();
 
       PubSub.publish('result.searched', self);
     }).catch(function( err ){
@@ -186,21 +190,30 @@ function( $$search, cy, cyStylesheet ){
 
     cy.endBatch(); // will trigger new stylesheet etc
     
-    cy.elements().stdFilter(function( ele ){
-      return ele.isNode() || ele.data('group') !== 'coexp';
-    }).layout({ name: 'cola' });
+    return new Promise(function( resolve ){
 
-    // cy.layout({
-    //   name: 'concentric',
-      
-    //   concentric: function(){
-    //     return this.data('score');
-    //   },
+      cy.one('layoutstop', function(){
+        resolve();
+      });
 
-    //   levelWidth: function( nodes ){
-    //     return 0.25;
-    //   },
-    // });
+      cy.elements().stdFilter(function( ele ){
+        return ele.isNode() || ele.data('group') !== 'coexp';
+      }).layout({ name: 'cola' });
+
+      // cy.layout({
+      //   name: 'concentric',
+        
+      //   concentric: function(){
+      //     return this.data('score');
+      //   },
+
+      //   levelWidth: function( nodes ){
+      //     return 0.25;
+      //   },
+      // });
+
+      });
+
   };
 
   return r;

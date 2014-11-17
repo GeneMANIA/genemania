@@ -1,8 +1,7 @@
 <div ng-controller="QueryCtrl">
 
   <div id="query-history" class="query-history scrollable query-history-splashed-{{query.splashed ? true : false}}">
-    <div class="query-history-entry" ng-style="{ 'background-image': 'url(' + entry.image + ')' }" ng-repeat="entry in history track by $index">
-      query entry 
+    <div class="query-history-entry" on-tap="query.succeed( entry )" ng-style="{ 'background-image': 'url(' + entry.image + ')' }" ng-repeat="entry in history track by entry.timestamp">
     </div>
   </div>
 

@@ -8,19 +8,26 @@ function( util ){ return function( Query ){
   //
   // ATTRIBUTES
 
-  qfn.toggleAttributesToMatchQuery = function( q2, pub ){
-    var q1 = this;
+  qfn.toggleAttributesToMatchParams = function( params, pub ){
+    var query = this;
 
-    for( var i = 0; i < q2.attributeGroups.length; i++ ){
-      var attrGr = q2.attributeGroups[i];
+    for( var i = 0; i < query.attributeGroups.length; i++ ){
+      var attrGr = query.attributeGroups[i];
 
-      q1.toggleAttributeGroupSelection( attrGr.id, attrGr.selected, false );
+      query.toggleAttributeGroupSelection( attrGr.id, false, false );
+    }
+
+    for( var i = 0; i < params.attributeGroupIds.length; i++ ){
+      var id = params.attributeGroupIds[i];
+      var attrGr = query.getAttributeGroup( id );
+
+      query.toggleAttributeGroupSelection( attrGr.id, true, false );
     }
 
     if( pub || pub === undefined ){
-      PubSub.publish( 'query.toggleAttributesToMatchQuery', {
-        query: q1,
-        otherQuery: q2
+      PubSub.publish( 'query.toggleAttributesToMatchParams', {
+        query: query,
+        params: params
       } );
     }
   };

@@ -8,19 +8,26 @@ function( util ){ return function( Query ){
   //
   // NETWORKS
 
-  qfn.toggleNetworksToMatchQuery = function( q2, pub ){
-    var q1 = this;
+  qfn.toggleNetworksToMatchParams = function( params, pub ){
+    var query = this;
 
-    for( var i = 0; i < q2.networks.length; i++ ){
-      var net = q2.networks[i];
+    for( var i = 0; i < query.networks.length; i++ ){
+      var net = query.networks[i];
 
-      q1.toggleNetworkSelection( net.id, net.selected, false );
+      query.toggleNetworkSelection( net.id, false, false );
+    }
+
+    for( var i = 0; i < params.networkIds.length; i++ ){
+      var netId = params.networkIds[i];
+      var net = this.getNetwork( netId );
+
+      query.toggleNetworkSelection( net.id, true, false );
     }
 
     if( pub || pub === undefined ){
-      PubSub.publish( 'query.toggleNetworkSelection', {
-        query: q1,
-        otherQuery: q2
+      PubSub.publish( 'query.toggleNetworksToMatchParams', {
+        query: query,
+        params: params
       } );
     }
   };
