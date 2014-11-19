@@ -86,6 +86,20 @@ app.directive('onCtrlEnter', ['$parse', function ($parse) {
   };
 }]);
 
+app.directive('onEscBlur', ['$parse', function ($parse) {
+  return function (scope, $ele, attr){
+
+    var handler = $parse(attr.onCtrlEnter);
+
+    $ele[0].addEventListener('keydown', function(evt){
+      if( evt.keyCode == 27 ){
+        $ele.blur();
+      }
+    });
+
+  };
+}]);
+
 app.directive('onLineSelect', ['$parse', function ($parse) {
   return function (scope, $ele, attr){
     var handler = $parse(attr.onLineSelect);

@@ -1,7 +1,13 @@
 <div ng-controller="QueryCtrl">
 
-  <div id="query-history" class="query-history scrollable scrollable-x query-history-splashed-{{query.splashed ? true : false}}">
-    <div class="query-history-entry activatable animated fadeIn" on-tap="query.succeed( entry )" ng-repeat="entry in history track by entry.timestamp" bindonce="entry">
+  <div class="query-history-expander activatable query-history-expanded-{{query.historyExpanded ? true : false}}" on-tap="query.toggleHistoryExpansion()">
+    <span class="query-history-expander-icon fa fa-history"></span>
+    <span class="query-history-expander-arrow fa fa-caret-up" ng-show="!query.historyExpanded"></span>
+    <span class="query-history-expander-arrow fa fa-caret-down" ng-show="query.historyExpanded"></span>
+  </div>
+
+  <div id="query-history" class="query-history scrollable scrollable-x query-history-splashed-{{query.splashed ? true : false}} query-history-expanded-{{query.historyExpanded ? true : false}}">
+    <div class="query-history-entry activatable animated-very-slow fadeIn" on-tap="query.succeed( entry )" ng-repeat="entry in history track by entry.timestamp" bindonce="entry">
       <span class="query-history-organism-icon" bo-class="entry.organismIcon"></span>
       <span class="query-history-image" bo-style="{ 'background-image': 'url(' + entry.image + ')' }"></span>
       <span class="query-history-label">
@@ -10,6 +16,15 @@
           +<span bo-text="entry.genes.length - 1"></span><span class="bio-helix"></span>
         </span>
       </span>
+      <span class="query-history-number" bo-text="history.length - $index"></span>
+    </div>
+
+    <div class="query-history-empty" ng-show=" (!history || history.length === 0) && query.historyInitLoaded ">
+      <span class="fa fa-info-circle"></span> Your search history is currently empty
+    </div>
+
+    <div class="query-history-loading" ng-show="!query.historyInitLoaded">
+      <span class="fa fa-refresh fa-spin"></span> Loading search history...
     </div>
 
     <div class="query-history-ender"></div>

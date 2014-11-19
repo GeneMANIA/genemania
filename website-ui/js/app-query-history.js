@@ -1,5 +1,5 @@
 app.factory('Query_history', 
-[ 'util', 'Result', 'io', 'cy',
+[ 'util', 'Result', 'io', 'cy', 
 function( util, Result, io, cy ){ return function( Query ){
   
   var q = Query;
@@ -80,9 +80,15 @@ function( util, Result, io, cy ){ return function( Query ){
       query: query
     });
 
+    var initSplash = !qfn.splashed;
+
     qfn.splashed = true;
 
     PubSub.publish('query.search', this);
+
+    if( initSplash ){
+      this.collapseHistory();
+    }
   };
 
   qfn.searchOrCancel = function(){
@@ -120,8 +126,30 @@ function( util, Result, io, cy ){ return function( Query ){
       genesText: this.genesText,
       attributeGroupIds: attrGrIds,
       networkIds: netIds,
-      weighting: this.weighting.value
+      weighting: this.weighting.value || config.networks.defaultWeighting.value
     };
+  };
+
+  qfn.toggleHistoryExpansion = function(){
+    if( this.historyExpanded ){
+      this.collapseHistory();
+    } else {
+      this.expandHistory();
+    }
+
+    PubSub.publish('query.toggleHistoryExpansion', this);
+  };
+
+  qfn.expandHistory = function(){
+    qfn.historyExpanded = true;
+
+    PubSub.publish('query.toggleHistoryExpansion', this);
+  };
+
+  qfn.collapseHistory = function(){
+    qfn.historyExpanded = false;
+
+    PubSub.publish('query.collapseHistory', this);
   };
   
 

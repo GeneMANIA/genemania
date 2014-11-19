@@ -95,6 +95,15 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
       self.setGenes( params.genesText );
     }
 
+    if( !qfn.historyInitLoaded ){
+      io('queries').read().then(function( qJson ){
+        qfn.historyExpanded = true;
+        qfn.historyInitLoaded = true;
+
+        PubSub.publish('query.historyLoaded');
+      });
+    }
+
   };
   var q = Query;
   var qfn = q.prototype;
@@ -257,6 +266,7 @@ function( $scope, updateScope, Query ){
   PubSub.subscribe('query.store', updateHistory);
   PubSub.subscribe('query.succeed', init);
   PubSub.subscribe('query.clearHistory', updateHistory);
+  PubSub.subscribe('query.historyLoaded', updateScope);
 
   PubSub.subscribe('query.validateGenes', updateScope);
   PubSub.subscribe('query.validateGenesStart', updateScope);

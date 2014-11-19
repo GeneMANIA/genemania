@@ -1,17 +1,50 @@
+.query-history-expander {
+	@l: @qHistExpSize;
+
+	z-index: 999;
+	position: absolute;
+	bottom: 2*@qHistP + @qHistSize;
+	left: 50%;
+	margin-left: -@l/2;
+	background: @qHistBg;
+	width: @l;
+	height: @l*0.666;
+	border-top-left-radius: 1em;
+	border-top-right-radius: 1em;
+	text-align: center;
+	cursor: pointer;
+
+	.transform( translate3d(0, 0, 0) );
+	.transition( transform linear 150ms );
+}
+
+.query-history-expander-icon {
+	font-size: 1.25em;
+	margin: 0.666em 0;
+}
+
+.query-history-expander-arrow {
+	position: absolute;
+	left: 50%;
+	margin-left: -0.25em;
+	font-size: 1.15em;
+	color: #666;
+}
+
 .query-history {
 	position: absolute;
 	left: 0;
 	bottom: 0;
-	background: red;
 	width: 100%;
 	height: @qHistSize;
-	padding: 1em;
-	background: rgba(0, 0, 0, 0.125);
+	padding: @qHistP;
+	background: @qHistBg;
 	// background: red;
 	z-index: 999;
 	white-space: nowrap;
 
-
+	.transform( translate3d(0, 0, 0) );
+	.transition( transform linear 150ms );
 }
 
 .query-history-entry {
@@ -69,4 +102,24 @@
 	right: 0;
 	bottom: 0;
 	text-align: center;
+}
+
+.query-history-number {
+	position: absolute;
+	right: 0;
+	top: 0;
+	color: #888;
+	margin: 0.25em;
+}
+
+.query-history-expanded-false {
+	.transform( translate3d(0, @qHistSize + 1.5*@qHistP, 0) );
+}
+
+.query-history-empty {
+	color: #888;
+}
+
+.query-history-loading {
+	color: #888;
 }

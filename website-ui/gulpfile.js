@@ -132,6 +132,11 @@ gulp.task('clean-all', ['javac-clean', 'java-deploy-clean', 'clean'], function( 
   next();
 });
 
+// convenient shortcut
+gulp.task('java-debug', function(){
+  return runSequence( 'javac-wdeps', 'java-deploy', next );
+});
+
 // compile java projects for debugging (incl. dependent projects)
 gulp.task( 'javac-wdeps', shell.task([
   'export PRIVATE_REPO=' + path.resolve( process.cwd(), '../../genemania-private' ) + ' && mvn clean install -pl website -am -P dev-debug'
