@@ -4,22 +4,69 @@
 	bottom: 0;
 	background: red;
 	width: 100%;
-	height: 50%;
-	// background: rgba(255, 255, 255, 0.666);
-	background: red;
-	z-index: 9999999;
+	height: @qHistSize;
+	padding: 1em;
+	background: rgba(0, 0, 0, 0.125);
+	// background: red;
+	z-index: 999;
+	white-space: nowrap;
+
+
 }
 
 .query-history-entry {
-	width: 20em;
-	height: 20em;
-	background-color: yellow;
+	position: relative;
+	width: @qHistSize;
+	height: @qHistSize;
+	background-color: rgba(255, 255, 255, 0.85);
+	cursor: pointer;
+	display: inline-block;
+
+	& + .query-history-entry {
+		border-left: 1px solid rgba(0, 0, 0, 0.125);
+	}
+}
+
+.query-history-ender {
+	height: @qHistSize;
+	width: 1.666em;
+	//background: red;
+	display: inline-block;
+	position: relative;
+}
+
+.query-history-organism-icon {
+	font-size: 2em;
+	opacity: 0.4;
+	position: absolute;
+	z-index: 9;
+	left: 0;
+	top: 0;
+	margin: 0.1em;
+}
+
+.query-history-image {
+	@p: 1.5em;
+
+	position: absolute;
+	left: @p;
+	top: @p;
+	width: @qHistSize - 2*@p;
+	height: @qHistSize - 2*@p;
 	background-size: contain;
 	background-repeat: no-repeat;
 	background-position: 50% 50%;
-	cursor: pointer;
-	float: left;
-	box-sizing: border-box;
-	border-right: 1px solid rgba(0, 0, 0, 0.5);
-	border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+	z-index: 10;
+}
+
+.query-history-label {
+	.monospace;
+
+	z-index: 100;
+	color: #666;
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	text-align: center;
 }

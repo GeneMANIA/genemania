@@ -24,12 +24,21 @@ function( util, Result, io, cy ){ return function( Query ){
       var l = Math.max( bb.w, bb.h );
       var idealL = 800;
       var scale = idealL / l;
+      var genes = query.genesText.split('\n');
+
+      for( var i = genes.length - 1; i >= 0; i-- ){
+        if( genes[i].match(/^\s*$/) ){
+          genes.splice( i, 1 );
+        }
+      }
 
       history.unshift({
         params: query.params(),
-        image: cy.png({ scale: scale }),
+        image: cy.png({ scale: scale, full: true }),
         timestamp: Date.now(),
-        version: copy( query.version )
+        genes: genes,
+        version: copy( query.version ),
+        organismIcon: query.organism.icon
       });
 
       return ioq.write();

@@ -1,8 +1,18 @@
 <div ng-controller="QueryCtrl">
 
-  <div id="query-history" class="query-history scrollable query-history-splashed-{{query.splashed ? true : false}}">
-    <div class="query-history-entry" on-tap="query.succeed( entry )" ng-style="{ 'background-image': 'url(' + entry.image + ')' }" ng-repeat="entry in history track by entry.timestamp">
+  <div id="query-history" class="query-history scrollable scrollable-x query-history-splashed-{{query.splashed ? true : false}}">
+    <div class="query-history-entry activatable animated fadeIn" on-tap="query.succeed( entry )" ng-repeat="entry in history track by entry.timestamp" bindonce="entry">
+      <span class="query-history-organism-icon" bo-class="entry.organismIcon"></span>
+      <span class="query-history-image" bo-style="{ 'background-image': 'url(' + entry.image + ')' }"></span>
+      <span class="query-history-label">
+        <span bo-text="entry.genes[0]"></span>
+        <span bo-if="entry.genes.length > 1">
+          +<span bo-text="entry.genes.length - 1"></span><span class="bio-helix"></span>
+        </span>
+      </span>
     </div>
+
+    <div class="query-history-ender"></div>
   </div>
 
 </div>
