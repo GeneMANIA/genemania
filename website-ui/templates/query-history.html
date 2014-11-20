@@ -2,8 +2,8 @@
 
   <div class="query-history-expander activatable query-history-expanded-{{query.historyExpanded ? true : false}}" on-tap="query.toggleHistoryExpansion()">
     <span class="query-history-expander-icon fa fa-history"></span>
-    <span class="query-history-expander-arrow fa fa-caret-up" ng-show="!query.historyExpanded"></span>
-    <span class="query-history-expander-arrow fa fa-caret-down" ng-show="query.historyExpanded"></span>
+    <span class="query-history-expander-arrow fa fa-angle-up" ng-show="!query.historyExpanded"></span>
+    <span class="query-history-expander-arrow fa fa-angle-down" ng-show="query.historyExpanded"></span>
   </div>
 
   <div id="query-history" class="query-history scrollable scrollable-x query-history-splashed-{{query.splashed ? true : false}} query-history-expanded-{{query.historyExpanded ? true : false}}">
