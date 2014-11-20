@@ -63,7 +63,9 @@ var paths = {
     './css/query-genes-sizes.less',
     './css/query-organisms.less',
     './css/query-networks.less',
-    './css/query-history.less'
+    './css/query-history.less',
+    './css/result.less',
+    './css/result-networks.less'
   ],
 
   // config for java project integration & debugging locally

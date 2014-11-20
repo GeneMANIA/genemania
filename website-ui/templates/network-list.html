@@ -1,0 +1,15 @@
+<div ng-controller="NetworksCtrl">
+
+  <div class="network-list networks">
+
+    <div class="network-group" ng-repeat="rGr in result.resultNetworkGroups">
+      {{rGr.networkGroup.name}}
+
+      <div class="network" ng-repeat="rNet in rGr.resultNetworks">
+        {{rNet.network.name}}
+      </div>
+    </div>
+
+  </div>
+
+</div>

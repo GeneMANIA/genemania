@@ -245,28 +245,17 @@ app.controller('QueryCtrl',
 [ '$scope', 'updateScope', 'Query', 
 function( $scope, updateScope, Query ){
 
-  function updateHistory(){
-    io('queries').read().then(function( qJson ){
-      $scope.history = window.queryHistory = qJson.history;
-
-      updateScope();
-    });
-  }
-
   // initialise once whole app is ready
   function init(){
     window.query = $scope.query = Query.current;
 
-    updateHistory();
-    $scope.$apply();
+    // $scope.$apply();
+    updateScope();
   }
 
   PubSub.subscribe('ready', init);
   PubSub.subscribe('query.searchResult', init);
-  PubSub.subscribe('query.store', updateHistory);
   PubSub.subscribe('query.succeed', init);
-  PubSub.subscribe('query.clearHistory', updateHistory);
-  PubSub.subscribe('query.historyLoaded', updateScope);
 
   PubSub.subscribe('query.validateGenes', updateScope);
   PubSub.subscribe('query.validateGenesStart', updateScope);

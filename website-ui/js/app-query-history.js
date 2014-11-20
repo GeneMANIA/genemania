@@ -22,7 +22,7 @@ function( util, Result, io, cy ){ return function( Query ){
       var history = qJson.history = qJson.history || [];
       var bb = cy.elements().boundingBox();
       var l = Math.max( bb.w, bb.h );
-      var idealL = 800;
+      var idealL = 150;
       var scale = idealL / l;
       var genes = query.genesText.split('\n');
 
@@ -155,3 +155,34 @@ function( util, Result, io, cy ){ return function( Query ){
 
 } } ]);
 
+app.controller('QueryHistoryCtrl',
+[ '$scope', 'updateScope', 'Query', 
+function( $scope, updateScope, Query ){
+
+  function updateHistory(){
+    io('queries').read().then(function( qJson ){
+      $scope.history = window.queryHistory = qJson.history;
+
+      updateScope();
+    });
+  }
+
+  // initialise once whole app is ready
+  function init(){
+    $scope.query = Query.current;
+
+    updateHistory();
+    updateScope();
+  }
+
+  PubSub.subscribe('query.ready', init);
+  PubSub.subscribe('query.store', updateHistory);
+  PubSub.subscribe('query.succeed', init);
+  PubSub.subscribe('query.clearHistory', updateHistory);
+  PubSub.subscribe('query.historyLoaded', updateScope);
+  
+  $scope.respRestyle = function(){ // allow access to resp restyle inside template
+    responsive.restyle();
+  };
+
+} ]);
