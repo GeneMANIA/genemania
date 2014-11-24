@@ -11,3 +11,63 @@
 // sizes
 @SMALL_SCREEN_WIDTH: 800px;
 @DEFAULT_DATA_WIDTH: 30em;
+
+// container
+@qH: 2.5em;
+@qItemW: @qH * 1.125;
+@qBg: rgba(240, 240, 240, 0.85); //#eee;
+@qSepColor: darken(@qBg, 10%);
+@qBorderColor: darken(@qBg, 1%);
+@qBorderRadius: 0.5em;
+@qMoveAniSpd: 0.25s;
+@qMargin: 0.25em;
+
+// splash
+@qSplashX: 0;
+@qSplashY: 75px;
+
+// organism
+@qOrgP: 0.5em;
+
+// genes
+@qGenesW: 10em;
+@qGenesMargin: 0.25em;
+@qGenesH: @qH - 2 * @qGenesMargin;
+@qGenesExpH: 140px;
+@qGenesValW: 1.333em;
+@qGenesLineHeight: 18px;
+@qGenesPaddingLeft: 3em;
+@qGenesAniDelay: 0.25s;
+
+// expander
+@qExpAniDur: 0.25s;
+@qExpW: 3*@qItemW + @qGenesW + 2*@qGenesMargin + 0.25em;
+
+// calculated query width
+@qW: 4*@qItemW + @qGenesW + 2*@qGenesMargin + 0.25em;
+
+// more / advanced
+@qMoreW: @qW - 0.25em;
+@qMoreH: 30em;
+
+// networks
+@qNetP: 0.25em;
+@qNetNameSpacing: 3.5em; // because scrollbars mess up calcs
+@qNetGrsH: 16em;
+@qNetGrsTitleH: 1.5em;
+
+// qtips
+@qQtipVpOffset: 10px;
+
+// history
+@qHistSize: 10em;
+@qHistP: 1em;
+@qHistExpSize: 3em;
+@qHistBg: rgba(0, 0, 0, 0.125);
+
+// networks
+@netListW: 14em;
+@netNameW: @netListW - 3em;
+@netBarH: 0.8em;
+@netLeftM: 2em;
+@netBorderColor: darken(@SEPARATOR_COLOR, 5%);

@@ -1,12 +1,32 @@
 <div ng-controller="NetworksCtrl">
 
-  <div class="network-list networks">
+  <div class="network-list networks scrollable networks-query-history-expanded-{{query.historyExpanded ? true : false}}">
 
-    <div class="network-group" ng-repeat="rGr in result.resultNetworkGroups">
-      {{rGr.networkGroup.name}}
+    <div class="network-list-title">
+      Networks
+    </div>
 
+    <div class="network-group" bindonce="result" ng-repeat="rGr in result.resultNetworkGroups">
+      <span class="network-group-check activatable-relative"><span class="check check-true"></span></span>
+      <span class="network-group-name activatable-relative">
+        <span class="network-group-expander"><span class="fa fa-caret-down"></span></span>
+        <span bo-text="rGr.networkGroup.name"></span>
+      </span>
+      <span class="network-group-bar">
+        <span class="network-group-color" bo-style="{ 'width': rGr.weight * 100 + '%', 'background-color': rGr.color }"></span>
+      </span>
+      <span class="network-group-percent" bo-text="rGr.displayWeight"></span>
+ 
       <div class="network" ng-repeat="rNet in rGr.resultNetworks">
-        {{rNet.network.name}}
+        <span class="network-check activatable-relative"><span class="check check-true"></span></span>
+        <span class="network-name activatable-relative">
+          <span class="network-expander"><span class="fa fa-caret-down"></span></span>
+          <span bo-text="rNet.network.name"></span>
+        </span>
+        <span class="network-bar">
+          <span class="network-color" bo-style="{ 'width': rNet.weight * 100 + '%', 'background-color': rNet.color }"></span>
+        </span>
+        <span class="network-percent" bo-text="rNet.displayWeight"></span>
       </div>
     </div>
 

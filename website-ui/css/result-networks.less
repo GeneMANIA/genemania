@@ -1,11 +1,117 @@
 .network-list {
+	@bc: darken(@SEPARATOR_COLOR, 5%);
+
 	position: absolute;
 	right: 0;
 	top: 0;
+	bottom: 0;
 	width: 10em;
 	z-index: 9;
+	width: @netListW;
 
-	background: red;
-	min-width: 100px;
-	min-height: 100px;
+	background: rgba(255, 255, 255, 0.85);
+	border-left: 2px solid @bc;
+	border-top: 1px solid @bc;
+	border-bottom: 1px solid @bc;
+	border-top-left-radius: 0.5em;
+	border-bottom-left-radius: 0.5em;
+	//background: red;
 }
+
+.network-list-title {
+	background-color: @SEPARATOR_COLOR;
+	padding: 0.25em;
+	text-align: center;
+}
+
+.networks-query-history-expanded-true {
+	bottom: @qHistSize + 2*@qHistP;
+}
+
+.network,
+.network-group {
+	border-top: 1px solid @netBorderColor;
+	padding: 0.25em 0;
+}
+
+.network-group:first-child {
+	border: 0;
+}
+
+.network-group {
+	//background: yellow;
+	position: relative;
+}
+
+.network {
+	//background: orange;
+	margin-left: @netLeftM;
+	position: relative;
+}
+
+.network-group-name,
+.network-name {
+	margin-left: 0.25em;
+	cursor: pointer;
+	display: inline-block;
+	position: relative;
+	// background: blue;
+}
+
+.network-group-name {
+	width: @netNameW;
+}
+
+.network-name {
+	font-size: 0.8em;
+	width: (@netNameW - @netLeftM)/0.8;
+}
+
+.network-group-check,
+.network-check {
+	padding: 0 0.25em;
+	cursor: pointer;
+}
+
+.network-group-expander, 
+.network-expander {
+	width: 0.5em;
+	text-align: right;
+}
+
+.network-group-percent,
+.network-percent {
+	font-size: 0.666em;
+	position: absolute;
+	margin: 0.5em;
+	margin-top: -1.55em;
+	right: 0.333em;
+	color: #aaa;
+}
+
+.network-group-bar,
+.network-bar {
+	@m: 0.25em;
+	@mL: 2em;
+
+	display: block;
+	width: @netNameW - @mL + 0.5em;
+	margin: @m;
+	margin-left: @mL;
+	height: @netBarH;
+	// background: blue;
+	border: 1px solid @SEPARATOR_COLOR;
+
+	&.network-group-bar {
+		margin-left: @netLeftM + @mL;
+	}
+}
+
+.network-group-color,
+.network-color {
+	display: block;
+	height: @netBarH;
+	min-width: 2px;
+	//background: red;
+}
+

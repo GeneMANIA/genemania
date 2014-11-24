@@ -12,6 +12,20 @@ var config = {
   },
 
   networks: {
+    colors: [
+      { code: 'coexp', color: '#d0b7d5' },
+      { code: 'coloc', color: '#a0b3dc' },
+      { code: 'gi', color: '#90e190' },
+      { code: 'path', color: '#9bd8de' },
+      { code: 'pi', color: '#eaa2a2' },
+      { code: 'predict', color: '#f6c384' },
+      { code: 'spd', color: '#dad4a2' },
+      { code: 'spd_attr', color: '#D0D0D0' },
+      { code: 'reg', color: '#D0D0D0' },
+      { code: 'reg_attr', color: '#D0D0D0' },
+      { code: 'user', color: '#f0ec86' }
+    ],
+
     sourceName: {
       'GEO': 'GEO',
       'PATHWAYCOMMONS': 'Pathway Commons',
@@ -139,6 +153,16 @@ var config = {
       }
     }
   ];
+
+  var colorsByCode = config.networks.colorsByCode = {};
+  var colors = config.networks.colors;
+  for( var i = 0; i < colors.length; i++ ){
+    var spec = colors[i];
+    var color = spec.color;
+    var code = spec.code;
+
+    colorsByCode[ code ] = color;
+  }
 
   if( config.debug ){
     Promise.longStackTraces(); // enable long stack traces in bluebird for debugging

@@ -149,7 +149,6 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
       var group = self.networkGroups[i];
       var nets = group.interactionNetworks;
       var selCount = 0;
-
       group.expanded = false;
 
       self.networkGroupsById[ group.id ] = group;

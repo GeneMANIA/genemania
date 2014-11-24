@@ -61,6 +61,8 @@ function( $$search, cy, cyStylesheet ){
         self[i] = searchResult[i];
       }
 
+      self.updateNetworkData();
+
       self.loadGraph().then(function(){
         if( opts.store ){
           q.store();
@@ -91,6 +93,27 @@ function( $$search, cy, cyStylesheet ){
 
   rfn.cancellable = function(){
     return this.searchPromise != null;
+  };
+
+  rfn.updateNetworkData = function(){
+    var self = this;
+    var rGrs = self.resultNetworkGroups;
+
+    for( var i = 0; i < rGrs.length; i++ ){
+      var rGr = rGrs[i];
+      var rNets = rGr.resultNetworks;
+      var color = config.networks.colorsByCode[ rGr.networkGroup.code ];
+
+      for( var j = 0; j < rNets.length; j++ ){
+        var rNet = rNets[j];
+
+        rNet.color = color;
+        rNet.displayWeight = numeral( rNet.weight ).format('0.00%');
+      }
+
+      rGr.color = color;
+      rGr.displayWeight = numeral( rGr.weight ).format('0.00%');
+    }
   };
 
   rfn.loadGraph = function(){
