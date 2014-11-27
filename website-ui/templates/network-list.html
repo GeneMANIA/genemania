@@ -1,6 +1,12 @@
 <div ng-controller="NetworksCtrl">
 
-  <div class="network-list networks scrollable networks-query-history-expanded-{{query.historyExpanded ? true : false}}">
+  <div class="network-list-expander activatable network-list-expanded-{{result.networksExpanded ? true : false}}" on-tap="result.toggleNetworksExpansion()">
+    <span class="network-list-expander-icon fa fa-share-alt"></span>
+    <span class="network-list-expander-arrow fa fa-angle-left" ng-show="!result.networksExpanded"></span>
+    <span class="network-list-expander-arrow fa fa-angle-right" ng-show="result.networksExpanded"></span>
+  </div>
+
+  <div id="network-list" class="network-list networks scrollable networks-query-history-expanded-{{query.historyExpanded ? true : false}} network-list-expanded-{{result.networksExpanded ? true : false}}">
 
     <div class="network-list-title">
       Networks

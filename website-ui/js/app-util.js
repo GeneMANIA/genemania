@@ -29,6 +29,13 @@ app.factory('util', [ function(){
           resolve();
         }, ms);
       });
+    },
+
+    isSmallScreen: function(){
+      var min = 550;
+      var $doc = $(document);
+
+      return $doc.width() < min || $doc.height() < min;
     }
   };
 } ]);

@@ -1,6 +1,6 @@
 app.factory('Result', 
-[ '$$search', 'cy', 'cyStylesheet',
-function( $$search, cy, cyStylesheet ){
+[ '$$search', 'cy', 'cyStylesheet', 'util',
+function( $$search, cy, cyStylesheet, util ){
 
   var Result = window.Result = function( opts ){
     if( !(this instanceof Result) ){
@@ -13,6 +13,10 @@ function( $$search, cy, cyStylesheet ){
       this.query = opts.query;
     } else {
       console.error('A result must have a query specified');
+    }
+
+    if( rfn.networksExpanded === undefined && !util.isSmallScreen() ){
+      rfn.networksExpanded = true;
     }
 
     this.search({
@@ -98,6 +102,9 @@ function( $$search, cy, cyStylesheet ){
   rfn.updateNetworkData = function(){
     var self = this;
     var rGrs = self.resultNetworkGroups;
+    var sortByWeight = function(a, b){
+      return b.weight - a.weight;
+    };
 
     for( var i = 0; i < rGrs.length; i++ ){
       var rGr = rGrs[i];
@@ -113,7 +120,11 @@ function( $$search, cy, cyStylesheet ){
 
       rGr.color = color;
       rGr.displayWeight = numeral( rGr.weight ).format('0.00%');
+
+      rNets.sort( sortByWeight );
     }
+
+    self.resultNetworkGroups.sort( sortByWeight );
   };
 
   rfn.loadGraph = function(){
@@ -214,6 +225,7 @@ function( $$search, cy, cyStylesheet ){
     cy.endBatch(); // will trigger new stylesheet etc
     
     return new Promise(function( resolve ){
+      var $list = $('#network-list');
 
       cy.one('layoutstop', function(){
         resolve();
@@ -221,7 +233,10 @@ function( $$search, cy, cyStylesheet ){
 
       cy.elements().stdFilter(function( ele ){
         return ele.isNode() || ele.data('group') !== 'coexp';
-      }).layout({ name: 'cola' });
+      }).layout({
+        name: 'cola',
+        edgeLength: function( e ){ return 60 / e.data('weight'); } // as w => inf, l => 0
+      });
 
       // cy.layout({
       //   name: 'concentric',
@@ -238,6 +253,30 @@ function( $$search, cy, cyStylesheet ){
       });
 
   };
+
+  rfn.toggleNetworksExpansion = function(){
+    if( this.networksExpanded ){
+      this.collapseNetworks();
+    } else {
+      this.expandNetworks();
+    }
+
+    PubSub.publish('query.toggleNetworksExpansion', this);
+  };
+
+  rfn.expandNetworks = function(){
+    rfn.networksExpanded = true;
+
+    PubSub.publish('query.toggleNetworksExpansion', this);
+  };
+
+  rfn.collapseNetworks = function(){
+    rfn.networksExpanded = false;
+
+    PubSub.publish('query.collapseNetworks', this);
+  };
+
+
 
   return r;
 

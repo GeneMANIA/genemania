@@ -22,6 +22,12 @@ var gulpif = require('gulp-if');
 var combine = require('stream-combiner');
 var replace = require('gulp-replace');
 
+var $cordova = path.resolve( process.cwd(), 'node_modules/cordova/bin/cordova' );
+var $crosswalkCreate = path.resolve( process.cwd(), 'crosswalk/bin/create' );
+var $crosswalkUrl = 'https://download.01.org/crosswalk/releases/crosswalk/android/stable/9.38.208.10/arm/crosswalk-cordova-9.38.208.10-arm.zip';
+var $appAddr = 'org.genemania.user';
+var $appName = 'GeneMANIA';
+
 var paths = {
   js: [
     './js/lib/jquery-*.js',
@@ -314,3 +320,31 @@ gulp.task('watch', ['prewatch'], function(){
   } );
 
 });
+
+gulp.task( 'cordova-create', shell.task([
+  '[ -d cordova ] || ( mkdir cordova && $cordova -d create cordova $appAddr $appName )'
+    .replace('$cordova', $cordova)
+    .replace('$appAddr', $appAddr)
+    .replace('$appName', $appName)
+]) );
+
+gulp.task( 'cordova-platforms', ['cordova-create'], shell.task([
+  '[ -d platforms/ios ] || $cordova platform add ios'.replace('$cordova', $cordova),
+  '[ -d platforms/firefoxos ] || $cordova platform add firefoxos'.replace('$cordova', $cordova)
+], { cwd: 'cordova' }) );
+
+gulp.task( 'crosswalk-create', shell.task([
+  ('[ -d crosswalk ] || ( ' + 
+      ' curl $crosswalkUrl -o crosswalk.zip ' +
+      ' && unzip crosswalk.zip && rm crosswalk.zip ' +
+      ' && mv crosswalk* crosswalk ' +
+  ' )').replace('$crosswalkUrl', $crosswalkUrl) // one big command b/c of if
+]) );
+
+gulp.task( 'crosswalk-platforms', shell.task([
+  '$crosswalkCreate . $appAddr $appName'
+    .replace('$crosswalkCreate', $crosswalkCreate)
+    .replace('$appAddr', $appAddr)
+    .replace('$appName', $appName)
+]) );
+  

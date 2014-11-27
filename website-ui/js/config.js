@@ -3,7 +3,8 @@ var config = {
 
   service: {
     // baseUrl: 'http://localhost:8080/genemania/json/'
-    baseUrl: 'http://max.local:8080/genemania/json/'
+    // baseUrl: 'http://max.local:8080/genemania/json/'
+    baseUrl: 'http://192.168.81.119:8080/genemania/json/'
   },
 
   query: {

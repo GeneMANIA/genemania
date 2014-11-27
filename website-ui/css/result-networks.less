@@ -18,9 +18,19 @@
 	//background: red;
 }
 
+.network-list, 
+.network-list-expander {
+	.transform( translate3d(0, 0, 0) );
+	.transition( transform linear 200ms );
+}
+
+.network-list-expanded-false {
+	.transform( translate3d(@netListW, 0, 0) );
+}
+
 .network-list-title {
 	background-color: @SEPARATOR_COLOR;
-	padding: 0.25em;
+	padding: 1em 0.25em;
 	text-align: center;
 }
 
@@ -71,12 +81,14 @@
 .network-check {
 	padding: 0 0.25em;
 	cursor: pointer;
+	opacity: 0.333;
 }
 
 .network-group-expander, 
 .network-expander {
 	width: 0.5em;
 	text-align: right;
+	opacity: 0.1;
 }
 
 .network-group-percent,
@@ -113,5 +125,30 @@
 	height: @netBarH;
 	min-width: 2px;
 	//background: red;
+}
+
+.network-list-expander {
+	position: absolute;
+	right: @netListW;
+	top: 50%;
+	margin-top: -1.125em;
+	z-index: 9;
+	background: rgba(220, 220, 220, 0.85);
+	border-top-left-radius: 1em;
+	border-bottom-left-radius: 1em;
+}
+
+.network-list-expander-icon {
+	font-size: 1.25em;
+	margin: 0.666em 0.2em 0.666em 0.666em;
+	cursor: pointer;
+}
+
+.network-list-expander-arrow {
+	position: absolute;
+	left: 0.333em;
+	top: 50%;
+	margin-top: -0.5em;
+	color: #666;
 }
 
