@@ -7,6 +7,7 @@
   },
   "devDependencies": {
     "cordova": "^4.1.2",
+    "del": "^1.0.0",
     "gulp": "~3.6.2",
     "gulp-clean": "~0.2.4",
     "gulp-concat": "~2.2.0",
@@ -28,6 +29,7 @@
     "gulp-uglify": "~0.3.0",
     "gulp-watch": "^0.6.6-1",
     "run-sequence": "^0.3.6",
-    "stream-combiner": "^0.2.1"
+    "stream-combiner": "^0.2.1",
+    "vinyl-paths": "^1.0.0"
   }
 }

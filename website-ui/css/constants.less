@@ -1,12 +1,14 @@
 // colours
 @BG_COLOR: #fff;
+@CONTENT_BG_COLOR: rgba(102, 102, 102, 0.93);
+@CONTENT_TEXT_COLOR: #fff;
 @BUTTON_COLOR: #8BB0D0;
 @BUTTON_COLOR_SEMI: rgba(139, 176, 208, 0.85);
 @LINK_COLOR: #8BB0D0;
-@SEPARATOR_COLOR: #f0f0f0;
+@SEPARATOR_COLOR: #555;
 @VALIDATION_ERROR_COLOR: rgba(255, 0, 0, 0.666); //#E81515;
 @VALIDATION_ALL_VALID_COLOR: #4FC44F;
-@HEADER_COLOR: #f0f0f0;
+@HEADER_COLOR: #444;
 
 // sizes
 @SMALL_SCREEN_WIDTH: 800px;
@@ -14,8 +16,9 @@
 
 // container
 @qH: 2.5em;
+@qTextColor: #fff;
 @qItemW: @qH * 1.125;
-@qBg: rgba(240, 240, 240, 0.85); //#eee;
+@qBg: rgba(102, 102, 102, 0.85); //#eee;
 @qSepColor: darken(@qBg, 10%);
 @qBorderColor: darken(@qBg, 1%);
 @qBorderRadius: 0.5em;
@@ -30,6 +33,7 @@
 @qOrgP: 0.5em;
 
 // genes
+@qGenesTextColor: #000;
 @qGenesW: 10em;
 @qGenesMargin: 0.25em;
 @qGenesH: @qH - 2 * @qGenesMargin;
@@ -55,6 +59,8 @@
 @qNetNameSpacing: 3.5em; // because scrollbars mess up calcs
 @qNetGrsH: 16em;
 @qNetGrsTitleH: 1.5em;
+@qNetCountColor: #aaa;
+@qNetTagBorderColor: #aaa;
 
 // qtips
 @qQtipVpOffset: 10px;
@@ -63,9 +69,11 @@
 @qHistSize: 10em;
 @qHistP: 1em;
 @qHistExpSize: 3em;
-@qHistBg: rgba(0, 0, 0, 0.125);
+@qHistBg: rgba(0, 0, 0, 0.4);
+@qHistEntBg: rgba(255, 255, 255, 0.85);
 
 // networks
+@netListBg: darken(@SEPARATOR_COLOR, 5%);
 @netListW: 14em;
 @netNameW: @netListW - 3em;
 @netBarH: 0.8em;

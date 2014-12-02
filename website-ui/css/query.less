@@ -11,6 +11,7 @@
 	border-bottom: 2px solid darken(@qBorderColor, 10%);
 	border-left-color: darken(@qBorderColor, 5%);
 	border-right-color: darken(@qBorderColor, 5%);
+	color: @qTextColor;
 
 	.transform( translate3d(0, 0, 0) ); // hopefully makes (left,top) ani faster
 	.transition-property( transform );
@@ -96,7 +97,7 @@
 }
 
 .query-action {
-	color: #888;
+	color: #ccc;
 }
 
 .query-submit {
@@ -153,7 +154,7 @@
 	top: 0;
 	height: @qH;
 	width: @qExpW;
-	opacity: 0.5;
+	opacity: 0.7;
 	z-index: 99999999;
 	pointer-events: none;
 	border-top-left-radius: @qBorderRadius;
@@ -191,13 +192,13 @@
 	margin-top: @qSplashY + 0;
 }
 
-.query-weighting-groups {
+.query-weighting-group-name {
 	background: @HEADER_COLOR;
 }
 
-.query-weighting-group + .query-weighting-group {
-	margin-top: 0.5em;
-}
+// .query-weighting-group + .query-weighting-group > .query-weighting-group-name {
+// 	padding-top: 0.5em;
+// }
 
 .query-weightings-footer {
 	text-align: center;
@@ -212,7 +213,7 @@
 .query-weighting {
 	font-size: 0.85em;
 	cursor: pointer;
-	background: @BG_COLOR;
+	//background: @BG_COLOR;
 }
 
 .query-weighting {

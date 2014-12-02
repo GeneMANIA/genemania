@@ -3,6 +3,7 @@
 	width: @qGenesW;
 	height: @qGenesH;
 	margin: @qGenesMargin;
+	color: @qGenesTextColor;
 }
 
 .query-genes-expander {
@@ -11,7 +12,7 @@
 
 	//box-sizing: border-box;
 	background: @c;
-	border: @bw solid darken(@c, 10%);
+	border: @bw solid rgba(60, 60, 60, 0.5);
 	position: absolute;
 	left: -@bw; // offset border
 	top: 0;
@@ -27,6 +28,7 @@
 
 .query-genes-expander-expanded {
 	//height: @qGenesExpH;
+	border-bottom-width: 2px;
 
 	.animated;
 	.fadeIn;

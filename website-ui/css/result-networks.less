@@ -1,5 +1,5 @@
 .network-list {
-	@bc: darken(@SEPARATOR_COLOR, 5%);
+	@bc: @netListBg;
 
 	position: absolute;
 	right: 0;
@@ -9,7 +9,8 @@
 	z-index: 9;
 	width: @netListW;
 
-	background: rgba(255, 255, 255, 0.85);
+	color: @CONTENT_TEXT_COLOR;
+	background: @CONTENT_BG_COLOR;
 	border-left: 2px solid @bc;
 	border-top: 1px solid @bc;
 	border-bottom: 1px solid @bc;
@@ -133,9 +134,10 @@
 	top: 50%;
 	margin-top: -1.125em;
 	z-index: 9;
-	background: rgba(220, 220, 220, 0.85);
+	background: @netListBg;
 	border-top-left-radius: 1em;
 	border-bottom-left-radius: 1em;
+	color: @CONTENT_TEXT_COLOR;
 }
 
 .network-list-expander-icon {
@@ -149,6 +151,6 @@
 	left: 0.333em;
 	top: 50%;
 	margin-top: -0.5em;
-	color: #666;
+	color: darken(@CONTENT_TEXT_COLOR, 15%);
 }
 

@@ -86,6 +86,22 @@ app.directive('onCtrlEnter', ['$parse', function ($parse) {
   };
 }]);
 
+app.directive('onCtrlEnterBlurAnd', ['$parse', function ($parse) {
+  return function (scope, $ele, attr){
+
+    var handler = $parse(attr.onCtrlEnterBlurAnd);
+
+    $ele[0].addEventListener('keydown', function(evt){
+      if( (evt.keyCode == 10 || evt.keyCode == 13) && (evt.ctrlKey || evt.metaKey || evt.altKey) ){
+        evt.preventDefault();
+        handler(scope, { $event: evt });
+        $ele.blur();
+      }
+    });
+
+  };
+}]);
+
 app.directive('onEscBlur', ['$parse', function ($parse) {
   return function (scope, $ele, attr){
 

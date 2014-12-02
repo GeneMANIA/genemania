@@ -24,9 +24,12 @@ var replace = require('gulp-replace');
 
 var $cordova = path.resolve( process.cwd(), 'node_modules/cordova/bin/cordova' );
 var $crosswalkCreate = path.resolve( process.cwd(), 'crosswalk/bin/create' );
+var $crosswalkCreate = path.resolve( process.cwd(), 'crosswalk/bin/create' );
 var $crosswalkUrl = 'https://download.01.org/crosswalk/releases/crosswalk/android/stable/9.38.208.10/arm/crosswalk-cordova-9.38.208.10-arm.zip';
 var $appAddr = 'org.genemania.user';
 var $appName = 'GeneMANIA';
+var $crosswalkAppDir = 'crosswalk/' + $appName;
+var $crosswalkAppWww = 'crosswalk/' + $appName + '/assets/www';
 
 var paths = {
   js: [
@@ -80,6 +83,23 @@ var paths = {
   deployJavaDir: '../../tomcat/webapps/genemania',
   springFiles: [
     '../website/target/**/ApplicationConfig.properties'
+  ],
+
+  cordova: [
+    './index.html',
+    './css-build/**',
+    './js-build/**',
+    './fonts/**',
+    './img/**'
+  ],
+
+  cordovaDebug: [
+    './index.html',
+    './css-build/**',
+    './js/**',
+    './js-build/**',
+    './fonts/**',
+    './img/**'
   ]
 };
 
@@ -224,7 +244,7 @@ gulp.task('htmlrefs', function(){
 });
 
 // update refs and include cached templates
-gulp.task('htmltemplatesref', ['templates'], function(next){
+gulp.task('htmltemplatesref', ['templates', 'css-unmin'], function(next){
   return runSequence( 'htmlrefs', next );
 });
 
@@ -321,6 +341,12 @@ gulp.task('watch', ['prewatch'], function(){
 
 });
 
+gulp.task('app-clean', ['clean'], function(){
+  return gulp.src([ './cordova', './crosswalk' ])
+    .pipe( clean() )
+  ;
+});
+
 gulp.task( 'cordova-create', shell.task([
   '[ -d cordova ] || ( mkdir cordova && $cordova -d create cordova $appAddr $appName )'
     .replace('$cordova', $cordova)
@@ -328,9 +354,29 @@ gulp.task( 'cordova-create', shell.task([
     .replace('$appName', $appName)
 ]) );
 
-gulp.task( 'cordova-platforms', ['cordova-create'], shell.task([
+gulp.task( 'cordova-projs', ['cordova-create'], shell.task([
   '[ -d platforms/ios ] || $cordova platform add ios'.replace('$cordova', $cordova),
   '[ -d platforms/firefoxos ] || $cordova platform add firefoxos'.replace('$cordova', $cordova)
+], { cwd: 'cordova' }) );
+
+gulp.task('cordova', ['htmlminrefs', 'cordova-projs'], function(){
+  return gulp.src( paths.cordova, { base: '.' } )
+    .pipe( gulp.dest('./cordova/www') )
+  ;
+});
+
+gulp.task('cordova-debug', ['htmltemplatesref', 'cordova-projs'], function(){
+  return gulp.src( paths.cordovaDebug, { base: '.' } )
+    .pipe( gulp.dest('./cordova/www') )
+  ;
+});
+
+gulp.task( 'ios-debug', ['cordova-debug'], shell.task([
+  '$cordova run ios --debug'.replace('$cordova', $cordova),
+], { cwd: 'cordova' }) );
+
+gulp.task( 'ios-release', ['clean', 'cordova'], shell.task([
+  '$cordova build ios --release'.replace('$cordova', $cordova),
 ], { cwd: 'cordova' }) );
 
 gulp.task( 'crosswalk-create', shell.task([
@@ -341,10 +387,32 @@ gulp.task( 'crosswalk-create', shell.task([
   ' )').replace('$crosswalkUrl', $crosswalkUrl) // one big command b/c of if
 ]) );
 
-gulp.task( 'crosswalk-platforms', shell.task([
-  '$crosswalkCreate . $appAddr $appName'
+gulp.task( 'crosswalk-projs', shell.task([
+  '[ - d $crosswalkAppDir ] || $crosswalkCreate $appName $appAddr $appName'
     .replace('$crosswalkCreate', $crosswalkCreate)
+    .replace('$crosswalkAppDir', $crosswalkAppDir)
     .replace('$appAddr', $appAddr)
     .replace('$appName', $appName)
-]) );
-  
+], { cwd: 'crosswalk' }) );
+
+gulp.task('crosswalk', ['htmlminrefs', 'crosswalk-projs'], function(){
+  return gulp.src( paths.cordova, { base: '.' } )
+    .pipe( gulp.dest($crosswalkAppWww) )
+  ;
+});
+
+gulp.task('crosswalk-debug', ['htmltemplatesref', 'crosswalk-projs'], function(){
+  return gulp.src( paths.cordovaDebug, { base: '.' } )
+    .pipe( gulp.dest($crosswalkAppWww) )
+  ;
+});
+
+gulp.task('android-debug', ['crosswalk'], shell.task([
+'./cordova/build --debug',
+'./cordova/run'
+], { cwd: $crosswalkAppDir }));
+
+gulp.task('android-release', ['clean', 'crosswalk-projs'], shell.task([
+'./cordova/build --release'
+], { cwd: $crosswalkAppDir }));
+

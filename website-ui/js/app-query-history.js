@@ -17,7 +17,7 @@ function( util, Result, io, cy ){ return function( Query ){
 
     //return util.delayPromise(1000).then(function(){
     return Promise.resolve().then(function(){
-      return ioq.read();
+      return ioq.read('queries');
     }).then(function( qJson ){
       var history = qJson.history = qJson.history || [];
       var bb = cy.elements().boundingBox();

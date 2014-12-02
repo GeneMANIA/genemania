@@ -42,7 +42,7 @@
           </div>
           <div id="query-genes-spellchecks" class="query-genes-spellchecks" ng-class="{ 'query-genes-validation-loading': query.validatingGenes || query.settingGenes }" ng-bind="query.geneSpellchecks">
           </div>
-          <textarea id="query-genes-textarea" wrap="off" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" ng-jquery-plugin="{ autosize: { callback: respRestyle } }" on-ctrl-enter="query.search()" on-line-select="query.describeGeneLine( $lineIndex )" on-esc-blur></textarea>
+          <textarea id="query-genes-textarea" wrap="off" class="query-genes-textarea" spellcheck="false" ng-model="query.genesText" ng-trim="false" ng-change="query.setGenesFromText()" ng-focus="query.expandGenes()" ng-blur="query.collapseGenes()" ng-jquery-plugin="{ autosize: { callback: respRestyle } }" on-ctrl-enter-blur-and="query.search()" on-line-select="query.describeGeneLine( $lineIndex )" on-esc-blur></textarea>
         </div>
 
         <popover id="query-genes-expander-instr" class="query-genes-expander-instr bottom popover-help ng-animate-fade" ng-show="query.genesExpanded">

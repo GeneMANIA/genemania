@@ -226,16 +226,23 @@ function( $$search, cy, cyStylesheet, util ){
     
     return new Promise(function( resolve ){
       var $list = $('#network-list');
+      var container = cy.container();
 
       cy.one('layoutstop', function(){
+        container.classList.remove('cy-layouting');
         resolve();
       });
 
-      cy.elements().stdFilter(function( ele ){
+      var layoutEles = cy.elements().stdFilter(function( ele ){
         return ele.isNode() || ele.data('group') !== 'coexp';
-      }).layout({
+      });
+
+      container.classList.add('cy-layouting');
+
+      layoutEles.layout({
         name: 'cola',
-        edgeLength: function( e ){ return 60 / e.data('weight'); } // as w => inf, l => 0
+        maxSimulationTime: 2000,
+        edgeLength: function( e ){ return layoutEles.length / 8 / e.data('weight'); } // as w => inf, l => 0
       });
 
       // cy.layout({

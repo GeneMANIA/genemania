@@ -21,6 +21,7 @@
 .query-history-expander-icon {
 	font-size: 1.25em;
 	margin: 0.666em 0;
+	color: @CONTENT_TEXT_COLOR;
 }
 
 .query-history-expander-arrow {
@@ -28,7 +29,7 @@
 	left: 50%;
 	margin-left: -0.25em;
 	font-size: 1.15em;
-	color: #666;
+	color: darken(@CONTENT_TEXT_COLOR, 15%);
 }
 
 .query-history {
@@ -51,7 +52,7 @@
 	position: relative;
 	width: @qHistSize;
 	height: @qHistSize;
-	background-color: rgba(255, 255, 255, 0.85);
+	background-color: @qHistEntBg;
 	cursor: pointer;
 	display: inline-block;
 
