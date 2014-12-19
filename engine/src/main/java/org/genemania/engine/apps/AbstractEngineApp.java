@@ -190,10 +190,6 @@ public abstract class AbstractEngineApp {
             }
         }
 
-        if (ids.size() == 0) {
-            throw new ApplicationException("no default networks found!");
-        }
-
         return ids;
     }
 

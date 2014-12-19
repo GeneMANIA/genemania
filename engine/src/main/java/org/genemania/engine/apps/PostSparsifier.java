@@ -306,10 +306,6 @@ public class PostSparsifier extends AbstractEngineApp {
             }
         }
 
-        if (records.size() == 0) {
-            throw new ApplicationException("no networks found!");
-        }
-
         logger.info(String.format("total %d networks selected", records.size()));
         return records;
     }

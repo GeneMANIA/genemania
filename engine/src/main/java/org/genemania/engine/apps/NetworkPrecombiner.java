@@ -98,7 +98,13 @@ public class NetworkPrecombiner extends AbstractEngineApp {
         // default networks
         logger.info("precomputing default networks");
         Collection<Collection<Long>> networkIds = getDefaultNetworks(organism);
-        preComputeForAllMethods(organism, networkIds);
+
+        if (networkIds.size() > 0) {
+            preComputeForAllMethods(organism, networkIds);
+        }
+        else {
+            logger.warn("skipped precombining for default networks, no default networks are defined");
+        }
 
         // all networks
         logger.info("precomputing all networks");

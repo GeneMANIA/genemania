@@ -109,14 +109,14 @@ public class DefaultNetworkSelector extends AbstractEngineApp {
         logger.info("processing organism " + organism.getId() + " "
                 + organism.getName());
 
-        Collection<Collection<Long>> networkIds = getDefaultPlusCoexpNetworks(organism);
         Collection<Long> coexpNetworks = getNetworkGroupByCode(organism,
                 COEXP_GROUP_CODE);
 
         if (coexpNetworks.size() == 0) {
             logger.warn(String.format("No coexp networks found for %s, skipping", organism.getName()));
         }
-        else {    
+        else {
+            Collection<Collection<Long>> networkIds = getDefaultPlusCoexpNetworks(organism);
             RelatedGenesEngineRequestDto request = buildRequest(organism,
                     networkIds);
             RelatedGenesEngineResponseDto response = mania2.findRelated(request);
@@ -167,7 +167,6 @@ public class DefaultNetworkSelector extends AbstractEngineApp {
     private Collection<Long> getNetworkGroupByCode(Organism organism,
             String code) throws ApplicationException {
 
-        int numFound = 0;
         Collection<InteractionNetworkGroup> groups = organism
                 .getInteractionNetworkGroups();
 
@@ -181,13 +180,8 @@ public class DefaultNetworkSelector extends AbstractEngineApp {
 
                 for (InteractionNetwork n : networks) {
                     ids.add(n.getId());
-                    numFound += 1;
                 }
             }
-        }
-
-        if (ids.size() == 0) {
-            throw new ApplicationException("no default networks found!");
         }
 
         return ids;
