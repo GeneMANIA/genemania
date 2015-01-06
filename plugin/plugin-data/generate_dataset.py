@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # This file is part of GeneMANIA.
 # Copyright (C) 2008-2011 University of Toronto.
