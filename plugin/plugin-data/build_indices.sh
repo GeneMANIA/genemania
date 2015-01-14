@@ -75,9 +75,12 @@ mkdir -p "${DISTDIR}"
 mkdir -p "${DATADIR}"
 
 # Build Lucene indices
-echo Building Lucene indices...
 pushd "${INDEXDIR}"
+echo Building Lucene indices in `pwd`
+echo java ${JAVA_OPTS} org.genemania.mediator.lucene.exporter.Generic2LuceneExporter "${DB_CONFIG}" "${DB_ROOT}" "${COLOURS}" "${PROFILE}"
 java ${JAVA_OPTS} org.genemania.mediator.lucene.exporter.Generic2LuceneExporter "${DB_CONFIG}" "${DB_ROOT}" "${COLOURS}" "${PROFILE}"
 popd
 
-java ${JAVA_OPTS} org.genemania.plugin.apps.IndexPostProcessor --target "${INDEXDIR}/lucene_index" --source "${DB_ROOT}/lucene_index"
+echo "running IndexPostProcessor in `pwd`"
+echo java ${JAVA_OPTS} org.genemania.plugin.apps.IndexPostProcessor --target "${INDEXDIR}" --source "${DB_ROOT}/lucene_index"
+java ${JAVA_OPTS} org.genemania.plugin.apps.IndexPostProcessor --target "${INDEXDIR}" --source "${DB_ROOT}/lucene_index"
