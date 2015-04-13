@@ -1,46 +1,10 @@
 app.factory('$$networks', 
-['$http', 'util',
+['$http', 'util', 
 function( $http, util ){
 
   var cache;
   var strcmp = util.strcmp;
-
-  function postprocessNetwork( net ){
-    var meta = net.metadata;
-    var authors = meta.authors.split(/\s*,\s*/);
-    var sAuthors;
-
-    if( authors.length === 0 ){
-      sAuthors = '';
-    } else if( authors.length < 2 ){
-      sAuthors = authors[0];
-    } else {
-      sAuthors = authors[0] + ' et al';
-    }
-
-    meta.shortAuthors = sAuthors;
-    meta.firstAuthor = authors[0];
-    meta.lastAuthor = authors[ authors.length - 1 ];
-
-    var mappedSourceName = config.networks.sourceName[ meta.source ];
-    meta.sourceName = mappedSourceName ? mappedSourceName : 'unknown';
-
-    meta.interactionCountFormatted = numeral( meta.interactionCount ).format('0,0');
-
-    var tags = net.tags;
-    for( var i = 0; i < tags.length; i++ ){
-      var tag = tags[i];
-
-      tag.nameFormatted = tag.name.toLowerCase();
-    }
-
-    tags.sort(function(a, b){
-      var aName = a.nameFormatted;
-      var bName = b.nameFormatted;
-
-      return strcmp( aName, bName );
-    });
-  }
+  var postprocessNetwork = config.networks.postprocess;
 
   var $$networks = window.$$networks = function(){
     if( cache ){ return Promise.resolve(cache); }

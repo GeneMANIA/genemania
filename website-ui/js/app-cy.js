@@ -5,6 +5,10 @@ function(  ){
   var cy = window.cy = cytoscape({
     container: document.getElementById('cy'),
 
+    boxSelectionEnabled: false,
+
+    autounselectify: true,
+
     motionBlur: true
   });
 

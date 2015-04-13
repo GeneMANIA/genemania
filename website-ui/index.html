@@ -15,16 +15,9 @@
   <div ng-include="'templates/query.html'"></div>
   <div ng-include="'templates/query-history.html'"></div>
   <div ng-include="'templates/network-list.html'"></div>
+  <div ng-include="'templates/gene-list.html'"></div>
 
   <div id="cy" class="cy"></div>
-
-  <div id="data">
-    <p on-tap="bar()">hello (foo = {{foo}})</p>
-    <p id="world">world</p>
-    <qtip target="world" qtip-show="foo === 'bar'" hide-event="none" show-event="none">
-      qtip body {{foo}}
-    </qtip>
-  </div>
 
   <style>
     #splash {
@@ -527,7 +520,6 @@
   <script src="js/lib/jquery-2.1.1.js"></script>
   <script src="js/lib/fastclick.js"></script>
   <script src="js/lib/angular.js"></script>
-  <script src="js-build/angular-templates.js"></script>
   <script src="js/lib/bindonce.js"></script>
   <script src="js/lib/bluebird.js"></script>
   <script src="js/lib/cola.adaptor.js"></script>
@@ -564,6 +556,7 @@
   <script src="js/app-query-history.js"></script>
   <script src="js/app-query-networks.js"></script>
   <script src="js/app-query.js"></script>
+  <script src="js/app-result-genes.js"></script>
   <script src="js/app-result-networks.js"></script>
   <script src="js/app-result.js"></script>
   <script src="js/app-search.js"></script>

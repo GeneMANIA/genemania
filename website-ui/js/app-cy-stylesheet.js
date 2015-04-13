@@ -80,6 +80,13 @@ function(){
           'width': 'mapData(weight, 0, 1, 1, 8)',
           'overlay-padding': 3
         }
+      },
+
+      {
+        selector: 'edge.filtered',
+        css: {
+          'opacity': 0.1
+        }
       }
     ];
 

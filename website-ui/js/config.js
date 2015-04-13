@@ -12,6 +12,10 @@ var config = {
     networkScrollDuration: 150,
   },
 
+  attributes: {
+    color: '#d0d0d0'
+  },
+
   networks: {
     colors: [
       { code: 'coexp', color: '#d0b7d5' },
@@ -164,6 +168,46 @@ var config = {
 
     colorsByCode[ code ] = color;
   }
+})();
+
+
+(function(){
+  config.networks.postprocess = function( net ){
+    var meta = net.metadata;
+    var authors = meta.authors.split(/\s*,\s*/);
+    var sAuthors;
+
+    if( authors.length === 0 ){
+      sAuthors = '';
+    } else if( authors.length < 2 ){
+      sAuthors = authors[0];
+    } else {
+      sAuthors = authors[0] + ' et al';
+    }
+
+    meta.shortAuthors = sAuthors;
+    meta.firstAuthor = authors[0];
+    meta.lastAuthor = authors[ authors.length - 1 ];
+
+    var mappedSourceName = config.networks.sourceName[ meta.source ];
+    meta.sourceName = mappedSourceName ? mappedSourceName : 'unknown';
+
+    meta.interactionCountFormatted = numeral( meta.interactionCount ).format('0,0');
+
+    var tags = net.tags;
+    for( var i = 0; i < tags.length; i++ ){
+      var tag = tags[i];
+
+      tag.nameFormatted = tag.name.toLowerCase();
+    }
+
+    tags.sort(function(a, b){
+      var aName = a.nameFormatted;
+      var bName = b.nameFormatted;
+
+      return strcmp( aName, bName );
+    });
+  };
 
   if( config.debug ){
     Promise.longStackTraces(); // enable long stack traces in bluebird for debugging

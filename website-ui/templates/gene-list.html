@@ -1,0 +1,39 @@
+<div ng-controller="GenesCtrl">
+
+  <div class="gene-list-expander activatable gene-list-expanded-{{result.genesExpanded ? true : false}}" on-tap="result.toggleGenesExpansion()">
+    <span class="gene-list-expander-icon bio-helix"></span>
+    <span class="gene-list-expander-arrow fa fa-angle-right" ng-show="!result.genesExpanded"></span>
+    <span class="gene-list-expander-arrow fa fa-angle-left" ng-show="result.genesExpanded"></span>
+  </div>
+
+  <div id="gene-list" class="gene-list genes scrollable scrollable-y genes-query-history-expanded-{{query.historyExpanded ? true : false}} gene-list-expanded-{{result.genesExpanded ? true : false}}">
+
+    <div class="gene-list-title">
+      Genes
+    </div>
+
+    <div bindonce="result" ng-repeat="rGene in result.resultGenes">
+
+      <div class="gene">
+        <span class="gene-expander"><span class="fa" ng-class="{ 'fa-caret-right': !rGene.expanded, 'fa-caret-down': rGene.expanded }"></span></span>
+        <span class="gene-name activatable-relative" on-tap="result.toggleGeneExpansion(rGene)">
+          <span bo-text="rGene.gene.symbol"></span>
+          <span class="gene-name-descr-preview" bo-text="rGene.gene.node.geneData.description"></span>
+        </span>
+
+        <div class="gene-info result-gene-info result-gene-info-expanded-{{rGene.expanded ? true : false}}">
+          <p class="gene-descr">
+            <span bo-text="rGene.gene.node.geneData.description"></span>
+
+            <span ng-if="rGene.links.length > 0" class="gene-link">
+              <a bo-href="rGene.links[0].url" target="_blank"><span class="fa fa-external-link"></span></a>
+            </span>
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

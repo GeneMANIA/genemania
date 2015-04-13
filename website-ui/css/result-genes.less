@@ -1,0 +1,136 @@
+.gene-list {
+	@bc: @geneListBg;
+
+	position: absolute;
+	left: 0;
+	top: @qH + 4*@qMargin;
+	bottom: 0;
+	width: 10em;
+	z-index: 9;
+	width: @geneListW;
+
+	color: @CONTENT_TEXT_COLOR;
+	background: @CONTENT_BG_COLOR;
+	border-right: 2px solid @bc;
+	border-top: 1px solid @bc;
+	border-bottom: 1px solid @bc;
+	border-top-right-radius: 0.5em;
+	border-bottom-right-radius: 0.5em;
+	//background: red;
+}
+
+.gene-list-expander {
+	position: absolute;
+	left: @geneListW;
+	top: 50%;
+	margin-top: -1.125em;
+	z-index: 9;
+	background: @geneListBg;
+	border-top-right-radius: 1em;
+	border-bottom-right-radius: 1em;
+	color: @CONTENT_TEXT_COLOR;
+	width: 2em;
+	height: 3em;
+	cursor: pointer;
+}
+
+.gene-list-expander-icon {
+	font-size: 1.25em;
+	position: absolute;
+	right: 0.6em;
+	top: 50%;
+	margin-top: -0.5em;
+}
+
+.gene-list-expander-arrow {
+	position: absolute;
+	right: 0.333em;
+	top: 50%;
+	margin-top: -0.5em;
+	color: darken(@CONTENT_TEXT_COLOR, 15%);
+}
+
+
+
+.gene-list, 
+.gene-list-expander {
+	.transform( translate3d(0, 0, 0) );
+	.transition( transform linear 200ms );
+}
+
+.gene-list-expanded-false {
+	.transform( translate3d(-@geneListW, 0, 0) );
+}
+
+.gene-list-title {
+	background-color: @SEPARATOR_COLOR;
+	padding: 1em 0.25em;
+	text-align: center;
+	display: none;
+	background: red;
+}
+
+.genes-query-history-expanded-true {
+	bottom: @qHistSize + 2*@qHistP;
+}
+
+.gene {
+	border-top: 1px solid @geneBorderColor;
+	padding: 0.25em 0;
+	//background: orange;
+	position: relative;
+	padding-left: 0.25em;
+	margin: 0.25em 0;
+}
+
+.gene-name {
+	padding-left: 0.75em;
+	margin-left: -0.75em;
+	cursor: pointer;
+	display: inline-block;
+	position: relative;
+
+	// background: rgba(0, 0, 255, 0.5);
+}
+
+.gene-name {
+	width: @geneNameW;
+}
+
+.gene-name-descr-preview {
+	font-size: 0.8em;
+	position: absolute;
+	bottom: 0;
+	display: inline-block;
+	margin-left: 0.25em;
+	width: 9999px;
+	opacity: 0.4;
+}
+
+.gene-expander {
+	width: 0.5em;
+	text-align: right;
+	cursor: pointer;
+	display: inline-block;
+	position: relative;
+
+	// background: rgba(255, 0, 0, 0.5);
+}
+
+.result-gene-info {
+	font-size: 0.8em;
+	margin-left: 0.8em/0.8;
+	padding-top: 0.1em;
+}
+
+.result-gene-info p {
+	margin: 0.5em 0;
+}
+
+.result-gene-info-expanded-false {
+	display: none;
+}
+
+.result-gene-info .fa {
+	font-size: 1.125em;
+}

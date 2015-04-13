@@ -19,6 +19,10 @@ function( $$search, cy, cyStylesheet, util ){
       rfn.networksExpanded = true;
     }
 
+    if( rfn.genesExpanded === undefined && !util.isSmallScreen() ){
+      rfn.genesExpanded = true;
+    }
+
     this.search({
       store: opts.store || opts.store === undefined ? true : false
     });
@@ -102,10 +106,18 @@ function( $$search, cy, cyStylesheet, util ){
   rfn.updateNetworkData = function(){
     var self = this;
     var rGrs = self.resultNetworkGroups;
+    var rAttrGrs = self.resultAttributeGroups;
+    var rAllGrs = self.resultAllGroups = rAttrGrs.concat( rGrs );
+
     var sortByWeight = function(a, b){
       return b.weight - a.weight;
     };
 
+    var makeDisplayWeight = function( weight ){
+      return numeral( weight ).format('0.00%');
+    }; 
+
+    // process the (real) networks
     for( var i = 0; i < rGrs.length; i++ ){
       var rGr = rGrs[i];
       var rNets = rGr.resultNetworks;
@@ -115,16 +127,49 @@ function( $$search, cy, cyStylesheet, util ){
         var rNet = rNets[j];
 
         rNet.color = color;
-        rNet.displayWeight = numeral( rNet.weight ).format('0.00%');
+        rNet.displayWeight = makeDisplayWeight( rNet.weight );
+        rNet.enabled = true;
+        rNet.expanded = false;
+        rNet.resultNetworkGroup = rGr;
+
+        config.networks.postprocess( rNet.network );
       }
 
+      rGr.isResultNetworkGroup = true;
       rGr.color = color;
-      rGr.displayWeight = numeral( rGr.weight ).format('0.00%');
+      rGr.displayWeight = makeDisplayWeight( rGr.weight );
+      rGr.enabled = true;
+      rGr.expanded = false;
 
       rNets.sort( sortByWeight );
     }
 
-    self.resultNetworkGroups.sort( sortByWeight );
+    // process the attributes
+    for( var i = 0; i < rAttrGrs.length; i++ ){
+      var rGr = rAttrGrs[i];
+      var rAttrs = rGr.resultAttributes;
+      var color = config.attributes.color;
+
+      for( var j = 0; j < rAttrs.length; j++ ){
+        var rAttr = rAttrs[j];
+
+        rAttr.color = color;
+        rAttr.displayWeight = makeDisplayWeight( rAttr.weight );
+        rAttr.enabled = true;
+        rAttr.expanded = false;
+        rAttr.resultAttributeGroup = rGr;
+      }
+
+      rGr.isResultAttributeGroup = true;
+      rGr.color = color;
+      rGr.displayWeight = makeDisplayWeight( rGr.weight );
+      rGr.enabled = true;
+      rGr.expanded = false;
+
+      rAttrs.sort( sortByWeight );
+    }
+
+    rAllGrs.sort( sortByWeight );
   };
 
   rfn.loadGraph = function(){
@@ -203,7 +248,8 @@ function( $$search, cy, cyStylesheet, util ){
               source: '' + rIntn.fromGene.gene.id,
               target: '' + rIntn.toGene.gene.id,
               weight: rIntn.interaction.weight,
-              group: gr.code
+              group: gr.code,
+              networkId: rNet.network.id
             }
           } );
         }
@@ -260,30 +306,6 @@ function( $$search, cy, cyStylesheet, util ){
       });
 
   };
-
-  rfn.toggleNetworksExpansion = function(){
-    if( this.networksExpanded ){
-      this.collapseNetworks();
-    } else {
-      this.expandNetworks();
-    }
-
-    PubSub.publish('query.toggleNetworksExpansion', this);
-  };
-
-  rfn.expandNetworks = function(){
-    rfn.networksExpanded = true;
-
-    PubSub.publish('query.toggleNetworksExpansion', this);
-  };
-
-  rfn.collapseNetworks = function(){
-    rfn.networksExpanded = false;
-
-    PubSub.publish('query.collapseNetworks', this);
-  };
-
-
 
   return r;
 

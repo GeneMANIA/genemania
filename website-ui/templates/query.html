@@ -117,18 +117,7 @@
                   <span class="query-network-name activatable-relative" bo-text="attrGr.name" on-tap-scroll-parent="#query-network-groups" on-tap="query.toggleAttributeGroupExpansion( attrGr )"></span>
                   
                   <div class="query-network-info" ng-if="attrGr.expanded">
-                    <p>
-                      <span class="query-network-comment">
-                        <span class="fa fa-info-circle"></span>
-                        <span bo-text="attrGr.description"></span>
-                      </span>
-                    </p>
-
-                    <p>
-                      <span class="fa fa-file-o"></span>
-                      <span class="query-network-publication" bo-text="attrGr.publicationName"></span>
-                      <a target="_blank" bo-href="attrGr.publicationUrl"><span class="fa fa-external-link"></span></a>
-                    </p>
+                    <div ng-include="'templates/attribute-group-details.html'"></div>
                   </div>
                 </div>
               </div>
@@ -151,35 +140,7 @@
                   <span class="query-network-name activatable-relative" bo-text="net.name" on-tap-scroll-parent="#query-network-groups" on-tap="query.toggleNetworkExpansion( net )"></span>
                   
                   <div class="query-network-info" ng-if="net.expanded">
-                    <p bo-if="net.metadata.title">
-                      <span class="fa fa-file-o"></span>
-                      <span class="query-network-title" bo-text="net.metadata.title"></span>
-                      <span class="query-network-authors" bo-text="net.metadata.shortAuthors"></span>
-                      <span class="query-network-year">(<span bo-text="net.metadata.yearPublished"></span>)</span>.
-                      <span class="query-network-publication" bo-text="net.metadata.publicationName"></span>
-                      <a target="_blank" bo-href="net.metadata.url"><span class="fa fa-external-link"></span></a>
-                    </p>
-
-                    <p>
-                      <span class="query-network-source">
-                        <span class="fa fa-share-alt"></span>
-                        <span bo-text="net.metadata.networkType"></span>
-                        <a target="_blank" href="http://pages.genemania.org/help/#GeneMANIA_network_categories"><spam class="fa fa-info-circle"></span></a>
-                        with <span bo-text="net.metadata.interactionCountFormatted"></span> interactions from
-                        <span bo-text="net.metadata.sourceName"></span> <a target="_blank" bo-href="net.metadata.sourceUrl"><span class="fa fa-external-link"></span></a>
-                      </span>
-                    </p>
-
-                    <p bo-if="net.metadata.comment">
-                      <span class="query-network-comment">
-                        <span class="fa fa-info-circle"></span>
-                        <span bo-text="net.metadata.comment"></span>
-                      </span>
-                    </p>
-
-                    <p>
-                      <span class="query-network-tag" bindonce ng-repeat="tag in net.tags"><span class="fa fa-tag"></span>&nbsp;<span bo-text="tag.nameFormatted"></span></span>
-                    </p>
+                    <div ng-include="'templates/network-details.html'"></div>
                   </div>
                 </div>
               </div>
