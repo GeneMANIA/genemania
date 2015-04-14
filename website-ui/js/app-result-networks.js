@@ -30,7 +30,6 @@ function( $scope, updateScope, cy ){
     PubSub.publish('result.collapseNetworks', this);
   };
 
-
   // toggling the individual nets
 
   rfn.toggleNetwork = function( rNet ){     

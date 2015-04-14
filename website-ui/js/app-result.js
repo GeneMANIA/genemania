@@ -176,6 +176,7 @@ function( $$search, cy, cyStylesheet, util ){
     var self = this;
     var eles = [];
     var id2AttrEle = {};
+    var rank = 0;
 
     cy.startBatch();
     cy.elements().remove();
@@ -185,13 +186,15 @@ function( $$search, cy, cyStylesheet, util ){
       var rGene = self.resultGenes[i];
       var gene = rGene.gene;
       var ele;
+      
+      rank = rGene.queryGene ? 0 : rank + 1;
 
       eles.push( ele = {
         group: 'nodes',
         data: {
           id: '' + gene.id,
           idInt: gene.id,
-          name: rGene.typedName || gene.symbol,
+          name: (rGene.typedName || gene.symbol) + (rank !== 0 ? ' (' + rank + ')' : ''),
           score: rGene.score,
           query: rGene.queryGene
         }
@@ -274,39 +277,109 @@ function( $$search, cy, cyStylesheet, util ){
       var $list = $('#network-list');
       var container = cy.container();
 
-      cy.one('layoutstop', function(){
-        container.classList.remove('cy-layouting');
-        resolve();
-      });
-
-      var layoutEles = cy.elements().stdFilter(function( ele ){
-        return ele.isNode() || ele.data('group') !== 'coexp';
-      });
-
-      container.classList.add('cy-layouting');
-
-      layoutEles.layout({
-        name: 'cola',
-        maxSimulationTime: 2000,
-        edgeLength: function( e ){ return layoutEles.length / 8 / e.data('weight'); } // as w => inf, l => 0
-      });
-
-      // cy.layout({
-      //   name: 'concentric',
-        
-      //   concentric: function(){
-      //     return this.data('score');
-      //   },
-
-      //   levelWidth: function( nodes ){
-      //     return 0.25;
-      //   },
-      // });
-
-      });
+      return self.forceLayout();
+    });
 
   };
 
   return r;
+
+} ]);
+
+app.controller('ResultCtrl',
+[ '$scope', 'updateScope', 'cy',
+function( $scope, updateScope, cy ){
+
+  var r = Result;
+  var rfn = r.prototype;
+
+  var sortByWeight = function(a, b){
+    return b.data('weight') - a.data('weight');
+  };
+
+  rfn.layoutPrepost = function(){
+    var self = this;
+
+    return new Promise(function(resolve){
+
+      if( self.networksExpanded ){
+        var container = cy.container();
+
+        cy.one('layoutstop', function(){
+          container.classList.remove('cy-layouting-shift');
+
+          resolve();
+        });
+
+        container.classList.add('cy-layouting-shift');
+      } else {
+        cy.one('layoutstop', function(){
+          resolve();
+        });
+      }
+    });
+  };
+
+  rfn.circleLayout = function(){
+    var p = this.layoutPrepost();
+
+    cy.layout({
+      name: 'concentric',
+      concentric: function(){
+        return (this.data('query') ? 100 : 0) + this.data('score');
+      },
+      levelWidth: function(){
+        return 1;
+      },
+      sort: sortByWeight
+    });
+
+    return p;
+  };
+
+  rfn.forceLayout = function(){
+    var p = this.layoutPrepost();
+
+    var layoutEles = cy.elements().stdFilter(function( ele ){
+      return ele.isNode() || ele.data('group') !== 'coexp';
+    });
+
+    layoutEles.layout({
+      name: 'cola',
+      randomize: true,
+      maxSimulationTime: 2000,
+      edgeLength: function( e ){ return layoutEles.length / 8 / e.data('weight'); } // as w => inf, l => 0
+    });
+
+    return p;
+  };
+
+  rfn.linearLayout = function(){
+    var p = this.layoutPrepost();
+
+    cy.layout({
+      name: 'grid',
+      columns: 1,
+      position: function(n){
+        return {
+          col: n.data('query') ? 0 : 1
+        }
+      },
+      sort: sortByWeight,
+      padding: 50
+    });
+
+    return p;
+  };
+
+
+  function init(){
+    $scope.query = Query.current;
+    $scope.result = $scope.query.result;
+
+    updateScope();
+  }
+
+  PubSub.subscribe('result.searched', init);
 
 } ]);
