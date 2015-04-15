@@ -1,7 +1,7 @@
-app.controller('NetworksCtrl',
-[ '$scope', 'updateScope', 'cy',
-function( $scope, updateScope, cy ){
-
+app.factory('Result_networks', 
+[ 'util',
+function( util ){ return function( Result ){
+  
   var r = Result;
   var rfn = r.prototype;
 
@@ -139,6 +139,14 @@ function( $scope, updateScope, cy ){
       network: rNet
     });
   };
+  
+
+} } ]);
+
+
+app.controller('NetworksCtrl',
+[ '$scope', 'updateScope', 'cy',
+function( $scope, updateScope, cy ){
 
   function init(){
     $scope.query = Query.current;

@@ -1,5 +1,5 @@
 /*!
- * This file is part of Cytoscape.js snapshot-b6e86e25b2-1429043832851.
+ * This file is part of Cytoscape.js snapshot-673aa2ccf8-1429116404470.
  * 
  * Cytoscape.js is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the Free
@@ -29,7 +29,7 @@ var cytoscape;
     return cytoscape.init.apply(cytoscape, arguments);
   };
 
-  $$.version = 'snapshot-b6e86e25b2-1429043832851';
+  $$.version = 'snapshot-673aa2ccf8-1429116404470';
   
   // allow functional access to cytoscape.js
   // e.g. var cyto = $.cytoscape({ selector: "#foo", ... });
@@ -5104,7 +5104,7 @@ this.cytoscape = cytoscape;
     var color = '#000' || this.containerPropertyAsString('color') || '#000';
     var textTransform = 'none' || this.containerPropertyAsString('text-transform') || 'none';
     var fontSize = 16 || this.containerPropertyAsString('font-size') || 16;
-    var textMaxWidth = 75 || this.containerPropertyAsString('text-max-width') || 75;
+    var textMaxWidth = 9999 || this.containerPropertyAsString('text-max-width') || 9999;
 
     // fill the style with the default stylesheet
     this
@@ -5119,7 +5119,7 @@ this.cytoscape = cytoscape;
           'text-opacity': 1,
           'text-decoration': 'none',
           'text-transform': textTransform,
-          'text-wrap': 'wrap',
+          'text-wrap': 'none',
           'text-max-width': textMaxWidth,
           'text-background-color': 'none',
           'text-background-opacity': 1,
@@ -16413,7 +16413,7 @@ this.cytoscape = cytoscape;
       text = text.toLowerCase();
     }
 
-    if( ele.isNode() && style['text-wrap'].value === 'wrap' ){
+    if( style['text-wrap'].value === 'wrap' ){
       //console.log('wrap'); 
       
       // save recalc if the label is the same as before
@@ -16517,7 +16517,7 @@ this.cytoscape = cytoscape;
     ds.padding = '0';
     ds.lineHeight = '1';
 
-    if( ele.isNode() && style['text-wrap'].value === 'wrap' ){
+    if( style['text-wrap'].value === 'wrap' ){
       ds.whiteSpace = 'pre'; // so newlines are taken into account
     } else {
       ds.whiteSpace = 'normal';
@@ -18122,6 +18122,11 @@ this.cytoscape = cytoscape;
     var halign = style["text-halign"].value;
     var valign = style["text-valign"].value;
 
+    if( element.isEdge() ){
+      halign = 'center';
+      valign = 'center';
+    }
+
     if ( text != null && !isNaN(textX) && !isNaN(textY)) {
       var backgroundOpacity = style["text-background-opacity"].value;
       if ((style["text-background-color"] && style["text-background-color"].value != "none" || style["text-border-width"].pxValue > 0) && backgroundOpacity > 0) {
@@ -18237,34 +18242,47 @@ this.cytoscape = cytoscape;
 
       var lineWidth = 2  * style['text-outline-width'].pxValue; // *2 b/c the stroke is drawn centred on the middle
 
-      if (lineWidth > 0) {
+      if( lineWidth > 0 ){
         context.lineWidth = lineWidth;
-        context.strokeText(text, textX, textY);
       }
 
-      if( element.isNode() && style['text-wrap'].value === 'wrap' ){ //console.log('draw wrap');
+      if( style['text-wrap'].value === 'wrap' ){ //console.log('draw wrap');
         var lines = rscratch.labelWrapCachedLines;
         var lineHeight = rstyle.labelHeight / lines.length;
 
         //console.log('lines', lines);
 
-        if( valign === 'top' ){
-          for( var l = lines.length - 1; l >= 0; l-- ){
-            context.fillText( lines[l], textX, textY );
+        switch( valign ){
+          case 'top':
+            textY -= (lines.length - 1) * lineHeight;
+            break;
 
-            textY -= lineHeight;
-          }
-        } else {
-          for( var l = 0; l < lines.length; l++ ){
-            context.fillText( lines[l], textX, textY );
+          case 'bottom':
+            // nothing required
+            break;
 
-            textY += lineHeight;
+          default:
+          case 'center':
+            textY -= (lines.length - 1) * lineHeight / 2;
+        }
+
+        for( var l = 0; l < lines.length; l++ ){
+          if( lineWidth > 0 ){
+            context.strokeText( lines[l], textX, textY );
           }
+
+          context.fillText( lines[l], textX, textY );
+
+          textY += lineHeight;
         }
 
         // var fontSize = style['font-size'].pxValue;
         // wrapText(context, text, textX, textY, style['text-max-width'].pxValue, fontSize + 1);
       } else {
+        if( lineWidth > 0 ){
+          context.strokeText( text, textX, textY );
+        }
+
         context.fillText( text, textX, textY );
       }
 
@@ -23563,8 +23581,8 @@ this.cytoscape = cytoscape;
     avoidOverlap: true, // prevents node overlap, may overflow boundingBox if not enough space
     height: undefined, // height of layout area (overrides container height)
     width: undefined, // width of layout area (overrides container width)
-    concentric: function(){ // returns numeric value for each node, placing higher nodes in levels towards the centre
-      return this.degree();
+    concentric: function(node){ // returns numeric value for each node, placing higher nodes in levels towards the centre
+      return node.degree();
     },
     levelWidth: function(nodes){ // the variation of concentric values in each level
       return nodes.maxDegree() / 4;

@@ -1,7 +1,7 @@
-app.factory('Query_history', 
-[ 'util', 'Result', 'io', 'cy', 
+app.factory('Query_history',
+[ 'util', 'Result', 'io', 'cy',
 function( util, Result, io, cy ){ return function( Query ){
-  
+
   var q = Query;
   var qfn = q.prototype;
   var copy = util.copy;
@@ -15,8 +15,7 @@ function( util, Result, io, cy ){ return function( Query ){
 
     // store query data params in clientside datastore
 
-    //return util.delayPromise(1000).then(function(){
-    return Promise.resolve().then(function(){
+    return Promise.delay(100).then(function(){
       return ioq.read('queries');
     }).then(function( qJson ){
       var history = qJson.history = qJson.history || [];
@@ -151,12 +150,12 @@ function( util, Result, io, cy ){ return function( Query ){
 
     PubSub.publish('query.collapseHistory', this);
   };
-  
+
 
 } } ]);
 
 app.controller('QueryHistoryCtrl',
-[ '$scope', 'updateScope', 'Query', 
+[ '$scope', 'updateScope', 'Query',
 function( $scope, updateScope, Query ){
 
   function updateHistory(){
@@ -180,7 +179,7 @@ function( $scope, updateScope, Query ){
   PubSub.subscribe('query.succeed', init);
   PubSub.subscribe('query.clearHistory', updateHistory);
   PubSub.subscribe('query.historyLoaded', updateScope);
-  
+
   $scope.respRestyle = function(){ // allow access to resp restyle inside template
     responsive.restyle();
   };

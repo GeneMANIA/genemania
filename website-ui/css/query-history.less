@@ -36,7 +36,7 @@
 	position: absolute;
 	left: 0;
 	bottom: 0;
-	width: 100%;
+	right: 0;
 	height: @qHistSize;
 	padding: @qHistP;
 	background: @qHistBg;
@@ -48,23 +48,29 @@
 	.transition( transform linear 150ms );
 }
 
-.query-history-entry {
+.query-history-entry,
+.query-history-delete {
 	position: relative;
 	width: @qHistSize;
 	height: @qHistSize;
-	background-color: @qHistEntBg;
 	cursor: pointer;
 	display: inline-block;
 
 	& + .query-history-entry {
 		border-left: 1px solid rgba(0, 0, 0, 0.125);
 	}
+
+	// background: blue;
+}
+
+.query-history-entry {
+	background-color: @qHistEntBg;
 }
 
 .query-history-ender {
 	height: @qHistSize;
-	width: 1.666em;
-	//background: red;
+	width: 0.5em;
+	// background: red;
 	display: inline-block;
 	position: relative;
 }
@@ -93,9 +99,21 @@
 	z-index: 10;
 }
 
-.query-history-label {
-	.monospace;
+.query-history-delete-icon {
+	position: absolute;
+	display: inline-block;
+	width: 100%;
+	height: 1em;
+	left: 0;
+	text-align: center;
+	top: 50%;
+	margin-top: -0.5em;
+	font-size: 4em;
+	color: #555;
+}
 
+.query-history-label,
+.query-history-delete-label {
 	z-index: 100;
 	color: #666;
 	position: absolute;
@@ -103,6 +121,10 @@
 	right: 0;
 	bottom: 0;
 	text-align: center;
+}
+
+.query-history-label {
+	.monospace;
 }
 
 .query-history-number {
@@ -118,9 +140,9 @@
 }
 
 .query-history-empty {
-	color: #888;
+	color: #555;
 }
 
 .query-history-loading {
-	color: #888;
+	color: #555;
 }

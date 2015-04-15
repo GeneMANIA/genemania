@@ -16,14 +16,11 @@
 	z-index: 2;
 }
 
-.graph-button-row-1 {
+.generate-rows(8);
 
-}
-
-.graph-button-row-2 {
-	margin-top: 1.75em;
-}
-
-.graph-button-row-3 {
-	margin-top: 3.5em;
+.generate-rows(@n, @i: 1) when (@i =< @n) {
+  .graph-button-row-@{i} {
+    margin-top: (@i - 1) * 1.75em;
+  }
+  .generate-rows(@n, (@i + 1));
 }

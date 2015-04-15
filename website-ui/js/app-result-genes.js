@@ -1,7 +1,7 @@
-app.controller('GenesCtrl',
-[ '$scope', 'updateScope', 'cy',
-function( $scope, updateScope, cy ){
-
+app.factory('Result_genes', 
+[ 'util',
+function( util ){ return function( Query ){
+  
   var r = Result;
   var rfn = r.prototype;
 
@@ -41,6 +41,14 @@ function( $scope, updateScope, cy ){
       gene: rGene
     });
   };
+  
+
+} } ]);
+
+
+app.controller('GenesCtrl',
+[ '$scope', 'updateScope', 'cy',
+function( $scope, updateScope, cy ){
 
   function init(){
     $scope.query = Query.current;

@@ -1,6 +1,8 @@
-app.factory('Result', 
-[ '$$search', 'cy', 'cyStylesheet', 'util',
-function( $$search, cy, cyStylesheet, util ){
+app.factory('Result',
+[ '$$search', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts',
+function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts ){
+
+  var rmods = [ Result_genes, Result_networks, Result_layouts ];
 
   var Result = window.Result = function( opts ){
     if( !(this instanceof Result) ){
@@ -115,7 +117,7 @@ function( $$search, cy, cyStylesheet, util ){
 
     var makeDisplayWeight = function( weight ){
       return numeral( weight ).format('0.00%');
-    }; 
+    };
 
     // process the (real) networks
     for( var i = 0; i < rGrs.length; i++ ){
@@ -186,7 +188,7 @@ function( $$search, cy, cyStylesheet, util ){
       var rGene = self.resultGenes[i];
       var gene = rGene.gene;
       var ele;
-      
+
       rank = rGene.queryGene ? 0 : rank + 1;
 
       eles.push( ele = {
@@ -205,7 +207,7 @@ function( $$search, cy, cyStylesheet, util ){
       for( var j = 0; j < rAttrs.length; j++ ){
         var rAttr = rAttrs[j];
         var attr = rAttr.attribute;
-        var attrEle = id2AttrEle[ attr.id ]; 
+        var attrEle = id2AttrEle[ attr.id ];
         var attrEdge;
 
         if( !attrEle ){
@@ -272,15 +274,20 @@ function( $$search, cy, cyStylesheet, util ){
     cy.style().fromJson( stylesheet );
 
     cy.endBatch(); // will trigger new stylesheet etc
-    
-    return new Promise(function( resolve ){
-      var $list = $('#network-list');
-      var container = cy.container();
 
-      return self.forceLayout();
+    var $list = $('#network-list');
+    var container = cy.container();
+
+    return self.forceLayout({
+      animate: false
     });
 
   };
+
+  // inject the individual query submodules
+  for( var i = 0; i < rmods.length; i++ ){
+    rmods[i]( r );
+  }
 
   return r;
 
@@ -289,89 +296,6 @@ function( $$search, cy, cyStylesheet, util ){
 app.controller('ResultCtrl',
 [ '$scope', 'updateScope', 'cy',
 function( $scope, updateScope, cy ){
-
-  var r = Result;
-  var rfn = r.prototype;
-
-  var sortByWeight = function(a, b){
-    return b.data('weight') - a.data('weight');
-  };
-
-  rfn.layoutPrepost = function(){
-    var self = this;
-
-    return new Promise(function(resolve){
-
-      if( self.networksExpanded ){
-        var container = cy.container();
-
-        cy.one('layoutstop', function(){
-          container.classList.remove('cy-layouting-shift');
-
-          resolve();
-        });
-
-        container.classList.add('cy-layouting-shift');
-      } else {
-        cy.one('layoutstop', function(){
-          resolve();
-        });
-      }
-    });
-  };
-
-  rfn.circleLayout = function(){
-    var p = this.layoutPrepost();
-
-    cy.layout({
-      name: 'concentric',
-      concentric: function(){
-        return (this.data('query') ? 100 : 0) + this.data('score');
-      },
-      levelWidth: function(){
-        return 1;
-      },
-      sort: sortByWeight
-    });
-
-    return p;
-  };
-
-  rfn.forceLayout = function(){
-    var p = this.layoutPrepost();
-
-    var layoutEles = cy.elements().stdFilter(function( ele ){
-      return ele.isNode() || ele.data('group') !== 'coexp';
-    });
-
-    layoutEles.layout({
-      name: 'cola',
-      randomize: true,
-      maxSimulationTime: 2000,
-      edgeLength: function( e ){ return layoutEles.length / 8 / e.data('weight'); } // as w => inf, l => 0
-    });
-
-    return p;
-  };
-
-  rfn.linearLayout = function(){
-    var p = this.layoutPrepost();
-
-    cy.layout({
-      name: 'grid',
-      columns: 1,
-      position: function(n){
-        return {
-          col: n.data('query') ? 0 : 1
-        }
-      },
-      sort: sortByWeight,
-      padding: 50
-    });
-
-    return p;
-  };
-
 
   function init(){
     $scope.query = Query.current;

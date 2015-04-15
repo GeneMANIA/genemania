@@ -33,6 +33,7 @@
       font-family: helvetica neue, helvetica, arial, sans-serif;
       font-size: 16px;
       text-align: left;
+      transition: opacity 0.5s ease-out;
     }
 
     #splash-content {
@@ -57,13 +58,15 @@
 
     #app-loader {
       display: inline-block;
+      display: none;
       width: 30px;
       height: 30px;
       margin-top: 5px;
     }
 
     #app-loader-holder {
-      border: 1px dotted #ccc;
+      border: 1px solid #515151;
+      background: #7d7d7d;
       border-radius: 8px;
       text-align: center;
       width: 310px;
@@ -78,7 +81,8 @@
     }
 
     #splash.splash-splashed {
-      display: none;
+      opacity: 0;
+      pointer-events: none;
     }
 
     #linkouts {
@@ -134,6 +138,32 @@
         transform: rotate(359deg);
       }
     }
+
+    @-webkit-keyframes splash-flash {
+      0%, 50%, 100% {
+        opacity: 1;
+      }
+
+      25%, 75% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes splash-flash {
+      0%, 50%, 100% {
+        opacity: 1;
+      }
+
+      25%, 75% {
+        opacity: 0;
+      }
+    }
+
+    .splash-flash {
+      -webkit-animation: splash-flash 2s infinite linear;
+      animation: splash-flash 2s infinite linear;
+    }
+
 
   </style>
   <div id="splash" ng-controller="SplashCtrl" ng-class="{ 'splash-ready': ready, 'splash-splashed': splashed }"><div id="splash-content">
@@ -481,7 +511,7 @@
       </g>
     </svg><br />
 
-    <div id="app-loader-holder">
+    <div id="app-loader-holder" class="splash-flash">
       <svg version="1.1" id="app-loader" class="splash-spin" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
      width="216px" height="146px" viewBox="0 0 216 146" enable-background="new 0 0 216 146" xml:space="preserve">
         <g>
@@ -558,6 +588,7 @@
   <script src="js/app-query-networks.js"></script>
   <script src="js/app-query.js"></script>
   <script src="js/app-result-genes.js"></script>
+  <script src="js/app-result-layouts.js"></script>
   <script src="js/app-result-networks.js"></script>
   <script src="js/app-result.js"></script>
   <script src="js/app-search.js"></script>
