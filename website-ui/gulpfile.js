@@ -75,7 +75,8 @@ var paths = {
     './css/query-history.less',
     './css/result.less',
     './css/result-networks.less',
-    './css/result-genes.less'
+    './css/result-genes.less',
+    './css/result-selected-info.less'
   ],
 
   // config for java project integration & debugging locally
@@ -300,7 +301,7 @@ gulp.task('css-unmin', function(){
 
     .pipe( less(debugLessOpts) )
       .on('error', handleError)
-    
+
     .pipe( gulp.dest('./css-build') )
   ;
 });
@@ -381,7 +382,7 @@ gulp.task( 'ios-release', ['clean', 'cordova'], shell.task([
 ], { cwd: 'cordova' }) );
 
 gulp.task( 'crosswalk-create', shell.task([
-  ('[ -d crosswalk ] || ( ' + 
+  ('[ -d crosswalk ] || ( ' +
       ' curl $crosswalkUrl -o crosswalk.zip ' +
       ' && unzip crosswalk.zip && rm crosswalk.zip ' +
       ' && mv crosswalk* crosswalk ' +
@@ -416,4 +417,3 @@ gulp.task('android-debug', ['crosswalk'], shell.task([
 gulp.task('android-release', ['clean', 'crosswalk-projs'], shell.task([
 './cordova/build --release'
 ], { cwd: $crosswalkAppDir }));
-

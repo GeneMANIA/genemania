@@ -1,8 +1,8 @@
 app.factory('Result',
-[ '$$search', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts',
-function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts ){
+[ '$$search', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts', 'Result_selectedinfo',
+function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts, Result_selectedinfo ){
 
-  var rmods = [ Result_genes, Result_networks, Result_layouts ];
+  var rmods = [ Result_genes, Result_networks, Result_layouts, Result_selectedinfo ];
 
   var Result = window.Result = function( opts ){
     if( !(this instanceof Result) ){
@@ -73,6 +73,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
 
       self.updateNetworkData();
 
+      self.updateGenesData();
+
       self.loadGraph().then(function(){
         if( opts.store ){
           q.store();
@@ -103,6 +105,18 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
 
   rfn.cancellable = function(){
     return this.searchPromise != null;
+  };
+
+  rfn.updateGenesData = function(){
+    var self = this;
+
+    var m = self.resultGenesById = {};
+
+    for( var i = 0; i < self.resultGenes.length; i++ ){
+      var rg = self.resultGenes[i];
+
+      m[ '' + rg.gene.id ] = rg;
+    }
   };
 
   rfn.updateNetworkData = function(){
@@ -198,7 +212,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
           idInt: gene.id,
           name: (rGene.typedName || gene.symbol) + (rank !== 0 ? ' (' + rank + ')' : ''),
           score: rGene.score,
-          query: rGene.queryGene
+          query: rGene.queryGene,
+          gene: true
         }
       } );
 

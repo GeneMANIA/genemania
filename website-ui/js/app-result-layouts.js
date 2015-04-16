@@ -14,6 +14,11 @@ function( util ){ return function( Result ){
 
     return new Promise(function(resolve){
 
+      if( self.cyLayout ){
+        self.cyLayout.stop();
+        self.cyLayout = null;
+      }
+
       if( self.networksExpanded ){
         var container = cy.container();
 
@@ -39,7 +44,7 @@ function( util ){ return function( Result ){
 
     var p = this.layoutPrepost();
 
-    cy.layout({
+    var l = this.cyLayout = cy.makeLayout({
       name: 'concentric',
       animate: options.animate,
       animationDuration: 500,
@@ -51,6 +56,8 @@ function( util ){ return function( Result ){
       },
       sort: sortByWeight
     });
+
+    l.run();
 
     return p;
   };
@@ -68,13 +75,15 @@ function( util ){ return function( Result ){
       return ele.isNode() || ele.data('group') !== 'coexp';
     });
 
-    layoutEles.layout({
+    var l = this.cyLayout = layoutEles.makeLayout({
       name: 'cola',
       animate: options.animate,
       randomize: options.randomize,
       maxSimulationTime: options.maxSimulationTime,
       edgeLength: function( e ){ return layoutEles.length / 8 / e.data('weight'); } // as w => inf, l => 0
     });
+
+    l.run();
 
     return p;
   };
@@ -86,7 +95,7 @@ function( util ){ return function( Result ){
 
     var p = this.layoutPrepost();
 
-    cy.layout({
+    var l = this.cyLayout = cy.makeLayout({
       name: 'grid',
       animate: options.animate,
       animationDuration: 500,
@@ -99,6 +108,8 @@ function( util ){ return function( Result ){
       sort: sortByWeight,
       padding: 50
     });
+
+    l.run();
 
     return p;
   };

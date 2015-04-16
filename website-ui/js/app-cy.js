@@ -1,4 +1,4 @@
-app.factory('cy', 
+app.factory('cy',
 [
 function(  ){
 
@@ -6,9 +6,7 @@ function(  ){
     container: document.getElementById('cy'),
 
     boxSelectionEnabled: false,
-
     autounselectify: true,
-
     motionBlur: true
   });
 
@@ -18,6 +16,16 @@ function(  ){
 
     if( qg && document.activeElement === qg ){
       qg.blur();
+    }
+  });
+
+  cy.on('tap', '[?gene]', function(){
+    query.result.selectGene( this.data('id') );
+  });
+
+  cy.on('tap', function(e){
+    if( e.cyTarget === cy ){
+      query.result.closeSelectedInfo();
     }
   });
 

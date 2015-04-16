@@ -1,0 +1,45 @@
+.selected-info {
+	width: @qContentW - 0.5em;
+	min-height: 2em;
+	padding: 0.25em;
+	position: absolute;
+	left: @qItemW + @qMargin;
+	top: @qH + 5*@qMargin;
+	background: @qBg;
+	z-index: 2;
+	border: 1px solid @qBorderColor;
+	border-bottom-width: 2px;
+	border-radius: @qBorderRadius;
+	color: #fff;
+
+  opacity: 0;
+  .transform( translate3d(0, -0.75em, 0) ); // hopefully makes (left,top) ani faster
+	.transition-property( transform, opacity );
+	.transition-duration( 200ms );
+}
+
+.selected-info-close {
+	position: absolute;
+	right: 0;
+	top: 0;
+	font-size: 1.25em;
+	padding: 0.25em;
+  width: 1em;
+  height: 1em;
+  text-align: center;
+  line-height: 1em;
+	cursor: pointer;
+}
+
+.selected-info-title {
+	margin: 0.25em 0;
+}
+
+.selected-info-details {
+	font-size: 0.8em;
+}
+
+.selected-info-open-true {
+  opacity: 1;
+  .transform( translate3d(0, 0, 0) );
+}

@@ -25,7 +25,7 @@ function(){
           'width': 'mapData(score, '+ minScore +', '+ maxScore +', 20, 60)',
           'height': 'mapData(score, '+ minScore +', '+ maxScore +', 20, 60)',
           'content': 'data(name)',
-          'font-size': 10,
+          'font-size': 12,
           'text-valign': 'center',
           'text-halign': 'center',
           'background-color': '#888',
