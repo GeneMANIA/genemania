@@ -1,0 +1,19 @@
+<p>
+  {{rNet.resultNetworkGroup.networkGroup.name}} : {{rNet.network.name}}
+</p>
+
+<p>Absolute weight:</p>
+<span class="interaction-bar interaction-bar-abs">
+  <span class="interaction-color" ng-style="{ 'width': rIntn.absoluteWeight * 100 + '%', 'background-color': rNet.color }"></span>
+</span>
+<span class="interaction-percent">{{rIntn.absoluteDisplayWeight}}</span>
+
+<p>Weight relative to network category:</p>
+<span class="interaction-bar interaction-bar-rel" ng-style="{ 'border-color': rNet.color }">
+  <span class="interaction-color" ng-style="{ 'width': rIntn.weight * 100 + '%', 'background-color': rNet.color }"></span>
+</span>
+<span class="interaction-percent">{{rIntn.displayWeight}}</span>
+
+<div class="interaction-network-details">
+  <div ng-include="'templates/network-details-dyn.html'"></div>
+</div>

@@ -152,7 +152,7 @@ function isLessFile( file ){
 gulp.task('default', ['watch']);
 
 // clean built files
-gulp.task('clean', ['javac-clean', 'htmlrefs'], function(){
+gulp.task('clean', ['htmlrefs'], function(){
   return gulp.src([ './js-build', './js/website-config.js', './css-build' ])
     .pipe( clean() )
   ;

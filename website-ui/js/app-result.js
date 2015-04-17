@@ -115,8 +115,16 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     for( var i = 0; i < self.resultGenes.length; i++ ){
       var rg = self.resultGenes[i];
 
+      rg.name = rg.gene.name = rg.typedName || rg.gene.symbol;
+
       m[ '' + rg.gene.id ] = rg;
     }
+  };
+
+  rfn.makeResultInteractionId = function(){
+    this.lastRIntnId = this.lastRIntnId || 1;
+
+    return ++this.lastRIntnId;
   };
 
   rfn.updateNetworkData = function(){
@@ -124,6 +132,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     var rGrs = self.resultNetworkGroups;
     var rAttrGrs = self.resultAttributeGroups;
     var rAllGrs = self.resultAllGroups = rAttrGrs.concat( rGrs );
+    var rAttrsById = self.resultAttributesById = {};
+    var rIntnsById = self.resultInteractionsById = {};
 
     var sortByWeight = function(a, b){
       return b.weight - a.weight;
@@ -147,6 +157,25 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
         rNet.enabled = true;
         rNet.expanded = false;
         rNet.resultNetworkGroup = rGr;
+
+        var rIntns = rNet.resultInteractions;
+        for( var k = 0; k < rIntns.length; k++ ){
+          var rIntn = rIntns[k];
+
+          rIntn.weight = rIntn.interaction.weight;
+          rIntn.displayWeight = numeral( rIntn.weight ).format('0.0000%');
+
+          rIntn.absoluteWeight = rIntn.interaction.weight * rNet.weight;
+          rIntn.absoluteDisplayWeight = numeral( rIntn.absoluteWeight ).format('0.0000%');
+
+          rIntn.id = self.makeResultInteractionId();
+          rIntn.resultNetwork = rNet;
+
+          rIntn.fromGene.name = rIntn.fromGene.gene.name = rIntn.fromGene.typedName || rIntn.fromGene.gene.symbol;
+          rIntn.toGene.name = rIntn.toGene.gene.name = rIntn.toGene.typedName || rIntn.toGene.gene.symbol;
+
+          rIntnsById[ rIntn.id ] = rIntn;
+        }
 
         config.networks.postprocess( rNet.network );
       }
@@ -174,6 +203,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
         rAttr.enabled = true;
         rAttr.expanded = false;
         rAttr.resultAttributeGroup = rGr;
+
+        rAttrsById[ rAttr.attribute.id ] = rAttr;
       }
 
       rGr.isResultAttributeGroup = true;
@@ -242,7 +273,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
           data: {
             source: '' + gene.id,
             target: '' + attr.id,
-            group: 'attr'
+            group: 'attr',
+            attr: true
           }
         } );
       }
@@ -269,7 +301,9 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
               target: '' + rIntn.toGene.gene.id,
               weight: rIntn.interaction.weight,
               group: gr.code,
-              networkId: rNet.network.id
+              networkId: rNet.network.id,
+              intn: true,
+              rIntnId: rIntn.id
             }
           } );
         }

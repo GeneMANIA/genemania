@@ -1,0 +1,29 @@
+<p ng-if="net.metadata.title">
+  <span class="fa fa-file-o"></span>
+  <span class="query-network-title">{{net.metadata.title}}</span>
+  <span class="query-network-authors">{{net.metadata.shortAuthors}}</span>
+  <span class="query-network-year">({{net.metadata.yearPublished}})</span>.
+  <span class="query-network-publication">{{net.metadata.publicationName}}</span>
+  <a target="_blank" href="{{net.metadata.url}}"><span class="fa fa-external-link"></span></a>
+</p>
+
+<p>
+  <span class="query-network-source">
+    <span class="fa fa-share-alt"></span>
+    <span>{{net.metadata.networkType}}</span>
+    <a target="_blank" href="http://pages.genemania.org/help/#GeneMANIA_network_categories"><spam class="fa fa-info-circle"></span></a>
+    with {{net.metadata.interactionCountFormatted}} interactions from
+    <span>{{net.metadata.sourceName}}</span> <a target="_blank" href="{{net.metadata.sourceUrl}}"><span class="fa fa-external-link"></span></a>
+  </span>
+</p>
+
+<p ng-if="net.metadata.comment">
+  <span class="query-network-comment">
+    <span class="fa fa-info-circle"></span>
+    <span>{{net.metadata.comment}}</span>
+  </span>
+</p>
+
+<p>
+  <span class="query-network-tag" ng-repeat="tag in net.tags"><span class="fa fa-tag"></span>&nbsp;{{tag.nameFormatted}}</span>
+</p>

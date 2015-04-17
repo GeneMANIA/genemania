@@ -13,9 +13,9 @@
 	color: #fff;
 
   opacity: 0;
-  .transform( translate3d(0, -0.75em, 0) ); // hopefully makes (left,top) ani faster
-	.transition-property( transform, opacity );
-	.transition-duration( 200ms );
+  //.transform( translate3d(0, -0.75em, 0) ); // hopefully makes (left,top) ani faster
+	.transition-property( opacity );
+	.transition-duration( 100ms );
 }
 
 .selected-info-close {
@@ -41,5 +41,14 @@
 
 .selected-info-open-true {
   opacity: 1;
-  .transform( translate3d(0, 0, 0) );
+  //.transform( translate3d(0, 0, 0) );
+}
+
+.selected-info-open-false {
+	pointer-events: none;
+}
+
+.selected-info p {
+	margin: 0.333em 0;
+	line-height: 1.3;
 }

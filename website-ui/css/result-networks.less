@@ -93,6 +93,11 @@
 	display: none;
 }
 
+.network-group-networks-expanded-true {
+	.animated;
+	.fadeIn;
+}
+
 .network {
 	//background: orange;
 	margin-left: @netLeftM;
@@ -103,7 +108,6 @@
 .network-name {
 	padding-left: 0.75em;
 	margin-left: -0.75em;
-	cursor: pointer;
 	display: inline-block;
 	position: relative;
 
@@ -137,7 +141,8 @@
 }
 
 .network-group-percent,
-.network-percent {
+.network-percent,
+.interaction-percent {
 	font-size: 0.666em;
 	position: absolute;
 	margin: 0.5em;
@@ -146,8 +151,16 @@
 	color: #aaa;
 }
 
+.interaction-percent {
+	margin: 0.25em;
+	margin-top: -1.2em;
+	color: #ccc;
+	font-size: 0.666em / 0.8em;
+}
+
 .network-group-bar,
-.network-bar {
+.network-bar,
+.interaction-bar {
 	@m: 0.25em;
 	@mL: 2.5em;
 
@@ -164,8 +177,20 @@
 	}
 }
 
+.interaction-bar {
+	width: 100%;
+	margin: 0;
+	border-color: #4a4a4a;
+	font-size: 1.25em;
+}
+
+.interaction-bar-rel {
+
+}
+
 .network-group-color,
-.network-color {
+.network-color,
+.interaction-color {
 	display: block;
 	height: @netBarH;
 	min-width: 2px;
@@ -187,6 +212,15 @@
 	display: none;
 }
 
+.result-network-info-expanded-true {
+	.animated;
+	.fadeIn;
+}
+
 .result-network-info .fa {
 	font-size: 1.125em;
+}
+
+.interaction-network-details {
+	margin-top: 0.5em;
 }

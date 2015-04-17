@@ -27,6 +27,8 @@ function( util, cy ){ return function( Result ){
     }, opts);
 
     this.selectedResultGene = opts.rGene;
+    this.selectedResultAttribute = opts.rAttr;
+    this.selectedResultInteraction = opts.rIntn;
     this.selectedInfoOpen = true;
 
     if( opts.publish ){
@@ -42,6 +44,22 @@ function( util, cy ){ return function( Result ){
     });
   };
 
+  rfn.selectAttribute = function( idOrObj ){
+    var rAttr = typeof idOrObj === typeof {} ? idOrObj : this.resultAttributesById[ idOrObj ];
+
+    this.openSelectedInfo({
+      rAttr: rAttr
+    });
+  };
+
+  rfn.selectInteraction = function( idOrObj ){
+    var rIntn = typeof idOrObj === typeof {} ? idOrObj : this.resultInteractionsById[ idOrObj ];
+    
+    this.openSelectedInfo({
+      rIntn: rIntn
+    });
+  };
+
 } } ]);
 
 app.controller('SelectedInfoCtrl',
@@ -52,6 +70,16 @@ function( $scope, updateScope, cy ){
     $scope.query = Query.current;
     $scope.result = $scope.query.result;
     $scope.rGene = $scope.result.selectedResultGene;
+    $scope.rAttr = $scope.result.selectedResultAttribute;
+    $scope.rIntn = $scope.result.selectedResultInteraction;
+
+    if( $scope.rIntn ){
+      $scope.rNet = $scope.rIntn.resultNetwork;
+      $scope.net = $scope.rNet.network;
+    } else {
+      $scope.rNet = null;
+      $scope.net = null;
+    }
 
     updateScope();
   }

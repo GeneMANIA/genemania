@@ -4,12 +4,30 @@
       <i class="fa fa-times"></i>
     </div>
 
-    <div>
+    <div ng-if="rGene">
       <div class="selected-info-title">
         {{rGene.gene.symbol}}
       </div>
       <div class="selected-info-details">
         <div ng-include="'templates/gene-details-dyn.html'"></div>
+      </div>
+    </div>
+
+    <div ng-if="rAttr">
+      <div class="selected-info-title">
+        {{rAttr.attribute.name}}
+      </div>
+      <div class="selected-info-details">
+        <div ng-include="'templates/attribute-details-dyn.html'"></div>
+      </div>
+    </div>
+
+    <div ng-if="rIntn">
+      <div class="selected-info-title">
+        {{rIntn.fromGene.name}} - {{rIntn.toGene.name}}
+      </div>
+      <div class="selected-info-details">
+        <div ng-include="'templates/interaction-details-dyn.html'"></div>
       </div>
     </div>
   </div>

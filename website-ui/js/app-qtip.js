@@ -110,7 +110,7 @@ app.directive('qtip', function(){
             $this.velocity({
               opacity: 0
             }, {
-              duration: 150,
+              duration: 1, // 150,
               complete: function(){
                 $this.hide();
               }
