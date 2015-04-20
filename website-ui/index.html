@@ -18,6 +18,7 @@
   <div ng-include="'templates/gene-list.html'"></div>
   <div ng-include="'templates/graph-buttons.html'"></div>
   <div ng-include="'templates/selected-info.html'"></div>
+  <div ng-include="'templates/functions.html'"></div>
 
   <div id="cy" class="cy"></div>
 
@@ -86,6 +87,8 @@
     }
 
     #linkouts {
+      width: 310px;
+      text-align: center;
       margin-left: 4px;
       margin-top: 6px;
       font-size: 12px;
@@ -513,7 +516,8 @@
       <a target="_blank" href="http://pages.genemania.org/help/">Help</a> |
       <a target="_blank" href="http://pages.genemania.org/contact/">Contact</a> |
       <a target="_blank" href="http://pages.genemania.org/">About</a> |
-      <a target="_blank" href="http://www.utoronto.ca/">&copy; University of Toronto</a>
+      <a target="_blank" href="http://pages.genemania.org/help/faq/#How_do_I_cite_GeneMANIA?">Cite</a> |
+      <a target="_blank" href="http://www.utoronto.ca/">&copy; U of T</a>
     </div>
   </div></div>
 
@@ -561,6 +565,7 @@
   <script src="js/app-query-history.js"></script>
   <script src="js/app-query-networks.js"></script>
   <script src="js/app-query.js"></script>
+  <script src="js/app-result-functions.js"></script>
   <script src="js/app-result-genes.js"></script>
   <script src="js/app-result-layouts.js"></script>
   <script src="js/app-result-networks.js"></script>

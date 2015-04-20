@@ -1,0 +1,45 @@
+<div ng-controller="FunctionsCtrl">
+
+  <div id="functions-add" class="functions-add activatable graph-button"><i class="fa fa-plus-square"></i></div>
+
+  <div id="functions" class="functions">
+
+    <div class="function-coloring-list">
+      <div class="function-coloring-functions">
+        <div class="function-coloring-function" ng-repeat="fn in addedFunctions">
+          <span class="function-coloring-color activatable-relative" on-tap="result.toggleFunctionColoring( fn )"><i class="fa fa-times function-remove-icon"></i> <i class="fa fa-square" ng-style="{ 'color': fn.color }"></i></span>
+          <span class="function-coloring-name">{{fn.ontologyCategory.description}}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <qtip qtip-target="functions-add" qtip-position-my="bottom center" qtip-position-at="top center" qtip-id="functions-add-list" qtip-adjust-resize="false" qtip-class="qtip-no-padding qtip-functions-add-list">
+    <div id="functions-add-list" class="functions-add-list scrollable">
+      <table class="functions-add-table">
+        <tr class="function-header">
+          <td class="function-name">Function</td>
+          <td class="function-fdr">FDR</td>
+          <td class="function-coverage">Coverage</td>
+        </tr>
+        <tr class="function" ng-class="{ 'activatable-bg': result.functionColors.length !== 0 }" ng-repeat="fn in functions" on-tap="result.toggleFunctionColoring( fn )">
+          <td class="function-name">
+            <span ng-if="fn.colored" class="fa-stack">
+              <i class="fa fa-square fa-stack-1x"></i>
+              <i class="fa fa-times fa-stack-1x" ng-style="{ 'color': fn.color }"></i>
+            </span>
+            <span ng-if="!fn.colored" ng-class="{ 'disabled': result.functionColors.length === 0 }" class="fa-stack">
+              <i class="fa fa-square fa-stack-1x"></i>
+              <i class="fa fa-plus fa-stack-1x function-icon-top"></i>
+            </span>
+            {{fn.ontologyCategory.description}}
+          </td>
+          <td class="function-fdr">{{fn.qValueFormatted}}</td>
+          <td class="function-coverage">{{fn.numAnnotatedInSample}} / {{fn.numAnnotatedInTotal}}</td>
+        </tr>
+      </table>
+    </div>
+  </qtip>
+
+</div>

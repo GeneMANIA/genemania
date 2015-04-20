@@ -1,0 +1,91 @@
+.functions {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: @fnsW;
+  margin: 0.25em;
+  //background: red;
+  z-index: 2;
+}
+
+.functions-add {
+  bottom: 0.5em;
+  top: auto;
+}
+
+.function-coloring-list {
+  position: absolute;
+  bottom: 2.5em;
+  left: 0.5em;
+  width: 100%;
+  // min-height: 5em;
+  // background: blue;
+  //background: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  border-radius: 0.5em;
+  text-shadow:
+    -1px -1px 0 #fff,
+    1px -1px 0 #fff,
+    -1px 1px 0 #fff,
+    1px 1px 0 #fff,
+    -2px -2px 0 rgba(255, 255, 255, 0.5),
+    2px -2px 0 rgba(255, 255, 255, 0.5),
+    -2px 2px 0 rgba(255, 255, 255, 0.5),
+    2px 2px 0 rgba(255, 255, 255, 0.5);
+}
+
+.function-coloring-functions {
+  font-size: 0.8em;
+}
+
+.function-coloring-function {
+  margin: 0.5em 0;
+}
+
+.function-coloring-color {
+  pointer-events: auto;
+  display: inline-block;
+}
+
+.functions-add-list {
+  width: @fnsW - 0.5em;
+  min-height: 10em;
+}
+
+.functions-add-table {
+  font-size: 0.8em;
+}
+
+.function {
+  border-bottom: 1px solid #555;
+}
+
+.function-header {
+  background: #444;
+}
+
+.function-name {
+  padding-right: 1em;
+}
+
+.function-fdr {
+  min-width: 5.5em;
+  // background: red;
+}
+
+.function-coverage {
+  min-width: 5em;
+  // background: blue;
+}
+
+.function-remove-icon {
+  opacity: 0.5;
+}
+
+.function-spacer-icon {
+  opacity: 0;
+}
+
+.function-icon-top {
+  color: #666;
+}

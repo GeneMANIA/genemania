@@ -16,6 +16,8 @@ var config = {
     color: '#d0d0d0'
   },
 
+  functionColors: [ "#c26661", "#639bc7", "#e9ae3d", "#907cc7", "#6fc17c", "#d28bcc", "#8dcbc3" ],
+
   networks: {
     colors: [
       { code: 'coexp', color: '#d0b7d5' },

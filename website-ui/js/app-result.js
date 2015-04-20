@@ -1,8 +1,8 @@
 app.factory('Result',
-[ '$$search', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts', 'Result_selectedinfo',
-function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts, Result_selectedinfo ){
+[ '$$search', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts', 'Result_selectedinfo', 'Result_functions',
+function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions ){
 
-  var rmods = [ Result_genes, Result_networks, Result_layouts, Result_selectedinfo ];
+  var rmods = [ Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions ];
 
   var Result = window.Result = function( opts ){
     if( !(this instanceof Result) ){
@@ -72,8 +72,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
       }
 
       self.updateNetworkData();
-
       self.updateGenesData();
+      self.updateFunctionsData();
 
       self.loadGraph().then(function(){
         if( opts.store ){
@@ -105,6 +105,20 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
 
   rfn.cancellable = function(){
     return this.searchPromise != null;
+  };
+
+  rfn.updateFunctionsData = function(){
+    var fns = this.resultOntologyCategories;
+
+    for( var i = 0; i < fns.length; i++ ){
+      var fn = fns[i];
+
+      fn.qValueFormatted = new Number( fn.qValue ).toExponential( 2 );
+    }
+
+    this.coloringFunctions = [];
+
+    this.functionColors = config.functionColors;
   };
 
   rfn.updateGenesData = function(){
@@ -245,7 +259,10 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
           score: rGene.score,
           query: rGene.queryGene,
           gene: true
-        }
+        },
+        classes: rGene.resultOntologyCategories.map(function(fn){
+          return 'fn' + fn.id;
+        }).join(' ')
       } );
 
       // attribute nodes & edges

@@ -5,7 +5,7 @@
       handler: function(){
         var vp = document.getElementById('query-qtip-viewport');
 
-        return [ 
+        return [
           { name: 'max-height', value: vp.clientHeight - 70 + 'px' }
         ];
       },
@@ -17,7 +17,7 @@
       handler: function(){
         var vp = document.getElementById('query-qtip-viewport');
 
-        return [ 
+        return [
           { name: 'max-height', value: vp.clientHeight - 30 + 'px' }
         ];
       },
@@ -29,8 +29,20 @@
       handler: function(){
         var vp = document.getElementById('query-qtip-viewport');
 
-        return [ 
+        return [
           { name: 'max-height', value: vp.clientHeight - 50 + 'px' }
+        ];
+      },
+      after: qtipFix
+    },
+
+    {
+      id: 'functions-add-list',
+      handler: function(){
+        var vp = document.body;
+
+        return [
+          { name: 'max-height', value: vp.clientHeight - 60 + 'px' }
         ];
       },
       after: qtipFix

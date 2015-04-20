@@ -76,7 +76,8 @@ var paths = {
     './css/result.less',
     './css/result-networks.less',
     './css/result-genes.less',
-    './css/result-selected-info.less'
+    './css/result-selected-info.less',
+    './css/result-functions.less'
   ],
 
   // config for java project integration & debugging locally
