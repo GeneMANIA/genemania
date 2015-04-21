@@ -6,7 +6,7 @@ function( util ){ return function( Result ){
   var rfn = r.prototype;
 
   var sortByWeight = function(a, b){
-    return b.data('weight') - a.data('weight');
+    return b.data('score') - a.data('score');
   };
 
   rfn.layoutPrepost = function(){
