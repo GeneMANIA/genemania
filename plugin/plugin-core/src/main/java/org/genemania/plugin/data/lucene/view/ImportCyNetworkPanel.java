@@ -19,9 +19,9 @@
 
 package org.genemania.plugin.data.lucene.view;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -39,6 +39,8 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -47,6 +49,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -86,6 +89,7 @@ import org.genemania.util.ProgressReporter;
 
 @SuppressWarnings("serial")
 public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
+	
 	private static final int CHECK_COLUMN = 0;
 	private static final int NAME_COLUMN = 1;
 	
@@ -99,7 +103,6 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 	private JLabel expressionLabel;
 	private JTable expressionTable;
 	private JScrollPane expressionPane;
-	private ExpressionTableModel expressionModel;
 	private NetworkGroupComboBox groupCombo;
 	private JTextField nameTextField;
 	private JTextArea descriptionTextArea;
@@ -113,45 +116,45 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 	private JButton importButton;
 	private JTextField groupNameField;
 
+	private final ExpressionTableModel expressionModel;
+	private final DocumentListener documentListener;
+	private final FocusListener focusListener;
+	
 	public ImportCyNetworkPanel(DataSetManager dataSetManager, UiUtils uiUtils, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, TaskDispatcher taskDispatcher) {
 		this.dataSetManager = dataSetManager;
 		this.uiUtils = uiUtils;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.taskDispatcher = taskDispatcher;
 		
-		setOpaque(false);
-		setLayout(new GridBagLayout());
+		if (uiUtils.isAquaLAF())
+			setOpaque(false);
 		
-		Insets insets = new Insets(0, 0, 0, 0);
-		int row = 0;
-		
-		sourcePanel = createSourcePanel();
-		sourcePanel.setBorder(BorderFactory.createTitledBorder(Strings.importCyNetworkSource_title));
-		destinationPanel = createDestinationPanel();
-		destinationPanel.setBorder(BorderFactory.createTitledBorder(Strings.importCyNetworkDestination_title));
-
-		helpLabel = new JLabel();
-		add(helpLabel, new GridBagConstraints(0, row, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 5, 5), 0, 0));
-		row++;
-
-		add(sourcePanel, new GridBagConstraints(0, row, 1, 1, 1, 1, GridBagConstraints.PAGE_START, GridBagConstraints.BOTH, insets, 0, 0));
-		row++;
-
-		add(destinationPanel, new GridBagConstraints(0, row, 1, 1, 1, 1, GridBagConstraints.PAGE_START, GridBagConstraints.BOTH, insets, 0, 0));
-		row++;
-		
-		importButton = new JButton(Strings.importCyNetworkImport_label);
-		importButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleImport();
+		expressionModel = new ExpressionTableModel();
+		documentListener = new DocumentListener() {
+			@Override
+			public void removeUpdate(DocumentEvent arg0) {
+				validateSettings();
 			}
-		});
+			@Override
+			public void insertUpdate(DocumentEvent arg0) {
+				validateSettings();
+			}
+			@Override
+			public void changedUpdate(DocumentEvent arg0) {
+				validateSettings();
+			}
+		};
+		focusListener = new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				validateSettings();
+			}
+			@Override
+			public void focusGained(FocusEvent arg0) {
+			}
+		};
 		
-		add(importButton , new GridBagConstraints(0, row, 2, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 0, 0));
-		row++;
-		
-		add(uiUtils.createJPanel(), new GridBagConstraints(0, row, 2, 1, 0, Double.MIN_VALUE, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		row++;
+		addComponents();
 		
 		dataSetManager.addDataSetChangeListener(new DataSetChangeListener() {
 			@Override
@@ -164,229 +167,364 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		validateSettings();
 	}
 	
-	private JPanel createDestinationPanel() {
-		JPanel panel = uiUtils.createJPanel();
-		panel.setLayout(new GridBagLayout());
+	private void addComponents() {
+		helpLabel = new JLabel();
+		helpLabel.setFont(helpLabel.getFont().deriveFont(UiUtils.INFO_FONT_SIZE));
+		helpLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 20, 0));
+		
+		weightLabel = new JLabel(Strings.importCyNetworkWeight_label);
+		expressionLabel = new JLabel(Strings.importCyNetworkExpressionValues_label);
+		
+		final GroupLayout layout = new GroupLayout(this);
+		this.setLayout(layout);
+		layout.setAutoCreateGaps(uiUtils.isWinLAF());
+		layout.setAutoCreateContainerGaps(true);
+		
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)
+				.addComponent(helpLabel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getSourcePanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getDestinationPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getImportButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(helpLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+				.addComponent(getSourcePanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getDestinationPanel(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+				.addComponent(getImportButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+		);
+	}
+	
+	private JPanel getSourcePanel() {
+		if (sourcePanel == null) {
+			sourcePanel = uiUtils.createJPanel();
+			sourcePanel.setBorder(uiUtils.createTitledBorder(Strings.importCyNetworkSource_title));
+	
+			final JLabel label1 = new JLabel(Strings.importCyNetworkSourceNetwork_label);
+			final JLabel label2 = new JLabel(Strings.importCyNetworkNodeIdentifier_label);
+			final JLabel label3 = new JLabel(Strings.importCyNetworkType_label);
+			
+			final GroupLayout layout = new GroupLayout(sourcePanel);
+			sourcePanel.setLayout(layout);
+			layout.setAutoCreateGaps(true);
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
+							.addComponent(label1)
+							.addComponent(label2)
+							.addComponent(label3)
+							.addComponent(weightLabel)
+							.addComponent(expressionLabel)
+					)
+					.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+							.addComponent(getNetworkCombo(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(getIdCombo(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(getTypeCombo(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(getWeightCombo(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(getExpressionPane(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					)
+			);
+			layout.setVerticalGroup(layout.createSequentialGroup()
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(label1)
+							.addComponent(getNetworkCombo())
+					)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(label2)
+							.addComponent(getIdCombo())
+					)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(label3)
+							.addComponent(getTypeCombo())
+					)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(weightLabel)
+							.addComponent(getWeightCombo())
+					)
+					.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
+							.addComponent(expressionLabel)
+							.addComponent(getExpressionPane())
+					)
+			);
+			
+			// To prevent the fields from shifting when the typeCombo value changes
+			uiUtils.fixHorizontalAlignment(SwingConstants.RIGHT, label1, label2, label3, weightLabel, expressionLabel);
+			
+			handleTypeChange(getTypeCombo());
+		}
+		
+		return sourcePanel;
+	}
+	
+	private JPanel getDestinationPanel() {
+		if (destinationPanel == null) {
+			destinationPanel = uiUtils.createJPanel();
+			destinationPanel.setBorder(uiUtils.createTitledBorder(Strings.importCyNetworkDestination_title));
+	
+			final JLabel label1 = new JLabel(Strings.importCyNetworkOrganism_label);
+			final JLabel label2 = new JLabel(Strings.importCyNetworkNetworkGroup_label);
+			final JLabel label3 = new JLabel(Strings.importCyNetworkNetworkName_label);
+			final JLabel label4 = new JLabel(Strings.importCyNetworkNetworkDescription_label);
+			
+			final JScrollPane descriptionPane = new JScrollPane(getDescriptionTextArea());
+			
+			final GroupLayout layout = new GroupLayout(destinationPanel);
+			destinationPanel.setLayout(layout);
+			layout.setAutoCreateGaps(true);
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
+							.addComponent(label1)
+							.addComponent(label2)
+							.addComponent(label3)
+							.addComponent(label4)
+					)
+					.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+							.addComponent(getOrganismCombo(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addGroup(layout.createSequentialGroup()
+									.addComponent(getGroupCombo(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+									.addComponent(getGroupNameField(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+							)
+							.addComponent(getNameTextField(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+							.addComponent(descriptionPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					)
+			);
+			layout.setVerticalGroup(layout.createSequentialGroup()
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(label1)
+							.addComponent(getOrganismCombo())
+					)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(label2)
+							.addComponent(getGroupCombo())
+							.addComponent(getGroupNameField())
+					)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(label3)
+							.addComponent(getNameTextField())
+					)
+					.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+							.addComponent(label4, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(descriptionPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					)
+			);
+		}
 
-		Insets insets = new Insets(0, 0, 0, 0);
-		int row = 0;
+		return destinationPanel;
+	}
+	
+	private JButton getImportButton() {
+		if (importButton == null) {
+			importButton = new JButton(Strings.importCyNetworkImport_label);
+			importButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleImport();
+				}
+			});
+		}
 		
-		organismCombo = new JComboBox();
-		panel.add(new JLabel(Strings.importCyNetworkOrganism_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		panel.add(organismCombo, new GridBagConstraints(1, row, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		row++;
-		organismCombo.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleOrganismChange();
-			}
-		});
+		return importButton;
+	}
+	
+	private JComboBox getNetworkCombo() {
+		if (networkCombo == null) {
+			networkCombo = new JComboBox();
+			networkCombo.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleNetworkChange();
+					handleSourceChange();
+				}
+			});
+		}
 		
-		DocumentListener documentListener = new DocumentListener() {
-			@Override
-			public void removeUpdate(DocumentEvent arg0) {
-				validateSettings();
+		return networkCombo;
+	}
+	
+	private JComboBox getIdCombo() {
+		if (idCombo == null) {
+			idCombo = new JComboBox();
+			idCombo.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleSourceChange();
+				}
+			});
+		}
+		
+		return idCombo;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private JComboBox getTypeCombo() {
+		if (typeCombo == null) {
+			final Comparator<NetworkType> comparator = new Comparator<NetworkType>() {
+				@Override
+				public int compare(NetworkType o1, NetworkType o2) {
+					return o1.compareTo(o2);
+				}
+			};
+			final IObjectFormatter<NetworkType> formatter = new IObjectFormatter<NetworkType>() {
+				@Override
+				public String format(NetworkType type) {
+					switch (type) {
+					case COEXPRESSION:
+						return Strings.importCyNetworkTypeCoexpression_label;
+					case UNWEIGHTED:
+						return Strings.importCyNetworkTypeUnweighted_label;
+					case WEIGHTED:
+						return Strings.importCyNetworkTypeWeighted_label;
+					default:
+						return Strings.importCyNetworkTypeUnknown_label;
+					}
+				};
+			};
+			
+			final NetworkType[] allTypes = NetworkType.values();
+			final ModelElement<NetworkType>[] typeModel = new ModelElement[allTypes.length];
+			
+			for (int i = 0; i < typeModel.length; i++) {
+				typeModel[i] = new ModelElement<NetworkType>(allTypes[i], comparator, formatter); 
 			}
 			
-			@Override
-			public void insertUpdate(DocumentEvent arg0) {
-				validateSettings();
-			}
-			
-			@Override
-			public void changedUpdate(DocumentEvent arg0) {
-				validateSettings();
-			}
-		};
+			typeCombo = new JComboBox(typeModel);
+			typeCombo.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleTypeChange(typeCombo);
+				}
+			});
+		}
 		
-		FocusListener focusListener = new FocusListener() {
-			@Override
-			public void focusLost(FocusEvent arg0) {
-				validateSettings();
-			}
-			
-			@Override
-			public void focusGained(FocusEvent arg0) {
-			}
-		};
+		return typeCombo;
+	}
+	
+	private JComboBox getWeightCombo() {
+		if (weightCombo == null) {
+			weightCombo = new JComboBox();
+		}
 		
-		JPanel groupPanel = uiUtils.createJPanel();
-		groupPanel.setLayout(new GridBagLayout());
+		return weightCombo;
+	}
+	
+	private JTable getExpressionTable() {
+		if (expressionTable == null) {
+			expressionTable = new JTable(expressionModel) {
+				@Override
+				public void addNotify() {
+					super.addNotify();
+					uiUtils.packColumns(this);
+				}
+			};
+		}
 		
-		groupCombo = new NetworkGroupComboBox();
-		groupCombo.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				validateSettings();
-			}
-		});
+		return expressionTable;
+	}
+	
+	private JScrollPane getExpressionPane() {
+		if (expressionPane == null) {
+			expressionPane = new JScrollPane(getExpressionTable());
+			expressionPane.setPreferredSize(uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 30, 5));
+		}
+		
+		return expressionPane;
+	}
+	
+	private JComboBox getOrganismCombo() {
+		if (organismCombo == null) {
+			organismCombo = new JComboBox();
+			organismCombo.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleOrganismChange();
+				}
+			});
+		}
+		
+		return organismCombo;
+	}
+	
+	private NetworkGroupComboBox getGroupCombo() {
+		if (groupCombo == null) {
+			groupCombo = new NetworkGroupComboBox();
+			groupCombo.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					validateSettings();
+				}
+			});
+		}
+		
+		return groupCombo;
+	}
+	
+	private JTextField getGroupNameField() {
+		if (groupNameField == null) {
+			groupNameField = new JTextField(30);
+			groupNameField.getDocument().addDocumentListener(documentListener);
+			groupNameField.addFocusListener(focusListener);
+		}
+		
+		return groupNameField;
+	}
+	
+	private JTextField getNameTextField() {
+		if (nameTextField == null) {
+			nameTextField = new JTextField(30);
+			nameTextField.getDocument().addDocumentListener(documentListener);
+			nameTextField.addFocusListener(focusListener);
+		}
 
-		groupNameField = new JTextField(30);
-		groupNameField.getDocument().addDocumentListener(documentListener);
-		groupNameField.addFocusListener(focusListener);
+		return nameTextField;
+	}
+	
+	private JTextArea getDescriptionTextArea() {
+		if (descriptionTextArea == null) {
+			descriptionTextArea = new JTextArea();
+			descriptionTextArea.setRows(4);
+			descriptionTextArea.getDocument().addDocumentListener(documentListener);
+			descriptionTextArea.addFocusListener(focusListener);
+		}
 		
-		groupPanel.add(groupCombo, new GridBagConstraints(0, 0, 1, 1, Double.MIN_VALUE, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		groupPanel.add(groupNameField, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-
-		panel.add(new JLabel(Strings.importCyNetworkNetworkGroup_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		panel.add(groupPanel, new GridBagConstraints(1, row, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, insets , 0, 0));
-		row++;
-
-		nameTextField = new JTextField(30);
-		nameTextField.getDocument().addDocumentListener(documentListener);
-		nameTextField.addFocusListener(focusListener);
-		panel.add(new JLabel(Strings.importCyNetworkNetworkName_label) , new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		panel.add(nameTextField, new GridBagConstraints(1, row, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, insets , 0, 0));
-		row++;
-		
-		descriptionTextArea = new JTextArea();
-		descriptionTextArea.setRows(4);
-		descriptionTextArea.getDocument().addDocumentListener(documentListener);
-		descriptionTextArea.addFocusListener(focusListener);
-		
-		JScrollPane descriptionPane = new JScrollPane(descriptionTextArea);
-		panel.add(new JLabel(Strings.importCyNetworkNetworkDescription_label) , new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		panel.add(descriptionPane, new GridBagConstraints(1, row, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, insets , 0, 0));
-		row++;
-		
-		panel.add(uiUtils.createJPanel(), new GridBagConstraints(0, row, 2, 1, 0, Double.MIN_VALUE, GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
-		row++;
-
-		return panel;
+		return descriptionTextArea;
 	}
 
 	void validateSettings() {
-		int groupIndex = groupCombo.getSelectedIndex();
-		groupNameField.setVisible(groupIndex == 0);
+		int groupIndex = getGroupCombo().getSelectedIndex();
+		getGroupNameField().setVisible(groupIndex == 0);
 		validate();
 
-		boolean valid = nameTextField.getText().trim().length() > 0;
-		valid &= organismCombo.getSelectedIndex() != -1;
+		boolean valid =  getNameTextField().getText().trim().length() > 0;
+		valid &= getOrganismCombo().getSelectedIndex() != -1;
 		valid &= groupIndex != -1;
 		
-		String groupName = groupNameField.getText().trim();
-		valid &= groupIndex != 0 || groupName.length() > 0 && !groupCombo.containsGroup(groupName);
+		String groupName = getGroupNameField().getText().trim();
+		valid &= groupIndex != 0 || groupName.length() > 0 && !getGroupCombo().containsGroup(groupName);
 		
-		importButton.setEnabled(valid);
-	}
-
-	@SuppressWarnings("unchecked")
-	private JPanel createSourcePanel() {
-		JPanel panel = uiUtils.createJPanel();
-		panel.setLayout(new GridBagLayout());
-
-		Insets insets = new Insets(0, 0, 0, 0);
-		int row = 0;
-		
-		networkCombo = new JComboBox();
-		panel.add(new JLabel(Strings.importCyNetworkSourceNetwork_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		panel.add(networkCombo, new GridBagConstraints(1, row, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		row++;
-
-		idCombo = new JComboBox();
-		panel.add(new JLabel(Strings.importCyNetworkNodeIdentifier_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		panel.add(idCombo, new GridBagConstraints(1, row, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		row++;
-		
-		networkCombo.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				handleNetworkChange();
-				handleSourceChange();
-			}
-		});
-		idCombo.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				handleSourceChange();
-			}
-		});
-		
-		Comparator<NetworkType> comparator = new Comparator<NetworkType>() {
-			public int compare(NetworkType o1, NetworkType o2) {
-				return o1.compareTo(o2);
-			}
-		};
-		IObjectFormatter<NetworkType> formatter = new IObjectFormatter<NetworkType>() {
-			public String format(NetworkType type) {
-				switch (type) {
-				case COEXPRESSION:
-					return Strings.importCyNetworkTypeCoexpression_label;
-				case UNWEIGHTED:
-					return Strings.importCyNetworkTypeUnweighted_label;
-				case WEIGHTED:
-					return Strings.importCyNetworkTypeWeighted_label;
-				default:
-					return Strings.importCyNetworkTypeUnknown_label;
-				}
-			};
-		};
-	
-		NetworkType[] allTypes = NetworkType.values();
-		ModelElement<NetworkType>[] typeModel = new ModelElement[allTypes.length];
-		for (int i = 0; i < typeModel.length; i++) {
-			typeModel[i] = new ModelElement<NetworkType>(allTypes[i], comparator, formatter); 
-		}
-		typeCombo = new JComboBox(typeModel);
-		typeCombo.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleTypeChange(typeCombo);
-			}
-		});
-		
-		panel.add(new JLabel(Strings.importCyNetworkType_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		panel.add(typeCombo, new GridBagConstraints(1, row, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		row++;
-		
-		// Weighted components
-		weightLabel = new JLabel(Strings.importCyNetworkWeight_label);
-		weightCombo = new JComboBox();
-		panel.add(weightLabel , new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		panel.add(weightCombo, new GridBagConstraints(1, row, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		
-		// Co-expression components
-		expressionLabel = new JLabel(Strings.importCyNetworkExpressionValues_label);
-		expressionModel = new ExpressionTableModel();
-		
-		expressionTable = new JTable(expressionModel) {
-			@Override
-			public void addNotify() {
-				super.addNotify();
-				uiUtils.packColumns(this);
-			}
-		};
-		expressionPane = new JScrollPane(expressionTable);
-		
-		panel.add(expressionLabel, new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, insets , 0, 0));
-		panel.add(expressionPane, new GridBagConstraints(1, row, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, insets , 0, 0));
-		
-		row++;
-		
-		panel.add(uiUtils.createJPanel(), new GridBagConstraints(0, row, 2, 1, 0, Double.MIN_VALUE, GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
-		row++;
-		
-		handleTypeChange(typeCombo);
-		return panel;
+		getImportButton().setEnabled(valid);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void handleOrganismChange() {
-		ModelElement<Organism> element = (ModelElement<Organism>) organismCombo.getSelectedItem();
+		ModelElement<Organism> element = (ModelElement<Organism>) getOrganismCombo().getSelectedItem();
 		if (element == null) {
-			groupCombo.updateNetworkGroups(null);
+			getGroupCombo().updateNetworkGroups(null);
 			return;
 		}
 		Organism organism = element.getItem();
 		Collection<InteractionNetworkGroup> groups = organism.getInteractionNetworkGroups();
-		groupCombo.updateNetworkGroups(groups);
+		getGroupCombo().updateNetworkGroups(groups);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void handleSourceChange() {
-		String idAttribute = (String) idCombo.getSelectedItem();
+		String idAttribute = (String) getIdCombo().getSelectedItem();
 		if (idAttribute == null) {
 			return;
 		}
-		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = ((ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>) networkCombo.getSelectedItem()).getItem();
+		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = ((ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>) getNetworkCombo().getSelectedItem()).getItem();
 		NETWORK network = networkProxy.getProxied();
 		
 		// Attempt to autodetect organism
@@ -419,11 +557,11 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		List<Match> organismIds = classifier.getMostLikelyOrganismIds();
 		if (organismIds.size() > 0) {
 			Match match = organismIds.get(0);
-			ComboBoxModel model = organismCombo.getModel();
+			ComboBoxModel model = getOrganismCombo().getModel();
 			for (int i = 0; i < model.getSize(); i++) {
 				ModelElement<Organism> element = (ModelElement<Organism>) model.getElementAt(i);
 				if (element.getItem().getId() == match.organismId) {
-					organismCombo.setSelectedItem(element);
+					getOrganismCombo().setSelectedItem(element);
 					return;
 				}
 			}
@@ -460,12 +598,12 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>[] model = new ModelElement[networkIds.size()];
 		model = networkIds.toArray(model);
 		Arrays.sort(model);
-		networkCombo.setModel(new DefaultComboBoxModel(model));
+		getNetworkCombo().setModel(new DefaultComboBoxModel(model));
 		
 		boolean hasNetworks = model.length > 0;
-		sourcePanel.setVisible(hasNetworks);
-		destinationPanel.setVisible(hasNetworks);
-		importButton.setVisible(hasNetworks);
+		getSourcePanel().setVisible(hasNetworks);
+		getDestinationPanel().setVisible(hasNetworks);
+		getImportButton().setVisible(hasNetworks);
 		
 		if (hasNetworks) {
 			helpLabel.setText(Strings.importCyNetworkHelp_label);
@@ -477,7 +615,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 
 	@SuppressWarnings("unchecked")
 	private void handleNetworkChange() {
-		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = ((ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>) networkCombo.getSelectedItem()).getItem();
+		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = ((ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>) getNetworkCombo().getSelectedItem()).getItem();
 		populateAttributes(networkProxy);
 	}
 
@@ -493,7 +631,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 				i++;
 			}
 			Arrays.sort(elements);
-			organismCombo.setModel(new DefaultComboBoxModel(elements));
+			getOrganismCombo().setModel(new DefaultComboBoxModel(elements));
 			handleOrganismChange();
 		} catch (DataStoreException e) {
 			log(e);
@@ -504,8 +642,8 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		String[] nodeAttributes = sort(networkProxy.getNodeAttributeNames());
 		String[] edgeAttributes = sort(networkProxy.getEdgeAttributeNames());
 		
-		idCombo.setModel(new DefaultComboBoxModel(nodeAttributes));
-		weightCombo.setModel(new DefaultComboBoxModel(edgeAttributes));
+		getIdCombo().setModel(new DefaultComboBoxModel(nodeAttributes));
+		getWeightCombo().setModel(new DefaultComboBoxModel(edgeAttributes));
 		
 		expressionModel.clear();
 		for (String name : nodeAttributes) {
@@ -530,21 +668,21 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		boolean showNone = element.getItem() == NetworkType.UNWEIGHTED;
 		
 		weightLabel.setVisible(showWeight && !showNone);
-		weightCombo.setVisible(showWeight && !showNone);
+		getWeightCombo().setVisible(showWeight && !showNone);
 		expressionLabel.setVisible(!showWeight && !showNone);
-		expressionPane.setVisible(!showWeight && !showNone);
+		getExpressionPane().setVisible(!showWeight && !showNone);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void handleImport() {
-		ModelElement<Organism> element = (ModelElement<Organism>) organismCombo.getSelectedItem();
+		ModelElement<Organism> element = (ModelElement<Organism>) getOrganismCombo().getSelectedItem();
 		final Organism organism = element.getItem();
 		
-		final NetworkProxy<NETWORK, NODE, EDGE> networkProxy = ((ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>) networkCombo.getSelectedItem()).getItem();
+		final NetworkProxy<NETWORK, NODE, EDGE> networkProxy = ((ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>) getNetworkCombo().getSelectedItem()).getItem();
 		final NETWORK cyNetwork = networkProxy.getProxied();
 		
-		final String idAttribute = (String) idCombo.getSelectedItem();
-		final ModelElement<NetworkType> typeElement = (ModelElement<NetworkType>) typeCombo.getSelectedItem();
+		final String idAttribute = (String) getIdCombo().getSelectedItem();
+		final ModelElement<NetworkType> typeElement = (ModelElement<NetworkType>) getTypeCombo().getSelectedItem();
 
 		GeneManiaTask task = new GeneManiaTask(Strings.importCyNetworkTask_title) {
 			@Override
@@ -557,10 +695,10 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 					long networkId = data.getNextAvailableId(InteractionNetwork.class, Namespace.USER);
 					InteractionNetwork network = new InteractionNetwork();
 					network.setId(networkId);
-					network.setName(nameTextField.getText());
-					network.setDescription(descriptionTextArea.getText());
+					network.setName( getNameTextField().getText());
+					network.setDescription(getDescriptionTextArea().getText());
 					
-					InteractionNetworkGroup group = groupCombo.getGroup();
+					InteractionNetworkGroup group = getGroupCombo().getGroup();
 					
 					settings.setNetwork(network);
 					settings.setNetworkGroup(group);
@@ -576,7 +714,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 							break;
 						case WEIGHTED:
 							fileType = DataFileType.INTERACTION_NETWORK;
-							String weightAttribute = (String) weightCombo.getSelectedItem();
+							String weightAttribute = (String) getWeightCombo().getSelectedItem();
 							handleWeightedNetwork(settings, cyNetwork, idAttribute, weightAttribute, writer, progress);
 							break;
 						case COEXPRESSION:
@@ -645,17 +783,21 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 	}
 
 	private void resetForm() {
-		nameTextField.setText(""); //$NON-NLS-1$
-		descriptionTextArea.setText(""); //$NON-NLS-1$
+		 getNameTextField().setText(""); //$NON-NLS-1$
+		getDescriptionTextArea().setText(""); //$NON-NLS-1$
 	}
 	
 	List<String> getExpressionAttributes() {
-		List<String> names = new ArrayList<String>();
-		for (int row = 0; row < expressionTable.getRowCount(); row++) {
-			if ((Boolean) expressionTable.getValueAt(row, CHECK_COLUMN)) {
-				names.add((String) expressionTable.getValueAt(row, NAME_COLUMN));
+		final List<String> names = new ArrayList<String>();
+		final JTable table = getExpressionTable();
+		final int rowCount = table.getRowCount();
+		
+		for (int row = 0; row < rowCount; row++) {
+			if ((Boolean) table.getValueAt(row, CHECK_COLUMN)) {
+				names.add((String) table.getValueAt(row, NAME_COLUMN));
 			}
 		}
+		
 		return names;
 	}
 	

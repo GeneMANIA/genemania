@@ -19,72 +19,78 @@
 
 package org.genemania.plugin;
 
+import java.awt.Desktop;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.net.URI;
+import java.net.URISyntaxException;
 
-import org.apache.log4j.Logger;
+import javax.swing.JOptionPane;
+
+
 
 public class SystemUtils {
-	public static boolean openBrowser(URL url) {
-		String osName = System.getProperty("os.name"); //$NON-NLS-1$
-		
-		try {
-			if (osName.startsWith("Windows")) { //$NON-NLS-1$
-				Runtime runtime = Runtime.getRuntime();
-				Process p = runtime.exec(new String[] { "rundll32", "url.dll,FileProtocolHandler", url.toString() }); //$NON-NLS-1$ //$NON-NLS-2$
-				return p.waitFor() == 0;
-			} else if (osName.startsWith("Mac OS")) { //$NON-NLS-1$
-				Class<?> fileManagerClass = Class.forName("com.apple.eio.FileManager"); //$NON-NLS-1$
-				Method method = fileManagerClass.getDeclaredMethod("openURL", new Class[] { String.class }); //$NON-NLS-1$
-				method.invoke(null, new Object[] { url.toString() });
-				return true;
-			} else {
-				// Assume POSIX/UNIX
-				Runtime runtime = Runtime.getRuntime();
-				Process p = runtime.exec(new String[] { "xdg-open", url.toString() }); //$NON-NLS-1$
-				return p.waitFor() == 0;
+	
+	private static String[] BROWSERS =
+        { "xdg-open", "htmlview", "firefox", "mozilla", "konqueror", "chrome", "chromium" };
+
+	/**
+	 * Opens the specified URL in the system default web browser.
+	 *
+	 * @return true if the URL opens successfully.
+	 */
+	public static boolean openBrowser(final String url) {
+        URI uri = null;
+        
+        try {
+            uri = new URI(url);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("URL has an incorrect format: " + url);
+        }
+
+        return openBrowser(uri);
+	}
+	
+	/**
+	 * Opens the specified URL in the system default web browser.
+	 *
+	 * @return true if the URL opens successfully.
+	 */
+	public static boolean openBrowser(final URI uri) {
+		if (openURLWithDesktop(uri)) {
+			return true;
+		} else {
+			for (final String browser : BROWSERS) {
+				if (openURLWithBrowser(uri.toString(), browser))
+					return true;
 			}
-		} catch (ClassNotFoundException e) {
-			return false;
-		} catch (SecurityException e) {
-			return false;
-		} catch (NoSuchMethodException e) {
-			return false;
-		} catch (IllegalArgumentException e) {
-			return false;
-		} catch (IllegalAccessException e) {
-			return false;
-		} catch (InvocationTargetException e) {
-			return false;
-		} catch (IOException e) {
-			return false;
-		} catch (InterruptedException e) {
-			return false;
 		}
+		
+		JOptionPane.showInputDialog(null, "GeneMANIA was unable to open your web browser.. "
+				+ "\nPlease copy the following URL and paste it into your browser:", uri);
+		
+		return false;
 	}
-	
-	public static String escape(String data) {
-		try {
-			return URLEncoder.encode(data, "UTF-8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			Logger logger = Logger.getLogger(SystemUtils.class);
-			logger.error(e.getMessage(), e);
-			return null;
-		}
-	}
-	
-	public static String unescape(String data) {
-		try {
-			return URLDecoder.decode(data, "UTF-8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			Logger logger = Logger.getLogger(SystemUtils.class);
-			logger.error(e.getMessage(), e);
-			return null;
-		}
-	}
+
+    private static boolean openURLWithDesktop(final URI uri) {
+        if (!Desktop.isDesktopSupported())
+            return false;
+        
+        try {
+            Desktop.getDesktop().browse(uri);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private static boolean openURLWithBrowser(final String url, final String browser) {
+        final ProcessBuilder builder = new ProcessBuilder(browser, url);
+        
+        try {
+            builder.start();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
 }

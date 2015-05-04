@@ -138,7 +138,7 @@ public class ImportOrganismPanel extends JPanel {
 	private JPanel createInstalledPanel() {
 		JPanel panel = uiUtils.createJPanel();
 		panel.setLayout(new GridBagLayout());
-		panel.setBorder(BorderFactory.createTitledBorder(Strings.installedOrganismList_title));
+		panel.setBorder(uiUtils.createTitledBorder(Strings.installedOrganismList_title));
 		
 		final LuceneDataSet data = (LuceneDataSet) dataSetManager.getDataSet();;
 		installedModel = controller.createModel(data);
@@ -188,14 +188,16 @@ public class ImportOrganismPanel extends JPanel {
 
 	private JPanel createImportPanel() {
 		JPanel panel = uiUtils.createJPanel();
-		panel.setBorder(BorderFactory.createTitledBorder(Strings.importOrganism_title));
+		panel.setBorder(uiUtils.createTitledBorder(Strings.importOrganism_title));
 		panel.setLayout(new GridBagLayout());
 		
 		Insets insets = new Insets(0, 0, 0, 0);
 		int row = 0;
 		int rowWidth = 3;
 
-		JLabel header = new JLabel(Strings.importOrganismHelp_label);
+		final JLabel header = new JLabel(Strings.importOrganismHelp_label);
+		header.setFont(header.getFont().deriveFont(UiUtils.INFO_FONT_SIZE));
+		
 		panel.add(header, new GridBagConstraints(0, row, rowWidth, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, insets , 0, 0));
 		row++;
 

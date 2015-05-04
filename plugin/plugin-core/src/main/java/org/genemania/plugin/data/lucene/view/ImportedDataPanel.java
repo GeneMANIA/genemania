@@ -33,11 +33,14 @@ import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
 public class ImportedDataPanel extends JPanel {
+	
 	private final ImportedNetworkDataPanel importNetworkPanel;
 	private final ImportOrganismPanel importOrganismPanel;
 
 	public ImportedDataPanel(DataSetManager dataSetManager, UiUtils uiUtils, FileUtils fileUtils, TaskDispatcher taskDispatcher) {
-		setOpaque(false);
+		if (uiUtils.isAquaLAF())
+			setOpaque(false);
+		
 		setLayout(new GridBagLayout());
 		JTabbedPane tabPane = new JTabbedPane();
 		

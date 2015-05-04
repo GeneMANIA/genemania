@@ -19,16 +19,18 @@
 
 package org.genemania.plugin.view;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.FlowLayout;
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+import static org.genemania.plugin.view.util.UiUtils.MISSING_FIELD_COLOR;
+import static org.genemania.plugin.view.util.UiUtils.MISSING_FIELD_ICON_CODE;
+import static org.genemania.plugin.view.util.UiUtils.MISSING_FIELD_ICON_SIZE;
+
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.SystemColor;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -55,26 +57,25 @@ import java.util.Vector;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
-import javax.swing.JSplitPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingUtilities;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.event.HyperlinkListener;
@@ -82,7 +83,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.NumberFormatter;
 
 import org.genemania.data.normalizer.GeneCompletionProvider2;
@@ -124,63 +124,77 @@ import org.genemania.plugin.selection.SelectionEvent;
 import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.task.GeneManiaTask;
 import org.genemania.plugin.task.TaskDispatcher;
+import org.genemania.plugin.view.util.CollapsiblePanel;
+import org.genemania.plugin.view.util.CollapsiblePanel.CollapseListener;
 import org.genemania.plugin.view.util.FileSelectionMode;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
 import org.genemania.util.ProgressReporter;
 
+@SuppressWarnings("serial")
 public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
-	private static final long serialVersionUID = 1L;
 	
-	private JPanel networkSubPanel;
-	private Organism selectedOrganism;
-
-	private JComboBox organismComboBox;
-
-	private JTextField limitTextField;
-
-	private JComboBox weightingMethodComboBox;
-
-	private JLabel dataSourceLabel;
+	private JPanel dataPanel;
+	private JPanel basicPanel;
+	private CollapsiblePanel advancedPanel;
 	private CompletionPanel genePanel;
+	private JPanel networkPanel;
+	private JPanel networkSubPanel;
+	private NetworkSelectionPanel selectionPanel;
+	private JPanel limitPanel;
+	
+	private JLabel organismLabel;
+	private JLabel geneLabel;
+	private JLabel networkLabel;
+	private JLabel organismMissingLabel;
+	private JLabel geneMissingLabel;
+	private JLabel networkMissingLabel;
+	
+	private Organism selectedOrganism;
+	private JComboBox organismComboBox;
+	private JTextField limitTextField;
+	private JComboBox weightingMethodComboBox;
+	
 	private JLabel totalOrganismsLabel;
 	private JLabel totalNetworksLabel;
 	private JLabel totalGenesLabel;
 	private JLabel totalInteractionsLabel;
+	private JLabel dataVersionLabel;
+	
 	private JButton startButton;
-	private JButton removeButton;
-	private JButton clearButton;
-	private NetworkSelectionPanel selectionPanel;
-	private JButton configureButton;
-	private JPanel networkPanel;
-	private JButton chooseFileButton;
+	private JButton removeGenesButton;
+	private JButton clearGenesButton;
+	private JButton dataConfigButton;
+	private JButton loadParamsButton;
+	
+	private JFormattedTextField attributeLimitTextField;
 
 	private Map<Long, List<String>> selectedGenes;
 	private RetrieveRelatedGenesController<NETWORK, NODE, EDGE> controller;
 	private DataSetManager dataSetManager;
 
-	private TitledBorder networkBorder;
-	private TitledBorder geneBorder;
-	private TitledBorder organismBorder;
-	private TitledBorder loadQueryBorder;
-
 	private final NetworkUtils networkUtils;
-
 	private final UiUtils uiUtils;
 
 	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
 
 	private final FileUtils fileUtils;
-
 	private final TaskDispatcher taskDispatcher;
-
 	private final GeneMania<NETWORK, NODE, EDGE> plugin;
 
-	private JFormattedTextField attributeLimitTextField;
-
-    @SuppressWarnings("serial")
-	public RetrieveRelatedGenesDialog(Frame owner, boolean modality, RetrieveRelatedGenesController<NETWORK, NODE, EDGE> controller, DataSetManager dataSetManager, NetworkUtils networkUtils, UiUtils uiUtils, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, FileUtils fileUtils, TaskDispatcher taskDispatcher, GeneMania<NETWORK, NODE, EDGE> plugin) {
+	public RetrieveRelatedGenesDialog(
+			Frame owner,
+			boolean modality,
+			RetrieveRelatedGenesController<NETWORK, NODE, EDGE> controller,
+			DataSetManager dataSetManager,
+			NetworkUtils networkUtils,
+			UiUtils uiUtils,
+			CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			FileUtils fileUtils,
+			TaskDispatcher taskDispatcher,
+			GeneMania<NETWORK, NODE, EDGE> plugin
+	) {
     	super(owner, Strings.default_title, modality);
     	this.controller = controller;
     	this.networkUtils = networkUtils;
@@ -189,44 +203,51 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
     	this.fileUtils = fileUtils;
     	this.taskDispatcher = taskDispatcher;
     	this.plugin = plugin;
+    	this.dataSetManager = dataSetManager;
     	
     	selectedGenes = new HashMap<Long, List<String>>();
-    	this.dataSetManager = dataSetManager;
+    	
+    	createLabels();
+    	
 		dataSetManager.addDataSetChangeListener(new DataSetChangeListener() {
+			@Override
 			public void dataSetChanged(DataSet activeDataSet, ProgressReporter progress) {
 				handleDataSetChanged(activeDataSet);
 			}
 		});
 
-		JRootPane root = getRootPane();
+		final JRootPane root = getRootPane();
 		final RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> dialog = this;
 		AbstractAction action = new AbstractAction("Close") { //$NON-NLS-1$
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				dialog.setVisible(false);
 			}
 		};
-		String key = (String) action.getValue(Action.NAME);
+		final String key = (String) action.getValue(Action.NAME);
 		root.getActionMap().put(key, action);
 		root.getInputMap(JRootPane.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), key);
 		
-    	Container contents = getContentPane();
-        contents.setLayout(new BoxLayout(contents, BoxLayout.PAGE_AXIS));
         addComponents();
         
+        setMinimumSize(new Dimension(480, 680));
+        pack();
+        
         addComponentListener(new ComponentListener() {
+        	@Override
 			public void componentShown(ComponentEvent e) {
 			}
-			
+			@Override
 			public void componentResized(ComponentEvent e) {
-				genePanel.handleParentMoved();
+				getGenePanel().handleParentMoved();
 			}
-			
+			@Override
 			public void componentMoved(ComponentEvent e) {
-				genePanel.handleParentMoved();
+				getGenePanel().handleParentMoved();
 			}
-			
+			@Override
 			public void componentHidden(ComponentEvent e) {
-				genePanel.hideProposals();
+				getGenePanel().hideProposals();
 			}
 		});
         
@@ -234,36 +255,17 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 			@Override
 			public void windowLostFocus(WindowEvent event) {
 				Window window = event.getOppositeWindow();
-				if (window == genePanel.getProposalDialog()) {
+				if (window == getGenePanel().getProposalDialog()) {
 					return;
 				}
-				genePanel.hideProposals();
+				getGenePanel().hideProposals();
 			}
 			
 			@Override
 			public void windowGainedFocus(WindowEvent arg0) {
 			}
 		});
-        
-        createMenu();
     }
-
-    private void createMenu() {
-        JMenuBar menuBar = new JMenuBar();        
-        JMenu editMenu = new JMenu(Strings.edit_menuLabel);
-        JMenuItem pasteMenu = new JMenuItem(Strings.paste_menuLabel);
-        pasteMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				genePanel.requestFocus();
-				new DefaultEditorKit.PasteAction().actionPerformed(event);
-			}
-		});
-		editMenu.add(pasteMenu);
-        menuBar.add(editMenu);
-        
-        setJMenuBar(menuBar);
-	}
 
 	protected void handleDataSetChanged(DataSet dataSet) {
 		try {
@@ -275,225 +277,578 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 
 	public void setDataSet(DataSet data) throws ApplicationException {
 		if (data == null) {
-			dataSourceLabel.setText(Strings.retrieveRelatedGenesNoDataSet_label);
+			dataVersionLabel.setText(Strings.retrieveRelatedGenesNoDataSet_label);
 		} else {
-			dataSourceLabel.setText(data.getDescription());
+			dataVersionLabel.setText(data.getDescription());
+			
 	    	try {
 	    		Vector<ModelElement<Organism>> model = controller.createModel(data);
-	    		organismComboBox.setModel(new DefaultComboBoxModel(model));
+	    		getOrganismComboBox().setModel(new DefaultComboBoxModel(model));
 			} catch (DataStoreException e) {
 				throw new ApplicationException(e);
 			}
+	    	
 			updateStatistics(data);
-			configureButton.setEnabled(data.getConfiguration().hasUi());
+			getDataConfigButton().setEnabled(data.getConfiguration().hasUi());
 		}
 		
 		handleOrganismSelected();
     }
-    
-    private JPanel createOrganismSelector() {
-    	JPanel header = uiUtils.createJPanel();
-    	organismBorder = BorderFactory.createTitledBorder(Strings.retrieveRelatedGenesOrganism_label);
-    	header.setBorder(organismBorder);
-    	header.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
-        String tipText = Strings.retrieveRelatedGenesOrganismComboBox_label;
-        header.setToolTipText(tipText);
-    	
-        //organism combo box
-        organismComboBox = new JComboBox();
-        organismComboBox.setToolTipText(tipText);
-        header.add(organismComboBox);
-        
-        organismComboBox.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				handleOrganismSelected();
-			}
-        });
-        
-        return header;
-    }
-    
-    @SuppressWarnings("unchecked")
-	private void handleOrganismSelected() {
-		try {
-			ModelElement<Organism> element = (ModelElement<Organism>) organismComboBox.getSelectedItem();
-			if (element != null) {
-				handleOrganismChange(element.getItem());
-			} else {
-				handleOrganismChange(null);
-			}
-		} catch (ApplicationException e) {
-			LogUtils.log(getClass(), e);
-		}
-		validateQuery();
-	}
-
-	private JComponent createGeneAndNetworkPane() {
-		JPanel panel = uiUtils.createJPanel();
-		panel.setLayout(new GridBagLayout());
+	
+	private void createLabels() {
+		organismLabel = new JLabel(Strings.retrieveRelatedGenesOrganism_label);
+		organismLabel.setToolTipText(Strings.retrieveRelatedGenesOrganismComboBox_label);
 		
-		JPanel organismSelectionPanel = createOrganismSelector();
-		panel.add(organismSelectionPanel, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-
-		JPanel loadQueryPanel = uiUtils.createJPanel();
-		loadQueryPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
-		loadQueryBorder = BorderFactory.createTitledBorder(Strings.retrieveRelatedGenesLoadParameters_label);
-		loadQueryPanel.setBorder(loadQueryBorder);
-		chooseFileButton = new JButton(Strings.retrieveRelatedGenesChooseFileButton_label);
-		chooseFileButton.addActionListener(new ActionListener() {
+		geneLabel = new JLabel(Strings.retrieveRelatedGenesGenePanel_label);
+		
+		networkLabel = new JLabel(Strings.retrieveRelatedGenesNetworkPanel_label);
+		
+		organismMissingLabel = uiUtils.createIconLabel(MISSING_FIELD_ICON_CODE, MISSING_FIELD_ICON_SIZE, MISSING_FIELD_COLOR);
+		geneMissingLabel = uiUtils.createIconLabel(MISSING_FIELD_ICON_CODE, MISSING_FIELD_ICON_SIZE, MISSING_FIELD_COLOR);
+		networkMissingLabel = uiUtils.createIconLabel(MISSING_FIELD_ICON_CODE, MISSING_FIELD_ICON_SIZE, MISSING_FIELD_COLOR);
+	}
+    
+	private void addComponents() {
+        final JButton closeButton = new JButton(new AbstractAction(Strings.closeButton_label) {
+			@Override
 			public void actionPerformed(ActionEvent e) {
-				handleChooseFile();
+				setVisible(false);
 			}
 		});
-		loadQueryPanel.add(chooseFileButton);
-		panel.add(loadQueryPanel, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        
+        final JPanel buttonPanel = uiUtils.createOkCancelPanel(getStartButton(), closeButton);
+        
+        final JPanel contentPane = new JPanel();
+        contentPane.setDoubleBuffered(true);
+        
+        final GroupLayout layout = new GroupLayout(contentPane);
+        contentPane.setLayout(layout);
+		layout.setAutoCreateGaps(uiUtils.isWinLAF());
+		layout.setAutoCreateContainerGaps(true);
 		
-		JPanel geneSelectionPanel = uiUtils.createJPanel();
-		geneBorder = BorderFactory.createTitledBorder(Strings.retrieveRelatedGenesGenePanel_label);
-        geneSelectionPanel.setBorder(geneBorder);
-        geneSelectionPanel.setLayout(new GridBagLayout());
-        
-        genePanel = new CompletionPanel(2, networkUtils, uiUtils, taskDispatcher);
-        
-        geneSelectionPanel.add(genePanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        
-        JPanel buttonPanel = uiUtils.createJPanel();
-        buttonPanel.setLayout(new GridBagLayout());
-        
-        final JLabel statusField = new JLabel(""); //$NON-NLS-1$
-        statusField.setBorder(BorderFactory.createEmptyBorder());
-        buttonPanel.add(statusField, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-        
-        genePanel.setProgressReporter(new ProgressReporter() {
-        	public void setStatus(String status) {
-        		statusField.setText(status);
-        		statusField.invalidate();
-        	}
-
-			public String getStatus() {
-				return statusField.getText();
-			}
-
-			public void cancel() {
-			}
-
-			public int getMaximumProgress() {
-				return 0;
-			}
-
-			public int getProgress() {
-				return 0;
-			}
-
-			public boolean isCanceled() {
-				return false;
-			}
-
-			public void setMaximumProgress(int maximum) {
-			}
-
-			public void setProgress(int progress) {
-			}
-
-			public String getDescription() {
-				return null;
-			}
-
-			public void setDescription(String description) {
-			}
-        });
-        
-        removeButton = new JButton(Strings.retrieveRelatedGenesRemoveGeneButton_label);
-        removeButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				genePanel.removeSelection();
-				validateQuery();
-			}
-        });
-        buttonPanel.add(removeButton, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        
-        clearButton = new JButton(Strings.retrieveRelatedGenesClearGenesButton_label);
-        clearButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleClearButton();
-			}
-        });
-        buttonPanel.add(clearButton, new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        
-        genePanel.addTableModelEventListener(new TableModelListener() {
-        	public void tableChanged(TableModelEvent e) {
-        		validateQuery();
-        	}
-        });
-        
-        genePanel.addListSelectionListener(new ListSelectionListener() {
-	        public void valueChanged(ListSelectionEvent e) {
-	        	validateQuery();
-	        }
-        });
-        
-        geneSelectionPanel.add(buttonPanel, new GridBagConstraints(0, 2, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-        
-		panel.add(geneSelectionPanel, new GridBagConstraints(0, 1, 2, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-
-        networkPanel = createNetworkPanel();
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panel, networkPanel);
-        splitPane.setAlignmentX(CENTER_ALIGNMENT);
-        splitPane.setBorder(BorderFactory.createEmptyBorder());
-        
-        return splitPane;
-    }
-    
-    private void handleChooseFile() {
-    	HashSet<String> extensions = new HashSet<String>();
-    	extensions.add("json"); //$NON-NLS-1$
-		File initialFile = fileUtils.getUserHome();
-		final File file;
-		try {
-			file = uiUtils.getFile(this, Strings.retrieveRelatedGenesChooseFile_title, initialFile, Strings.jsonDescription, extensions, FileSelectionMode.OPEN_FILE);
-		} catch (ApplicationException e) {
-			LogUtils.log(getClass(), e);
-			return;
-		}
-		if (file == null) {
-			return;
-		}
-    	GeneManiaTask task = new GeneManiaTask(Strings.retrieveRelatedGenesChooseFile_title) {
+		final ParallelGroup hgroup = layout.createParallelGroup(Alignment.CENTER, true);
+		final SequentialGroup vgroup = layout.createSequentialGroup();
+		
+		layout.setHorizontalGroup(hgroup
+				.addComponent(getDataPanel(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+				.addComponent(getBasicPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getAdvancedPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(buttonPanel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		layout.setVerticalGroup(vgroup
+				.addComponent(getDataPanel(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+				.addComponent(getBasicPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getAdvancedPanel(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+				.addComponent(buttonPanel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+		);
+		
+		getAdvancedPanel().addCollapseListener(new CollapseListener() {
 			@Override
-			protected void runTask() throws Throwable {
-				progress.setStatus(Strings.retrieveRelatedGenesChooseFile_status);
-				DataSet data = dataSetManager.getDataSet();
-				IQueryErrorHandler handler = new IQueryErrorHandler() {
-					public void warn(String message) {
-					}
-					
-					public void handleUnrecognizedGene(String gene) {
-					}
-					
-					public void handleSynonym(String gene) {
-					}
-					
-					public void handleNetwork(InteractionNetwork network) {
-					}
-					
-					public void handleUnrecognizedNetwork(String network) {
-					}
-				};
-				final Query query = parseQuery(data, file, handler);
-				SwingUtilities.invokeAndWait(new Runnable() {
-					public void run() {
-						try {
-							applyQuery(query);
-						} catch (ApplicationException e) {
-							throw new RuntimeException(e);
-						}
+			public void expanded() {
+				addMeAgain(false);
+				resizeDialog();
+			}
+			@Override
+			public void collapsed() {
+				addMeAgain(true);
+			}
+			private void addMeAgain(boolean collapsed) {
+				contentPane.remove(getAdvancedPanel());
+				contentPane.remove(buttonPanel);
+				
+				hgroup.addComponent(getAdvancedPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE);
+				hgroup.addComponent(buttonPanel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE);
+				
+				if (collapsed)
+					vgroup.addComponent(getAdvancedPanel(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE);
+				else
+					vgroup.addComponent(getAdvancedPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE);
+				
+				vgroup.addComponent(buttonPanel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE);
+			}
+		});
+		
+		setContentPane(contentPane);
+		
+		uiUtils.setDefaultOkCancelKeyStrokes(getRootPane(), getStartButton().getAction(), closeButton.getAction());
+		getRootPane().setDefaultButton(getStartButton());
+		
+        validateQuery();
+    }
+	
+	private JPanel getDataPanel() {
+		if (dataPanel == null) {
+			dataPanel = uiUtils.createJPanel();
+			dataPanel.setToolTipText(Strings.retrieveRelatedGenesStatistics_label);
+		    
+			Font labelFont = new JLabel().getFont().deriveFont(UiUtils.INFO_FONT_SIZE);
+			
+			totalOrganismsLabel = createLabel("0", labelFont); //$NON-NLS-1$
+			totalOrganismsLabel.setName(Strings.retrieveRelatedGenesStatisticsOrganisms_label);
+			
+			totalNetworksLabel = createLabel("0", labelFont); //$NON-NLS-1$
+			totalNetworksLabel.setName(Strings.retrieveRelatedGenesStatisticsNetworks_label);
+			
+			totalGenesLabel = createLabel("0", labelFont); //$NON-NLS-1$
+			totalGenesLabel.setName(Strings.retrieveRelatedGenesStatisticsGenes_label);
+			
+			totalInteractionsLabel = createLabel("0", labelFont); //$NON-NLS-1$
+			totalInteractionsLabel.setName(Strings.retrieveRelatedGenesStatisticsInteractions_label);
+			
+			dataVersionLabel = createLabel(Strings.retrieveRelatedGenesStatisticsOrganisms_label, labelFont);
+			dataVersionLabel.setName(Strings.retrieveRelatedGenesStatisticsVersion_label);
+			
+			labelFont = labelFont.deriveFont(Font.BOLD);
+			
+			final JLabel organismsLabel = createLabel(Strings.retrieveRelatedGenesStatisticsOrganisms_label, labelFont);
+			final JLabel networksLabel = createLabel(Strings.retrieveRelatedGenesStatisticsNetworks_label, labelFont);
+			final JLabel genesLabel = createLabel(Strings.retrieveRelatedGenesStatisticsGenes_label, labelFont);
+			final JLabel interactionsLabel = createLabel(Strings.retrieveRelatedGenesStatisticsInteractions_label, labelFont);
+			final JLabel versionLabel = createLabel(Strings.retrieveRelatedGenesStatisticsVersion_label, labelFont);
+			
+			final JSeparator sep = new JSeparator(JSeparator.VERTICAL);
+			
+			final GroupLayout layout = new GroupLayout(dataPanel);
+			dataPanel.setLayout(layout);
+			layout.setAutoCreateGaps(false);
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(organismsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(totalOrganismsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(networksLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(totalNetworksLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(genesLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(totalGenesLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(interactionsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(totalInteractionsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(versionLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(dataVersionLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(getDataConfigButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(sep, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(getLoadParamsButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+			layout.setVerticalGroup(layout.createParallelGroup(Alignment.CENTER, false)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(organismsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(totalOrganismsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(networksLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(totalNetworksLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(genesLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(totalGenesLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(interactionsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(totalInteractionsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(versionLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(dataVersionLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addComponent(getDataConfigButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addComponent(sep, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(getLoadParamsButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+		}
+		
+		return dataPanel;
+	}
+	
+	private JPanel getBasicPanel() {
+		if (basicPanel == null) {
+			basicPanel = uiUtils.createJPanel();
+			basicPanel.setBorder(uiUtils.createPanelBorder());
+			basicPanel.setDoubleBuffered(true);
+			
+			final JLabel statusField = new JLabel(""); //$NON-NLS-1$
+	        statusField.setBorder(BorderFactory.createEmptyBorder());
+	        
+	        getGenePanel().setProgressReporter(new ProgressReporter() {
+	        	@Override
+	        	public void setStatus(String status) {
+	        		statusField.setText(status);
+	        		statusField.invalidate();
+	        	}
+	        	@Override
+				public String getStatus() {
+					return statusField.getText();
+				}
+	        	@Override
+				public void cancel() {
+				}
+	        	@Override
+				public int getMaximumProgress() {
+					return 0;
+				}
+	        	@Override
+				public int getProgress() {
+					return 0;
+				}
+	        	@Override
+				public boolean isCanceled() {
+					return false;
+				}
+	        	@Override
+				public void setMaximumProgress(int maximum) {
+				}
+	        	@Override
+				public void setProgress(int progress) {
+				}
+	        	@Override
+				public String getDescription() {
+					return null;
+				}
+	        	@Override
+				public void setDescription(String description) {
+				}
+	        });
+			
+	        final GroupLayout layout = new GroupLayout(basicPanel);
+	        basicPanel.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(organismMissingLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(organismLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addComponent(getOrganismComboBox(), 320, 420, PREFERRED_SIZE)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(geneMissingLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(geneLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addComponent(getGenePanel(), DEFAULT_SIZE, 800, Short.MAX_VALUE)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(statusField, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+							.addComponent(getRemoveGenesButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(getClearGenesButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+			);
+			layout.setVerticalGroup(layout.createSequentialGroup()
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(organismMissingLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(organismLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addComponent(getOrganismComboBox(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(geneMissingLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(geneLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addComponent(getGenePanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(statusField)
+							.addComponent(getRemoveGenesButton())
+							.addComponent(getClearGenesButton())
+					)
+			);
+			
+			uiUtils.equalizeSize(getRemoveGenesButton(), getClearGenesButton());
+		}
+		
+		return basicPanel;
+	}
+	
+	private CollapsiblePanel getAdvancedPanel() {
+		if (advancedPanel == null) {
+			advancedPanel = new CollapsiblePanel(Strings.advancedOptionsPanel_title, true, uiUtils);
+			
+			final JSeparator sep = new JSeparator();
+			
+			final GroupLayout layout = new GroupLayout(advancedPanel.getContentPane());
+			advancedPanel.getContentPane().setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+					.addComponent(getNetworkPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(sep, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(getLimitPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+			);
+			layout.setVerticalGroup(layout.createSequentialGroup()
+					.addComponent(getNetworkPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(sep, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addComponent(getLimitPanel(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+		}
+		
+		return advancedPanel;
+	}
+    
+	private CompletionPanel getGenePanel() {
+		if (genePanel == null) {
+			genePanel = new CompletionPanel(2, networkUtils, uiUtils, taskDispatcher);
+			genePanel.setDoubleBuffered(true);
+			
+			final int maxWidth = Math.max(genePanel.getPreferredSize().width, getLimitPanel().getPreferredSize().width);
+			genePanel.setMinimumSize(new Dimension(maxWidth, genePanel.getMinimumSize().height));
+	        
+	        genePanel.addTableModelEventListener(new TableModelListener() {
+	        	@Override
+	        	public void tableChanged(TableModelEvent e) {
+	        		validateQuery();
+	        	}
+	        });
+	        genePanel.addListSelectionListener(new ListSelectionListener() {
+	        	@Override
+		        public void valueChanged(ListSelectionEvent e) {
+		        	validateQuery();
+		        }
+	        });
+		}
+		
+		return genePanel;
+	}
+	
+	private JPanel getNetworkPanel() {
+		if (networkPanel == null) {
+	        final JEditorPane selectionLabel = uiUtils.createEditorPane(Strings.retrieveRelatedGenesNetworkPanelSelection_label);
+	        selectionLabel.addHyperlinkListener(new HyperlinkListener() {
+	        	@Override
+				public void hyperlinkUpdate(HyperlinkEvent e) {
+					handleLink(e);
+				}
+			});
+	        
+	        networkPanel = uiUtils.createJPanel();
+	        networkPanel.setToolTipText(Strings.retrieveRelatedGenesNetworkPanel_tooltip);
+	        networkPanel.setDoubleBuffered(true);
+	        
+	        final GroupLayout layout = new GroupLayout(networkPanel);
+	        networkPanel.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(false);
+			
+			layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(networkMissingLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(networkLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addComponent(getNetworkSubPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(selectionLabel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+			);
+			layout.setVerticalGroup(layout.createSequentialGroup()
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(networkMissingLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(networkLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+					.addComponent(getNetworkSubPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(selectionLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+		}
+		
+        return networkPanel;
+    }
+	
+	private JPanel getNetworkSubPanel() {
+		if (networkSubPanel == null) {
+			networkSubPanel = uiUtils.createJPanel();
+	        networkSubPanel.setLayout(new GridBagLayout());
+		}
+		
+		return networkSubPanel;
+	}
+	
+	private JPanel getLimitPanel() {
+		if (limitPanel == null) {
+			limitPanel = uiUtils.createJPanel();
+			
+			final JLabel lbl1 = new JLabel(Strings.retrieveRelatedGenes_label);
+			final JLabel lbl2 = new JLabel(Strings.retrieveRelatedGenes_label2);
+			final JLabel lbl5 = new JLabel(Strings.retrieveRelatedGenes_label5);
+			final JLabel lbl6 = new JLabel(Strings.retrieveRelatedGenes_label6);
+			final JLabel lbl3 = new JLabel(Strings.retrieveRelatedGenes_label3);
+			final JLabel lbl4 = new JLabel(Strings.retrieveRelatedGenes_label4);
+	        
+	        final GroupLayout layout = new GroupLayout(limitPanel);
+	        limitPanel.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addComponent(lbl1)
+					.addComponent(getLimitTextField(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(lbl2)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(lbl5)
+					.addComponent(getAttributeLimitTextField(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(lbl6)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(lbl3)
+					.addComponent(getWeightingMethodComboBox(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(lbl4)
+			);
+			layout.setVerticalGroup(layout.createParallelGroup(Alignment.CENTER, false)
+					.addComponent(lbl1)
+					.addComponent(getLimitTextField())
+					.addComponent(lbl2)
+					.addComponent(lbl5)
+					.addComponent(getAttributeLimitTextField())
+					.addComponent(lbl6)
+					.addComponent(lbl3)
+					.addComponent(getWeightingMethodComboBox())
+					.addComponent(lbl4)
+			);
+		}
+		
+		return limitPanel;
+	}
+	
+	private JComboBox getOrganismComboBox() {
+		if (organismComboBox == null) {
+	        organismComboBox = new JComboBox();
+	        organismComboBox.setToolTipText(Strings.retrieveRelatedGenesOrganismComboBox_label);
+	        
+	        organismComboBox.addActionListener(new ActionListener() {
+	        	@Override
+				public void actionPerformed(ActionEvent event) {
+					handleOrganismSelected();
+				}
+	        });
+		}
+		
+		return organismComboBox;
+	}
+	
+	private JButton getRemoveGenesButton() {
+		if (removeGenesButton == null) {
+			removeGenesButton = new JButton(Strings.retrieveRelatedGenesRemoveGeneButton_label);
+	        removeGenesButton.addActionListener(new ActionListener() {
+	        	@Override
+				public void actionPerformed(ActionEvent e) {
+					genePanel.removeSelection();
+					validateQuery();
+				}
+	        });
+		}
+		
+		return removeGenesButton;
+	}
+	
+	private JButton getClearGenesButton() {
+		if (clearGenesButton == null) {
+			clearGenesButton = new JButton(Strings.retrieveRelatedGenesClearGenesButton_label);
+	        clearGenesButton.addActionListener(new ActionListener() {
+	        	@Override
+				public void actionPerformed(ActionEvent e) {
+					handleClearButton();
+				}
+	        });
+		}
+		
+		return clearGenesButton;
+	}
+	
+	private JButton getDataConfigButton() {
+		if (dataConfigButton == null) {
+			dataConfigButton = new JButton(Strings.dataSetConfigurationButton_label);
+			dataConfigButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
+			
+			dataConfigButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					handleConfigureButton();
+				}
+			});
+		}
+		
+		return dataConfigButton;
+	}
+	
+	private JButton getLoadParamsButton() {
+		if (loadParamsButton == null) {
+			loadParamsButton = new JButton(Strings.retrieveRelatedGenesLoadParametersButton_label);
+			loadParamsButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
+			
+			loadParamsButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleChooseFile();
+				}
+			});
+		}
+		
+		return loadParamsButton;
+	}
+	
+	private JTextField getLimitTextField() {
+		if (limitTextField == null) {
+			limitTextField = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#"))); //$NON-NLS-1$
+	        limitTextField.setText("20"); //$NON-NLS-1$
+	        limitTextField.setColumns(4);
+	        limitTextField.addKeyListener(new KeyAdapter() {
+	        	@Override
+	        	public void keyReleased(KeyEvent e) {
+	        		validateQuery();
+	        	}
+			});
+		}
+		
+		return limitTextField;
+	}
+	
+	private JFormattedTextField getAttributeLimitTextField() {
+		if (attributeLimitTextField == null) {
+			attributeLimitTextField = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#"))); //$NON-NLS-1$
+	        attributeLimitTextField.setText("20"); //$NON-NLS-1$
+	        attributeLimitTextField.setColumns(4);
+	        attributeLimitTextField.addKeyListener(new KeyAdapter() {
+	        	@Override
+	        	public void keyReleased(KeyEvent e) {
+	        		validateQuery();
+	        	}
+			});
+		}
+		
+		return attributeLimitTextField;
+	}
+	
+	private JButton getStartButton() {
+		if (startButton == null) {
+			 startButton = new JButton(new AbstractAction(Strings.retrieveRelatedGenesStartButton_label) {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						handleStartButton();
 					}
 				});
-			}
-		};
-		taskDispatcher.executeTask(task, this, true, false);
+			 startButton.setMinimumSize(new Dimension(180, startButton.getMinimumSize().height));
+		}
+		
+ 		return startButton;
 	}
-
+	
+	private JComboBox getWeightingMethodComboBox() {
+		if (weightingMethodComboBox == null) {
+			weightingMethodComboBox = new JComboBox();
+		}
+		
+		return weightingMethodComboBox;
+	}
+    
 	protected Query parseQuery(DataSet data, File file, IQueryErrorHandler handler) throws ApplicationException {
 		IQueryParser[] parsers = new IQueryParser[] { new JsonQueryParser(), new WebsiteQueryParser() };
 		for (IQueryParser parser : parsers) {
@@ -507,70 +862,32 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 		throw new ApplicationException(Strings.retrieveRelatedGenesChooseFile_error);
 	}
 
-	@SuppressWarnings("unchecked")
-	private void applyQuery(Query query) throws ApplicationException {
-		Organism organism = query.getOrganism();
-		ComboBoxModel model = organismComboBox.getModel();		
-		for (int i = 0; i < model.getSize(); i++) {
-			ModelElement<Organism> element = (ModelElement<Organism>) model.getElementAt(i);
-			Organism o = element.getItem();
-			if (organism.getId() == o.getId()) {
-				model.setSelectedItem(element);
-				handleOrganismChange(o);
-				break;
-			}
-		}
-
-		genePanel.setItems(query.getGenes());
-		selectionPanel.setSelection(query);
-		limitTextField.setText(String.valueOf(query.getGeneLimit()));
-		
-		ComboBoxModel weightingMethodModel = weightingMethodComboBox.getModel();
-		CombiningMethod combiningMethod = query.getCombiningMethod();
-		for (int i = 0; i < weightingMethodModel.getSize(); i++) {
-			WeightingMethodEntry entry = (WeightingMethodEntry) weightingMethodModel.getElementAt(i);
-			if (entry.getMethod().equals(combiningMethod)) {
-				weightingMethodModel.setSelectedItem(entry);
-				break;
-			}
-		}
-		validateQuery();
-	}
-
 	private void handleClearButton() {
-		genePanel.clear();
+		getGenePanel().clear();
+		validateQuery();
+	}
+	
+    @SuppressWarnings("unchecked")
+	private void handleOrganismSelected() {
+		try {
+			ModelElement<Organism> element = (ModelElement<Organism>) getOrganismComboBox().getSelectedItem();
+			if (element != null) {
+				handleOrganismChange(element.getItem());
+			} else {
+				handleOrganismChange(null);
+			}
+		} catch (ApplicationException e) {
+			LogUtils.log(getClass(), e);
+		}
 		validateQuery();
 	}
 
-	private JPanel createNetworkPanel() {
-        JPanel networkPanel = uiUtils.createJPanel();
-        networkBorder = BorderFactory.createTitledBorder(Strings.retrieveRelatedGenesNetworkPanel_label);
-        networkPanel.setBorder(networkBorder);
-        networkPanel.setLayout(new GridBagLayout());
-        
-        JEditorPane selectionLabel = uiUtils.createEditorPane(Strings.retrieveRelatedGenesNetworkPanelSelection_label);
-        selectionLabel.addHyperlinkListener(new HyperlinkListener() {
-			public void hyperlinkUpdate(HyperlinkEvent e) {
-				handleLink(e);
-			}
-		});
-        networkPanel.add(selectionLabel, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-        
-        networkPanel.setToolTipText(Strings.retrieveRelatedGenesNetworkPanel_tooltip);
-        networkSubPanel = uiUtils.createJPanel();
-        networkSubPanel.setLayout(new GridBagLayout());
-                
-        networkPanel.add(networkSubPanel, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        return networkPanel;
-    }
-    
 	private void handleLink(HyperlinkEvent e) {
-		if (e.getEventType() != EventType.ACTIVATED) {
+		if (e.getEventType() != EventType.ACTIVATED)
 			return;
-		}
-		if (selectionPanel == null) {
+		if (selectionPanel == null)
 			return;
-		}
+		
 		String reference = e.getDescription();
 		if ("#en-all".equals(reference)) { //$NON-NLS-1$
 			selectionPanel.selectAllNetworks(true);
@@ -582,95 +899,15 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 		validateQuery();
 	}
 
-	private void addLabel(Container component, String message, int row, int column) {
-    	JLabel label = new JLabel(message);
-    	label.setAlignmentX(CENTER_ALIGNMENT);
-    	Insets insets = new Insets(0, 2, 0, 2);
-		component.add(label, new GridBagConstraints(row, column, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets, 0, 0));
-	}
-
-	private void addComponents() {
-        Container contents = getContentPane();
-        contents.setLayout(new GridBagLayout());
-        Insets insets = new Insets(0, 0, 0, 0);
-		contents.add(createDataSourcePanel(), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
-        contents.add(createGeneAndNetworkPane(), new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
-        
-        Insets insets2 = new Insets(0, 2, 0, 2);
-        JPanel limitPanel = uiUtils.createJPanel();
-        
-        int column = 0;
-        limitPanel.setLayout(new GridBagLayout());
-        addLabel(limitPanel, Strings.retrieveRelatedGenes_label, column, 0);
-        column++;
-        
-        limitTextField = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#"))); //$NON-NLS-1$
-        limitTextField.setText("20"); //$NON-NLS-1$
-        limitTextField.setColumns(4);
-        limitTextField.addKeyListener(new KeyAdapter() {
-        	@Override
-        	public void keyReleased(KeyEvent e) {
-        		validateQuery();
-        	}
-		});
-        limitPanel.add(limitTextField, new GridBagConstraints(column, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets2, 0, 0));
-        column++;
-        
-        addLabel(limitPanel, Strings.retrieveRelatedGenes_label2, column, 0);
-        column++;
-        
-        addLabel(limitPanel, Strings.retrieveRelatedGenes_label5, column, 0);
-        column++;
-
-        attributeLimitTextField = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#"))); //$NON-NLS-1$
-        attributeLimitTextField.setText("20"); //$NON-NLS-1$
-        attributeLimitTextField.setColumns(4);
-        attributeLimitTextField.addKeyListener(new KeyAdapter() {
-        	@Override
-        	public void keyReleased(KeyEvent e) {
-        		validateQuery();
-        	}
-		});
-        limitPanel.add(attributeLimitTextField, new GridBagConstraints(column, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets2, 0, 0));
-        column++;
-
-        addLabel(limitPanel, Strings.retrieveRelatedGenes_label6, column, 0);
-        column++;
-
-        
-        addLabel(limitPanel, Strings.retrieveRelatedGenes_label3, column, 0);
-        column++;
-        
-        weightingMethodComboBox = new JComboBox();
-        
-        limitPanel.add(weightingMethodComboBox, new GridBagConstraints(column, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets2, 0, 0));
-        column++;
-        
-        addLabel(limitPanel, Strings.retrieveRelatedGenes_label4, column, 0);
-        column++;
-        
-        startButton = new JButton(Strings.retrieveRelatedGenesStartButton_label);
-        startButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleStartButton();
-			}
-        });
-        limitPanel.add(startButton, new GridBagConstraints(column, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets2, 0, 0));
-        column++;
-        
-        contents.add(limitPanel, new GridBagConstraints(0, 3, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, insets, 0, 0));
-        
-        validateQuery();
-    }
-
 	private Query getQuery() {
-		Query query = new Query();
+		final Query query = new Query();
 		query.setOrganism(selectedOrganism);
-		query.setGenes(genePanel.getItems());
-		query.setGeneLimit(getLimit(limitTextField));
-		query.setAttributeLimit(getLimit(attributeLimitTextField));
+		query.setGenes(getGenePanel().getItems());
+		query.setGeneLimit(getLimit(getLimitTextField()));
+		query.setAttributeLimit(getLimit(getAttributeLimitTextField()));
 		query.setCombiningMethod(getCombiningMethod());
 		query.setScoringMethod(getScoringMethod());
+		
 		return query;
 	}
 	
@@ -691,35 +928,33 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 
 	private void validateQuery() {
 		if (selectedOrganism != null) {
-			boolean hasGenes = genePanel.getItemCount() > 0;
+			boolean hasGenes = getGenePanel().getItemCount() > 0;
 			boolean hasNetworks = selectionPanel.getSelectionCount() > 0;
 			
 			setControlsEnabled(true);
 			Status status = checkQueryStatus();
-			startButton.setEnabled(status == Status.Ok);
-			clearButton.setEnabled(hasGenes);
-			removeButton.setEnabled(genePanel.getSelectionCount() > 0);			
-			
-			organismBorder.setTitleColor(SystemColor.textText);
-			geneBorder.setTitleColor(hasGenes ? SystemColor.textText : Color.red);
-			networkBorder.setTitleColor(hasNetworks ? SystemColor.textText : Color.red);
-			loadQueryBorder.setTitleColor(SystemColor.textText);
+			getStartButton().setEnabled(status == Status.Ok);
+			getClearGenesButton().setEnabled(hasGenes);
+			getRemoveGenesButton().setEnabled(getGenePanel().getSelectionCount() > 0);			
+
+			organismMissingLabel.setVisible(false);
+			geneMissingLabel.setVisible(hasGenes ? false : true);
+			networkMissingLabel.setVisible(hasNetworks ? false : true);
 		} else {
 			setControlsEnabled(false);
-			organismBorder.setTitleColor(SystemColor.textInactiveText);
-			networkBorder.setTitleColor(SystemColor.textInactiveText);
-			geneBorder.setTitleColor(SystemColor.textInactiveText);
-			loadQueryBorder.setTitleColor(SystemColor.textInactiveText);
+			organismMissingLabel.setVisible(false);
+			networkMissingLabel.setVisible(false);
+			geneMissingLabel.setVisible(false);
 		}
 	}
 	
 	private void setControlsEnabled(boolean enabled) {
-		organismComboBox.setEnabled(enabled);
-		genePanel.setEnabled(enabled);
-		removeButton.setEnabled(enabled);
-		clearButton.setEnabled(enabled);
-		startButton.setEnabled(enabled);
-		chooseFileButton.setEnabled(enabled);
+		getOrganismComboBox().setEnabled(enabled);
+		getGenePanel().setEnabled(enabled);
+		getRemoveGenesButton().setEnabled(enabled);
+		getClearGenesButton().setEnabled(enabled);
+		getStartButton().setEnabled(enabled);
+		getLoadParamsButton().setEnabled(enabled);
 		repaint();
 	}
 
@@ -728,15 +963,15 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 			return Status.NoOrganismSelected;
 		}
 		
-		if (getLimit(limitTextField) < 0) {
+		if (getLimit(getLimitTextField()) < 0) {
 			return Status.LimitViolation;
 		}
 
-		if (getLimit(attributeLimitTextField) < 0) {
+		if (getLimit(getAttributeLimitTextField()) < 0) {
 			return Status.LimitViolation;
 		}
 		
-		List<String> geneNames = genePanel.getItems();
+		List<String> geneNames = getGenePanel().getItems();
 		if (geneNames.size() < 1) {
 			return Status.MinimumQuerySizeViolation;
 		}
@@ -756,17 +991,17 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 
 		updateCombiningMethods(organism);
 		
-		networkSubPanel.removeAll();
+		getNetworkSubPanel().removeAll();
 		
 		List<String> genes = null;
 		if (selectionChanged) {
 			if (selectedOrganism != null) {
-				selectedGenes.put(selectedOrganism.getId(), genePanel.getItems());
+				selectedGenes.put(selectedOrganism.getId(), getGenePanel().getItems());
 			}
 			if (organism != null) {
 				genes = selectedGenes.get(organism.getId());
 			}
-			genePanel.clear();
+			getGenePanel().clear();
 		}
 
 		selectedOrganism = organism;
@@ -781,10 +1016,10 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 		}
 		
 		GeneCompletionProvider2 provider = data.getCompletionProvider(selectedOrganism);
-		genePanel.setProvider(provider);
+		getGenePanel().setProvider(provider);
 
 		if (genes != null) {
-			genePanel.setItems(genes);
+			getGenePanel().setItems(genes);
 		}
 		
 		List<Group<?, ?>> sortedGroups = new ArrayList<Group<?, ?>>();
@@ -811,35 +1046,49 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 				validateQuery();
 			}
 		});
-		networkSubPanel.add(selectionPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		getNetworkSubPanel().add(selectionPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 		selectionPanel.setGroups(sortedGroups);
 		
 		validate();
         validateQuery();
 	}
 
-	private void updateCombiningMethods(Organism organism) {
-		weightingMethodComboBox.removeAllItems();
+	private void handleConfigureButton() {
+		DataSet data = dataSetManager.getDataSet();
 		
-		if (organism == null) {
+		if (data == null)
 			return;
-		}
+		
+		IConfiguration config = data.getConfiguration();
+		
+		if (config.hasUi())
+			config.showUi(this);
+	}
+	
+	private void updateCombiningMethods(Organism organism) {
+		final JComboBox cmb = getWeightingMethodComboBox();
+		cmb.removeAllItems();
+		
+		if (organism == null)
+			return;
 		
 		boolean hasAnnotations = organism.getOntology() != null;
 		
-        weightingMethodComboBox.addItem(new WeightingMethodEntry(CombiningMethod.AUTOMATIC_SELECT, Strings.default_combining_method));
-        weightingMethodComboBox.addItem(new WeightingMethodEntry(CombiningMethod.AUTOMATIC, Strings.automatic));
+        cmb.addItem(new WeightingMethodEntry(CombiningMethod.AUTOMATIC_SELECT, Strings.default_combining_method));
+        cmb.addItem(new WeightingMethodEntry(CombiningMethod.AUTOMATIC, Strings.automatic));
+        
         if (hasAnnotations) {
-	        weightingMethodComboBox.addItem(new WeightingMethodEntry(CombiningMethod.BP, Strings.bp));
-	        weightingMethodComboBox.addItem(new WeightingMethodEntry(CombiningMethod.MF, Strings.mf));
-	        weightingMethodComboBox.addItem(new WeightingMethodEntry(CombiningMethod.CC, Strings.cc));
+	        cmb.addItem(new WeightingMethodEntry(CombiningMethod.BP, Strings.bp));
+	        cmb.addItem(new WeightingMethodEntry(CombiningMethod.MF, Strings.mf));
+	        cmb.addItem(new WeightingMethodEntry(CombiningMethod.CC, Strings.cc));
         }
-        weightingMethodComboBox.addItem(new WeightingMethodEntry(CombiningMethod.AVERAGE, Strings.average));
-        weightingMethodComboBox.addItem(new WeightingMethodEntry(CombiningMethod.AVERAGE_CATEGORY, Strings.average_category));
+        
+        cmb.addItem(new WeightingMethodEntry(CombiningMethod.AVERAGE, Strings.average));
+        cmb.addItem(new WeightingMethodEntry(CombiningMethod.AVERAGE_CATEGORY, Strings.average_category));
 	}
 
 	CombiningMethod getCombiningMethod() {
-		return ((WeightingMethodEntry) weightingMethodComboBox.getSelectedItem()).getMethod();
+		return ((WeightingMethodEntry) getWeightingMethodComboBox().getSelectedItem()).getMethod();
 	}
 	
 	ScoringMethod getScoringMethod() {
@@ -854,75 +1103,128 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 		}
 	}
 	
-	private Component createDataSourcePanel() {
-		final JPanel panel = uiUtils.createJPanel();
-		panel.setLayout(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(Strings.retrieveRelatedGenesStatistics_label));
-        
-		dataSourceLabel = new JLabel();
-		dataSourceLabel.setName(Strings.retrieveRelatedGenesStatisticsVersion_label);
+    private void handleChooseFile() {
+    	HashSet<String> extensions = new HashSet<String>();
+    	extensions.add("json"); //$NON-NLS-1$
+		File initialFile = fileUtils.getUserHome();
+		final File file;
 		
-		Font labelFont = dataSourceLabel.getFont().deriveFont(Font.BOLD);
-		Insets insets = new Insets(0, 8, 0 ,8);
-		
-		panel.add(createLabel(Strings.retrieveRelatedGenesStatisticsOrganisms_label, labelFont), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 5, 0));
-		totalOrganismsLabel = new JLabel("0"); //$NON-NLS-1$
-		totalOrganismsLabel.setName(Strings.retrieveRelatedGenesStatisticsOrganisms_label);
-		panel.add(totalOrganismsLabel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 2, 0));
-		
-		panel.add(createLabel(Strings.retrieveRelatedGenesStatisticsNetworks_label, labelFont), new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 5, 0));
-		totalNetworksLabel = new JLabel("0"); //$NON-NLS-1$
-		totalNetworksLabel.setName(Strings.retrieveRelatedGenesStatisticsNetworks_label);
-		panel.add(totalNetworksLabel, new GridBagConstraints(1, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 2, 0));
-		
-		panel.add(createLabel(Strings.retrieveRelatedGenesStatisticsGenes_label, labelFont), new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 5, 0));
-		totalGenesLabel = new JLabel("0"); //$NON-NLS-1$
-		totalGenesLabel.setName(Strings.retrieveRelatedGenesStatisticsGenes_label);
-		panel.add(totalGenesLabel, new GridBagConstraints(2, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 2, 0));
-		
-		panel.add(createLabel(Strings.retrieveRelatedGenesStatisticsInteractions_label, labelFont), new GridBagConstraints(3, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 5, 0));
-		totalInteractionsLabel = new JLabel("0"); //$NON-NLS-1$
-		totalInteractionsLabel.setName(Strings.retrieveRelatedGenesStatisticsInteractions_label);
-		panel.add(totalInteractionsLabel, new GridBagConstraints(3, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 5, 0));
-		
-		panel.add(createLabel(Strings.retrieveRelatedGenesStatisticsVersion_label, labelFont), new GridBagConstraints(4, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 5, 0));
-		panel.add(dataSourceLabel, new GridBagConstraints(4, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 0, 0));
-		
-		configureButton = new JButton(Strings.dataSetConfiguration_title);
-		configureButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				handleConfigureButton();
-			}
-		});
-
-		panel.add(configureButton, new GridBagConstraints(6, 0, 1, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		return panel;
-	}
-	
-	private void handleConfigureButton() {
-		DataSet data = dataSetManager.getDataSet();
-		if (data == null) {
+		try {
+			file = uiUtils.getFile(
+					this,
+					Strings.retrieveRelatedGenesChooseFile_title,
+					initialFile,
+					Strings.jsonDescription,
+					extensions,
+					FileSelectionMode.OPEN_FILE
+			);
+		} catch (ApplicationException e) {
+			LogUtils.log(getClass(), e);
 			return;
 		}
-		IConfiguration config = data.getConfiguration();
-		if (config.hasUi()) {
-			config.showUi(this);
-		}
+		
+		if (file == null)
+			return;
+		
+    	GeneManiaTask task = new GeneManiaTask(Strings.retrieveRelatedGenesChooseFile_title) {
+			@Override
+			protected void runTask() throws Throwable {
+				progress.setStatus(Strings.retrieveRelatedGenesChooseFile_status);
+				DataSet data = dataSetManager.getDataSet();
+				
+				IQueryErrorHandler handler = new IQueryErrorHandler() {
+					@Override
+					public void warn(String message) {
+					}
+					@Override
+					public void handleUnrecognizedGene(String gene) {
+					}
+					@Override
+					public void handleSynonym(String gene) {
+					}
+					@Override
+					public void handleNetwork(InteractionNetwork network) {
+					}
+					@Override
+					public void handleUnrecognizedNetwork(String network) {
+					}
+				};
+				
+				final Query query = parseQuery(data, file, handler);
+				SwingUtilities.invokeAndWait(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							applyQuery(query);
+						} catch (ApplicationException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				});
+			}
+		};
+		taskDispatcher.executeTask(task, this, true, false);
 	}
+	
+	@SuppressWarnings("unchecked")
+	private void applyQuery(Query query) throws ApplicationException {
+		Organism organism = query.getOrganism();
+		ComboBoxModel model = getOrganismComboBox().getModel();		
+		
+		for (int i = 0; i < model.getSize(); i++) {
+			ModelElement<Organism> element = (ModelElement<Organism>) model.getElementAt(i);
+			Organism o = element.getItem();
+			
+			if (organism.getId() == o.getId()) {
+				model.setSelectedItem(element);
+				handleOrganismChange(o);
+				break;
+			}
+		}
 
+		getGenePanel().setItems(query.getGenes());
+		selectionPanel.setSelection(query);
+		getLimitTextField().setText(String.valueOf(query.getGeneLimit()));
+		
+		ComboBoxModel weightingMethodModel = getWeightingMethodComboBox().getModel();
+		CombiningMethod combiningMethod = query.getCombiningMethod();
+		
+		for (int i = 0; i < weightingMethodModel.getSize(); i++) {
+			WeightingMethodEntry entry = (WeightingMethodEntry) weightingMethodModel.getElementAt(i);
+			
+			if (entry.getMethod().equals(combiningMethod)) {
+				weightingMethodModel.setSelectedItem(entry);
+				break;
+			}
+		}
+		
+		validateQuery();
+	}
+	
 	private JLabel createLabel(String message, Font font) {
-		JLabel label = new JLabel(message);
+		final JLabel label = new JLabel(message);
 		label.setFont(font);
+		
 		return label;
 	}
-
+	
 	public void updateStatistics(DataSet data) {
-		StatsMediator mediator = data.getMediatorProvider().getStatsMediator();
-		Statistics statistics = mediator.getLatestStatistics();
+		final StatsMediator mediator = data.getMediatorProvider().getStatsMediator();
+		final Statistics statistics = mediator.getLatestStatistics();
 		totalGenesLabel.setText(String.valueOf(statistics.getGenes()));
 		totalInteractionsLabel.setText(String.valueOf(statistics.getInteractions()));
 		totalNetworksLabel.setText(String.valueOf(statistics.getNetworks()));
 		totalOrganismsLabel.setText(String.valueOf(statistics.getOrganisms()));
+	}
+	
+	private void resizeDialog() {
+		final Dimension size = this.getSize();
+		final Dimension prefSize = this.getPreferredSize();
+		this.pack();
+		
+		int w = Math.max((size != null ? size.width : 0), prefSize.width);
+		int h = Math.max((size != null ? size.height : 0), prefSize.height);
+		this.setSize(new Dimension(w, h));
 	}
 	
 	static class WeightingMethodEntry {
@@ -951,5 +1253,4 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 		MinimumNetworkSelectionViolation,
 		LimitViolation,
 	}
-
 }

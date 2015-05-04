@@ -73,6 +73,7 @@ public class TaskDialog extends JDialog implements ProgressReporter {
 		initialize(cancelable);
 	}
 
+	@Override
 	public void cancel() {
 		isCanceled = true;
 	}

@@ -83,7 +83,7 @@ public class ImportedNetworkDataPanel extends JPanel {
 		
 		installedPanel = uiUtils.createJPanel();
 		installedPanel.setLayout(new GridBagLayout());
-		installedPanel.setBorder(BorderFactory.createTitledBorder(Strings.installedNetworkList_title));
+		installedPanel.setBorder(uiUtils.createTitledBorder(Strings.installedNetworkList_title));
 		
 		final DataSet data = dataSetManager.getDataSet();
 		installedModel = controller.createModel(data);
@@ -130,12 +130,14 @@ public class ImportedNetworkDataPanel extends JPanel {
 		
 		importTabPanel = uiUtils.createJPanel();
 		importTabPanel.setLayout(new GridBagLayout());
-		importTabPanel.setBorder(BorderFactory.createTitledBorder(Strings.importNetworkTab_label));
+		importTabPanel.setBorder(uiUtils.createTitledBorder(Strings.importNetworkTab_label));
 		
 		importPanel = new ImportNetworkPanel(dataSetManager, uiUtils, fileUtils, taskDispatcher);
 		updateOrganisms(data);
 		
 		helpLabel = new JLabel(Strings.luceneConfigUserDefinedTab_label);
+		helpLabel.setFont(helpLabel.getFont().deriveFont(UiUtils.INFO_FONT_SIZE));
+		helpLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 20, 0));
 		
 		listener = new DataSetChangeListener() {
 			public void dataSetChanged(DataSet activeDataSet, ProgressReporter progress) {

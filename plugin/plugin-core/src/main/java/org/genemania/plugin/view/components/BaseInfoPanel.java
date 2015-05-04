@@ -57,7 +57,7 @@ public abstract class BaseInfoPanel<U, T extends BaseDetailPanel<U>> extends JPa
 	protected static final Pattern sortPattern = Pattern.compile("#sort-(\\d+)([+-])?"); //$NON-NLS-1$
 	
 	static {
-		selectedBackground = new Color(255, 204, 51);
+		selectedBackground = new Color(222, 234, 252);
 		defaultBackground = SystemColor.text;
 	}
 	

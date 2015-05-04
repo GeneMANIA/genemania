@@ -19,21 +19,24 @@
 
 package org.genemania.plugin.data.lucene;
 
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import org.genemania.domain.Organism;
@@ -73,8 +76,8 @@ public class LuceneConfiguration<NETWORK, NODE, EDGE> extends Configuration {
 		return true;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
+	@SuppressWarnings({ "unchecked", "serial" })
 	public void showUi(Window parent) {
 		if (parent instanceof Frame) {
 			dialog = new JDialog((Frame) parent, true);
@@ -84,21 +87,45 @@ public class LuceneConfiguration<NETWORK, NODE, EDGE> extends Configuration {
 			return;
 		}
 		
-		final LuceneConfigPanel<NETWORK, NODE, EDGE> configPanel = new LuceneConfigPanel<NETWORK, NODE, EDGE>((LuceneDataSet<NETWORK, NODE, EDGE>) data, dataSetManager, uiUtils, fileUtils, cytoscapeUtils, taskDispatcher);
+		final LuceneConfigPanel<NETWORK, NODE, EDGE> configPanel = new LuceneConfigPanel<NETWORK, NODE, EDGE>(
+				(LuceneDataSet<NETWORK, NODE, EDGE>) data,
+				dataSetManager,
+				uiUtils,
+				fileUtils,
+				cytoscapeUtils,
+				taskDispatcher
+		);
 		
-		dialog.setTitle(Strings.dataSetConfiguration_title);
-		dialog.setPreferredSize(new Dimension(650, 600));
-		dialog.setLayout(new GridBagLayout());
-		dialog.add(configPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		
-		JButton closeButton = new JButton(Strings.closeButton_label);
-		closeButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		final JButton closeButton = new JButton(new AbstractAction(Strings.closeButton_label) {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
 				confirmClose(configPanel.getDataSet());
 			}
 		});
-		dialog.add(closeButton, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-
+		
+		final JPanel buttonPanel = uiUtils.createOkCancelPanel(null, closeButton);
+		
+		final JPanel contentPane = new JPanel();
+		
+		final GroupLayout layout = new GroupLayout(contentPane);
+		contentPane.setLayout(layout);
+		layout.setAutoCreateGaps(uiUtils.isWinLAF());
+		layout.setAutoCreateContainerGaps(true);
+		
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+				.addComponent(configPanel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(buttonPanel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(configPanel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(buttonPanel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+		);
+		
+		dialog.add(contentPane);
+		
+		uiUtils.setDefaultOkCancelKeyStrokes(dialog.getRootPane(), closeButton.getAction(), closeButton.getAction());
+		dialog.getRootPane().setDefaultButton(closeButton);
+		
 		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		dialog.addWindowListener(new WindowAdapter() {
 			@Override
@@ -107,9 +134,13 @@ public class LuceneConfiguration<NETWORK, NODE, EDGE> extends Configuration {
 			}
 		});
 		
+		dialog.setTitle(Strings.dataSetConfiguration_title);
+		dialog.setPreferredSize(new Dimension(650, 600));
 		dialog.setLocationByPlatform(true);
 		dialog.pack();
+		dialog.setResizable(false);
 		dialog.setVisible(true);
+		
 		configPanel.close();
 	}
 	

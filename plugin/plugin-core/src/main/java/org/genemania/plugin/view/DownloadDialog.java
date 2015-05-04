@@ -21,7 +21,6 @@ package org.genemania.plugin.view;
 
 import java.awt.Dialog;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -34,7 +33,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 
-import javax.swing.BorderFactory;
+import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
@@ -60,6 +59,7 @@ import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
 public class DownloadDialog extends JDialog {
+	
 	private JTable table;
 	private String dataSetId;
 	private DownloadController controller;
@@ -98,6 +98,7 @@ public class DownloadDialog extends JDialog {
 		row++;
 		
 		List<DownloadController.ModelElement> items;
+		
 		try {
 			items = controller.createModel();
 		} catch (IOException e) {
@@ -105,6 +106,7 @@ public class DownloadDialog extends JDialog {
 		} 
 		
 		model = new DynamicTableModel<ModelElement>() {
+			@Override
 			public Class<?> getColumnClass(int columnIndex) {
 				switch (columnIndex) {
 				case 0:
@@ -118,10 +120,12 @@ public class DownloadDialog extends JDialog {
 				}
 			}
 			
+			@Override
 			public int getColumnCount() {
 				return 3;
 			}
 			
+			@Override
 			public String getColumnName(int columnIndex) {
 				switch (columnIndex) {
 				case 0:
@@ -135,6 +139,7 @@ public class DownloadDialog extends JDialog {
 				}
 			}
 			
+			@Override
 			public Object getValueAt(int rowIndex, int columnIndex) {
 				ModelElement element = get(rowIndex);
 				switch (columnIndex) {
@@ -193,6 +198,7 @@ public class DownloadDialog extends JDialog {
 		row++;
 		
 		pane.add(panel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.PAGE_START, GridBagConstraints.BOTH, new Insets(16, 16, 16, 16), 0, 0));
+		
 		setMinimumSize(new Dimension(uiUtils.computeTextSizeHint(label.getFontMetrics(label.getFont()), 60, 25)));
 		setLocationByPlatform(true);
 		updateOptions();
@@ -201,36 +207,38 @@ public class DownloadDialog extends JDialog {
 	}
 	
 	private JPanel createButtonPanel() {
-		JPanel buttonPanel = new JPanel();
-		buttonPanel .setLayout(new FlowLayout());
-		downloadButton = new JButton(Strings.downloadDialogDownloadButton_label);
-		downloadButton.addActionListener(new ActionListener() {
+		downloadButton = new JButton(new AbstractAction(Strings.downloadDialogDownloadButton_label) {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleDownloadButton();
 			}
 		});
-		selectButton = new JButton(Strings.downloadDialogSelectButton_label);
-		selectButton.addActionListener(new ActionListener() {
+		
+		selectButton = new JButton(new AbstractAction(Strings.downloadDialogSelectButton_label) {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleSelectButton();
 			}
 		});
-		JButton cancelButton = new JButton(Strings.downloadDialogCancelButton_label);
-		cancelButton.addActionListener(new ActionListener() {
+		
+		final JButton cancelButton = new JButton(new AbstractAction(Strings.downloadDialogCancelButton_label) {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleCancelButton();
 			}
 		});
-		buttonPanel.add(selectButton);
-		buttonPanel.add(downloadButton);
-		buttonPanel.add(cancelButton);
+		
+		final JPanel buttonPanel = uiUtils.createOkCancelPanel(downloadButton, cancelButton, selectButton);
+		uiUtils.setDefaultOkCancelKeyStrokes(getRootPane(), downloadButton.getAction(), cancelButton.getAction());
+		getRootPane().setDefaultButton(downloadButton);
+		
 		return buttonPanel;
 	}
 
 	private JPanel createOptionPanel() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridBagLayout());
-		panel.setBorder(BorderFactory.createTitledBorder(Strings.downloadDialogOptionPanel_label));
+		panel.setBorder(uiUtils.createTitledBorder(Strings.downloadDialogOptionPanel_label));
 		
 		JRadioButton coreButton = new JRadioButton();
 		JRadioButton allButton = new JRadioButton();
