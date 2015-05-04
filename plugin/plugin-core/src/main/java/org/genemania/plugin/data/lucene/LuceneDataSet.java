@@ -475,22 +475,25 @@ public class LuceneDataSet<NETWORK, NODE, EDGE> extends DataSet {
 			// If we have user network models but no cache file or an
 			// inconsistent model, delete the orphaned model
 			IModelWriter writer = createModelWriter();
+			
 			try {
 				for (InteractionNetwork network : getUserNetworks()) {
 					boolean purge = false;
 					InteractionNetworkGroup group = getNetworkGroup(network.getId());
+					
 					if (group == null) {
 						purge = true;
 					} else {
 						Organism organism = getOrganism(group.getId());
+						
 						if (organism == null) {
 							purge = true;
-						}
-						
-						try {
-							cache.getNetwork(USER, organism.getId(), network.getId());
-						} catch (ApplicationException e) {
-							purge = true;
+						} else {
+							try {
+								cache.getNetwork(USER, organism.getId(), network.getId());
+							} catch (ApplicationException e) {
+								purge = true;
+							}
 						}
 					}
 			
