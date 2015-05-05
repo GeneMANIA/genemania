@@ -203,6 +203,7 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 			availablePanel.setBorder(uiUtils.createTitledBorder(Strings.netmaniaAvailableDataList_title));
 			
 			final JScrollPane scrollPane = new JScrollPane(getAvailableList());
+			scrollPane.setPreferredSize(uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 10, 10));
 			
 			final GroupLayout layout = new GroupLayout(availablePanel);
 			availablePanel.setLayout(layout);
@@ -228,6 +229,7 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 			installedPanel.setBorder(uiUtils.createTitledBorder(Strings.netmaniaInstalledDataList_title));
 			
 			final JScrollPane scrollPane = new JScrollPane(getInstalledList());
+			scrollPane.setPreferredSize(uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 10, 10));
 			
 			final GroupLayout layout = new GroupLayout(installedPanel);
 			installedPanel.setLayout(layout);

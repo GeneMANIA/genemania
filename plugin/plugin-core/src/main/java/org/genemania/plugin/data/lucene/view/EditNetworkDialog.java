@@ -51,10 +51,10 @@ public class EditNetworkDialog extends AbstractEditDialog {
 	private final JTextArea descriptionField;
 	private final JTextField groupNameField;
 	
-	public EditNetworkDialog(Frame owner, boolean modality, UiUtils uiUtils) {
+	public EditNetworkDialog(final Frame owner, final boolean modality, final UiUtils uiUtils) {
 		super(owner, Strings.editNetwork_title, modality);
 		
-		JPanel contents = uiUtils.createJPanel();
+		final JPanel contents = uiUtils.createJPanel();
 		contents.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 		contents.setLayout(new GridBagLayout());
 

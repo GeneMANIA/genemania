@@ -18,9 +18,7 @@
  */
 package org.genemania.plugin.data.lucene.view;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -37,19 +35,25 @@ public class ImportedDataPanel extends JPanel {
 	private final ImportedNetworkDataPanel importNetworkPanel;
 	private final ImportOrganismPanel importOrganismPanel;
 
-	public ImportedDataPanel(DataSetManager dataSetManager, UiUtils uiUtils, FileUtils fileUtils, TaskDispatcher taskDispatcher) {
+	public ImportedDataPanel(
+			final DataSetManager dataSetManager,
+			final UiUtils uiUtils,
+			final FileUtils fileUtils,
+			final TaskDispatcher taskDispatcher
+	) {
 		if (uiUtils.isAquaLAF())
 			setOpaque(false);
 		
-		setLayout(new GridBagLayout());
-		JTabbedPane tabPane = new JTabbedPane();
+		final JTabbedPane tabPane = new JTabbedPane();
 		
 		importNetworkPanel = new ImportedNetworkDataPanel(dataSetManager, uiUtils, fileUtils, taskDispatcher);
 		tabPane.add(Strings.importedDataPanelNetworkTab_title, importNetworkPanel);
 		
 		importOrganismPanel = new ImportOrganismPanel(dataSetManager, fileUtils, uiUtils, taskDispatcher);
 		tabPane.add(Strings.importedDataPanelOrganismTab_title, importOrganismPanel);
-		add(tabPane, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		
+		setLayout(new BorderLayout());
+		add(tabPane, BorderLayout.CENTER);
 	}
 
 	public void close() {

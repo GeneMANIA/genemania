@@ -19,15 +19,17 @@
 
 package org.genemania.plugin.data.lucene.view;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -54,159 +56,250 @@ import org.genemania.plugin.validation.ValidationEventListener;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.util.ProgressReporter;
 
+@SuppressWarnings("serial")
 public class ImportedNetworkDataPanel extends JPanel {
-	private static final long serialVersionUID = 1L;
 	
 	private final ImportedDataController controller;
 	private final UiUtils uiUtils;
+	private final FileUtils fileUtils;
+	private final TaskDispatcher taskDispatcher;
 	private final DataSetManager dataSetManager;
 	private final DataSetChangeListener listener;
 	
 	private DynamicTableModel<UserNetworkEntry> installedModel;
-	private JTable installedTable;
-	private JButton deleteButton;
-
-	private JButton editButton;
-	private ImportNetworkPanel importPanel;
+	
+	private JLabel helpLabel = new JLabel(Strings.luceneConfigUserDefinedTab_label);
 	private JPanel importTabPanel;
-	private JLabel helpLabel;
+	private ImportNetworkPanel importPanel;
 	private JPanel installedPanel;
+	private JTable installedTable;
+	private JButton importButton;
+	private JButton deleteButton;
+	private JButton editButton;
 
-	@SuppressWarnings("serial")
-	public ImportedNetworkDataPanel(DataSetManager dataSetManager, final UiUtils uiUtils, FileUtils fileUtils, TaskDispatcher taskDispatcher) {
-		this.uiUtils = uiUtils;
+	public ImportedNetworkDataPanel(
+			final DataSetManager dataSetManager,
+			final UiUtils uiUtils,
+			final FileUtils fileUtils,
+			final TaskDispatcher taskDispatcher
+	) {
 		this.dataSetManager = dataSetManager;
+		this.uiUtils = uiUtils;
+		this.fileUtils = fileUtils;
+		this.taskDispatcher = taskDispatcher;
 		this.controller = new ImportedDataController(dataSetManager, taskDispatcher);
 		
-		setLayout(new GridBagLayout());
-		setOpaque(false);
+		if (uiUtils.isAquaLAF())
+			setOpaque(false);
 		
-		installedPanel = uiUtils.createJPanel();
-		installedPanel.setLayout(new GridBagLayout());
-		installedPanel.setBorder(uiUtils.createTitledBorder(Strings.installedNetworkList_title));
-		
-		final DataSet data = dataSetManager.getDataSet();
-		installedModel = controller.createModel(data);
-		installedTable = new JTable(installedModel) {
-			@Override
-			public void addNotify() {
-				super.addNotify();
-				uiUtils.packColumns(installedTable);
-			}
-		};
-		
-		installedTable.setOpaque(false);
-		installedTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				int totalSelected = installedTable.getSelectedRowCount();
-				editButton.setEnabled(totalSelected == 1);
-				deleteButton.setEnabled(totalSelected > 0);
-			}
-		});
-		
-		JScrollPane scrollPane = new JScrollPane(installedTable);
-		scrollPane.setBorder(BorderFactory.createEtchedBorder());
-		
-		installedPanel.add(scrollPane, new GridBagConstraints(0, 0, 1, 2, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0 ,0));
-		
-		deleteButton = new JButton(Strings.deleteNetworkButton_label);
-		deleteButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				deleteNetworks(data);
-			}
-		});
-		deleteButton.setEnabled(false);
-		
-		editButton = new JButton(Strings.editNetworkButton_label);
-		editButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				editNetworks(data);
-			}
-		});
-		editButton.setEnabled(false);
-		
-		installedPanel.add(deleteButton, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0 ,0));
-		installedPanel.add(editButton, new GridBagConstraints(1, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0 ,0));
-		
-		importTabPanel = uiUtils.createJPanel();
-		importTabPanel.setLayout(new GridBagLayout());
-		importTabPanel.setBorder(uiUtils.createTitledBorder(Strings.importNetworkTab_label));
-		
-		importPanel = new ImportNetworkPanel(dataSetManager, uiUtils, fileUtils, taskDispatcher);
-		updateOrganisms(data);
-		
-		helpLabel = new JLabel(Strings.luceneConfigUserDefinedTab_label);
-		helpLabel.setFont(helpLabel.getFont().deriveFont(UiUtils.INFO_FONT_SIZE));
-		helpLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 20, 0));
+		installedModel = controller.createModel(getDataSet());
+		updateOrganisms(getDataSet());
 		
 		listener = new DataSetChangeListener() {
+			@Override
 			public void dataSetChanged(DataSet activeDataSet, ProgressReporter progress) {
 				handleDataSetChange(activeDataSet);
 			}
 		};
 		dataSetManager.addDataSetChangeListener(listener);
 		
-		int row = 0;
-		importTabPanel.add(importPanel, new GridBagConstraints(0, row, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		row++;
+		addComponents();
+		handleDataSetChange(getDataSet());
+	}
+	
+	private void addComponents() {
+		final GroupLayout layout = new GroupLayout(this);
+		this.setLayout(layout);
+		layout.setAutoCreateGaps(uiUtils.isWinLAF());
+		layout.setAutoCreateContainerGaps(true);
 		
-		final JButton importButton = new JButton(Strings.importNetworkButton_label);
-		importButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				importNetwork(data);
-			}
-		});
-		importTabPanel.add(importButton, new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		row++;
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)
+				.addComponent(getImportTabPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getInstalledPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(getImportTabPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getInstalledPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+	}
+
+	private JPanel getImportTabPanel() {
+		if (importTabPanel == null) {
+			importTabPanel = uiUtils.createJPanel();
+			importTabPanel.setBorder(uiUtils.createTitledBorder(Strings.importNetworkTab_label));
+			
+			helpLabel.setFont(helpLabel.getFont().deriveFont(UiUtils.INFO_FONT_SIZE));
+			helpLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+			
+			final GroupLayout layout = new GroupLayout(importTabPanel);
+			importTabPanel.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)
+					.addComponent(helpLabel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(getImportPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(getImportButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+			layout.setVerticalGroup(layout.createSequentialGroup()
+					.addComponent(helpLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addComponent(getImportPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(getImportButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+		}
 		
-		importPanel.addValidationEventListener(new ValidationEventListener() {
-			public void validate(boolean isValid) {
-				importButton.setEnabled(isValid);
-			}
-		});
-		importPanel.validateSettings();
+		return importTabPanel;
+	}
+	
+	private JPanel getInstalledPanel() {
+		if (installedPanel == null) {
+			installedPanel = uiUtils.createJPanel();
+			installedPanel.setBorder(uiUtils.createTitledBorder(Strings.installedNetworkList_title));
+			
+			final JScrollPane scrollPane = new JScrollPane(getInstalledTable());
+			scrollPane.setPreferredSize(uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 10, 6));
+			
+			final GroupLayout layout = new GroupLayout(installedPanel);
+			installedPanel.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(getDeleteButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(getEditButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+			);
+			layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+					.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(getDeleteButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(getEditButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+			);
+			
+			uiUtils.equalizeSize(getDeleteButton(), getEditButton());
+		}
 		
-		row = 0;
-		add(helpLabel, new GridBagConstraints(0, row, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 5, 5), 0, 0));
-		row++;
-		add(importTabPanel, new GridBagConstraints(0, row, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		row++;
-		add(installedPanel, new GridBagConstraints(0, row, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		row++;
-		add(uiUtils.createJPanel(), new GridBagConstraints(0, row, 1, 1, 0, Double.MIN_VALUE, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0) , 0, 0));
-		row++;
-		handleDataSetChange(data);
+		return installedPanel;
+	}
+	
+	private ImportNetworkPanel getImportPanel() {
+		if (importPanel == null) {
+			importPanel = new ImportNetworkPanel(dataSetManager, uiUtils, fileUtils, taskDispatcher);
+			
+			importPanel.addValidationEventListener(new ValidationEventListener() {
+				@Override
+				public void validate(boolean isValid) {
+					getImportButton().setEnabled(isValid);
+				}
+			});
+			importPanel.validateSettings();
+		}
+		
+		return importPanel;
+	}
+	
+	private JTable getInstalledTable() {
+		if (installedTable == null) {
+			installedTable = new JTable(installedModel) {
+				@Override
+				public void addNotify() {
+					super.addNotify();
+					uiUtils.packColumns(installedTable);
+				}
+			};
+			installedTable.setOpaque(false);
+			installedTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					int totalSelected = installedTable.getSelectedRowCount();
+					getEditButton().setEnabled(totalSelected == 1);
+					getDeleteButton().setEnabled(totalSelected > 0);
+				}
+			});
+		}
+		
+		return installedTable;
+	}
+	
+	private JButton getDeleteButton() {
+		if (deleteButton == null) {
+			deleteButton = new JButton(Strings.deleteNetworkButton_label);
+			deleteButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					deleteNetworks(getDataSet());
+				}
+			});
+			deleteButton.setEnabled(false);
+		}
+		
+		return deleteButton;
+	}
+	
+	private JButton getEditButton() {
+		if (editButton == null) {
+			editButton = new JButton(Strings.editNetworkButton_label);
+			editButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					editNetworks(getDataSet());
+				}
+			});
+			editButton.setEnabled(false);
+		}
+
+		return editButton;
+	}
+	
+	private JButton getImportButton() {
+		if (importButton == null) {
+			importButton = new JButton(Strings.importNetworkButton_label);
+			importButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					importNetwork(getDataSet());
+				}
+			});
+		}
+		
+		return importButton;
 	}
 
 	private void handleDataSetChange(DataSet activeDataSet) {
 		updateOrganisms(activeDataSet);
+		
 		if (activeDataSet != null) {
 			boolean hasData = controller.hasData(activeDataSet);
-			importTabPanel.setVisible(hasData);
-			installedPanel.setVisible(hasData);
+			getImportTabPanel().setVisible(hasData);
+			getInstalledPanel().setVisible(hasData);
+			
 			if (hasData) {
 				helpLabel.setText(Strings.luceneConfigUserDefinedTab_label);
 			} else {
 				helpLabel.setText(Strings.luceneConfigUserDefinedTab_label2);
 			}
 		}
+		
 		installedModel = controller.createModel(activeDataSet);
-		installedTable.setModel(installedModel);
-		uiUtils.packColumns(installedTable);
+		getInstalledTable().setModel(installedModel);
+		uiUtils.packColumns(getInstalledTable());
 	}
 
 	private void deleteNetworks(DataSet data) {
-		int[] selection = installedTable.getSelectedRows();
+		int[] selection = getInstalledTable().getSelectedRows();
 		controller.deleteNetworks(uiUtils.getFrame(this), data, installedModel, selection);
 //		installedModel.removeRows(selection);
 	}
 
 	private void editNetworks(DataSet data) {
-		int[] selection = installedTable.getSelectedRows();
+		int[] selection = getInstalledTable().getSelectedRows();
+		
 		for (int index : selection) {
-			UserNetworkEntry entry = installedModel.get(index);
-			InteractionNetwork network = entry.network;
-			EditNetworkDialog dialog = new EditNetworkDialog(uiUtils.getFrame(this), true, uiUtils);
+			final UserNetworkEntry entry = installedModel.get(index);
+			final InteractionNetwork network = entry.network;
+			final EditNetworkDialog dialog = new EditNetworkDialog(uiUtils.getFrame(this), true, uiUtils);
 			dialog.setLocationByPlatform(true);
 			dialog.setOrganism(entry.organism);
 			dialog.setGroup(entry.group);
@@ -216,45 +309,47 @@ public class ImportedNetworkDataPanel extends JPanel {
 			dialog.pack();
 			dialog.setVisible(true);
 			
-			if (dialog.isCanceled()) {
+			if (dialog.isCanceled())
 				return;
-			}
 			
 			network.setName(dialog.getNetworkName());
 			network.setDescription(dialog.getDescription());
-			InteractionNetworkGroup group = dialog.getGroup();
+			final InteractionNetworkGroup group = dialog.getGroup();
+			
 			if (group.getId() == -1) {
-				String name = dialog.getGroupName();
+				final String name = dialog.getGroupName();
 				group.setName(name);
 				group.setCode(name);
 				group.setDescription(""); //$NON-NLS-1$
 			}
+			
 			controller.updateNetwork(uiUtils.getFrame(this), data, network, group, dialog.getColor());
 		}
 	}
 
 	private void importNetwork(final DataSet data) {
-		File file = importPanel.getNetworkFile();
-		if (file == null || !file.exists()) {
+		File file = getImportPanel().getNetworkFile();
+		
+		if (file == null || !file.exists())
 			return;
-		}
+		
 		String networkFile = file.getAbsolutePath();
-		DataImportSettings settings = importPanel.getImportSettings();
+		DataImportSettings settings = getImportPanel().getImportSettings();
 		settings.setSource(file.getName());
-		DataFileType type = importPanel.getType();
+		DataFileType type = getImportPanel().getType();
 		
 		controller.importNetwork(uiUtils.getFrame(this), data, settings, networkFile, type);
-		uiUtils.packColumns(installedTable);
-		importPanel.clear();
+		uiUtils.packColumns(getInstalledTable());
+		getImportPanel().clear();
 	}
 
 	public void close() {
 		dataSetManager.removeDataSetChangeListener(listener);
 	}
 	
-	private void updateOrganisms(DataSet data) {
-		List<Organism> organisms = controller.getOrganisms(data);
-		importPanel.setOrganisms(organisms);
+	private void updateOrganisms(final DataSet data) {
+		final List<Organism> organisms = controller.getOrganisms(data);
+		getImportPanel().setOrganisms(organisms);
 	}
 
 	public DataSet getDataSet() {

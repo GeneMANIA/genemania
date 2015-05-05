@@ -98,9 +98,18 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 	private final TaskDispatcher taskDispatcher;
 	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
 	
-	private JLabel weightLabel;
+	private final JLabel helpLabel = new JLabel();
+	private final JLabel weightLabel = new JLabel(Strings.importCyNetworkWeight_label);
+	private final JLabel expressionLabel = new JLabel(Strings.importCyNetworkExpressionValues_label);
+	private final JLabel sourceNetLabel = new JLabel(Strings.importCyNetworkSourceNetwork_label);
+	private final JLabel nodeIdLabel = new JLabel(Strings.importCyNetworkNodeIdentifier_label);
+	private final JLabel typeLabel = new JLabel(Strings.importCyNetworkType_label);
+	private final JLabel organismLabel = new JLabel(Strings.importCyNetworkOrganism_label);
+	private final JLabel netGroupLabel = new JLabel(Strings.importCyNetworkNetworkGroup_label);
+	private final JLabel netNameLabel = new JLabel(Strings.importCyNetworkNetworkName_label);
+	private final JLabel netDescLabel = new JLabel(Strings.importCyNetworkNetworkDescription_label);
+	
 	private JComboBox weightCombo;
-	private JLabel expressionLabel;
 	private JTable expressionTable;
 	private JScrollPane expressionPane;
 	private NetworkGroupComboBox groupCombo;
@@ -110,7 +119,6 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 	private JComboBox idCombo;
 	private JComboBox networkCombo;
 	private JComboBox typeCombo;
-	private JLabel helpLabel;
 	private JPanel sourcePanel;
 	private JPanel destinationPanel;
 	private JButton importButton;
@@ -120,7 +128,12 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 	private final DocumentListener documentListener;
 	private final FocusListener focusListener;
 	
-	public ImportCyNetworkPanel(DataSetManager dataSetManager, UiUtils uiUtils, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, TaskDispatcher taskDispatcher) {
+	public ImportCyNetworkPanel(
+			final DataSetManager dataSetManager,
+			final UiUtils uiUtils,
+			final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			final TaskDispatcher taskDispatcher
+	) {
 		this.dataSetManager = dataSetManager;
 		this.uiUtils = uiUtils;
 		this.cytoscapeUtils = cytoscapeUtils;
@@ -156,6 +169,8 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		
 		addComponents();
 		
+		handleTypeChange(getTypeCombo());
+		
 		dataSetManager.addDataSetChangeListener(new DataSetChangeListener() {
 			@Override
 			public void dataSetChanged(DataSet activeDataSet, ProgressReporter progress) {
@@ -168,12 +183,8 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 	}
 	
 	private void addComponents() {
-		helpLabel = new JLabel();
 		helpLabel.setFont(helpLabel.getFont().deriveFont(UiUtils.INFO_FONT_SIZE));
 		helpLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 20, 0));
-		
-		weightLabel = new JLabel(Strings.importCyNetworkWeight_label);
-		expressionLabel = new JLabel(Strings.importCyNetworkExpressionValues_label);
 		
 		final GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -192,6 +203,13 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 				.addComponent(getDestinationPanel(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
 				.addComponent(getImportButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
 		);
+		
+		// To proper align all left-side labels and
+		// prevent the source panel fields from shifting when the typeCombo value changes:
+		uiUtils.fixHorizontalAlignment(
+				SwingConstants.RIGHT,
+				sourceNetLabel, nodeIdLabel, typeLabel, weightLabel, expressionLabel,
+				organismLabel, netGroupLabel, netNameLabel, netDescLabel);
 	}
 	
 	private JPanel getSourcePanel() {
@@ -199,10 +217,6 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 			sourcePanel = uiUtils.createJPanel();
 			sourcePanel.setBorder(uiUtils.createTitledBorder(Strings.importCyNetworkSource_title));
 	
-			final JLabel label1 = new JLabel(Strings.importCyNetworkSourceNetwork_label);
-			final JLabel label2 = new JLabel(Strings.importCyNetworkNodeIdentifier_label);
-			final JLabel label3 = new JLabel(Strings.importCyNetworkType_label);
-			
 			final GroupLayout layout = new GroupLayout(sourcePanel);
 			sourcePanel.setLayout(layout);
 			layout.setAutoCreateGaps(true);
@@ -210,9 +224,9 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 			
 			layout.setHorizontalGroup(layout.createSequentialGroup()
 					.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
-							.addComponent(label1)
-							.addComponent(label2)
-							.addComponent(label3)
+							.addComponent(sourceNetLabel)
+							.addComponent(nodeIdLabel)
+							.addComponent(typeLabel)
 							.addComponent(weightLabel)
 							.addComponent(expressionLabel)
 					)
@@ -226,31 +240,26 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 			);
 			layout.setVerticalGroup(layout.createSequentialGroup()
 					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
-							.addComponent(label1)
+							.addComponent(sourceNetLabel)
 							.addComponent(getNetworkCombo())
 					)
 					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
-							.addComponent(label2)
+							.addComponent(nodeIdLabel)
 							.addComponent(getIdCombo())
 					)
 					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
-							.addComponent(label3)
+							.addComponent(typeLabel)
 							.addComponent(getTypeCombo())
 					)
 					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
 							.addComponent(weightLabel)
 							.addComponent(getWeightCombo())
 					)
-					.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
-							.addComponent(expressionLabel)
-							.addComponent(getExpressionPane())
+					.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+							.addComponent(expressionLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(getExpressionPane(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 					)
 			);
-			
-			// To prevent the fields from shifting when the typeCombo value changes
-			uiUtils.fixHorizontalAlignment(SwingConstants.RIGHT, label1, label2, label3, weightLabel, expressionLabel);
-			
-			handleTypeChange(getTypeCombo());
 		}
 		
 		return sourcePanel;
@@ -261,11 +270,6 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 			destinationPanel = uiUtils.createJPanel();
 			destinationPanel.setBorder(uiUtils.createTitledBorder(Strings.importCyNetworkDestination_title));
 	
-			final JLabel label1 = new JLabel(Strings.importCyNetworkOrganism_label);
-			final JLabel label2 = new JLabel(Strings.importCyNetworkNetworkGroup_label);
-			final JLabel label3 = new JLabel(Strings.importCyNetworkNetworkName_label);
-			final JLabel label4 = new JLabel(Strings.importCyNetworkNetworkDescription_label);
-			
 			final JScrollPane descriptionPane = new JScrollPane(getDescriptionTextArea());
 			
 			final GroupLayout layout = new GroupLayout(destinationPanel);
@@ -275,10 +279,10 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 			
 			layout.setHorizontalGroup(layout.createSequentialGroup()
 					.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
-							.addComponent(label1)
-							.addComponent(label2)
-							.addComponent(label3)
-							.addComponent(label4)
+							.addComponent(organismLabel)
+							.addComponent(netGroupLabel)
+							.addComponent(netNameLabel)
+							.addComponent(netDescLabel)
 					)
 					.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
 							.addComponent(getOrganismCombo(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
@@ -292,20 +296,20 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 			);
 			layout.setVerticalGroup(layout.createSequentialGroup()
 					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
-							.addComponent(label1)
+							.addComponent(organismLabel)
 							.addComponent(getOrganismCombo())
 					)
 					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
-							.addComponent(label2)
+							.addComponent(netGroupLabel)
 							.addComponent(getGroupCombo())
 							.addComponent(getGroupNameField())
 					)
 					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
-							.addComponent(label3)
+							.addComponent(netNameLabel)
 							.addComponent(getNameTextField())
 					)
 					.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
-							.addComponent(label4, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(netDescLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
 							.addComponent(descriptionPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 					)
 			);
@@ -370,14 +374,14 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 				@Override
 				public String format(NetworkType type) {
 					switch (type) {
-					case COEXPRESSION:
-						return Strings.importCyNetworkTypeCoexpression_label;
-					case UNWEIGHTED:
-						return Strings.importCyNetworkTypeUnweighted_label;
-					case WEIGHTED:
-						return Strings.importCyNetworkTypeWeighted_label;
-					default:
-						return Strings.importCyNetworkTypeUnknown_label;
+						case COEXPRESSION:
+							return Strings.importCyNetworkTypeCoexpression_label;
+						case UNWEIGHTED:
+							return Strings.importCyNetworkTypeUnweighted_label;
+						case WEIGHTED:
+							return Strings.importCyNetworkTypeWeighted_label;
+						default:
+							return Strings.importCyNetworkTypeUnknown_label;
 					}
 				};
 			};
@@ -426,7 +430,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 	private JScrollPane getExpressionPane() {
 		if (expressionPane == null) {
 			expressionPane = new JScrollPane(getExpressionTable());
-			expressionPane.setPreferredSize(uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 30, 5));
+			expressionPane.setPreferredSize(uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 10, 5));
 		}
 		
 		return expressionPane;
@@ -809,6 +813,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 	
 	static class ExpressionTableModel extends DynamicTableModel<ExpressionTableElement> {
 
+		@Override
 		public Class<?> getColumnClass(int columnIndex) {
 			switch (columnIndex) {
 			case CHECK_COLUMN:
@@ -820,10 +825,12 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 			}
 		}
 
+		@Override
 		public int getColumnCount() {
 			return 2;
 		}
 
+		@Override
 		public String getColumnName(int columnIndex) {
 			switch (columnIndex) {
 			case CHECK_COLUMN:
@@ -835,6 +842,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 			}
 		}
 
+		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			ExpressionTableElement element = get(rowIndex);
 			if (element == null) {
@@ -850,21 +858,22 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 			}
 		}
 
+		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			return columnIndex == 0;
 		}
 
+		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			ExpressionTableElement element = get(rowIndex);
-			if (element == null) {
+			
+			if (element == null)
 				return;
-			}
-			if (columnIndex != 0) {
+			if (columnIndex != 0)
 				return;
-			}
-			if (aValue instanceof Boolean) {
+			
+			if (aValue instanceof Boolean)
 				element.selected = (Boolean) aValue;
-			}
 		}
 	}
 	

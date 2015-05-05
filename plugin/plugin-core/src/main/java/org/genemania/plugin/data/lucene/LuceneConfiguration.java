@@ -23,10 +23,11 @@ import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
 
 import java.awt.Dialog;
-import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
@@ -62,7 +63,14 @@ public class LuceneConfiguration<NETWORK, NODE, EDGE> extends Configuration {
 	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
 	private final TaskDispatcher taskDispatcher;
 
-	public LuceneConfiguration(DataSet data, DataSetManager dataSetManager, UiUtils uiUtils, FileUtils fileUtils, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, TaskDispatcher taskDispatcher) {
+	public LuceneConfiguration(
+			final DataSet data,
+			final DataSetManager dataSetManager,
+			final UiUtils uiUtils,
+			final FileUtils fileUtils,
+			final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			final TaskDispatcher taskDispatcher
+	) {
 		super(data);
 		this.dataSetManager = dataSetManager;
 		this.uiUtils = uiUtils;
@@ -121,6 +129,13 @@ public class LuceneConfiguration<NETWORK, NODE, EDGE> extends Configuration {
 				.addComponent(buttonPanel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
 		);
 		
+		configPanel.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				dialog.pack();
+			}
+		});
+		
 		dialog.add(contentPane);
 		
 		uiUtils.setDefaultOkCancelKeyStrokes(dialog.getRootPane(), closeButton.getAction(), closeButton.getAction());
@@ -135,7 +150,6 @@ public class LuceneConfiguration<NETWORK, NODE, EDGE> extends Configuration {
 		});
 		
 		dialog.setTitle(Strings.dataSetConfiguration_title);
-		dialog.setPreferredSize(new Dimension(650, 600));
 		dialog.setLocationByPlatform(true);
 		dialog.pack();
 		dialog.setResizable(false);
@@ -147,8 +161,16 @@ public class LuceneConfiguration<NETWORK, NODE, EDGE> extends Configuration {
 	private void confirmClose(DataSet data) {
 		try {
 			List<Organism> organisms = data.getMediatorProvider().getOrganismMediator().getAllOrganisms();
+			
 			if (organisms.size() == 0) {
-				if (WrappedOptionPane.showConfirmDialog(dialog, Strings.luceneConfig_error, Strings.luceneConfig_title, WrappedOptionPane.YES_NO_OPTION, WrappedOptionPane.WARNING_MESSAGE, WrappedOptionPane.DEFAULT_WIDTH) == WrappedOptionPane.YES_OPTION) {
+				if (WrappedOptionPane.showConfirmDialog(
+						dialog,
+						Strings.luceneConfig_error,
+						Strings.luceneConfig_title,
+						WrappedOptionPane.YES_NO_OPTION,
+						WrappedOptionPane.WARNING_MESSAGE,
+						WrappedOptionPane.DEFAULT_WIDTH
+					) == WrappedOptionPane.YES_OPTION) {
 					dialog.setVisible(false);
 				}
 			} else {
