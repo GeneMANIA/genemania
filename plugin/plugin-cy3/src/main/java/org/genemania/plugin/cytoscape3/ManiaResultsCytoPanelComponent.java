@@ -18,9 +18,14 @@
  */
 package org.genemania.plugin.cytoscape3;
 
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+
 import java.awt.Component;
 
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.Icon;
+import javax.swing.JPanel;
 
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
@@ -36,8 +41,10 @@ import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.view.ManiaResultsPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
-public class ManiaResultsCytoPanelComponent implements CytoPanelComponent {
+public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelComponent {
 
+	private static final long serialVersionUID = 1L;
+	
 	ManiaResultsPanel<CyNetwork, CyNode, CyEdge> panel;
 
 	public ManiaResultsCytoPanelComponent(
@@ -45,11 +52,27 @@ public class ManiaResultsCytoPanelComponent implements CytoPanelComponent {
 			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
 			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils,
 			UiUtils uiUtils,
-			NetworkUtils networkUtils) {
-		ManiaResultsController<CyNetwork, CyNode, CyEdge> controller = new ManiaResultsController<CyNetwork, CyNode, CyEdge>(
-				dataSetManager, cytoscapeUtils, uiUtils, networkUtils);
-		this.panel = new ManiaResultsPanel<CyNetwork, CyNode, CyEdge>(
-				controller, plugin, cytoscapeUtils, networkUtils, uiUtils);
+			NetworkUtils networkUtils
+	) {
+		ManiaResultsController<CyNetwork, CyNode, CyEdge> controller = 
+				new ManiaResultsController<CyNetwork, CyNode, CyEdge>(dataSetManager, cytoscapeUtils, uiUtils,
+						networkUtils);
+		this.panel = new ManiaResultsPanel<CyNetwork, CyNode, CyEdge>(controller, plugin, cytoscapeUtils, networkUtils,
+				uiUtils);
+		
+		this.setOpaque(!uiUtils.isAquaLAF());
+		
+		final GroupLayout layout = new GroupLayout(this);
+        this.setLayout(layout);
+		layout.setAutoCreateGaps(false);
+		layout.setAutoCreateContainerGaps(false);
+		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addComponent(panel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		layout.setVerticalGroup(layout.createParallelGroup(Alignment.CENTER, true)
+				.addComponent(panel)
+		);
 	}
 
 	public ManiaResultsPanel<CyNetwork, CyNode, CyEdge> getPanel() {
@@ -58,7 +81,7 @@ public class ManiaResultsCytoPanelComponent implements CytoPanelComponent {
 	
 	@Override
 	public Component getComponent() {
-		return panel;
+		return this;
 	}
 
 	@Override
@@ -75,5 +98,4 @@ public class ManiaResultsCytoPanelComponent implements CytoPanelComponent {
 	public String getTitle() {
 		return Strings.maniaResults_title;
 	}
-
 }

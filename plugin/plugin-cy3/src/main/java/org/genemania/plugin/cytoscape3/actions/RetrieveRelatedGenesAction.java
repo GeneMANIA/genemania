@@ -41,12 +41,26 @@ public class RetrieveRelatedGenesAction extends AbstractCyAction {
 
 	private RetrieveRelatedGenesDelegate<CyNetwork, CyNode, CyEdge> delegate;
 
-	public RetrieveRelatedGenesAction(Map<String, String> properties, CyApplicationManager applicationManager, GeneMania<CyNetwork, CyNode, CyEdge> plugin, CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, NetworkUtils networkUtils, UiUtils uiUtils, FileUtils fileUtils, TaskDispatcher taskDispatcher, CyNetworkViewManager viewManager) {
+	public RetrieveRelatedGenesAction(
+			Map<String, String> properties,
+			CyApplicationManager applicationManager,
+			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
+			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils,
+			NetworkUtils networkUtils,
+			UiUtils uiUtils,
+			FileUtils fileUtils,
+			TaskDispatcher taskDispatcher,
+			CyNetworkViewManager viewManager
+	) {
 		super(properties, applicationManager, viewManager);
 		putValue(NAME, Strings.retrieveRelatedGenes_menuLabel);
 		delegate = new RetrieveRelatedGenesDelegate<CyNetwork, CyNode, CyEdge>(plugin, cytoscapeUtils, networkUtils, uiUtils, fileUtils, taskDispatcher);
 	}
 
+	public RetrieveRelatedGenesDelegate<CyNetwork, CyNode, CyEdge> getDelegate() {
+		return delegate;
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		delegate.invoke();

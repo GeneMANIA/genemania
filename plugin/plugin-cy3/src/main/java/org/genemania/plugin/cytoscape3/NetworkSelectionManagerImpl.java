@@ -23,11 +23,17 @@ import org.genemania.plugin.selection.AbstractNetworkSelectionManager;
 import org.genemania.plugin.task.GeneManiaTask;
 import org.genemania.plugin.task.TaskDispatcher;
 
-public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager<CyNetwork, CyNode, CyEdge> implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener, SessionLoadedListener {
+public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager<CyNetwork, CyNode, CyEdge>
+										 implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener, SessionLoadedListener {
+	
 	private TaskDispatcher taskDispatcher;
 	private CyProperty<Properties> properties;
 
-	public NetworkSelectionManagerImpl(CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, TaskDispatcher taskDispatcher, CyProperty<Properties> properties) {
+	public NetworkSelectionManagerImpl(
+			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils,
+			TaskDispatcher taskDispatcher,
+			CyProperty<Properties> properties
+	) {
 		super(cytoscapeUtils);
 		this.taskDispatcher = taskDispatcher;
 		this.properties = properties;

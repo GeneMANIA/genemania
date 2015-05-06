@@ -34,6 +34,7 @@ import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.util.ProgressReporter;
 
 public class CyNetworkImporter<NETWORK, NODE, EDGE> {
+	
 	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
 
 	public CyNetworkImporter(CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils) {
@@ -42,6 +43,7 @@ public class CyNetworkImporter<NETWORK, NODE, EDGE> {
 	
 	public void process(NETWORK network, String idAttribute, String weightAttribute, Writer output, ProgressReporter progress) {
 		PrintWriter writer = new PrintWriter(output);
+		
 		try {
 			Context context = new Context();
 			NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(network);

@@ -23,8 +23,9 @@ import java.awt.Frame;
 import java.awt.Paint;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -47,10 +48,13 @@ import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.RowSetRecord;
 import org.cytoscape.model.events.RowsSetEvent;
 import org.cytoscape.model.events.RowsSetListener;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.visualize.ApplyPreferredLayoutTaskFactory;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.RenderingEngine;
@@ -73,6 +77,7 @@ import org.genemania.plugin.LogUtils;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.cytoscape.AbstractCytoscapeUtils;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
+import org.genemania.plugin.cytoscape3.layout.GeneManiaFDLayout;
 import org.genemania.plugin.delegates.SelectionDelegate;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ViewState;
@@ -108,9 +113,10 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	Map<CyTable, Reference<CyNetwork>> networksByNodeTable;
 	Map<CyTable, Reference<CyNetwork>> networksByEdgeTable;
 	
-	private Object selectionMutex = new Object();
+	private final Object selectionMutex = new Object();
 	private SelectionHandler selectionHandler;
-	private CyEventHelper eventHelper;
+	private final CyEventHelper eventHelper;
+	private final CyServiceRegistrar serviceRegistrar;
 	
 	public CytoscapeUtilsImpl(NetworkUtils networkUtils,
 							  CySwingApplication application, CyApplicationManager applicationManager,
@@ -121,7 +127,8 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 							  VisualMappingFunctionFactory passthroughFactory,
 							  VisualMappingFunctionFactory continuousFactory, TaskManager<?, ?> taskManager,
 							  CyEventHelper eventHelper, ApplyPreferredLayoutTaskFactory applyPreferredLayoutTaskFactory,
-							  RenderingEngineManager renderingEngineManager) {
+							  RenderingEngineManager renderingEngineManager,
+							  CyServiceRegistrar serviceRegistrar) {
 		super(networkUtils);
 		this.application = application;
 		this.applicationManager = applicationManager;
@@ -140,6 +147,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		this.taskManager = taskManager;
 		this.eventHelper = eventHelper;
 		this.renderingEngineManager = renderingEngineManager;
+		this.serviceRegistrar = serviceRegistrar;
 		
 		nodes = new WeakHashMap<CyNetwork, Map<String, Reference<CyNode>>>();
 		edges = new WeakHashMap<CyNetwork, Map<String, Reference<CyEdge>>>();
@@ -261,14 +269,25 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	@Override
 	public void maximize(CyNetwork network) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void performLayout(CyNetwork network) {
-		CyNetworkView view = viewManager.getNetworkViews(network).iterator().next();		
-		TaskIterator taskIterator = applyPreferredLayoutTaskFactory.createTaskIterator(Collections.singletonList(view));
-		taskManager.execute(taskIterator);
+		Collection<CyNetworkView> views = viewManager.getNetworkViews(network);
+		GeneManiaFDLayout gmLayout = (GeneManiaFDLayout) serviceRegistrar.getService(CyLayoutAlgorithmManager.class)
+				.getLayout(GeneManiaFDLayout.ALGORITHM_ID);
+		
+		if (gmLayout != null) {
+			Object context = gmLayout.createLayoutContext();
+			
+			for (CyNetworkView nv : views) {
+				Set<View<CyNode>> nodesToLayOut = new HashSet<View<CyNode>>(nv.getNodeViews());
+				taskManager.execute(gmLayout.createTaskIterator(nv, context, nodesToLayOut, null));
+			}
+		} else {
+			TaskIterator taskIterator = applyPreferredLayoutTaskFactory.createTaskIterator(views);
+			taskManager.execute(taskIterator);
+		}
 	}
 
 	@Override
