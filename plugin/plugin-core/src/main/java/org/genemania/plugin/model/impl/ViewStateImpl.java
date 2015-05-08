@@ -40,6 +40,7 @@ import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
 
 public class ViewStateImpl implements ViewStateBuilder {
+	
 	private final Map<String, Set<Network<?>>> networksByEdge;
 	private final Map<String, Set<Network<?>>> networksByNode;
 	private final Map<Group<?, ?>, Set<String>> edgeCache;
@@ -122,7 +123,7 @@ public class ViewStateImpl implements ViewStateBuilder {
 	}
 
 	@Override
-	public boolean getEnabled(Group<?, ?> group) {
+	public boolean isEnabled(Group<?, ?> group) {
 		return enabledGroups.contains(group);
 	}
 	
@@ -167,17 +168,17 @@ public class ViewStateImpl implements ViewStateBuilder {
 	}
 	
 	@Override
-	public boolean getGeneHighlighted(String name) {
+	public boolean isGeneHighlighted(String name) {
 		return highlightedNodes.contains(name);
 	}
 
 	@Override
-	public boolean getGroupHighlighted(Group<?, ?> group) {
+	public boolean isGroupHighlighted(Group<?, ?> group) {
 		return highlightedGroups.contains(group);
 	}
 	
 	@Override
-	public boolean getNetworkHighlighted(Network<?> network) {
+	public boolean isNetworkHighlighted(Network<?> network) {
 		return highlightedNetworks.contains(network);
 	}
 	

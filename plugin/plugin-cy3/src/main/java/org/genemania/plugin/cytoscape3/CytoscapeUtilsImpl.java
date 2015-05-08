@@ -157,7 +157,6 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		visualStyles = new WeakHashMap<CyNetwork, VisualStyle>();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void applyVisualization(
 			CyNetwork network,
@@ -196,11 +195,6 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		edgeWidthMapping.addPoint(extrema[0], new BoundaryRangeValues<Double>(MINIMUM_EDGE_WIDTH, MINIMUM_EDGE_WIDTH, MINIMUM_EDGE_WIDTH));
 		edgeWidthMapping.addPoint(extrema[1], new BoundaryRangeValues<Double>(MAXIMUM_EDGE_WIDTH, MAXIMUM_EDGE_WIDTH, MAXIMUM_EDGE_WIDTH));
 		style.addVisualMappingFunction(edgeWidthMapping);
-		
-		DiscreteMapping<Integer, Integer> edgeTransparencyMapping = (DiscreteMapping<Integer, Integer>) discreteFactory.createVisualMappingFunction(HIGHLIGHT_ATTRIBUTE, Integer.class, BasicVisualLexicon.EDGE_TRANSPARENCY);
-		edgeTransparencyMapping.putMapValue(0, 64);
-		edgeTransparencyMapping.putMapValue(1, 255);
-		style.addVisualMappingFunction(edgeTransparencyMapping);
 	
 		visualStyles.put(network, style);
 		
@@ -208,6 +202,49 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		if (panel.getState() == CytoPanelState.HIDE) {
 			panel.setState(CytoPanelState.DOCK);
 		}
+	}
+	
+	@Override
+	public void setHighlighted(final ViewState config, final CyNetwork network, final boolean visible) {
+		final NetworkProxy<CyNetwork, CyNode, CyEdge> networkProxy = getNetworkProxy(network);
+		final Collection<CyNetworkView> netViews = viewManager.getNetworkViews(network);
+		
+		for (final CyEdge edge : networkProxy.getEdges()) {
+			for (final CyNetworkView nv : netViews) {
+				final View<CyEdge> ev = nv.getEdgeView(edge);
+				
+				if (ev != null)
+					ev.setLockedValue(BasicVisualLexicon.EDGE_VISIBLE, visible);
+			}
+		}
+		
+		repaint();
+	}	
+	
+	@Override
+	public void setHighlight(final ViewState config, final Group<?, ?> source, final CyNetwork network,
+			final boolean visible) {
+		final Set<String> edgeIds = config.getEdgeIds(source);
+		
+		if (edgeIds == null)
+			return;
+		
+		config.setEnabled(source, visible);
+		final Collection<CyNetworkView> netViews = viewManager.getNetworkViews(network);
+		
+		for (final String edgeId : edgeIds) {
+			final CyEdge edge = getEdge(edgeId, network);
+			if (edge == null) continue;
+			
+			for (final CyNetworkView nv : netViews) {
+				final View<CyEdge> ev = nv.getEdgeView(edge);
+				
+				if (ev != null)
+					ev.setLockedValue(BasicVisualLexicon.EDGE_VISIBLE, visible);
+			}
+		}
+		
+		repaint();
 	}
 
 	private void setLabelPosition(CyNetworkView view, VisualStyle style) {
@@ -512,10 +549,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		}
 		
 		@Override
-		protected void handleSelection(
-				ViewState options)
-				throws ApplicationException {
-			
+		protected void handleSelection(ViewState options) throws ApplicationException {
 			if (!manager.isSelectionListenerEnabled()) {
 				return;
 			}

@@ -38,6 +38,7 @@ import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 
 public interface CytoscapeUtils<NETWORK, NODE, EDGE> {
+	
 	static final String LOG_SCORE_ATTRIBUTE = "log score"; //$NON-NLS-1$
 	static final String SCORE_ATTRIBUTE = "score"; //$NON-NLS-1$
 	static final String RAW_WEIGHTS_ATTRIBUTE = "raw weights"; //$NON-NLS-1$

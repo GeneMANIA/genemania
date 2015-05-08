@@ -22,7 +22,7 @@ import java.util.Set;
 
 public interface ViewState {
 
-	boolean getEnabled(Group<?, ?> group);
+	boolean isEnabled(Group<?, ?> group);
 
 	void setEnabled(Group<?, ?> group, boolean enabled);
 
@@ -30,9 +30,9 @@ public interface ViewState {
 
 	void setGroupHighlighted(Group<?, ?> group, boolean highlighted);
 
-	boolean getGeneHighlighted(String name);
+	boolean isGeneHighlighted(String name);
 
-	boolean getGroupHighlighted(Group<?, ?> group);
+	boolean isGroupHighlighted(Group<?, ?> group);
 
 	int getTotalHighlightedGenes();
 
@@ -54,7 +54,7 @@ public interface ViewState {
 
 	void setNetworkHighlighted(Network<?> network, boolean highlighted);
 	
-	boolean getNetworkHighlighted(Network<?> network);
+	boolean isNetworkHighlighted(Network<?> network);
 
 	Set<String> getEdgeIds(Group<?, ?> source);
 

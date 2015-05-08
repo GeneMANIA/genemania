@@ -569,7 +569,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 			if (group == null) {
 				continue;
 			}
-			Integer value = options.getEnabled(group) || visible ? 1 : 0;
+			Integer value = options.isEnabled(group) || visible ? 1 : 0;
 			edgeProxy.setAttribute(HIGHLIGHT_ATTRIBUTE, value);
 		}
 		

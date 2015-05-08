@@ -44,6 +44,7 @@ import org.genemania.plugin.view.NetworkGroupDetailPanel;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 
 public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> implements NetworkSelectionManager<NETWORK, NODE, EDGE> {
+	
 	protected final Map<Object, ViewState> networkOptions;
 	protected final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
 	protected GeneMania<NETWORK, NODE, EDGE> plugin;
@@ -154,17 +155,17 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 	@Override
 	public SelectionListener<Group<?, ?>> createNetworkListSelectionListener(final BaseInfoPanel<Group<?, ?>, NetworkGroupDetailPanel<NETWORK, NODE, EDGE>> panel, final ViewState options) {
 		return new SelectionListener<Group<?, ?>>() {
+			@Override
 			public void selectionChanged(SelectionEvent<Group<?, ?>> event) {
-				if (!selectionListenerEnabled) {
+				if (!selectionListenerEnabled)
 					return;
-				}
 				
 				NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
 				NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
 				ViewState options = networkOptions.get(networkProxy.getIdentifier());
-				if (options == null) {
+				
+				if (options == null)
 					return;
-				}
 				
 				Set<EDGE> enabledEdges = new HashSet<EDGE>();
 				Set<EDGE> disabledEdges = new HashSet<EDGE>();
@@ -191,7 +192,7 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 						disabledEdges.add(edge);
 					}
 					Group<?, ?> group = options.getGroup(name);
-					boolean highlighted = selectionState || options.getEnabled(group);
+					boolean highlighted = selectionState || options.isEnabled(group);
 					edgeProxy.setAttribute(CytoscapeUtils.HIGHLIGHT_ATTRIBUTE, highlighted ? 1 : 0);
 				}
 				
@@ -210,7 +211,7 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 						EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
 						String name = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
 						Group<?, ?> group = options.getGroup(name);
-						if (options.getEnabled(group)) {
+						if (options.isEnabled(group)) {
 							edgeProxy.setAttribute(CytoscapeUtils.HIGHLIGHT_ATTRIBUTE, 1);
 						} else {
 							edgeProxy.setAttribute(CytoscapeUtils.HIGHLIGHT_ATTRIBUTE, 0);
@@ -227,23 +228,24 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 	@Override
 	public SelectionListener<Network<?>> createNetworkSelectionListener() {
 		return new SelectionListener<Network<?>>() {
+			@Override
 			public void selectionChanged(SelectionEvent<Network<?>> event) {
-				if (!selectionListenerEnabled) {
+				if (!selectionListenerEnabled)
 					return;
-				}
 				
 				NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
 				NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
 				ViewState options = networkOptions.get(networkProxy.getIdentifier());
-				if (options == null) {
+				
+				if (options == null)
 					return;
-				}
 				
 				Map<String, Boolean> edgeSelectionChanges = new HashMap<String, Boolean>();
 				Map<String, Boolean> nodeSelectionChanges = new HashMap<String, Boolean>();
 				
 				for (Network<?> network : event.items) {
 					Attribute attribute = network.adapt(Attribute.class);
+					
 					if (attribute != null) {
 						nodeSelectionChanges.put(network.getName(), event.selected);
 						options.setGeneHighlighted(attribute.getName(), true);
@@ -260,20 +262,22 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 					
 					@SuppressWarnings("unchecked")
 					List<String> names = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_NAMES_ATTRIBUTE, List.class);
-					if (names == null) {
+					
+					if (names == null)
 						continue;
-					}
 					
 					boolean selectionState = false;
+					
 					for (String name : names) {
 						Boolean selected = edgeSelectionChanges.get(name);
 						selectionState = selectionState || selected != null && selected;
-						if (selectionState) {
+						
+						if (selectionState)
 							break;
-						}
 					}
 					
 					String attributeName = edgeProxy.getAttribute(CytoscapeUtils.ATTRIBUTE_NAME_ATTRIBUTE, String.class);
+					
 					if (attributeName != null) {
 						Boolean selected = nodeSelectionChanges.get(attributeName);
 						selectionState = selectionState || selected != null && selected;
@@ -294,10 +298,12 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 				for (NODE node : networkProxy.getNodes()) {
 					NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
 					String name = nodeProxy.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
-					if (name == null) {
+					
+					if (name == null)
 						continue;
-					}
+					
 					Boolean selected = nodeSelectionChanges.get(name);
+					
 					if (selected != null && selected) {
 						enabledNodes.add(node);
 					} else {
@@ -307,6 +313,7 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 				
 				boolean listenerState = selectionListenerEnabled;
 				selectionListenerEnabled = false;
+				
 				if (enabledEdges.size() > 0) {
 					networkProxy.setSelectedEdges(enabledEdges, true);
 				}
@@ -326,7 +333,8 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 						EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
 						String name = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
 						Group<?, ?> group = options.getGroup(name);
-						if (options.getEnabled(group)) {
+						
+						if (options.isEnabled(group)) {
 							edgeProxy.setAttribute(CytoscapeUtils.HIGHLIGHT_ATTRIBUTE, 1);
 						} else {
 							edgeProxy.setAttribute(CytoscapeUtils.HIGHLIGHT_ATTRIBUTE, 0);
@@ -343,20 +351,20 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 	@Override
 	public SelectionListener<Gene> createFunctionListSelectionListener(FunctionInfoPanel functionPanel, SearchResult options) {
 		return new SelectionListener<Gene>() {
+			@Override
 			public void selectionChanged(SelectionEvent<Gene> event) {
-				if (!selectionListenerEnabled) {
+				if (!selectionListenerEnabled)
 					return;
-				}
 				
 				NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
 				NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-				
 				ViewState options = networkOptions.get(networkProxy.getIdentifier());
-				if (options == null) {
+				
+				if (options == null)
 					return;
-				}
 				
 				Set<Long> selectedNodes = new HashSet<Long>();
+				
 				for (Gene gene : event.items) {
 					selectedNodes.add(gene.getNode().getId());
 				}
@@ -370,10 +378,11 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 				for (NODE node : networkProxy.getNodes()) {
 					NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
 					Long nodeId = options.getNodeId(nodeProxy.getIdentifier());
-					if (selectedNodes.contains(nodeId)) {
+					
+					if (selectedNodes.contains(nodeId))
 						networkProxy.setSelectedNode(node, true);
-					}
 				}
+				
 				selectionListenerEnabled = listenerState;
 				cytoscapeUtils.repaint();
 			}

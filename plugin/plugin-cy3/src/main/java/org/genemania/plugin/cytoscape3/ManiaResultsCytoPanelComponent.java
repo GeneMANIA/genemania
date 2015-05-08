@@ -23,11 +23,10 @@ import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import java.awt.Component;
 
 import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
-import org.cytoscape.application.swing.CytoPanelComponent;
+import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -41,7 +40,7 @@ import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.view.ManiaResultsPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
-public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelComponent {
+public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelComponent2 {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -60,7 +59,7 @@ public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelC
 		this.panel = new ManiaResultsPanel<CyNetwork, CyNode, CyEdge>(controller, plugin, cytoscapeUtils, networkUtils,
 				uiUtils);
 		
-		this.setOpaque(!uiUtils.isAquaLAF());
+		setOpaque(!uiUtils.isAquaLAF());
 		
 		final GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
@@ -70,8 +69,8 @@ public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelC
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addComponent(panel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 		);
-		layout.setVerticalGroup(layout.createParallelGroup(Alignment.CENTER, true)
-				.addComponent(panel)
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(panel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 		);
 	}
 
@@ -97,5 +96,10 @@ public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelC
 	@Override
 	public String getTitle() {
 		return Strings.maniaResults_title;
+	}
+
+	@Override
+	public String getIdentifier() {
+		return "org.genemania.GeneMANIAResultsPanel";
 	}
 }
