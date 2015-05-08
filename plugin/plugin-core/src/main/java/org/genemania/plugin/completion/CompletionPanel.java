@@ -27,6 +27,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -37,6 +38,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -59,7 +61,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultEditorKit;
 
@@ -85,7 +86,7 @@ public class CompletionPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	private static final String GENE_HINT = Strings.completionPanelGeneHint_label;
-	private static final Color PROPOSAL_BG_COLOR = new Color(0xFF, 0xFF, 0xE0);
+	private static final Color PROPOSAL_BG_COLOR = Color.WHITE;
 
 	private int autoTriggerThreshold;
 	private JTextField textField;
@@ -369,9 +370,20 @@ public class CompletionPanel extends JPanel {
 	private JTable getProposalTable() {
 		if (proposalTable == null) {
 			proposalTable = createTable(proposalModel);
-			proposalTable.setBackground(PROPOSAL_BG_COLOR );
+			proposalTable.setBackground(PROPOSAL_BG_COLOR);
 			proposalTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			proposalTable.requestFocusInWindow();
+			
+			proposalTable.addMouseMotionListener(new MouseMotionAdapter() {
+				@Override
+				public void mouseMoved(MouseEvent e) {
+					proposalTable.clearSelection();
+					int row = proposalTable.rowAtPoint(e.getPoint());
+
+					if (row > -1)
+						proposalTable.setRowSelectionInterval(row, row);
+				}
+			});
 			
 			proposalTable.addMouseListener(new MouseAdapter() {
 				@Override
@@ -496,10 +508,10 @@ public class CompletionPanel extends JPanel {
 	void setShowGeneHint(boolean visible) {
 		if (visible) {
 			getTextField().setText(GENE_HINT);
-			getTextField().setForeground(Color.gray);
+			getTextField().setForeground(SystemColor.textInactiveText);
 		} else {
 			getTextField().setText(""); //$NON-NLS-1$
-			getTextField().setForeground(Color.black);
+			getTextField().setForeground(SystemColor.textText);
 		}
 	}
 	
@@ -511,28 +523,24 @@ public class CompletionPanel extends JPanel {
 				super.addNotify();
 				uiUtils.packColumns(this);
 			}
-			
-			@Override
-			public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-				setForeground(column == 0 ? Color.black : Color.darkGray);
-				return super.prepareRenderer(renderer, row, column);
-			}
 		};
 		table.setColumnSelectionAllowed(false);
 		table.setRowSelectionAllowed(true);
+		
 		return table;
 	}
 
 	private DynamicTableModel<Gene> createModel() {
 		return new DynamicTableModel<Gene>() {
+			@Override
 			public Class<?> getColumnClass(int columnIndex) {
 				return String.class;
 			}
-
+			@Override
 			public int getColumnCount() {
 				return 2;
 			}
-
+			@Override
 			public String getColumnName(int columnIndex) {
 				switch (columnIndex) {
 				case 0:
@@ -543,7 +551,7 @@ public class CompletionPanel extends JPanel {
 					return ""; //$NON-NLS-1$
 				}
 			}
-
+			@Override
 			public Object getValueAt(int rowIndex, int columnIndex) {
 				Gene gene = get(rowIndex);
 				if (gene == null) {
@@ -557,11 +565,11 @@ public class CompletionPanel extends JPanel {
 				}
 				return null;
 			}
-
+			@Override
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
 				return false;
 			}
-
+			@Override
 			public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			}
 		};
