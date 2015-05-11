@@ -54,9 +54,15 @@ public class GeneManiaFDLayoutContext implements TunableValidator {
 	@Tunable(description="Default Spring Coefficient:")
 	public double defaultSpringCoefficient = 0.1;
 	@Tunable(description="Default Spring Length:")
-	public double defaultSpringLength = 20;
-	@Tunable(description="Default Node Mass:")
-	public double defaultNodeMass = 3.0;
+	public double defaultSpringLength = 10;
+	@Tunable(description="Min Node Mass:")
+	public double minNodeMass = 10.0;
+	@Tunable(description="Max Node Mass:")
+	public double maxNodeMass = 5000.0;
+	@Tunable(description="Number of Edges when Node Mass is Half of Max Mass:")
+	public int midpointEdges = 700;
+	@Tunable(description="Steepness of the Curve (Logistic Function):")
+	public double curveSteepness = 0.007;
 	@Tunable(description="Force deterministic layouts (slower):")
 	public boolean isDeterministic;
 	@Tunable(description="Don't partition graph before layout:", groups="Standard Settings")
@@ -74,20 +80,24 @@ public class GeneManiaFDLayoutContext implements TunableValidator {
 	
 	@Override
 	public ValidationState getValidationState(final Appendable errMsg) {
+		boolean invalid = false;
+		
 		try {
 			if (!isPositive(numIterations))
-				errMsg.append("Number of iterations must be > 0; current value = "+numIterations);
+				invalid = append(errMsg, "Number of iterations must be > 0; current value = " + numIterations);
 			if (!isPositive(defaultSpringCoefficient))
-				errMsg.append("Default spring coefficient must be > 0; current value = "+defaultSpringCoefficient);
+				invalid = append(errMsg, "Default spring coefficient must be > 0; current value = " + defaultSpringCoefficient);
 			if (!isPositive(defaultSpringLength))
-				errMsg.append("Default spring length must be > 0; current value = "+defaultSpringLength);
-			if (!isPositive(defaultNodeMass))
-				errMsg.append("Default node mass must be > 0; current value = "+defaultNodeMass);
-		} catch (IOException e) {}
+				invalid = append(errMsg, "Default spring length must be > 0; current value = " + defaultSpringLength);
+			if (!isPositive(minNodeMass))
+				invalid = append(errMsg, "Min node mass must be > 0; current value = " + minNodeMass);
+			if (!isPositive(maxNodeMass))
+				invalid = append(errMsg, "Max node mass must be > 0; current value = " + maxNodeMass);
+		} catch (IOException e) {
+			return ValidationState.INVALID;
+		}
 		
-		return isPositive(numIterations) && isPositive(defaultSpringCoefficient)
-		       && isPositive(defaultSpringLength) && isPositive(defaultNodeMass)
-			? ValidationState.OK : ValidationState.INVALID;
+		return invalid ? ValidationState.INVALID : ValidationState.OK;
 	}
 	
 	public <T extends CyIdentifiable> Set<View<T>> getElementsToLayOut(final Collection<View<T>> views,
@@ -132,5 +142,12 @@ public class GeneManiaFDLayoutContext implements TunableValidator {
 
 	private static boolean isPositive(final double n) {
 		return n > 0.0;
+	}
+	
+	private boolean append(final Appendable errMsg, final String msg) throws IOException {
+		final String NEW_LINE = errMsg.toString().isEmpty() ?  "" : "\n";
+		errMsg.append(NEW_LINE + msg);
+		
+		return true;
 	}
 }

@@ -28,7 +28,6 @@ package org.genemania.plugin.cytoscape3.layout;
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.NODE_VISIBLE;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,13 +37,11 @@ import java.util.Set;
 
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
-import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.view.layout.LayoutEdge;
 import org.cytoscape.view.layout.LayoutNode;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
-import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.undo.UndoSupport;
 import org.genemania.plugin.cytoscape3.layout.prefuse.util.force.DragForce;
 import org.genemania.plugin.cytoscape3.layout.prefuse.util.force.ForceItem;
@@ -64,6 +61,7 @@ public class GeneManiaFDLayoutTask extends AbstractPartitionLayoutTask {
 	private ForceSimulator forceSim;
 	private Map<LayoutNode, ForceItem> forceItems;
 	private GeneManiaFDLayoutContext context;
+	private double mass;
 	
 	/**
 	 * Creates a new GeneManiaFDLayout object.
@@ -85,25 +83,18 @@ public class GeneManiaFDLayoutTask extends AbstractPartitionLayoutTask {
 				attrName,
 				undo
 		);
-
 		this.displayName = displayName;
 		this.context = context;
 		
-		// Derived through linear regression of manual parameter tuning for 20, 60, and 110 nodes
-		final double defaultMass = -20.0/9 * nodesToLayOut.size() + 1000;
-		context.defaultNodeMass = defaultMass; // TODO give the user an option to override this
-        
-//        if (auto) {// TODO UI option
-    	final int edgeCount = context.ignoreHiddenElements ?
-        		getVisibleEdgeCount(networkView) : networkView.getModel().getEdgeCount();
-    	
-        double length = context.defaultSpringLength;
-        length = length + (edgeCount > 0 ? 2*Math.log(edgeCount) : 0);
-        length = Math.min(200, length);
-        
-        context.defaultSpringLength = length;
-//        }
+        final double L = context.maxNodeMass; // the curve's maximum value, or the max node mass
+		final double k = context.curveSteepness; // the steepness of the curve
+		final double x0 = context.midpointEdges; // the x-value of the sigmoid's midpoint
+		final double x = context.ignoreHiddenElements ? getVisibleEdgeCount(networkView) : networkView.getModel().getEdgeCount();
 		
+		// Apply logistic function (http://en.wikipedia.org/wiki/Logistic_function) to the node mass
+		mass = L / ( 1 + Math.pow( Math.E, (-k * (x - x0)) ) );
+		mass = Math.max(context.minNodeMass, mass);
+        
 		edgeWeighter = context.edgeWeighter;
 		edgeWeighter.setWeightAttribute(layoutAttribute);
 
@@ -257,7 +248,7 @@ public class GeneManiaFDLayoutTask extends AbstractPartitionLayoutTask {
 	 * a mass value of 1.0.
 	 */
 	protected float getMassValue(LayoutNode n) {
-		return (float)context.defaultNodeMass;
+		return (float)mass;
 	}
 
 	/**
