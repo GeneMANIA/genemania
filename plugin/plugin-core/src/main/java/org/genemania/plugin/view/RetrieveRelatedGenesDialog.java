@@ -211,14 +211,18 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
     	
 		dataSetManager.addDataSetChangeListener(new DataSetChangeListener() {
 			@Override
-			public void dataSetChanged(DataSet activeDataSet, ProgressReporter progress) {
-				handleDataSetChanged(activeDataSet);
+			public void dataSetChanged(final DataSet dataSet, final ProgressReporter progress) {
+				try {
+					setDataSet(dataSet);
+				} catch (ApplicationException e) {
+					LogUtils.log(getClass(), e);
+				}
 			}
 		});
 
 		final JRootPane root = getRootPane();
 		final RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> dialog = this;
-		AbstractAction action = new AbstractAction("Close") { //$NON-NLS-1$
+		final AbstractAction action = new AbstractAction("Close") { //$NON-NLS-1$
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				dialog.setVisible(false);
@@ -229,6 +233,12 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 		root.getInputMap(JRootPane.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), key);
 		
         addComponents();
+        
+        try {
+        	setDataSet(dataSetManager.getDataSet());
+		} catch (ApplicationException e) {
+			LogUtils.log(getClass(), e);
+		}
         
         setMinimumSize(new Dimension(480, 680));
         pack();
@@ -267,15 +277,7 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 		});
     }
 
-	protected void handleDataSetChanged(DataSet dataSet) {
-		try {
-			setDataSet(dataSet);
-		} catch (ApplicationException e) {
-			LogUtils.log(getClass(), e);
-		}
-	}
-
-	public void setDataSet(DataSet data) throws ApplicationException {
+	private void setDataSet(final DataSet data) throws ApplicationException {
 		if (data == null) {
 			dataVersionLabel.setText(Strings.retrieveRelatedGenesNoDataSet_label);
 		} else {
@@ -372,8 +374,6 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 		
 		uiUtils.setDefaultOkCancelKeyStrokes(getRootPane(), getStartButton().getAction(), closeButton.getAction());
 		getRootPane().setDefaultButton(getStartButton());
-		
-        validateQuery();
     }
 	
 	private JPanel getDataPanel() {
@@ -870,15 +870,16 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
     @SuppressWarnings("unchecked")
 	private void handleOrganismSelected() {
 		try {
-			ModelElement<Organism> element = (ModelElement<Organism>) getOrganismComboBox().getSelectedItem();
-			if (element != null) {
+			final ModelElement<Organism> element = (ModelElement<Organism>) getOrganismComboBox().getSelectedItem();
+			
+			if (element != null)
 				handleOrganismChange(element.getItem());
-			} else {
+			else
 				handleOrganismChange(null);
-			}
 		} catch (ApplicationException e) {
 			LogUtils.log(getClass(), e);
 		}
+		
 		validateQuery();
 	}
 
@@ -889,6 +890,7 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 			return;
 		
 		String reference = e.getDescription();
+		
 		if ("#en-all".equals(reference)) { //$NON-NLS-1$
 			selectionPanel.selectAllNetworks(true);
 		} else if ("#en-none".equals(reference)) { //$NON-NLS-1$
@@ -896,6 +898,7 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 		} else if ("#en-default".equals(reference)) { //$NON-NLS-1$
 			selectionPanel.selectDefaultNetworks();
 		}
+		
 		validateQuery();
 	}
 
@@ -942,9 +945,9 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 			networkMissingLabel.setVisible(hasNetworks ? false : true);
 		} else {
 			setControlsEnabled(false);
-			organismMissingLabel.setVisible(false);
-			networkMissingLabel.setVisible(false);
-			geneMissingLabel.setVisible(false);
+			organismMissingLabel.setVisible(true);
+			networkMissingLabel.setVisible(true);
+			geneMissingLabel.setVisible(true);
 		}
 	}
 	
