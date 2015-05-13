@@ -54,7 +54,8 @@ public class RetrieveRelatedGenesAction extends AbstractCyAction {
 	) {
 		super(properties, applicationManager, viewManager);
 		putValue(NAME, Strings.retrieveRelatedGenes_menuLabel);
-		delegate = new RetrieveRelatedGenesDelegate<CyNetwork, CyNode, CyEdge>(plugin, cytoscapeUtils, networkUtils, uiUtils, fileUtils, taskDispatcher);
+		delegate = new RetrieveRelatedGenesDelegate<CyNetwork, CyNode, CyEdge>(
+				plugin, cytoscapeUtils, networkUtils, uiUtils, fileUtils, taskDispatcher);
 	}
 
 	public RetrieveRelatedGenesDelegate<CyNetwork, CyNode, CyEdge> getDelegate() {

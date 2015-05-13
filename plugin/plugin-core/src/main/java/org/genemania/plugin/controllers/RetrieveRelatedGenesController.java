@@ -332,6 +332,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 
 		cytoscapeUtils.registerSelectionListener(network, manager, plugin);
 		cytoscapeUtils.applyVisualization(network, filterGeneScores(scores, options), computeColors(data, organism), extrema);
+		
 		return network;
 	}
 	

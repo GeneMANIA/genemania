@@ -32,10 +32,12 @@ import org.genemania.plugin.Strings;
 @SuppressWarnings("serial")
 public class SwitchDataSetAction extends GeneManiaAction {
 
-	public SwitchDataSetAction(Map<String, String> properties,
+	public SwitchDataSetAction(
+			Map<String, String> properties,
 			CyApplicationManager applicationManager,
 			GeneMania<CyNetwork, CyNode, CyEdge> geneMania,
-			CyNetworkViewManager viewManager) {
+			CyNetworkViewManager viewManager
+	) {
 		super(properties, applicationManager, geneMania, viewManager);
 		putValue(NAME, Strings.changeData_menuLabel);
 	}
@@ -44,5 +46,4 @@ public class SwitchDataSetAction extends GeneManiaAction {
 	public void actionPerformed(ActionEvent e) {
 		geneMania.handleSwitch();
 	}
-
 }
