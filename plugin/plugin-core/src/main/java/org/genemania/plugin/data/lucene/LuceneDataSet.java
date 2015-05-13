@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -46,8 +47,8 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.index.IndexWriter.MaxFieldLength;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MultiSearcher;
 import org.apache.lucene.search.Query;
@@ -388,27 +389,33 @@ public class LuceneDataSet<NETWORK, NODE, EDGE> extends DataSet {
 		}
 	}
 
-	public List<DataDescriptor> getAvailableDataDescriptors() {
+	public List<DataDescriptor> getAvailableDataDescriptors() throws IOException {
 		List<DataDescriptor> result = new ArrayList<DataDescriptor>();
+		String baseUrl = fileUtils.findDataSetBaseUrl(FileUtils.DEFAULT_BASE_URL, getVersion().toString());
+		InputStream stream = null;
 		
 		try {
-			String baseUrl = fileUtils.findDataSetBaseUrl(FileUtils.DEFAULT_BASE_URL, getVersion().toString());
+			
 			URL url = new URL(String.format("%s.xml", baseUrl)); //$NON-NLS-1$
 			URLConnection connection = fileUtils.getUrlConnection(url);
-			InputStream stream = connection.getInputStream();
-			try {
-				Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream).getDocumentElement();
-				XPath xpath = XPathFactory.newInstance().newXPath();
-				NodeList nodes = (NodeList) xpath.evaluate("data", root, XPathConstants.NODESET); //$NON-NLS-1$
-				for (int i = 0; i < nodes.getLength(); i++) {
-					Element node = (Element) nodes.item(i);
-					String id = node.getAttribute("path"); //$NON-NLS-1$
-					String name = (String) xpath.evaluate("name", node, XPathConstants.STRING);  //$NON-NLS-1$
-					String description = (String) xpath.evaluate("description", node, XPathConstants.STRING);  //$NON-NLS-1$
-					result.add(new DataDescriptor(id, String.format("%s %s", name, description))); //$NON-NLS-1$
-				}
-			} finally {
-				stream.close();
+			stream = connection.getInputStream();
+		} catch (MalformedURLException e) {
+			log(e);
+		} catch (IOException e) {
+			throw new IOException(Strings.checkForUpdates_error, e);
+		}
+		
+		try {
+			Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream).getDocumentElement();
+			XPath xpath = XPathFactory.newInstance().newXPath();
+			NodeList nodes = (NodeList) xpath.evaluate("data", root, XPathConstants.NODESET); //$NON-NLS-1$
+			
+			for (int i = 0; i < nodes.getLength(); i++) {
+				Element node = (Element) nodes.item(i);
+				String id = node.getAttribute("path"); //$NON-NLS-1$
+				String name = (String) xpath.evaluate("name", node, XPathConstants.STRING);  //$NON-NLS-1$
+				String description = (String) xpath.evaluate("description", node, XPathConstants.STRING);  //$NON-NLS-1$
+				result.add(new DataDescriptor(id, String.format("%s %s", name, description))); //$NON-NLS-1$
 			}
 		} catch (IOException e) {
 			log(e);
@@ -418,7 +425,12 @@ public class LuceneDataSet<NETWORK, NODE, EDGE> extends DataSet {
 			log(e);
 		} catch (XPathExpressionException e) {
 			log(e);
+		} finally {
+			try {
+				if (stream != null) stream.close();
+			} catch (Exception e) {}
 		}
+		
 		return result;
 	}
 

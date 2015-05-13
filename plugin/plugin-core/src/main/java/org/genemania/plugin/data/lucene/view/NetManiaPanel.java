@@ -25,6 +25,7 @@ import static javax.swing.GroupLayout.PREFERRED_SIZE;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +35,7 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
@@ -333,14 +335,27 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 		installedModel = new DynamicListModel<DataDescriptor>(installed);
 		getInstalledList().setModel(installedModel);
 		
-		List<DataDescriptor> availableDescriptors = data.getAvailableDataDescriptors();
+		List<DataDescriptor> availableDescriptors = null;
+		
+		try {
+			availableDescriptors = data.getAvailableDataDescriptors();
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(
+					null,
+					e.getMessage(), 
+					"GeneMANIA Error",
+					JOptionPane.ERROR_MESSAGE
+			);
+			return;
+		}
+		
 		List<DataDescriptor> result = new ArrayList<DataDescriptor>();
 		
 		for (DataDescriptor descriptor : availableDescriptors) {
-			if (!installed.contains(descriptor)) {
+			if (!installed.contains(descriptor))
 				result.add(descriptor);
-			}
 		}
+		
 		Collections.sort(result);
 		
 		availableModel = new DynamicListModel<DataDescriptor>(result);
