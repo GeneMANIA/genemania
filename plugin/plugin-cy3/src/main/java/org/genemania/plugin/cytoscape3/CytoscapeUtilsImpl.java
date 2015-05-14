@@ -88,19 +88,17 @@ import org.genemania.plugin.selection.NetworkSelectionManager;
 
 public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode, CyEdge> implements CytoscapeUtils<CyNetwork, CyNode, CyEdge>, RowsSetListener {
 
-	private CySwingApplication application;
-	private CyApplicationManager applicationManager;
-	private CyNetworkManager networkManager;
-	private CyNetworkFactory networkFactory;
-	private CyNetworkViewFactory viewFactory;
-	private CyNetworkViewManager viewManager;
-	
+	private final CySwingApplication application;
+	private final CyApplicationManager applicationManager;
+	private final CyNetworkManager networkManager;
+	private final CyNetworkFactory networkFactory;
+	private final CyNetworkViewFactory viewFactory;
+	private final CyNetworkViewManager viewManager;
 	private final VisualStyleFactory styleFactory;
 	private final VisualMappingManager mappingManager;
 	private final VisualMappingFunctionFactory discreteFactory;
 	private final VisualMappingFunctionFactory passthroughFactory;
 	private final VisualMappingFunctionFactory continuousFactory;
-	
 	private final TaskManager<?, ?> taskManager;
 	private final ApplyPreferredLayoutTaskFactory applyPreferredLayoutTaskFactory;
 	private final RenderingEngineManager renderingEngineManager;
@@ -118,17 +116,23 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	private final CyEventHelper eventHelper;
 	private final CyServiceRegistrar serviceRegistrar;
 	
-	public CytoscapeUtilsImpl(NetworkUtils networkUtils,
-							  CySwingApplication application, CyApplicationManager applicationManager,
-							  CyNetworkManager networkManager, CyNetworkViewManager viewManager,
-							  CyNetworkFactory networkFactory, CyNetworkViewFactory viewFactory,
-							  VisualStyleFactory styleFactory, VisualMappingManager mappingManager,
-							  VisualMappingFunctionFactory discreteFactory,
-							  VisualMappingFunctionFactory passthroughFactory,
-							  VisualMappingFunctionFactory continuousFactory, TaskManager<?, ?> taskManager,
-							  CyEventHelper eventHelper, ApplyPreferredLayoutTaskFactory applyPreferredLayoutTaskFactory,
-							  RenderingEngineManager renderingEngineManager,
-							  CyServiceRegistrar serviceRegistrar) {
+	public CytoscapeUtilsImpl(
+			NetworkUtils networkUtils,
+			CySwingApplication application,
+			CyApplicationManager applicationManager,
+			CyNetworkManager networkManager,
+			CyNetworkViewManager viewManager,
+			CyNetworkFactory networkFactory,
+			CyNetworkViewFactory viewFactory,
+			VisualStyleFactory styleFactory,
+			VisualMappingManager mappingManager,
+			VisualMappingFunctionFactory discreteFactory,
+			VisualMappingFunctionFactory passthroughFactory,
+			VisualMappingFunctionFactory continuousFactory, TaskManager<?, ?> taskManager,
+			CyEventHelper eventHelper, ApplyPreferredLayoutTaskFactory applyPreferredLayoutTaskFactory,
+			RenderingEngineManager renderingEngineManager,
+			CyServiceRegistrar serviceRegistrar
+	) {
 		super(networkUtils);
 		this.application = application;
 		this.applicationManager = applicationManager;
@@ -161,8 +165,9 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	public void applyVisualization(
 			CyNetwork network,
 			Map<Long, Double> scores,
-			Map<String, Color> colors, double[] extrema) {
-		
+			Map<String, Color> colors,
+			double[] extrema
+	) {
 		VisualStyle style = styleFactory.createVisualStyle(getVisualStyleName(network));
 		style.setDefaultValue(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ELLIPSE);
 		style.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, RESULT_COLOR);
@@ -199,6 +204,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		visualStyles.put(network, style);
 		
 		CytoPanel panel = application.getCytoPanel(CytoPanelName.EAST);
+		
 		if (panel.getState() == CytoPanelState.HIDE) {
 			panel.setState(CytoPanelState.DOCK);
 		}
