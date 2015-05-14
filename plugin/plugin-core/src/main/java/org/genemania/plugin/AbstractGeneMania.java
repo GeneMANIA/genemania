@@ -171,10 +171,18 @@ public abstract class AbstractGeneMania<NETWORK, NODE, EDGE> implements GeneMani
 	}
 	
 	private boolean showDownloadDialog(ProgressReporter progress) throws ApplicationException {
-		DownloadDialog dialog = new DownloadDialog(taskDispatcher.getTaskDialog(), Strings.default_title, true, Strings.dataUpdateDownload_label, dataSetManager, uiUtils, fileUtils);
+		final DownloadDialog dialog = new DownloadDialog(
+				taskDispatcher.getTaskDialog(),
+				Strings.default_title,
+				Strings.dataUpdateDownload_label,
+				dataSetManager,
+				uiUtils,
+				fileUtils
+		);
 		dialog.setVisible(true);
 		String dataId = dialog.getSelectedDataSetId();
 		Action action = dialog.getAction();
+		
 		if (dataId != null && action == Action.download) {
 	        File settings = getSettingsDirectory();
 			downloadDataSet(dataId, settings, progress);
@@ -183,6 +191,7 @@ public abstract class AbstractGeneMania<NETWORK, NODE, EDGE> implements GeneMani
 			File path = findDataSetById(dataId);
 			loadDataSet(path, progress, false, true);
 		}
+		
 		return false;
 	}
 
@@ -359,15 +368,26 @@ public abstract class AbstractGeneMania<NETWORK, NODE, EDGE> implements GeneMani
 	@Override
 	public boolean initializeData(ProgressReporter progress, boolean reportErrors) throws ApplicationException {
 		File path = dataSetManager.getDataSourcePath();
+		
 		if (path == null || !path.exists()) {
 			List<File> paths = dataSetManager.getDataSetPaths();
+			
 			if (paths.size() == 0) {
-				DownloadDialog dialog = new DownloadDialog(taskDispatcher.getTaskDialog(), Strings.default_title, true, Strings.missingData_prompt, dataSetManager, uiUtils, fileUtils);
+				final DownloadDialog dialog = new DownloadDialog(
+						taskDispatcher.getTaskDialog(),
+						Strings.default_title,
+						Strings.missingData_prompt,
+						dataSetManager,
+						uiUtils,
+						fileUtils
+				);
 				dialog.setVisible(true);
 				String dataId = dialog.getSelectedDataSetId();
+				
 				if (dataId != null) {
 			        File settings = getSettingsDirectory();
 					downloadDataSet(dataId, settings, progress);
+					
 					return true;
 				} else {
 					loadDataSet(null, progress, false, false);
@@ -378,6 +398,7 @@ public abstract class AbstractGeneMania<NETWORK, NODE, EDGE> implements GeneMani
 		} else {
 			loadDataSet(path, progress, true, reportErrors);
 		}
+		
 		return false;
 	}
 
