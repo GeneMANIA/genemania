@@ -482,8 +482,8 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 
 	private void applyDefaultSelection(ViewState config, Collection<Group<?, ?>> selectedGroups) {
 		Set<String> targetGroups = new HashSet<String>();
-		targetGroups.add("coloc"); //$NON-NLS-1$
-		targetGroups.add("coexp"); //$NON-NLS-1$
+		//targetGroups.add("coloc"); //$NON-NLS-1$
+		//targetGroups.add("coexp"); //$NON-NLS-1$
 		
 		// By default, disable colocation/coexpression networks.
 		Set<String> retainedGroups = new HashSet<String>();
