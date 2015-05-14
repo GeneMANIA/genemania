@@ -53,12 +53,18 @@ import org.genemania.plugin.view.util.FileSelectionMode;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class ManiaResultsController<NETWORK, NODE, EDGE> {
+	
 	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
 	private final DataSetManager dataSetManager;
 	private final NetworkUtils networkUtils;
 	private final UiUtils uiUtils;
 
-	public ManiaResultsController(DataSetManager dataSetManager, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, UiUtils uiUtils, NetworkUtils networkUtils) {
+	public ManiaResultsController(
+			final DataSetManager dataSetManager,
+			final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			final UiUtils uiUtils,
+			final NetworkUtils networkUtils
+	) {
 		this.dataSetManager = dataSetManager;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.uiUtils = uiUtils;
@@ -66,8 +72,9 @@ public class ManiaResultsController<NETWORK, NODE, EDGE> {
 	}
 	
 	public void showAttributesDialog(NETWORK cyNetwork, ViewState options) {		
-		AttributesDialog dialog = new AttributesDialog(cytoscapeUtils.getFrame(), true, new AttributesController());
-		dialog.pack();
+		final AttributesDialog dialog =
+				new AttributesDialog(cytoscapeUtils.getFrame(), new AttributesController(), uiUtils);
+		dialog.setLocationRelativeTo(cytoscapeUtils.getFrame());
 		dialog.setVisible(true);
 		List<String> attributes = dialog.getSelectedAttributes();
 		cytoscapeUtils.expandAttributes(cyNetwork, options, attributes);

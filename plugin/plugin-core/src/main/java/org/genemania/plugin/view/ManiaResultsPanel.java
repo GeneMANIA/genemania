@@ -101,26 +101,26 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 		organismLabel.setHorizontalAlignment(JLabel.CENTER);
 		
 		final JButton exportButton = new JButton(Strings.maniaResultsPanelExportButton_label);
-		exportButton.setAlignmentX(CENTER_ALIGNMENT);
 		exportButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				handleExportButton();
 			}
 		});
+		exportButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
 		
 		final JButton attributesButton = new JButton(Strings.maniaResultsAttributesButton_label);
-		attributesButton.setAlignmentX(CENTER_ALIGNMENT);
 		attributesButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleAttributesButton();
 			}
 		});
+		attributesButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
 		
 		final GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
-		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateGaps(uiUtils.isWinLAF());
 		layout.setAutoCreateContainerGaps(false);
 		
 		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)

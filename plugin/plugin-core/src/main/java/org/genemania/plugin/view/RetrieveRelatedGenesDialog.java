@@ -25,6 +25,7 @@ import static org.genemania.plugin.view.util.UiUtils.MISSING_FIELD_COLOR;
 import static org.genemania.plugin.view.util.UiUtils.MISSING_FIELD_ICON_CODE;
 import static org.genemania.plugin.view.util.UiUtils.MISSING_FIELD_ICON_SIZE;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
@@ -320,11 +321,11 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
         
         final JPanel buttonPanel = uiUtils.createOkCancelPanel(getStartButton(), closeButton);
         
-        final JPanel contentPane = new JPanel();
-        contentPane.setDoubleBuffered(true);
+        final JPanel panel = new JPanel();
+        panel.setDoubleBuffered(true);
         
-        final GroupLayout layout = new GroupLayout(contentPane);
-        contentPane.setLayout(layout);
+        final GroupLayout layout = new GroupLayout(panel);
+        panel.setLayout(layout);
 		layout.setAutoCreateGaps(uiUtils.isWinLAF());
 		layout.setAutoCreateContainerGaps(true);
 		
@@ -355,8 +356,8 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 				addMeAgain(true);
 			}
 			private void addMeAgain(boolean collapsed) {
-				contentPane.remove(getAdvancedPanel());
-				contentPane.remove(buttonPanel);
+				panel.remove(getAdvancedPanel());
+				panel.remove(buttonPanel);
 				
 				hgroup.addComponent(getAdvancedPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE);
 				hgroup.addComponent(buttonPanel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE);
@@ -370,7 +371,7 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 			}
 		});
 		
-		setContentPane(contentPane);
+		getContentPane().add(panel, BorderLayout.CENTER);
 		
 		uiUtils.setDefaultOkCancelKeyStrokes(getRootPane(), getStartButton().getAction(), closeButton.getAction());
 		getRootPane().setDefaultButton(getStartButton());
@@ -744,6 +745,7 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 					validateQuery();
 				}
 	        });
+	        removeGenesButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
 		}
 		
 		return removeGenesButton;
@@ -758,6 +760,7 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 					handleClearButton();
 				}
 	        });
+	        clearGenesButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
 		}
 		
 		return clearGenesButton;

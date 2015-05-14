@@ -19,104 +19,218 @@
 
 package org.genemania.plugin.view;
 
-import java.awt.Component;
-import java.awt.FlowLayout;
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+
+import java.awt.BorderLayout;
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
 import javax.swing.JTextArea;
 
 import org.genemania.plugin.Strings;
 import org.genemania.plugin.controllers.AttributesController;
 import org.genemania.plugin.model.AttributeEntry;
+import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
 public class AttributesDialog extends JDialog {
-	private List<AttributeEntry> entries;
-	private List<JCheckBox> checkBoxes;
+	
+	private final List<AttributeEntry> entries;
 	private List<String> selectedAttributes;
 	
-	public AttributesDialog(Frame parent, boolean modality, AttributesController controller) {
-		super(parent, Strings.attributesDialog_title, modality);
-		
+	private JPanel mainPanel;
+	private JPanel attributesPanel;
+	private JButton selectAllButton;
+	private JButton selectNoneButton;
+	private JButton addAttributesButton;
+	private JButton cancelButton;
+	private final List<JCheckBox> checkBoxes = new ArrayList<JCheckBox>();
+	
+	private final UiUtils uiUtils;
+	
+	public AttributesDialog(final Frame parent, final AttributesController controller, final UiUtils uiUtils) {
+		super(parent, Strings.attributesDialog_title, ModalityType.APPLICATION_MODAL);
+		this.uiUtils = uiUtils;
 		this.entries = controller.createModel();
 		
-		JRootPane root = getRootPane();
-		root.setLayout(new GridBagLayout());
-		
-		JPanel canvas = new JPanel();
-		
-		canvas.setLayout(new GridBagLayout());
-		
-		int row = 0;
-		Insets insets = new Insets(0, 0, 0, 0);
-		
-		JTextArea label = new JTextArea(Strings.attributesDialog_description);
-		label.setEditable(false);
-		label.setOpaque(false);
-		label.setWrapStyleWord(true);
-		label.setLineWrap(true);
-		label.setColumns(40);
-		label.setRows(4);
-		canvas.add(label, new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets , 0, 0));
-		row++;
-		
-		canvas.add(createSelectPanel(), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.PAGE_START, GridBagConstraints.NONE, insets, 0, 0));
-		row++;
-
-		checkBoxes = new ArrayList<JCheckBox>();
-		for (final AttributeEntry entry : entries) {
-			final JCheckBox checkBox = new JCheckBox(entry.getDisplayName());
-			checkBox.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					entry.setSelected(checkBox.isSelected());
-				}
-			});
-			canvas.add(checkBox, new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets, 0, 0));
-			checkBoxes.add(checkBox);
-			row++;
-		}
-		
-		canvas.add(createControlPanel(), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.PAGE_START, GridBagConstraints.NONE, insets, 0, 0));
-		row++;
-		
-		canvas.add(new JPanel(), new GridBagConstraints(0, row, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
-		row++;
-		
-		root.add(canvas, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(16, 16, 16, 16), 0, 0));
+		addComponents();
 	}
 	
-	private Component createControlPanel() {
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout());
-		JButton addAttributesButton = new JButton(Strings.attributesDialogAddButton_label);
-		addAttributesButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleAddAttributesButton();
-			}
-		});
-		panel.add(addAttributesButton);
+	public List<String> getSelectedAttributes() {
+		return selectedAttributes;
+	}
+	
+	private void addComponents() {
+		final JPanel buttonPanel = uiUtils.createOkCancelPanel(getAddAttributesButton(), getCancelButton());
 		
-		JButton cancelButton = new JButton(Strings.attributesDialogCancelButton_label);
-		cancelButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleCancelButton();
+		final JPanel panel = new JPanel();
+		final GroupLayout layout = new GroupLayout(panel);
+		panel.setLayout(layout);
+		layout.setAutoCreateGaps(uiUtils.isWinLAF());
+		layout.setAutoCreateContainerGaps(true);
+		
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+				.addComponent(getMainPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(buttonPanel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(getMainPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(buttonPanel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+		);
+		
+		getContentPane().add(panel, BorderLayout.CENTER);
+		
+		uiUtils.setDefaultOkCancelKeyStrokes(getRootPane(), getAddAttributesButton().getAction(),
+				getCancelButton().getAction());
+		getRootPane().setDefaultButton(getAddAttributesButton());
+		
+		pack();
+		setResizable(false);
+	}
+	
+	private JPanel getMainPanel() {
+		if (mainPanel == null) {
+			mainPanel = uiUtils.createJPanel();
+			mainPanel.setBorder(uiUtils.createPanelBorder());
+			
+			final JTextArea label = new JTextArea(Strings.attributesDialog_description);
+			label.setEditable(false);
+			label.setOpaque(false);
+			label.setFont(label.getFont().deriveFont(UiUtils.INFO_FONT_SIZE));
+			label.setWrapStyleWord(true);
+			label.setLineWrap(true);
+			
+			final GroupLayout layout = new GroupLayout(mainPanel);
+			mainPanel.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addGroup(layout.createParallelGroup(Alignment.TRAILING, true)
+							.addComponent(label, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+							.addGroup(layout.createSequentialGroup()
+									.addComponent(getSelectAllButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+									.addComponent(getSelectNoneButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							)
+					)
+					.addComponent(getAttributesPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+			);
+			layout.setVerticalGroup(layout.createParallelGroup(Alignment.TRAILING, true)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(label, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+							.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+									.addComponent(getSelectAllButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+									.addComponent(getSelectNoneButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							)
+					)
+					.addComponent(getAttributesPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+			);
+			
+			uiUtils.equalizeSize(getSelectAllButton(), getSelectNoneButton());
+		}
+		
+		return mainPanel;
+	}
+	
+	private JPanel getAttributesPanel() {
+		if (attributesPanel == null) {
+			attributesPanel = uiUtils.createJPanel();
+			attributesPanel.setBorder(uiUtils.createPanelBorder());
+			
+			final GroupLayout layout = new GroupLayout(attributesPanel);
+			attributesPanel.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			final ParallelGroup hgroup = layout.createParallelGroup(Alignment.LEADING, true);
+			final SequentialGroup vgroup = layout.createSequentialGroup();
+			layout.setHorizontalGroup(hgroup);
+			layout.setVerticalGroup(vgroup);
+			
+			for (final AttributeEntry entry : entries) {
+				final JCheckBox checkBox = new JCheckBox(entry.getDisplayName());
+				checkBox.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						entry.setSelected(checkBox.isSelected());
+					}
+				});
+				checkBoxes.add(checkBox);
+				
+				hgroup.addComponent(checkBox, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE);
+				vgroup.addComponent(checkBox, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE);
 			}
-		});
-		panel.add(cancelButton);
-		return panel;
+		}
+		
+		return attributesPanel;
+	}
+	
+	private JButton getSelectAllButton() {
+		if (selectAllButton == null) {
+			selectAllButton = new JButton(new AbstractAction(Strings.attributesDialogSelectAllButton_label) {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					setSelected(true);
+				}
+			});
+			selectAllButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
+		}
+		
+		return selectAllButton;
+	}
+	
+	private JButton getSelectNoneButton() {
+		if (selectNoneButton == null) {
+			selectNoneButton = new JButton(new AbstractAction(Strings.attributesDialogSelectNoneButton_label) {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					setSelected(false);
+				}
+			});
+			selectNoneButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
+		}
+		
+		return selectNoneButton;
+	}
+	
+	private JButton getAddAttributesButton() {
+		if (addAttributesButton == null) {
+			addAttributesButton = new JButton(new AbstractAction(Strings.attributesDialogAddButton_label) {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleAddAttributesButton();
+				}
+			});
+		}
+		
+		return addAttributesButton;
+	}
+	
+	private JButton getCancelButton() {
+		if (cancelButton == null) {
+			cancelButton = new JButton(new AbstractAction(Strings.attributesDialogCancelButton_label) {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleCancelButton();
+				}
+			});
+		}
+		
+		return cancelButton;
 	}
 
 	private void handleCancelButton() {
@@ -134,39 +248,6 @@ public class AttributesDialog extends JDialog {
 		setVisible(false);
 	}
 
-	public List<String> getSelectedAttributes() {
-		return selectedAttributes;
-	}
-	
-	private Component createSelectPanel() {
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout());
-		JButton selectAllButton = new JButton(Strings.attributesDialogSelectAllButton_label);
-		selectAllButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleSelectAllButton();
-			}
-		});
-		panel.add(selectAllButton);
-		
-		JButton selectNoneButton = new JButton(Strings.attributesDialogSelectNoneButton_label);
-		selectNoneButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleSelectNoneButton();
-			}
-		});
-		panel.add(selectNoneButton);
-		return panel;
-	}
-
-	private void handleSelectNoneButton() {
-		setSelected(false);
-	}
-
-	private void handleSelectAllButton() {
-		setSelected(true);
-	}
-	
 	private void setSelected(boolean selected) {
 		for (JCheckBox checkBox : checkBoxes) {
 			checkBox.setSelected(selected);
