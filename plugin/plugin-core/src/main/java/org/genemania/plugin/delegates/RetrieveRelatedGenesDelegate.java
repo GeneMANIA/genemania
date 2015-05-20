@@ -40,32 +40,70 @@ import org.genemania.plugin.view.RetrieveRelatedGenesDialog;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class RetrieveRelatedGenesDelegate<NETWORK, NODE, EDGE> implements Delegate {
+	
 	private static final long MIN_HEAP_SIZE = 900 * 1000000;
 
-	private final RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> dialog;
+	private RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> dialog;
 
 	private final GeneMania<NETWORK, NODE, EDGE> plugin;
 	private final UiUtils uiUtils;
+	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final NetworkUtils networkUtils;
+	private final  FileUtils fileUtils;
+	private final TaskDispatcher taskDispatcher;
+	private final DataSetManager dataSetManager;
+	
+	private final Object lock = new Object();
 
-	public RetrieveRelatedGenesDelegate(GeneMania<NETWORK, NODE, EDGE> plugin, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, NetworkUtils networkUtils, UiUtils uiUtils, FileUtils fileUtils, TaskDispatcher taskDispatcher) {
+	public RetrieveRelatedGenesDelegate(
+			GeneMania<NETWORK, NODE, EDGE> plugin,
+			CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			NetworkUtils networkUtils,
+			UiUtils uiUtils,
+			FileUtils fileUtils,
+			TaskDispatcher taskDispatcher
+	) {
 		this.plugin = plugin;
 		this.uiUtils = uiUtils;
+		this.cytoscapeUtils = cytoscapeUtils;
+		this.networkUtils = networkUtils;
+		this.fileUtils = fileUtils;
+		this.taskDispatcher = taskDispatcher;
 		
-		DataSetManager dataSetManager = plugin.getDataSetManager();
-		dialog = new RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE>(null, false, new RetrieveRelatedGenesController<NETWORK, NODE, EDGE>(plugin, cytoscapeUtils, networkUtils, taskDispatcher), dataSetManager , networkUtils, uiUtils, cytoscapeUtils, fileUtils, taskDispatcher, plugin);
-		dialog.setAlwaysOnTop(false);
-		dialog.setResizable(true);
-		dialog.setSize(900, 600);
-		dialog.setLocationByPlatform(true);
+		dataSetManager = plugin.getDataSetManager();
     }
+	
+	public RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> getDialog() {
+		synchronized(lock) {
+			if (dialog == null) {
+				dialog = new RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE>(
+						null,
+						false,
+						new RetrieveRelatedGenesController<NETWORK, NODE, EDGE>(plugin, cytoscapeUtils, networkUtils, taskDispatcher),
+						dataSetManager,
+						networkUtils,
+						uiUtils,
+						cytoscapeUtils,
+						fileUtils,
+						taskDispatcher,
+						plugin
+				);
+				dialog.setAlwaysOnTop(false);
+				dialog.setLocationByPlatform(true);
+			}
+		}
+		
+		return dialog;
+	}
 	
 	@Override
 	public void invoke() {
 		checkHeapSize();
 		DataSetManager dataSetManager = plugin.getDataSetManager();
 		DataSet data = dataSetManager.getDataSet();
+		
 		if (data == null) {
-			plugin.initializeData(dialog, true);
+			plugin.initializeData(getDialog(), true);
 			data = dataSetManager.getDataSet();
 		}
 		
@@ -74,25 +112,23 @@ public class RetrieveRelatedGenesDelegate<NETWORK, NODE, EDGE> implements Delega
 				List<Organism> organisms = data.getMediatorProvider().getOrganismMediator().getAllOrganisms();
 				if (organisms.size() == 0) {
 					IConfiguration configuration = data.getConfiguration();
-					configuration.showUi(dialog);
+					configuration.showUi(getDialog());
 				}
 			} catch (DataStoreException e) {
 				LogUtils.log(getClass(), e);
 			}
 		}
-		dialog.setVisible(true);
+		
+		getDialog().setVisible(true);
 	}
 
 	private void checkHeapSize() {
 		Runtime runtime = Runtime.getRuntime();
+		
 		if (runtime.maxMemory() < MIN_HEAP_SIZE) {
 			String message = String.format(Strings.heapSize_error, (int) (runtime.maxMemory() / 1000000), (int) (MIN_HEAP_SIZE / 1000000));
-			JEditorPane editor = uiUtils.createLinkEnabledEditorPane(dialog, message);
-			JOptionPane.showMessageDialog(dialog, editor, Strings.heapSize_title, JOptionPane.WARNING_MESSAGE);
+			JEditorPane editor = uiUtils.createLinkEnabledEditorPane(getDialog(), message);
+			JOptionPane.showMessageDialog(getDialog(), editor, Strings.heapSize_title, JOptionPane.WARNING_MESSAGE);
 		}
-	}
-
-	public RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> getDialog() {
-		return dialog;
 	}
 }

@@ -18,9 +18,9 @@
  */
 package org.genemania.plugin.data.lucene.view;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -32,6 +32,8 @@ import java.io.Reader;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -40,6 +42,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -67,12 +70,15 @@ import org.genemania.util.ProgressReporter;
 
 @SuppressWarnings("serial")
 public class ImportOrganismPanel extends JPanel {
+	
 	private final DataSetManager dataSetManager;
 	private final FileUtils fileUtils;
 	private final UiUtils uiUtils;
 	private final ImportOrganismController controller;
 	private final OrganismValidator validator;
 
+	private JPanel importPanel;
+	private JPanel installedPanel;
 	private JTextField fileField;
 	private JTextField nameField;
 	private JTextField aliasField;
@@ -94,7 +100,7 @@ public class ImportOrganismPanel extends JPanel {
 		controller = new ImportOrganismController(dataSetManager, taskDispatcher);
 		validator = new OrganismValidator();
 		
-		DataSet data = dataSetManager.getDataSet();
+		final DataSet data = dataSetManager.getDataSet();
 		listener = new DataSetChangeListener() {
 			@Override
 			public void dataSetChanged(DataSet activeDataSet, ProgressReporter progress) {
@@ -102,172 +108,57 @@ public class ImportOrganismPanel extends JPanel {
 			}
 		};
 		dataSetManager.addDataSetChangeListener(listener);
-		setOpaque(false);
 		
-		setLayout(new GridBagLayout());
-		JPanel importPanel = createImportPanel();
-		JPanel installedPanel = createInstalledPanel();
+		if (uiUtils.isAquaLAF())
+			setOpaque(false);
 		
-		Insets insets = new Insets(0, 0, 0, 0);
-		add(importPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
-		add(installedPanel, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
+		installedModel = controller.createModel(dataSetManager.getDataSet());
+		
+		addComponents();
 		handleDataSetChange(data);
 		validateSettings();
 	}
 
-	private void handleDataSetChange(DataSet data) {
-		installedModel.clear();
-		OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
-		try {
-			List<Organism> organisms = mediator.getAllOrganisms();
-			for (Organism organism : organisms) {
-				if (organism.getId() >= 0) {
-					continue;
-				}
-				
-				installedModel.add(organism);
-			}
-			uiUtils.packColumns(installedTable);
-			validator.setOrganisms(organisms);
-		} catch (DataStoreException e) {
-			LogUtils.log(getClass(), e);
-		}
-	}
-
-	@SuppressWarnings("rawtypes")
-	private JPanel createInstalledPanel() {
-		JPanel panel = uiUtils.createJPanel();
-		panel.setLayout(new GridBagLayout());
-		panel.setBorder(BorderFactory.createTitledBorder(Strings.installedOrganismList_title));
-		
-		final LuceneDataSet data = (LuceneDataSet) dataSetManager.getDataSet();;
-		installedModel = controller.createModel(data);
-		installedTable = new JTable(installedModel) {
-			@Override
-			public void addNotify() {
-				super.addNotify();
-				uiUtils.packColumns(installedTable);
-			}
-		};
-		
-		installedTable.setOpaque(false);
-		installedTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				int totalSelected = installedTable.getSelectedRowCount();
-				editButton.setEnabled(totalSelected == 1);
-				deleteButton.setEnabled(totalSelected > 0);
-			}
-		});
-		
-		JScrollPane scrollPane = new JScrollPane(installedTable);
-		scrollPane.setBorder(BorderFactory.createEtchedBorder());
-
-		panel.add(scrollPane, new GridBagConstraints(0, 0, 1, 2, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0 ,0));
-		
-		deleteButton = new JButton(Strings.deleteNetworkButton_label);
-		deleteButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				deleteOrganisms(data);
-			}
-		});
-		deleteButton.setEnabled(false);
-		
-		editButton = new JButton(Strings.editNetworkButton_label);
-		editButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				editOrganisms(data);
-			}
-		});
-		editButton.setEnabled(false);
-		
-		panel.add(deleteButton, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0 ,0));
-		panel.add(editButton, new GridBagConstraints(1, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0 ,0));
-
-		return panel;
-	}
-
-	private JPanel createImportPanel() {
-		JPanel panel = uiUtils.createJPanel();
-		panel.setBorder(BorderFactory.createTitledBorder(Strings.importOrganism_title));
-		panel.setLayout(new GridBagLayout());
-		
-		Insets insets = new Insets(0, 0, 0, 0);
-		int row = 0;
-		int rowWidth = 3;
-
-		JLabel header = new JLabel(Strings.importOrganismHelp_label);
-		panel.add(header, new GridBagConstraints(0, row, rowWidth, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, insets , 0, 0));
-		row++;
-
-		DocumentListener listener = new DocumentListener() {
+	private void addComponents() {
+		final DocumentListener docListener = new DocumentListener() {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
 				validateSettings();
 			}
-			
 			@Override
 			public void insertUpdate(DocumentEvent e) {
 				validateSettings();
 			}
-			
 			@Override
 			public void changedUpdate(DocumentEvent e) {
 				validateSettings();
 			}
 		};
 		
-		fileField = new JTextField();
-		fileField.getDocument().addDocumentListener(listener);
+		fileField = new JTextField(20);
+		fileField.getDocument().addDocumentListener(docListener);
 		fileField.addFocusListener(new FocusListener() {
+			@Override
 			public void focusLost(FocusEvent e) {
 				validateSettings();
 			}
-			
+			@Override
 			public void focusGained(FocusEvent e) {
 			}
 		});
-
-		JButton browseButton = new JButton(Strings.importOrganismBrowseButton_label);
-		browseButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				handleBrowse();
-			}
-		});
-		
-		panel.add(new JLabel(Strings.importOrganismFile_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, insets, 0, 0));
-		panel.add(fileField, new GridBagConstraints(1, row, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, insets, 0, 0));
-		panel.add(browseButton, new GridBagConstraints(2, row, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets, 0, 0));
-		row++;
 		
 		nameField = new JTextField(30);
-		nameField.getDocument().addDocumentListener(listener);
-		
-		panel.add(new JLabel(Strings.importOrganismName_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, insets, 0, 0));
-		panel.add(nameField, new GridBagConstraints(1, row, 2, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, insets, 0, 0));
-		row++;
+		nameField.getDocument().addDocumentListener(docListener);
 		
 		aliasField = new JTextField(30);
-		aliasField.getDocument().addDocumentListener(listener);
+		aliasField.getDocument().addDocumentListener(docListener);
 		
-		panel.add(new JLabel(Strings.importOrganismAlias_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, insets, 0, 0));
-		panel.add(aliasField, new GridBagConstraints(1, row, 2, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, insets, 0, 0));
-		row++;
-
 		taxIdField = new JTextField(30);
-		taxIdField.getDocument().addDocumentListener(listener);
+		taxIdField.getDocument().addDocumentListener(docListener);
 		
-		panel.add(new JLabel(Strings.importOrganismTaxonomyId_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, insets, 0, 0));
-		panel.add(taxIdField, new GridBagConstraints(1, row, 2, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, insets, 0, 0));
-		row++;
-
 		descriptionField = new JTextArea();
-		descriptionField.getDocument().addDocumentListener(listener);
+		descriptionField.getDocument().addDocumentListener(docListener);
 		
-		panel.add(new JLabel(Strings.importOrganismDescription_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, insets, 0, 0));
-		panel.add(new JScrollPane(descriptionField), new GridBagConstraints(1, row, 2, 1, 1, 1, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, insets, 0, 0));
-		row++;
-
 		importButton = new JButton(Strings.importOrganismImportButton_label);
 		importButton.addActionListener(new ActionListener() {
 			@Override
@@ -276,27 +167,239 @@ public class ImportOrganismPanel extends JPanel {
 			}
 		});
 		
-		panel.add(importButton, new GridBagConstraints(0, row, rowWidth, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 0, 0));
-		row++;
+		final GroupLayout layout = new GroupLayout(this);
+		this.setLayout(layout);
+		layout.setAutoCreateGaps(uiUtils.isWinLAF());
+		layout.setAutoCreateContainerGaps(true);
+		
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)
+				.addComponent(getImportPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getInstalledPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(getImportPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getInstalledPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+	}
+	
+	private JPanel getImportPanel() {
+		if (importPanel == null) {
+			importPanel = uiUtils.createJPanel();
+			importPanel.setBorder(uiUtils.createTitledBorder(Strings.importOrganism_title));
+			
+			final JLabel helpLabel = new JLabel(Strings.importOrganismHelp_label);
+			helpLabel.setFont(helpLabel.getFont().deriveFont(UiUtils.INFO_FONT_SIZE));
+			helpLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+			
+			final JLabel label1 = new JLabel(Strings.importOrganismFile_label);
+			final JLabel label2 = new JLabel(Strings.importOrganismName_label);
+			final JLabel label3 = new JLabel(Strings.importOrganismAlias_label);
+			final JLabel label4 = new JLabel(Strings.importOrganismTaxonomyId_label);
+			final JLabel label5 = new JLabel(Strings.importOrganismDescription_label);
+			
+			final JButton browseButton = new JButton(Strings.importOrganismBrowseButton_label);
+			browseButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleBrowse();
+				}
+			});
+			
+			final JScrollPane scrollPane = new JScrollPane(descriptionField);
+			scrollPane.setPreferredSize(uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 10, 4));
+			
+			final GroupLayout layout = new GroupLayout(importPanel);
+			importPanel.setLayout(layout);
+			layout.setAutoCreateGaps(false);
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)
+					.addComponent(helpLabel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addGroup(layout.createSequentialGroup()
+						.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
+								.addComponent(label1)
+								.addComponent(label2)
+								.addComponent(label3)
+								.addComponent(label4)
+								.addComponent(label5)
+						)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(fileField, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(browseButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+								)
+								.addComponent(nameField, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(aliasField, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(taxIdField, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+						)
+					)
+					.addComponent(importButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+			layout.setVerticalGroup(layout.createSequentialGroup()
+					.addComponent(helpLabel)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(label1)
+							.addComponent(fileField)
+							.addComponent(browseButton)
+					)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(label2)
+							.addComponent(nameField)
+					)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(label3)
+							.addComponent(aliasField)
+					)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(label4)
+							.addComponent(taxIdField)
+					)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+							.addComponent(label5, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(importButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+		}
 
-		return panel;
+		return importPanel;
+	}
+	
+	private JPanel getInstalledPanel() {
+		if (installedPanel == null) {
+			installedPanel = uiUtils.createJPanel();
+			installedPanel.setBorder(uiUtils.createTitledBorder(Strings.installedOrganismList_title));
+			
+			final JScrollPane scrollPane = new JScrollPane(getInstalledTable());
+			scrollPane.setPreferredSize(uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 10, 6));
+	
+			final GroupLayout layout = new GroupLayout(installedPanel);
+			installedPanel.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+							.addComponent(getDeleteButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(getEditButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+			);
+			layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+					.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(getDeleteButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+							.addComponent(getEditButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					)
+			);
+			
+			uiUtils.equalizeSize(getDeleteButton(), getEditButton());
+		}
+		
+		return installedPanel;
+	}
+	
+	private JTable getInstalledTable() {
+		if (installedTable == null) {
+			installedTable = new JTable(installedModel) {
+				@Override
+				public void addNotify() {
+					super.addNotify();
+					uiUtils.packColumns(installedTable);
+				}
+			};
+			installedTable.setOpaque(false);
+			installedTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+				@Override
+				public void valueChanged(ListSelectionEvent e) {
+					int totalSelected = installedTable.getSelectedRowCount();
+					getEditButton().setEnabled(totalSelected == 1);
+					getDeleteButton().setEnabled(totalSelected > 0);
+				}
+			});
+		}
+		
+		return installedTable;
+	}
+	
+	private JButton getDeleteButton() {
+		if (deleteButton == null) {
+			deleteButton = new JButton(Strings.deleteNetworkButton_label);
+			deleteButton.addActionListener(new ActionListener() {
+				@SuppressWarnings("rawtypes")
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					deleteOrganisms((LuceneDataSet) dataSetManager.getDataSet());
+				}
+			});
+			deleteButton.setEnabled(false);
+		}
+		
+		return deleteButton;
+	}
+	
+	private JButton getEditButton() {
+		if (editButton == null) {
+			editButton = new JButton(Strings.editNetworkButton_label);
+			editButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					editOrganisms(dataSetManager.getDataSet());
+				}
+			});
+			editButton.setEnabled(false);
+		}
+
+		return editButton;
 	}
 
+	private void handleDataSetChange(DataSet data) {
+		installedModel.clear();
+		OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
+		
+		try {
+			List<Organism> organisms = mediator.getAllOrganisms();
+			
+			for (Organism organism : organisms) {
+				if (organism.getId() >= 0)
+					continue;
+				
+				installedModel.add(organism);
+			}
+			
+			uiUtils.packColumns(getInstalledTable());
+			validator.setOrganisms(organisms);
+		} catch (DataStoreException e) {
+			LogUtils.log(getClass(), e);
+		}
+	}
+	
 	private void handleBrowse() {
 		HashSet<String> extensions = new HashSet<String>();
 		extensions.add("csv"); //$NON-NLS-1$
 		extensions.add("txt"); //$NON-NLS-1$
 		File initialFile = fileUtils.getUserHome();
 		File file;
+		
 		try {
 			file = uiUtils.getFile(uiUtils.getFrame(this), Strings.importNetworkFile_title, initialFile, Strings.importNetworkPanelTypeDescription_label, extensions, FileSelectionMode.OPEN_FILE);
 		} catch (ApplicationException e) {
 			LogUtils.log(getClass(), e);
 			return;
 		}
-		if (file == null) {
+		
+		if (file == null)
 			return;
-		}
+		
 		fileField.setText(file.getAbsolutePath());
 		validateSettings();
 	}
@@ -304,6 +407,7 @@ public class ImportOrganismPanel extends JPanel {
 	private void handleImport() {
 		DataSet data = dataSetManager.getDataSet();
 		Organism organism = new Organism();
+		
 		try {
 			organism.setId(data.getNextAvailableId(organism.getClass(), Namespace.USER));
 			organism.setName(nameField.getText());
@@ -331,9 +435,11 @@ public class ImportOrganismPanel extends JPanel {
 
 	private long getTaxonomyId() {
 		String text = taxIdField.getText();
+		
 		if (text == null || text.isEmpty()) {
 			return -1;
 		}
+		
 		try {
 			return Long.parseLong(text);
 		} catch (NumberFormatException e) {
@@ -343,15 +449,17 @@ public class ImportOrganismPanel extends JPanel {
 
 	@SuppressWarnings("rawtypes")
 	private void deleteOrganisms(LuceneDataSet data) {
-		int[] selection = installedTable.getSelectedRows();
+		int[] selection = getInstalledTable().getSelectedRows();
 		controller.deleteOrganisms(uiUtils.getFrame(this), data, installedModel, selection);
 	}
 	
 	private void editOrganisms(DataSet data) {
-		int[] selection = installedTable.getSelectedRows();
+		int[] selection = getInstalledTable().getSelectedRows();
+		
 		for (int index : selection) {
 			Organism organism = installedModel.get(index);
 			EditOrganismDialog dialog;
+			
 			try {
 				validator.setCurrentOrganism(organism);
 				dialog = new EditOrganismDialog(uiUtils.getFrame(this), true, uiUtils, validator);
@@ -390,9 +498,9 @@ public class ImportOrganismPanel extends JPanel {
 	}
 
 	private boolean isValidPath(String path) {
-		if (path == null || path.isEmpty()) {
+		if (path == null || path.isEmpty())
 			return false;
-		}
+		
 		return new File(path).isFile();
 	}
 

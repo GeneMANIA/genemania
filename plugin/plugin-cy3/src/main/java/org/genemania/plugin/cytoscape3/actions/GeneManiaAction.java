@@ -31,9 +31,14 @@ import org.genemania.plugin.GeneMania;
 @SuppressWarnings("serial")
 public abstract class GeneManiaAction extends AbstractCyAction {
 	
-	protected GeneMania<CyNetwork, CyNode, CyEdge> geneMania;
+	protected final GeneMania<CyNetwork, CyNode, CyEdge> geneMania;
 
-	public GeneManiaAction(Map<String, String> properties, CyApplicationManager applicationManager, GeneMania<CyNetwork, CyNode, CyEdge> geneMania, CyNetworkViewManager viewManager) {
+	public GeneManiaAction(
+			Map<String, String> properties,
+			CyApplicationManager applicationManager,
+			GeneMania<CyNetwork, CyNode, CyEdge> geneMania,
+			CyNetworkViewManager viewManager
+	) {
 		super(properties, applicationManager, viewManager);
 		this.geneMania = geneMania;
 	}

@@ -32,10 +32,13 @@ import org.genemania.plugin.Strings;
 @SuppressWarnings("serial")
 public class CheckForUpdatesAction extends GeneManiaAction {
 
-	public CheckForUpdatesAction(Map<String, String> properties,
+	public CheckForUpdatesAction(
+			Map<String, String> properties,
 			CyApplicationManager applicationManager,
-			GeneMania<CyNetwork, CyNode, CyEdge> geneMania,
-			CyNetworkViewManager viewManager) {
+			GeneMania<CyNetwork, CyNode,
+			CyEdge> geneMania,
+			CyNetworkViewManager viewManager
+	) {
 		super(properties, applicationManager, geneMania, viewManager);
 		putValue(NAME, Strings.dataUpdateCheck_menuLabel);
 	}
@@ -44,5 +47,4 @@ public class CheckForUpdatesAction extends GeneManiaAction {
 	public void actionPerformed(ActionEvent arg0) {
 		geneMania.handleCheck();
 	}
-
 }

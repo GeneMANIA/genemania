@@ -19,12 +19,14 @@
 
 package org.genemania.plugin.view;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -58,8 +60,9 @@ import org.genemania.plugin.view.components.BaseInfoPanel;
 import org.genemania.plugin.view.components.ScrollablePanel;
 import org.genemania.plugin.view.util.UiUtils;
 
+@SuppressWarnings("serial")
 public class NetworkSelectionPanel extends JPanel {
-	private static final long serialVersionUID = 1L;
+	
 	private final JSplitPane pane;
 	private final JPanel leftPanel;
 	private final JPanel middlePanel;
@@ -85,11 +88,17 @@ public class NetworkSelectionPanel extends JPanel {
 		middlePanel = new ScrollablePanel();
 		middlePanel.setLayout(new GridBagLayout());
 		
-		JScrollPane leftScrollPane = createScrollPane(leftPanel);
-		JScrollPane middleScrollPane = createScrollPane(middlePanel);
-		middleScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		final JScrollPane leftScrollPane = createScrollPane(leftPanel);
+		final Dimension d1 = uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 24, 10);
+		leftScrollPane.setMinimumSize(d1);
+		leftScrollPane.setPreferredSize(d1);
 		
-		pane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftScrollPane, middleScrollPane);
+		final JScrollPane rightScrollPane = createScrollPane(middlePanel);
+		rightScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		final Dimension d2 = uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 36, 10);
+		rightScrollPane.setPreferredSize(d2);
+		
+		pane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftScrollPane, rightScrollPane);
 		pane.setBorder(BorderFactory.createEmptyBorder());
 		
 		add(pane, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
@@ -133,13 +142,15 @@ public class NetworkSelectionPanel extends JPanel {
 			
 			label.addMouseListener(createMouseListener(group));
 			ActionListener listener = new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					validateSelection(label, group);
 					notifyListeners();
 				}
 			};
-
+			
 			checkBox.addActionListener(new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					handleGroupCheckBoxAction(checkBox, sortedNetworks);
 					validateSelection(label, group);
@@ -166,21 +177,10 @@ public class NetworkSelectionPanel extends JPanel {
 	}
 	
 	private MouseListener createMouseListener(final Group<?, ?> group) {
-		return new MouseListener() {
+		return new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent e) {
 				showNetworks(group);
-			}
-
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			public void mouseExited(MouseEvent e) {
-			}
-
-			public void mousePressed(MouseEvent e) {
-			}
-
-			public void mouseReleased(MouseEvent e) {
 			}
 		};
 	}
@@ -332,21 +332,10 @@ public class NetworkSelectionPanel extends JPanel {
 				checkBox.addActionListener(listener);
 				
 				JLabel label = new JLabel(network.getName());
-				label.addMouseListener(new MouseListener() {
+				label.addMouseListener(new MouseAdapter() {
+					@Override
 					public void mouseClicked(MouseEvent e) {
 						selectedNetwork = network;
-					}
-
-					public void mouseEntered(MouseEvent e) {
-					}
-
-					public void mouseExited(MouseEvent e) {
-					}
-
-					public void mousePressed(MouseEvent e) {
-					}
-
-					public void mouseReleased(MouseEvent e) {
 					}
 				});
 				
@@ -378,7 +367,6 @@ public class NetworkSelectionPanel extends JPanel {
 		}
 	}
 
-	@SuppressWarnings("serial")
 	class NetworkDetailPanel extends JPanel {
 		private JEditorPane descriptionLabel;
 
@@ -389,6 +377,7 @@ public class NetworkSelectionPanel extends JPanel {
 			setLayout(new GridBagLayout());
 			final JToggleButton expander = uiUtils.createToggleButton();
 			expander.addActionListener(new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					handleExpand(expander.isSelected());
 				}
@@ -404,6 +393,7 @@ public class NetworkSelectionPanel extends JPanel {
 			descriptionLabel.setOpaque(true);
 			descriptionLabel.setBackground(new Color(0xe0, 0xe0, 0xff));
 			descriptionLabel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+			descriptionLabel.setFont(descriptionLabel.getFont().deriveFont(UiUtils.INFO_FONT_SIZE));
 			
 			add(descriptionLabel, new GridBagConstraints(2, 1, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		}

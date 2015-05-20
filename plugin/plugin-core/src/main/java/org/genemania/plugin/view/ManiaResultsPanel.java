@@ -19,13 +19,17 @@
 
 package org.genemania.plugin.view;
 
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -49,8 +53,10 @@ import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
-	private static final long serialVersionUID = 1L;
-
+	
+	private static final long serialVersionUID = -2824736017091793317L;
+	
+	private JTabbedPane tabPane;
 	private JLabel organismLabel;
 	private ViewState options;
 	private GeneInfoPanel genePanel;
@@ -73,77 +79,66 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 
 	private final UiUtils uiUtils;
 
-	public ManiaResultsPanel(ManiaResultsController<NETWORK, NODE, EDGE> controller, GeneMania<NETWORK, NODE, EDGE> plugin, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, NetworkUtils networkUtils, UiUtils uiUtils) {
+	public ManiaResultsPanel(
+			ManiaResultsController<NETWORK, NODE, EDGE> controller,
+			GeneMania<NETWORK, NODE, EDGE> plugin,
+			CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			NetworkUtils networkUtils,
+			UiUtils uiUtils
+	) {
 		this.controller = controller;
 		this.plugin = plugin;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.networkUtils = networkUtils;
 		this.uiUtils = uiUtils;
 		
-		setOpaque(false);		
-		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		setOpaque(!uiUtils.isAquaLAF());
 		addComponents();
 	}
 	
 	private void addComponents() {
 		organismLabel = new JLabel();
-		organismLabel.setAlignmentX(CENTER_ALIGNMENT);
-		add(organismLabel);
-
-		JTabbedPane tabPane = new JTabbedPane();
-		tabPane.setAlignmentX(CENTER_ALIGNMENT);
+		organismLabel.setHorizontalAlignment(JLabel.CENTER);
 		
-		JPanel networkContents = uiUtils.createJPanel();
-		networkContents.setLayout(new GridBagLayout());
-		networkPanel = new NetworkGroupInfoPanel<NETWORK, NODE, EDGE>(plugin, cytoscapeUtils, networkUtils, uiUtils);
-		JScrollPane networkScrollPane = new JScrollPane(networkPanel);
-		
-		JPanel optionsPanel = networkPanel.createExpanderPanel(Strings.maniaResultsPanelNetworkOptions_label);
-		networkContents.add(optionsPanel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.PAGE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-		networkContents.add(networkScrollPane, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		tabPane.add(networkContents);
-		tabPane.setTitleAt(0, Strings.maniaResultsPanelNetworkTab_label);
-
-		JPanel geneContents = uiUtils.createJPanel();
-		geneContents.setLayout(new GridBagLayout());
-		genePanel = new GeneInfoPanel(networkUtils, uiUtils);
-		JScrollPane geneScrollPane = new JScrollPane(genePanel);
-		
-		optionsPanel = genePanel.createExpanderPanel(Strings.maniaResultsPanelGeneOptions_label);
-		geneContents.add(optionsPanel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.PAGE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-		geneContents.add(geneScrollPane, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		
-		tabPane.add(geneContents);
-		tabPane.setTitleAt(1, Strings.maniaResultsPanelGeneTab_label);
-		
-		JPanel functionContents = uiUtils.createJPanel();
-		functionContents.setLayout(new GridBagLayout());
-		
-		functionPanel = new FunctionInfoPanel(uiUtils);
-		functionContents.add(functionPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		
-		tabPane.add(functionContents);
-		tabPane.setTitleAt(2, Strings.maniaResultsPanelFunctionTab_label);
-		
-		add(tabPane);		
-		
-		JButton exportButton = new JButton(Strings.maniaResultsPanelExportButton_label);
-		exportButton.setAlignmentX(CENTER_ALIGNMENT);
+		final JButton exportButton = new JButton(Strings.maniaResultsPanelExportButton_label);
 		exportButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent event) {
 				handleExportButton();
 			}
 		});
-		add(exportButton);
+		exportButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
 		
-		JButton attributesButton = new JButton(Strings.maniaResultsAttributesButton_label);
-		attributesButton.setAlignmentX(CENTER_ALIGNMENT);
+		final JButton attributesButton = new JButton(Strings.maniaResultsAttributesButton_label);
 		attributesButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleAttributesButton();
 			}
 		});
-		add(attributesButton);
+		attributesButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
+		
+		final GroupLayout layout = new GroupLayout(this);
+        this.setLayout(layout);
+		layout.setAutoCreateGaps(uiUtils.isWinLAF());
+		layout.setAutoCreateContainerGaps(false);
+		
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)
+				.addComponent(organismLabel)
+				.addComponent(getTabPane(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addGroup(layout.createSequentialGroup()
+					.addComponent(exportButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addComponent(attributesButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+				)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(organismLabel)
+				.addComponent(getTabPane(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+					.addComponent(exportButton)
+					.addComponent(attributesButton)
+				)
+		);
 	}
 	
 	protected void handleExportButton() {
@@ -195,5 +190,45 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 		genePanel.updateSelection(options);
 		networkPanel.updateSelection(options);
 		functionPanel.updateSelection(options);
+	}
+	
+	private JTabbedPane getTabPane() {
+		if (tabPane == null) {
+			tabPane = new JTabbedPane();
+			
+			JPanel networkContents = uiUtils.createJPanel();
+			networkContents.setLayout(new GridBagLayout());
+			networkPanel = new NetworkGroupInfoPanel<NETWORK, NODE, EDGE>(plugin, cytoscapeUtils, networkUtils, uiUtils);
+			JScrollPane networkScrollPane = new JScrollPane(networkPanel);
+			
+			JPanel optionsPanel = networkPanel.createExpanderPanel(Strings.maniaResultsPanelNetworkOptions_label);
+			networkContents.add(optionsPanel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.PAGE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+			networkContents.add(networkScrollPane, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+			tabPane.add(networkContents);
+			tabPane.setTitleAt(0, Strings.maniaResultsPanelNetworkTab_label);
+
+			JPanel geneContents = uiUtils.createJPanel();
+			geneContents.setLayout(new GridBagLayout());
+			genePanel = new GeneInfoPanel(networkUtils, uiUtils);
+			JScrollPane geneScrollPane = new JScrollPane(genePanel);
+			
+			optionsPanel = genePanel.createExpanderPanel(Strings.maniaResultsPanelGeneOptions_label);
+			geneContents.add(optionsPanel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.PAGE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+			geneContents.add(geneScrollPane, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+			
+			tabPane.add(geneContents);
+			tabPane.setTitleAt(1, Strings.maniaResultsPanelGeneTab_label);
+			
+			JPanel functionContents = uiUtils.createJPanel();
+			functionContents.setLayout(new GridBagLayout());
+			
+			functionPanel = new FunctionInfoPanel(uiUtils);
+			functionContents.add(functionPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+			
+			tabPane.add(functionContents);
+			tabPane.setTitleAt(2, Strings.maniaResultsPanelFunctionTab_label);
+		}
+		
+		return tabPane;
 	}
 }

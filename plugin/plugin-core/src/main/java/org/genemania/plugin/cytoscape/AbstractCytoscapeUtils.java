@@ -124,6 +124,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 	protected abstract NetworkProxy<NETWORK, NODE, EDGE> createNetworkProxy(NETWORK network);
 	protected abstract EdgeProxy<EDGE, NODE> createEdgeProxy(EDGE edge, NETWORK network);
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	public void expandAttributes(NETWORK cyNetwork, ViewState options, List<String> attributes) {
 		if (attributes.size() == 0) {
@@ -167,6 +168,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 	}
 	
 	static class TagAttributeHandler implements AttributeHandler {
+		@Override
 		public Object getValue(InteractionNetwork network) {
 			StringBuilder builder = new StringBuilder();
 			for (Tag tag : network.getTags()) {
@@ -228,6 +230,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 	 * @param preferredSymbol
 	 * @return
 	 */
+	@Override
 	public NODE getNode(NETWORK network, Node node, String preferredSymbol) {
 		String id = getNodeId(network, node);
 		NODE target = getNode(id, network);
@@ -553,6 +556,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 		}
 	}
 
+	@Override
 	public void setHighlighted(ViewState options, NETWORK cyNetwork, boolean visible) {
 		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = getNetworkProxy(cyNetwork);
 		for (EDGE edge : networkProxy.getEdges()) {
@@ -565,7 +569,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 			if (group == null) {
 				continue;
 			}
-			Integer value = options.getEnabled(group) || visible ? 1 : 0;
+			Integer value = options.isEnabled(group) || visible ? 1 : 0;
 			edgeProxy.setAttribute(HIGHLIGHT_ATTRIBUTE, value);
 		}
 		
@@ -578,6 +582,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 		return proxy.getTitle().replace(".", ""); //$NON-NLS-1$ //$NON-NLS-2$;
 	}
 	
+	@Override
 	public void setHighlight(ViewState config, Group<?, ?> source, NETWORK network, boolean selected) {
 		Set<String> edgeIds = config.getEdgeIds(source);
 		if (edgeIds == null) {

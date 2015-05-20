@@ -19,14 +19,15 @@
 
 package org.genemania.plugin.completion;
 
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -37,11 +38,14 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -57,7 +61,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultEditorKit;
 
@@ -79,9 +82,11 @@ import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.util.ProgressReporter;
 
 public class CompletionPanel extends JPanel {
+	
 	private static final long serialVersionUID = 1L;
 
 	private static final String GENE_HINT = Strings.completionPanelGeneHint_label;
+	private static final Color PROPOSAL_BG_COLOR = Color.WHITE;
 
 	private int autoTriggerThreshold;
 	private JTextField textField;
@@ -93,7 +98,7 @@ public class CompletionPanel extends JPanel {
 	private final CompletionConsumer consumer;
 	private GeneCompletionProvider2 provider;
 
-	private final JTable resultTable;
+	private JTable resultTable;
 	
 	private int lastCompletionCount;
 
@@ -119,14 +124,16 @@ public class CompletionPanel extends JPanel {
 		this.networkUtils = networkUtils;
 		this.uiUtils = uiUtils;
 		this.taskDispatcher = taskDispatcher;
-		
-		setOpaque(false);
 		this.autoTriggerThreshold = autoTriggerThreshold;
+		
+		setOpaque(!uiUtils.isAquaLAF());
+		
 		proposalModel = createModel();
 		resultModel = createModel();
 		limit = 15;
 		
 		consumer = new CompletionConsumer() {
+			@Override
 			public void consume(String completion) {
 				lastCompletionCount++;
 				if (lastCompletionCount >= limit) {
@@ -135,7 +142,7 @@ public class CompletionPanel extends JPanel {
 				Gene gene = provider.getGene(completion);
 				proposalModel.add(gene);
 			}
-
+			@Override
 			public void finish() {
 				switch (lastCompletionCount) {
 				case -1:
@@ -154,230 +161,311 @@ public class CompletionPanel extends JPanel {
 					}
 				}
 			}
-
+			@Override
 			public void tooManyCompletions() {
 			}
 		};
 		
-		setLayout(new GridBagLayout());
-
-		textField = new JTextField();
+		addComponents();
+	}
+	
+	private void addComponents() {
 		setShowGeneHint(true);
-		textField.addFocusListener(new FocusListener() {
-			public void focusGained(FocusEvent e) {
-				if (getQuery().equals(GENE_HINT)) {
-					setShowGeneHint(false);
-				}
-				checkTrigger();
-			}
-
-			public void focusLost(FocusEvent e) {
-				if (getQuery().length() == 0) {
-					setShowGeneHint(true);
-				}
-			}
-		});
 		
-		add(textField, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-
-		textField.getDocument().addDocumentListener(new DocumentListener() {
-			public void changedUpdate(DocumentEvent e) {
-				checkTrigger(); 
-			}
-
-			public void insertUpdate(DocumentEvent e) {
-				checkTrigger(); 
-			}
-
-			public void removeUpdate(DocumentEvent e) {
-				checkTrigger(); 
-			}
-		});
-		
-		resultTable = createTable(resultModel);
-		resultTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		
-		final JScrollPane resultPane = new JScrollPane(resultTable);
-		Dimension textSizeHint = uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 40, 8);
+		final JScrollPane resultPane = new JScrollPane(getResultTable());
+		final Dimension textSizeHint = uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 40, 8);
 		resultPane.setMinimumSize(textSizeHint);
+		resultPane.setPreferredSize(textSizeHint);
 		
-		add(resultPane, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.PAGE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-
-		textField.addKeyListener(new KeyAdapter() {
+		addFocusListener(new FocusListener() {
 			@Override
-			public void keyReleased(KeyEvent e) {
-				switch (e.getKeyCode()) {
-				case KeyEvent.VK_DOWN:
-				case KeyEvent.VK_KP_DOWN:
-					showProposals();
-					ListSelectionModel model = proposalTable.getSelectionModel();
-					model.clearSelection();
-					model.addSelectionInterval(0, 0);
-					proposalTable.requestFocus();
-					break;
-				case KeyEvent.VK_ESCAPE:
-					hideProposals();
-					break;
-				case KeyEvent.VK_ENTER:
-					if (proposalTable.getSelectedRowCount() > 0) {
-						acceptProposal();
-					} else {
-						validateEntry(getQuery());
-					}
-					break;
-				}
-			}
-		});
-		
-		proposalDialog = new JDialog(uiUtils.getFrame(this), false);
-		proposalDialog.setUndecorated(true);
-		proposalDialog.setAlwaysOnTop(true);
-		JRootPane rootPane = proposalDialog.getRootPane();
-		rootPane.setLayout(new GridBagLayout());
-		
-		Color proposalBackground = new Color(0xFF, 0xFF, 0xE0);
-		rootPane.setBackground(proposalBackground);
-		proposalTable = createTable(proposalModel);
-		proposalTable.setBackground(proposalBackground );
-		proposalTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		proposalTable.requestFocusInWindow();
-
-		statusLabel = new JLabel();
-		rootPane.add(statusLabel, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.PAGE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-		rootPane.add(proposalTable, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		proposalDialog.pack();
-		
-		proposalTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				acceptProposal();
-			}
-		});
-		
-		proposalTable.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				switch (e.getKeyCode()) {
-				case KeyEvent.VK_ENTER:
-					acceptProposal();
-					break;
-				case KeyEvent.VK_ESCAPE:
-					hideProposals();
-					break;
-				}
-			}
-		});
-		
-		FocusListener focusListener = new FocusListener() {
 			public void focusGained(FocusEvent event) {
 			}
-
+			@Override
 			public void focusLost(FocusEvent event) {
 				handleFocusLost(event);
-			}
-		};
-		
-		addFocusListener(focusListener);
-		proposalTable.addFocusListener(focusListener);
-		textField.addFocusListener(focusListener);
-		textField.addFocusListener(new FocusListener() {
-			public void focusLost(FocusEvent e) {
-				saveCaret();
-			}
-			
-			public void focusGained(FocusEvent e) {
-				restoreCaret();
-			}
-		});
-		
-		resultTable.addFocusListener(new FocusListener() {
-			public void focusGained(FocusEvent e) {
-				hideProposals();
-			}
-
-			public void focusLost(FocusEvent e) {
 			}
 		});
 		
 		addComponentListener(new ComponentListener() {
+			@Override
 			public void componentShown(ComponentEvent e) {
 			}
-			
+			@Override
 			public void componentResized(ComponentEvent e) {
 			}
-			
+			@Override
 			public void componentMoved(ComponentEvent e) {
 			}
-			
+			@Override
 			public void componentHidden(ComponentEvent e) {
-				proposalDialog.setVisible(false);
+				getProposalDialog().setVisible(false);
 			}
 		});
 		
-		proposalDialog.addComponentListener(new ComponentListener() {
-			public void componentShown(ComponentEvent e) {
-			}
-			
-			public void componentResized(ComponentEvent e) {
-			}
-			
-			public void componentMoved(ComponentEvent e) {
-			}
-			
-			public void componentHidden(ComponentEvent e) {
-				textField.requestFocus();
-			}
-		});
+		final GroupLayout layout = new GroupLayout(this);
+        setLayout(layout);
+		layout.setAutoCreateGaps(uiUtils.isWinLAF());
+		layout.setAutoCreateContainerGaps(false);
+		
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+				.addComponent(getTextField(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(resultPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(getTextField(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+				.addComponent(resultPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
 		
 		createMenu();
 	}
 
+	public JDialog getProposalDialog() {
+		if (proposalDialog == null) {
+			proposalDialog = new JDialog(uiUtils.getFrame(this), false);
+			proposalDialog.setUndecorated(true);
+			proposalDialog.setAlwaysOnTop(true);
+			
+			final JRootPane rootPane = proposalDialog.getRootPane();
+			rootPane.setBackground(PROPOSAL_BG_COLOR);
+			
+			final GroupLayout layout = new GroupLayout(rootPane);
+			rootPane.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+					.addComponent(getStatusLabel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(getProposalTable(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+			);
+			layout.setVerticalGroup(layout.createSequentialGroup()
+					.addComponent(getStatusLabel(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addComponent(getProposalTable(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+			);
+			
+			proposalDialog.pack();
+			
+			proposalDialog.addComponentListener(new ComponentListener() {
+				@Override
+				public void componentShown(ComponentEvent e) {
+				}
+				@Override
+				public void componentResized(ComponentEvent e) {
+				}
+				@Override
+				public void componentMoved(ComponentEvent e) {
+				}
+				@Override
+				public void componentHidden(ComponentEvent e) {
+					getTextField().requestFocus();
+				}
+			});
+		}
+		
+		return proposalDialog;
+	}
+	
+	private JLabel getStatusLabel() {
+		if (statusLabel == null) {
+			statusLabel = new JLabel();
+		}
+		
+		return statusLabel;
+	}
+	
+	private JTextField getTextField() {
+		if (textField == null) {
+			textField = new JTextField();
+			textField.addFocusListener(new FocusListener() {
+				@Override
+				public void focusGained(FocusEvent e) {
+					if (getQuery().equals(GENE_HINT)) {
+						setShowGeneHint(false);
+					}
+					checkTrigger();
+				}
+				@Override
+				public void focusLost(FocusEvent e) {
+					if (getQuery().length() == 0) {
+						setShowGeneHint(true);
+					}
+				}
+			});
+			
+			textField.getDocument().addDocumentListener(new DocumentListener() {
+				@Override
+				public void changedUpdate(DocumentEvent e) {
+					checkTrigger(); 
+				}
+				@Override
+				public void insertUpdate(DocumentEvent e) {
+					checkTrigger(); 
+				}
+				@Override
+				public void removeUpdate(DocumentEvent e) {
+					checkTrigger(); 
+				}
+			});
+			
+			textField.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyReleased(KeyEvent e) {
+					switch (e.getKeyCode()) {
+					case KeyEvent.VK_DOWN:
+					case KeyEvent.VK_KP_DOWN:
+						showProposals();
+						ListSelectionModel model = getProposalTable().getSelectionModel();
+						model.clearSelection();
+						model.addSelectionInterval(0, 0);
+						getProposalTable().requestFocus();
+						break;
+					case KeyEvent.VK_ESCAPE:
+						hideProposals();
+						break;
+					case KeyEvent.VK_ENTER:
+						if (getProposalTable().getSelectedRowCount() > 0)
+							acceptProposal();
+						else
+							validateEntry(getQuery());
+						break;
+					}
+				}
+			});
+			
+			textField.addFocusListener(new FocusListener() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					handleFocusLost(e);
+					saveCaret();
+				}
+				@Override
+				public void focusGained(FocusEvent e) {
+					restoreCaret();
+				}
+			});
+		}
+		
+		return textField;
+	}
+	
+	private JTable getResultTable() {
+		if (resultTable == null) {
+			resultTable = createTable(resultModel);
+			resultTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			
+			resultTable.addFocusListener(new FocusListener() {
+				@Override
+				public void focusGained(FocusEvent e) {
+					hideProposals();
+				}
+				@Override
+				public void focusLost(FocusEvent e) {
+				}
+			});
+		}
+		
+		return resultTable;
+	}
+	
+	private JTable getProposalTable() {
+		if (proposalTable == null) {
+			proposalTable = createTable(proposalModel);
+			proposalTable.setBackground(PROPOSAL_BG_COLOR);
+			proposalTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			proposalTable.requestFocusInWindow();
+			
+			proposalTable.addMouseMotionListener(new MouseMotionAdapter() {
+				@Override
+				public void mouseMoved(MouseEvent e) {
+					proposalTable.clearSelection();
+					int row = proposalTable.rowAtPoint(e.getPoint());
+
+					if (row > -1)
+						proposalTable.setRowSelectionInterval(row, row);
+				}
+			});
+			
+			proposalTable.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					acceptProposal();
+				}
+			});
+			
+			proposalTable.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyPressed(KeyEvent e) {
+					switch (e.getKeyCode()) {
+					case KeyEvent.VK_ENTER:
+						acceptProposal();
+						break;
+					case KeyEvent.VK_ESCAPE:
+						hideProposals();
+						break;
+					}
+				}
+			});
+			
+			proposalTable.addFocusListener(new FocusListener() {
+				@Override
+				public void focusGained(FocusEvent event) {
+				}
+				@Override
+				public void focusLost(FocusEvent event) {
+					handleFocusLost(event);
+				}
+			});
+		}
+		
+		return proposalTable;
+	}
+	
 	private void createMenu() {
 		JPopupMenu contextMenu = new JPopupMenu();
 		JMenuItem pasteMenu = new JMenuItem(Strings.paste_menuLabel);
 		pasteMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				textField.requestFocus();
+				getTextField().requestFocus();
 				new DefaultEditorKit.PasteAction().actionPerformed(event);
 			}
 		});
 		contextMenu.add(pasteMenu);
-		textField.setComponentPopupMenu(contextMenu);
+		getTextField().setComponentPopupMenu(contextMenu);
 	}
 
 	public void handleParentMoved() {
-		if (proposalDialog.isVisible()) {
-			popUpBelow(textField);
+		if (getProposalDialog().isVisible()) {
+			popUpBelow(getTextField());
 		}
 	}
 
 	void restoreCaret() {
-		textField.select(lastSelectionStart, lastSelectionEnd);
+		getTextField().select(lastSelectionStart, lastSelectionEnd);
 	}
 
 	void saveCaret() {
-		lastSelectionStart = textField.getSelectionStart();
-		lastSelectionEnd = textField.getSelectionEnd();
+		lastSelectionStart = getTextField().getSelectionStart();
+		lastSelectionEnd = getTextField().getSelectionEnd();
 	}
 
 	private void handleFocusLost(FocusEvent event) {
 		Component component = event.getOppositeComponent();
-		if (component == null) {
+		
+		if (component == null)
 			return;
-		}
+		
 		while (component != null) {
-			if (component.equals(proposalTable)) {
+			if (component.equals(proposalTable))
 				return;
-			}
-			if (component.equals(textField)) {
+			if (component.equals(getTextField()))
 				return;
-			}
-			if (component.equals(this)) {
+			if (component.equals(this))
 				return;
-			}
+			
 			component = component.getParent();
 		}
+		
 		hideProposals();
 	}
 
@@ -388,15 +476,15 @@ public class CompletionPanel extends JPanel {
 		point.y = controlBounds.y;
 		SwingUtilities.convertPointToScreen(point, control.getParent());
 		
-		Rectangle bounds = proposalDialog.getBounds();
+		Rectangle bounds = getProposalDialog().getBounds();
 		bounds.x = point.x;
 		bounds.y = point.y + controlBounds.height;
 		bounds.width = controlBounds.width;
-		proposalDialog.setBounds(bounds);
+		getProposalDialog().setBounds(bounds);
 		
 		hackForTicket1439();
 		hackForTicket1449();
-		proposalDialog.setVisible(true);
+		getProposalDialog().setVisible(true);
 	}
 
 	private void hackForTicket1449() {
@@ -405,7 +493,7 @@ public class CompletionPanel extends JPanel {
 			return;
 		}
 		
-		proposalDialog.setFocusableWindowState(false);
+		getProposalDialog().setFocusableWindowState(false);
 	}
 
 	private void hackForTicket1439() {
@@ -414,16 +502,16 @@ public class CompletionPanel extends JPanel {
 			return;
 		}
 		
-		proposalDialog.setFocusableWindowState(false);
+		getProposalDialog().setFocusableWindowState(false);
 	}
 
 	void setShowGeneHint(boolean visible) {
 		if (visible) {
-			textField.setText(GENE_HINT);
-			textField.setForeground(Color.gray);
+			getTextField().setText(GENE_HINT);
+			getTextField().setForeground(SystemColor.textInactiveText);
 		} else {
-			textField.setText(""); //$NON-NLS-1$
-			textField.setForeground(Color.black);
+			getTextField().setText(""); //$NON-NLS-1$
+			getTextField().setForeground(SystemColor.textText);
 		}
 	}
 	
@@ -435,28 +523,24 @@ public class CompletionPanel extends JPanel {
 				super.addNotify();
 				uiUtils.packColumns(this);
 			}
-			
-			@Override
-			public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-				setForeground(column == 0 ? Color.black : Color.darkGray);
-				return super.prepareRenderer(renderer, row, column);
-			}
 		};
 		table.setColumnSelectionAllowed(false);
 		table.setRowSelectionAllowed(true);
+		
 		return table;
 	}
 
 	private DynamicTableModel<Gene> createModel() {
 		return new DynamicTableModel<Gene>() {
+			@Override
 			public Class<?> getColumnClass(int columnIndex) {
 				return String.class;
 			}
-
+			@Override
 			public int getColumnCount() {
 				return 2;
 			}
-
+			@Override
 			public String getColumnName(int columnIndex) {
 				switch (columnIndex) {
 				case 0:
@@ -467,7 +551,7 @@ public class CompletionPanel extends JPanel {
 					return ""; //$NON-NLS-1$
 				}
 			}
-
+			@Override
 			public Object getValueAt(int rowIndex, int columnIndex) {
 				Gene gene = get(rowIndex);
 				if (gene == null) {
@@ -481,11 +565,11 @@ public class CompletionPanel extends JPanel {
 				}
 				return null;
 			}
-
+			@Override
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
 				return false;
 			}
-
+			@Override
 			public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			}
 		};
@@ -502,7 +586,7 @@ public class CompletionPanel extends JPanel {
 	}
 	
 	void setProposalStatus(String message) {
-		statusLabel.setText(String.format("<html><b>%s</b></html>", message)); //$NON-NLS-1$
+		getStatusLabel().setText(String.format("<html><b>%s</b></html>", message)); //$NON-NLS-1$
 	}
 
 	public void setProvider(GeneCompletionProvider2 provider) {
@@ -513,7 +597,7 @@ public class CompletionPanel extends JPanel {
 		if (provider == null) {
 			provider = createEmptyProvider();
 		}
-		textField.setTransferHandler(new CompletionTransferHandler(provider, new CompletionConsumer() {
+		getTextField().setTransferHandler(new CompletionTransferHandler(provider, new CompletionConsumer() {
 			List<String> completions = new ArrayList<String>();
 			
 			public void consume(String completion) {
@@ -589,23 +673,23 @@ public class CompletionPanel extends JPanel {
 			});
 			return;
 		}
-		uiUtils.packColumns(resultTable);
+		uiUtils.packColumns(getResultTable());
 	}
 
 	private void acceptProposal() {
 		synchronized (this) {
-			Gene gene = proposalModel.get(proposalTable.getSelectedRow());
+			Gene gene = proposalModel.get(getProposalTable().getSelectedRow());
 			String proposal = gene.getSymbol(); 
 			if (validateGene(proposal)) {
 				setStatus(""); //$NON-NLS-1$
 				repackTable();
 			}
-			ListSelectionModel model = proposalTable.getSelectionModel();
+			ListSelectionModel model = getProposalTable().getSelectionModel();
 			model.clearSelection();
 			model.addSelectionInterval(0, 0);
 			hideProposals();
 			proposalModel.clear();
-			textField.setText(""); //$NON-NLS-1$
+			getTextField().setText(""); //$NON-NLS-1$
 		}
 	}
 	
@@ -617,11 +701,11 @@ public class CompletionPanel extends JPanel {
 		repackTable();
 		hideProposals();
 		proposalModel.clear();
-		textField.setText(""); //$NON-NLS-1$
+		getTextField().setText(""); //$NON-NLS-1$
 	}
 
 	public void hideProposals() {
-		proposalDialog.setVisible(false);
+		getProposalDialog().setVisible(false);
 	}
 
 	private void showProposals() {
@@ -648,16 +732,16 @@ public class CompletionPanel extends JPanel {
 			i++;
 		}
 		
-		uiUtils.packColumns(proposalTable);
-		proposalDialog.pack();
+		uiUtils.packColumns(getProposalTable());
+		getProposalDialog().pack();
 
-		popUpBelow(textField);
+		popUpBelow(getTextField());
 		if (selectedIndex != -1) {
-			ListSelectionModel model = proposalTable.getSelectionModel();
+			ListSelectionModel model = getProposalTable().getSelectionModel();
 			model.clearSelection();
 			model.addSelectionInterval(selectedIndex, selectedIndex);
 		}
-		textField.requestFocus();
+		getTextField().requestFocus();
 	}
 
 	private void computeProposals(String query) {
@@ -675,7 +759,7 @@ public class CompletionPanel extends JPanel {
 	}
 	
 	private String getQuery() {
-		return textField.getText().trim();
+		return getTextField().getText().trim();
 	}
 
 	public List<String> getItems() {
@@ -700,27 +784,27 @@ public class CompletionPanel extends JPanel {
 	}
 	
 	public int getSelectionCount() {
-		return resultTable.getSelectedRowCount();
+		return getResultTable().getSelectedRowCount();
 	}
 	
 	public void removeSelection() {
-		int[] selection = resultTable.getSelectedRows();
+		int[] selection = getResultTable().getSelectedRows();
 		resultModel.removeRows(selection);
-		uiUtils.packColumns(resultTable);
+		uiUtils.packColumns(getResultTable());
 	}
 	
 	public void clear() {
 		setStatus(""); //$NON-NLS-1$
 		resultModel.clear();
-		uiUtils.packColumns(resultTable);
+		uiUtils.packColumns(getResultTable());
 	}
 
 	public void addListSelectionListener(ListSelectionListener listener) {
-		resultTable.getSelectionModel().addListSelectionListener(listener);
+		getResultTable().getSelectionModel().addListSelectionListener(listener);
 	}
 	
 	public void removeListSelectionListener(ListSelectionListener listener) {
-		resultTable.getSelectionModel().removeListSelectionListener(listener);
+		getResultTable().getSelectionModel().removeListSelectionListener(listener);
 	}
 	
 	public void addTableModelEventListener(TableModelListener listener) {
@@ -733,17 +817,13 @@ public class CompletionPanel extends JPanel {
 	
 	@Override
 	public void setEnabled(boolean enabled) {
-		textField.setEnabled(enabled);
-		resultTable.setEnabled(enabled);
+		getTextField().setEnabled(enabled);
+		getResultTable().setEnabled(enabled);
 		super.setEnabled(enabled);
-	}
-	
-	public JDialog getProposalDialog() {
-		return proposalDialog;
 	}
 	
 	@Override
 	public void requestFocus() {
-		textField.requestFocus();
+		getTextField().requestFocus();
 	}
 }

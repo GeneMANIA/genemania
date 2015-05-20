@@ -65,6 +65,7 @@ public class Strings extends AbstractStrings {
 	public static String adjacencyListParameter_error;
 	public static String installTextNetwork_status;
 	public static String dataSetConfiguration_title;
+	public static String dataSetConfigurationButton_label;
 	public static String closeButton_label;
 	public static String unknownFileType_error;
 	public static String installTextNetwork_status2;
@@ -166,6 +167,7 @@ public class Strings extends AbstractStrings {
 	public static String networkDetailPanelTags_label;
 	public static String networkDetailPanelDescription_label;
 	
+	public static String advancedOptionsPanel_title;
 	public static String detailedSelection_label;
 	public static String networkSelectionPanelDescription_label;
 	public static String organismModelElementDescription_label;
@@ -204,8 +206,7 @@ public class Strings extends AbstractStrings {
 	public static String retrieveRelatedGenesStatisticsInteractions_label;
 	public static String retrieveRelatedGenesStatisticsVersion_label;
 	public static String retrieveRelatedGenesNoResults;
-	public static String retrieveRelatedGenesLoadParameters_label;
-	public static String retrieveRelatedGenesChooseFileButton_label;
+	public static String retrieveRelatedGenesLoadParametersButton_label;
 	public static String taskDialog_error;
 	public static String taskDialogCloseButton_label;
 	public static String taskDialogOutOfMemory_error;

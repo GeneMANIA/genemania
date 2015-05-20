@@ -72,7 +72,7 @@ public class GeneInfoPanel extends ToggleInfoPanel<Gene, GeneDetailPanel> {
 	public void updateSelection(ViewState options) {
 		GeneDetailPanel mostRecent = null;
 		for (GeneDetailPanel panel : dataModel) {
-			boolean enabled = options.getGeneHighlighted(panel.getGeneName());
+			boolean enabled = options.isGeneHighlighted(panel.getGeneName());
 			if (enabled) {
 				mostRecent = panel;
 				panel.showDetails(true, 1);

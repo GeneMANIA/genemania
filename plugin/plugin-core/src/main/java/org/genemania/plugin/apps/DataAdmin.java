@@ -32,6 +32,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JOptionPane;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.genemania.exception.ApplicationException;
@@ -261,10 +263,24 @@ public class DataAdmin extends AbstractPluginApp {
 			String path = fArguments.get(1); 
 			try {
 				fData = (LuceneDataSet<?, ?, ?>) fManager.open(new File(path));
-				List<DataDescriptor> available = fData.getAvailableDataDescriptors();
+				List<DataDescriptor> available = null;
+				
+				try {
+					available = fData.getAvailableDataDescriptors();
+				} catch (IOException e) {
+					JOptionPane.showMessageDialog(
+							null,
+							e.getMessage(), 
+							"GeneMANIA Error",
+							JOptionPane.ERROR_MESSAGE
+					);
+					return;
+				}
+				
 				List<DataDescriptor> installed = fData.getInstalledDataDescriptors();
 				
 				System.out.println("Data ID\tDescription\tStatus"); //$NON-NLS-1$
+				
 				for (DataDescriptor descriptor : available) {
 					boolean isInstalled = installed.contains(descriptor);
 					String status = isInstalled ? "Installed" : ""; //$NON-NLS-1$ //$NON-NLS-2$
@@ -328,8 +344,22 @@ public class DataAdmin extends AbstractPluginApp {
 
 			try {
 				fData = (LuceneDataSet<?, ?, ?>) fManager.open(file);
-				List<DataDescriptor> available = fData.getAvailableDataDescriptors();
+				List<DataDescriptor> available = null;
+				
+				try {
+					available = fData.getAvailableDataDescriptors();
+				} catch (IOException e) {
+					JOptionPane.showMessageDialog(
+							null,
+							e.getMessage(), 
+							"GeneMANIA Error",
+							JOptionPane.ERROR_MESSAGE
+					);
+					return;
+				}
+				
 				List<DataDescriptor> installed = fData.getInstalledDataDescriptors();
+				
 				for (int i = 2; i < fArguments.size(); i++) {
 					String id = fArguments.get(i);
 					if ("all".equals(id)) { //$NON-NLS-1$

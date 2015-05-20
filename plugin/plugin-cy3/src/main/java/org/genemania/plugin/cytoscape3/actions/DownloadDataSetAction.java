@@ -32,7 +32,12 @@ import org.genemania.plugin.Strings;
 @SuppressWarnings("serial")
 public class DownloadDataSetAction extends GeneManiaAction {
 	
-	public DownloadDataSetAction(Map<String, String> properties, CyApplicationManager applicationManager, GeneMania<CyNetwork, CyNode, CyEdge> geneMania, CyNetworkViewManager viewManager) {
+	public DownloadDataSetAction(
+			Map<String, String> properties,
+			CyApplicationManager applicationManager,
+			GeneMania<CyNetwork, CyNode, CyEdge> geneMania,
+			CyNetworkViewManager viewManager
+	) {
 		super(properties, applicationManager, geneMania, viewManager);
 		putValue(NAME, Strings.dataUpdateDownload_menuLabel);
 	}

@@ -19,19 +19,23 @@
 
 package org.genemania.plugin.data.lucene.view;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.BorderFactory;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
@@ -49,9 +53,11 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.util.ChildProgressReporter;
 
+@SuppressWarnings("serial")
 public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
-	private static final long serialVersionUID = 1L;
 	
+	private JPanel availablePanel;
+	private JPanel installedPanel;
 	private DynamicListModel<DataDescriptor> installedModel;
 	private DynamicListModel<DataDescriptor> availableModel;
 	private JList installedList;
@@ -69,73 +75,21 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 		this.uiUtils = uiUtils;
 		this.taskDispatcher = taskDispatcher;
 		
-		setLayout(new GridBagLayout());
-		setOpaque(false);
+		if (uiUtils.isAquaLAF())
+			setOpaque(false);
 		
-		ListSelectionListener listener = new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				validateSettings();
-			}
-		};
-	
-		JPanel installed = uiUtils.createJPanel();
-		installed.setBorder(BorderFactory.createTitledBorder(Strings.netmaniaInstalledDataList_title));
+		addComponents();
 		
-		installed.setLayout(new GridBagLayout());
-		installedList = new JList();
-		installedList.setName(Strings.netmaniaInstalledDataList_title);
-		installedList.setBorder(BorderFactory.createEtchedBorder());
-		installedList.addListSelectionListener(listener);
-		installed.add(new JScrollPane(installedList), new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		
-		JPanel installedButtons = uiUtils.createJPanel();
-		installedButtons.setLayout(new GridBagLayout());
-		installed.add(installedButtons, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		
-		deleteButton = new JButton(Strings.deleteDataButton_label);
-		deleteButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				doDelete();
-			}
-		});
-		installedButtons.add(deleteButton, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0 ,0));
-		
-		JPanel available = uiUtils.createJPanel();
-		available.setBorder(BorderFactory.createTitledBorder(Strings.netmaniaAvailableDataList_title));
-		
-		available.setLayout(new GridBagLayout());
-		availableList = new JList();
-		availableList.setName(Strings.netmaniaAvailableDataList_title);
-		availableList.setBorder(BorderFactory.createEtchedBorder());
-		availableList.addListSelectionListener(listener);
-		available.add(new JScrollPane(availableList), new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		
-		JPanel availableButtons = uiUtils.createJPanel();
-		availableButtons.setLayout(new GridBagLayout());
-		available.add(availableButtons, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		
-		installButton = new JButton(Strings.installDataButton_label);
-		installButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				doInstall();
-			}
-		});
-		availableButtons.add(installButton, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		
-		JEditorPane descriptionPane = uiUtils.createLinkEnabledEditorPane(this, Strings.luceneConfigNetManiaTab_label);
-		add(descriptionPane, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 5, 5), 0, 0));
-		add(available, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		add(installed, new GridBagConstraints(0, 2, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-
-		LuceneDataSet<NETWORK, NODE, EDGE> data = (LuceneDataSet<NETWORK, NODE, EDGE>) dataSetManager.getDataSet();
+		final LuceneDataSet<NETWORK, NODE, EDGE> data = (LuceneDataSet<NETWORK, NODE, EDGE>) dataSetManager.getDataSet();
 		populate(data);
 		validateSettings();
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void doDelete() {
 		LuceneDataSet<NETWORK, NODE, EDGE> data = (LuceneDataSet) dataSetManager.getDataSet();
-		int[] selection = installedList.getSelectedIndices();
+		int[] selection = getInstalledList().getSelectedIndices();
+		
 		for (int i : selection) {
 			DataDescriptor descriptor = (DataDescriptor) installedModel.getElementAt(i);
 
@@ -145,6 +99,7 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 				data.log(e);
 			}
 		}
+		
 		validateSettings();
 		GeneManiaTask task = new GeneManiaTask(Strings.deleteData_status) {
 			@Override
@@ -152,6 +107,7 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 				dataSetManager.reloadDataSet(progress);
 			}
 		};
+		
 		taskDispatcher.executeTask(task, uiUtils.getFrame(this), true, true);
 		LogUtils.log(getClass(), task.getLastError());
 		
@@ -160,21 +116,23 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 	
 	public void doInstall() {
 		GeneManiaTask task = new GeneManiaTask(Strings.installData_status) {
-			@SuppressWarnings("unchecked")
 			@Override
+			@SuppressWarnings("unchecked")
 			protected void runTask() {
-				int[] selection = availableList.getSelectedIndices();
+				int[] selection = getAvailableList().getSelectedIndices();
 				ArrayList<Integer> installed = new ArrayList<Integer>();
 				progress.setMaximumProgress(selection.length);
 				LuceneDataSet<NETWORK, NODE, EDGE> data = (LuceneDataSet<NETWORK, NODE, EDGE>) dataSetManager.getDataSet();
+				
 				for (int index : selection) {
-					if (progress.isCanceled()) {
+					if (progress.isCanceled())
 						break;
-					}
+					
 					DataDescriptor descriptor = (DataDescriptor) availableModel.getElementAt(index);
 					String name = descriptor.getId();
 
 					ChildProgressReporter childProgress = new ChildProgressReporter(progress);
+					
 					try {
 						data.installIndex(name, descriptor.getDescription(), childProgress);
 						if (childProgress.isCanceled()) {
@@ -199,35 +157,175 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 						childProgress.close();
 					}
 				}
-				// Remove in reverse order so we don't have to worry about
-				// shifting indicies.
+				
+				// Remove in reverse order so we don't have to worry about shifting indices.
 				Collections.sort(installed);
 				for (int i = installed.size() - 1; i >= 0; i--) {
 					availableModel.remove(installed.get(i));
 				}
+				
 				installedModel.sort();
 				validateSettings();
 				dataSetManager.reloadDataSet(progress);
 			}
 		};
+		
 		taskDispatcher.executeTask(task, uiUtils.getFrame(this), true, true);
 		LogUtils.log(getClass(), task.getLastError());
 	}
 	
+	private void addComponents() {
+		final JEditorPane descriptionPane =
+				uiUtils.createLinkEnabledEditorPane(this, Strings.luceneConfigNetManiaTab_label);
+		descriptionPane.setFont(descriptionPane.getFont().deriveFont(UiUtils.INFO_FONT_SIZE));
+		descriptionPane.setMargin(new Insets(5, 0, 20, 0));
+		
+		final GroupLayout layout = new GroupLayout(this);
+		this.setLayout(layout);
+		layout.setAutoCreateGaps(uiUtils.isWinLAF());
+		layout.setAutoCreateContainerGaps(true);
+		
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)
+				.addComponent(descriptionPane, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+				.addComponent(getAvailablePanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getInstalledPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(descriptionPane, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+				.addComponent(getAvailablePanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getInstalledPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		
+		uiUtils.equalizeSize(getInstallButton(), getDeleteButton());
+	}
+	
+	private JPanel getAvailablePanel() {
+		if (availablePanel == null) {
+			availablePanel = uiUtils.createJPanel();
+			availablePanel.setBorder(uiUtils.createTitledBorder(Strings.netmaniaAvailableDataList_title));
+			
+			final JScrollPane scrollPane = new JScrollPane(getAvailableList());
+			scrollPane.setPreferredSize(uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 10, 10));
+			
+			final GroupLayout layout = new GroupLayout(availablePanel);
+			availablePanel.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(getInstallButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+			layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+					.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(getInstallButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+		}
+		
+		return availablePanel;
+	}
+	
+	private JPanel getInstalledPanel() {
+		if (installedPanel == null) {
+			installedPanel = uiUtils.createJPanel();
+			installedPanel.setBorder(uiUtils.createTitledBorder(Strings.netmaniaInstalledDataList_title));
+			
+			final JScrollPane scrollPane = new JScrollPane(getInstalledList());
+			scrollPane.setPreferredSize(uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 10, 10));
+			
+			final GroupLayout layout = new GroupLayout(installedPanel);
+			installedPanel.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(getDeleteButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+			layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+					.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(getDeleteButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+		}
+		
+		return installedPanel;
+	}
+	
+	private JList getAvailableList() {
+		if (availableList == null) {
+			availableList = new JList();
+			availableList.setName(Strings.netmaniaAvailableDataList_title);
+			availableList.addListSelectionListener(new ListSelectionListener() {
+				@Override
+				public void valueChanged(ListSelectionEvent e) {
+					validateSettings();
+				}
+			});
+		}
+		
+		return availableList;
+	}
+	
+	private JList getInstalledList() {
+		if (installedList == null) {
+			installedList = new JList();
+			installedList.setName(Strings.netmaniaInstalledDataList_title);
+			installedList.addListSelectionListener(new ListSelectionListener() {
+				@Override
+				public void valueChanged(ListSelectionEvent e) {
+					validateSettings();
+				}
+			});
+		}
+		
+		return installedList;
+	}
+	
+	private JButton getInstallButton() {
+		if (installButton == null) {
+			installButton = new JButton(Strings.installDataButton_label);
+			installButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					doInstall();
+				}
+			});
+		}
+		
+		return installButton;
+	}
+	
+	private JButton getDeleteButton() {
+		if (deleteButton == null) {
+			deleteButton = new JButton(Strings.deleteDataButton_label);
+			deleteButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					doDelete();
+				}
+			});
+		}
+		
+		return deleteButton;
+	}
+	
 	private void validateSettings() {
-		installButton.setEnabled(availableModel.getSize() > 0 && availableList.getSelectedIndex() != -1);
-		deleteButton.setEnabled(installedModel.getSize() > 0 && installedList.getSelectedIndex() != -1);
+		getInstallButton().setEnabled(
+				availableModel != null && availableModel.getSize() > 0 && getAvailableList().getSelectedIndex() != -1);
+		getDeleteButton().setEnabled(
+				installedModel != null && installedModel.getSize() > 0 && getInstalledList().getSelectedIndex() != -1);
 	}
 	
 	@SuppressWarnings("unchecked")
 	private DataDescriptor getInstalledDataDescriptor(String id) {
 		LuceneDataSet<NETWORK, NODE, EDGE> data = (LuceneDataSet<NETWORK, NODE, EDGE>) dataSetManager.getDataSet();
 		List<DataDescriptor> installed = data.getInstalledDataDescriptors();
+		
 		for (DataDescriptor descriptor : installed) {
-			if (descriptor.getId().equals(id)) {
+			if (descriptor.getId().equals(id))
 				return descriptor;
-			}
 		}
+		
 		return null;
 	}
 	
@@ -235,20 +333,32 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 		List<DataDescriptor> installed = data.getInstalledDataDescriptors();
 		Collections.sort(installed);
 		installedModel = new DynamicListModel<DataDescriptor>(installed);
-		installedList.setModel(installedModel);
+		getInstalledList().setModel(installedModel);
 		
-		List<DataDescriptor> availableDescriptors = data.getAvailableDataDescriptors();
+		List<DataDescriptor> availableDescriptors = null;
+		
+		try {
+			availableDescriptors = data.getAvailableDataDescriptors();
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(
+					null,
+					e.getMessage(), 
+					"GeneMANIA Error",
+					JOptionPane.ERROR_MESSAGE
+			);
+			return;
+		}
+		
 		List<DataDescriptor> result = new ArrayList<DataDescriptor>();
 		
 		for (DataDescriptor descriptor : availableDescriptors) {
-			if (!installed.contains(descriptor)) {
+			if (!installed.contains(descriptor))
 				result.add(descriptor);
-			}
 		}
+		
 		Collections.sort(result);
 		
 		availableModel = new DynamicListModel<DataDescriptor>(result);
-		availableList.setModel(availableModel);
+		getAvailableList().setModel(availableModel);
 	}
-
 }

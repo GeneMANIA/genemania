@@ -40,6 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.log4j.Logger;
 import org.genemania.util.ProgressReporter;
 
 import ch.enterag.utils.zip.FileEntry;
@@ -50,6 +51,7 @@ import ch.enterag.utils.zip.Zip64File;
  * GeneMANIA server.
  */
 public class FileUtils {
+	
 	public static final String DEFAULT_BASE_URL = "http://www.genemania.org/plugin"; //$NON-NLS-1$
 	public static final String DEFAULT_METADATA_URL = DEFAULT_BASE_URL + "/versions.txt"; //$NON-NLS-1$
 	
@@ -273,9 +275,16 @@ public class FileUtils {
 	public Map<String, Long> getDataSetSizes(String baseUrl) throws IOException {
 		Map<String, String> properties = getDataSetProperties(baseUrl, SIZE_FILE);
 		Map<String, Long> sizes = new HashMap<String, Long>();
+		
 		for (Entry<String, String> entry : properties.entrySet()) {
-			sizes.put(entry.getKey(), Long.decode(entry.getValue()));
+			try {
+				sizes.put(entry.getKey(), Long.decode(entry.getValue()));
+			} catch (NumberFormatException e) {
+				log(e);
+				throw new IOException("Invalid Data Set", e);
+			}
 		}
+			
 		return sizes;
 	}
 	
@@ -310,5 +319,12 @@ public class FileUtils {
 
 	public File getUserHome() {
 		return new File(System.getProperty("user.home")); //$NON-NLS-1$
+	}
+	
+	public void log(Throwable e) {
+		if (e != null) {
+			Logger logger = Logger.getLogger(getClass());
+			logger.error("Unexpected error", e); //$NON-NLS-1$
+		}
 	}
 }

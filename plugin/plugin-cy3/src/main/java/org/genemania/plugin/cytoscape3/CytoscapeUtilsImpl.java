@@ -23,8 +23,9 @@ import java.awt.Frame;
 import java.awt.Paint;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -47,10 +48,13 @@ import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.RowSetRecord;
 import org.cytoscape.model.events.RowsSetEvent;
 import org.cytoscape.model.events.RowsSetListener;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.visualize.ApplyPreferredLayoutTaskFactory;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.RenderingEngine;
@@ -73,6 +77,7 @@ import org.genemania.plugin.LogUtils;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.cytoscape.AbstractCytoscapeUtils;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
+import org.genemania.plugin.cytoscape3.layout.GeneManiaFDLayout;
 import org.genemania.plugin.delegates.SelectionDelegate;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ViewState;
@@ -83,19 +88,17 @@ import org.genemania.plugin.selection.NetworkSelectionManager;
 
 public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode, CyEdge> implements CytoscapeUtils<CyNetwork, CyNode, CyEdge>, RowsSetListener {
 
-	private CySwingApplication application;
-	private CyApplicationManager applicationManager;
-	private CyNetworkManager networkManager;
-	private CyNetworkFactory networkFactory;
-	private CyNetworkViewFactory viewFactory;
-	private CyNetworkViewManager viewManager;
-	
+	private final CySwingApplication application;
+	private final CyApplicationManager applicationManager;
+	private final CyNetworkManager networkManager;
+	private final CyNetworkFactory networkFactory;
+	private final CyNetworkViewFactory viewFactory;
+	private final CyNetworkViewManager viewManager;
 	private final VisualStyleFactory styleFactory;
 	private final VisualMappingManager mappingManager;
 	private final VisualMappingFunctionFactory discreteFactory;
 	private final VisualMappingFunctionFactory passthroughFactory;
 	private final VisualMappingFunctionFactory continuousFactory;
-	
 	private final TaskManager<?, ?> taskManager;
 	private final ApplyPreferredLayoutTaskFactory applyPreferredLayoutTaskFactory;
 	private final RenderingEngineManager renderingEngineManager;
@@ -108,20 +111,28 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	Map<CyTable, Reference<CyNetwork>> networksByNodeTable;
 	Map<CyTable, Reference<CyNetwork>> networksByEdgeTable;
 	
-	private Object selectionMutex = new Object();
+	private final Object selectionMutex = new Object();
 	private SelectionHandler selectionHandler;
-	private CyEventHelper eventHelper;
+	private final CyEventHelper eventHelper;
+	private final CyServiceRegistrar serviceRegistrar;
 	
-	public CytoscapeUtilsImpl(NetworkUtils networkUtils,
-							  CySwingApplication application, CyApplicationManager applicationManager,
-							  CyNetworkManager networkManager, CyNetworkViewManager viewManager,
-							  CyNetworkFactory networkFactory, CyNetworkViewFactory viewFactory,
-							  VisualStyleFactory styleFactory, VisualMappingManager mappingManager,
-							  VisualMappingFunctionFactory discreteFactory,
-							  VisualMappingFunctionFactory passthroughFactory,
-							  VisualMappingFunctionFactory continuousFactory, TaskManager<?, ?> taskManager,
-							  CyEventHelper eventHelper, ApplyPreferredLayoutTaskFactory applyPreferredLayoutTaskFactory,
-							  RenderingEngineManager renderingEngineManager) {
+	public CytoscapeUtilsImpl(
+			NetworkUtils networkUtils,
+			CySwingApplication application,
+			CyApplicationManager applicationManager,
+			CyNetworkManager networkManager,
+			CyNetworkViewManager viewManager,
+			CyNetworkFactory networkFactory,
+			CyNetworkViewFactory viewFactory,
+			VisualStyleFactory styleFactory,
+			VisualMappingManager mappingManager,
+			VisualMappingFunctionFactory discreteFactory,
+			VisualMappingFunctionFactory passthroughFactory,
+			VisualMappingFunctionFactory continuousFactory, TaskManager<?, ?> taskManager,
+			CyEventHelper eventHelper, ApplyPreferredLayoutTaskFactory applyPreferredLayoutTaskFactory,
+			RenderingEngineManager renderingEngineManager,
+			CyServiceRegistrar serviceRegistrar
+	) {
 		super(networkUtils);
 		this.application = application;
 		this.applicationManager = applicationManager;
@@ -140,6 +151,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		this.taskManager = taskManager;
 		this.eventHelper = eventHelper;
 		this.renderingEngineManager = renderingEngineManager;
+		this.serviceRegistrar = serviceRegistrar;
 		
 		nodes = new WeakHashMap<CyNetwork, Map<String, Reference<CyNode>>>();
 		edges = new WeakHashMap<CyNetwork, Map<String, Reference<CyEdge>>>();
@@ -149,13 +161,13 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		visualStyles = new WeakHashMap<CyNetwork, VisualStyle>();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void applyVisualization(
 			CyNetwork network,
 			Map<Long, Double> scores,
-			Map<String, Color> colors, double[] extrema) {
-		
+			Map<String, Color> colors,
+			double[] extrema
+	) {
 		VisualStyle style = styleFactory.createVisualStyle(getVisualStyleName(network));
 		style.setDefaultValue(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ELLIPSE);
 		style.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, RESULT_COLOR);
@@ -188,18 +200,57 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		edgeWidthMapping.addPoint(extrema[0], new BoundaryRangeValues<Double>(MINIMUM_EDGE_WIDTH, MINIMUM_EDGE_WIDTH, MINIMUM_EDGE_WIDTH));
 		edgeWidthMapping.addPoint(extrema[1], new BoundaryRangeValues<Double>(MAXIMUM_EDGE_WIDTH, MAXIMUM_EDGE_WIDTH, MAXIMUM_EDGE_WIDTH));
 		style.addVisualMappingFunction(edgeWidthMapping);
-		
-		DiscreteMapping<Integer, Integer> edgeTransparencyMapping = (DiscreteMapping<Integer, Integer>) discreteFactory.createVisualMappingFunction(HIGHLIGHT_ATTRIBUTE, Integer.class, BasicVisualLexicon.EDGE_TRANSPARENCY);
-		edgeTransparencyMapping.putMapValue(0, 64);
-		edgeTransparencyMapping.putMapValue(1, 255);
-		style.addVisualMappingFunction(edgeTransparencyMapping);
 	
 		visualStyles.put(network, style);
 		
 		CytoPanel panel = application.getCytoPanel(CytoPanelName.EAST);
+		
 		if (panel.getState() == CytoPanelState.HIDE) {
 			panel.setState(CytoPanelState.DOCK);
 		}
+	}
+	
+	@Override
+	public void setHighlighted(final ViewState config, final CyNetwork network, final boolean visible) {
+		final NetworkProxy<CyNetwork, CyNode, CyEdge> networkProxy = getNetworkProxy(network);
+		final Collection<CyNetworkView> netViews = viewManager.getNetworkViews(network);
+		
+		for (final CyEdge edge : networkProxy.getEdges()) {
+			for (final CyNetworkView nv : netViews) {
+				final View<CyEdge> ev = nv.getEdgeView(edge);
+				
+				if (ev != null)
+					ev.setLockedValue(BasicVisualLexicon.EDGE_VISIBLE, visible);
+			}
+		}
+		
+		repaint();
+	}	
+	
+	@Override
+	public void setHighlight(final ViewState config, final Group<?, ?> source, final CyNetwork network,
+			final boolean visible) {
+		final Set<String> edgeIds = config.getEdgeIds(source);
+		
+		if (edgeIds == null)
+			return;
+		
+		config.setEnabled(source, visible);
+		final Collection<CyNetworkView> netViews = viewManager.getNetworkViews(network);
+		
+		for (final String edgeId : edgeIds) {
+			final CyEdge edge = getEdge(edgeId, network);
+			if (edge == null) continue;
+			
+			for (final CyNetworkView nv : netViews) {
+				final View<CyEdge> ev = nv.getEdgeView(edge);
+				
+				if (ev != null)
+					ev.setLockedValue(BasicVisualLexicon.EDGE_VISIBLE, visible);
+			}
+		}
+		
+		repaint();
 	}
 
 	private void setLabelPosition(CyNetworkView view, VisualStyle style) {
@@ -261,14 +312,25 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	@Override
 	public void maximize(CyNetwork network) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void performLayout(CyNetwork network) {
-		CyNetworkView view = viewManager.getNetworkViews(network).iterator().next();		
-		TaskIterator taskIterator = applyPreferredLayoutTaskFactory.createTaskIterator(Collections.singletonList(view));
-		taskManager.execute(taskIterator);
+		Collection<CyNetworkView> views = viewManager.getNetworkViews(network);
+		GeneManiaFDLayout gmLayout = (GeneManiaFDLayout) serviceRegistrar.getService(CyLayoutAlgorithmManager.class)
+				.getLayout(GeneManiaFDLayout.ALGORITHM_ID);
+		
+		if (gmLayout != null) {
+			Object context = gmLayout.createLayoutContext();
+			
+			for (CyNetworkView nv : views) {
+				Set<View<CyNode>> nodesToLayOut = new HashSet<View<CyNode>>(nv.getNodeViews());
+				taskManager.execute(gmLayout.createTaskIterator(nv, context, nodesToLayOut, null));
+			}
+		} else {
+			TaskIterator taskIterator = applyPreferredLayoutTaskFactory.createTaskIterator(views);
+			taskManager.execute(taskIterator);
+		}
 	}
 
 	@Override
@@ -493,10 +555,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		}
 		
 		@Override
-		protected void handleSelection(
-				ViewState options)
-				throws ApplicationException {
-			
+		protected void handleSelection(ViewState options) throws ApplicationException {
 			if (!manager.isSelectionListenerEnabled()) {
 				return;
 			}

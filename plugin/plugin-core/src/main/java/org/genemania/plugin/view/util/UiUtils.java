@@ -27,6 +27,7 @@ import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Image;
 import java.awt.SystemColor;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URL;
@@ -35,17 +36,32 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.Icon;
+import javax.swing.InputMap;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JRootPane;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.filechooser.FileFilter;
@@ -61,10 +77,28 @@ import org.genemania.plugin.Strings;
 import org.genemania.plugin.SystemUtils;
 
 public class UiUtils {
+	
+	public static final Color INFO_COLOR = Color.LIGHT_GRAY;
+	public static final Color WARNING_COLOR = new Color(184, 174, 105);
+	public static final Color ERROR_COLOR = new Color(109, 73, 74);
+	public static final Color MISSING_FIELD_COLOR = Color.RED.darker();
+	
+	public static final String INFO_ICON_CODE = IconManager.ICON_INFO_CIRCLE;
+	public static final String WARNING_ICON_CODE = IconManager.ICON_EXCLAMATION_TRIANGLE;
+	public static final String ERROR_ICON_CODE = IconManager.ICON_MINUS_CIRCLE;
+	public static final String HELP_ICON_CODE = IconManager.ICON_QUESTION_CIRCLE;
+	public static final String MISSING_FIELD_ICON_CODE = IconManager.ICON_ASTERISK;
+	
+	public static final float MISSING_FIELD_ICON_SIZE = 12.0f;
+	
+	public static final float INFO_FONT_SIZE = 11.0f;
+	
 	private final ImageCache images;
+	private final IconManager iconManager;
 	
 	public UiUtils() {
 		images = new ImageCache();
+		iconManager = new IconManager();
 	}
 	
 	public JEditorPane createLinkEnabledEditorPane(final Component parent, String text) {
@@ -88,15 +122,17 @@ public class UiUtils {
 		
 		JEditorPane pane = createEditorPane(text);
 		HyperlinkListener linkListener = new HyperlinkListener() {
+			@Override
 			public void hyperlinkUpdate(HyperlinkEvent e) {
 				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-					if (!SystemUtils.openBrowser(e.getURL())) {
+					if (!SystemUtils.openBrowser(e.getURL().toString())) {
 						JOptionPane.showMessageDialog(parent, Strings.openHyperlink_error, Strings.default_title, JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			}
 		};
 		pane.addHyperlinkListener(linkListener);
+		
 		return pane;
 	}
 
@@ -135,6 +171,14 @@ public class UiUtils {
 		expandButton.setFocusable(false);
 		expandButton.setBorder(BorderFactory.createEmptyBorder());
 		return expandButton;
+	}
+	
+	public JLabel createIconLabel(final String code, final float size, final Color color) {
+		final JLabel label = new JLabel(code);
+		label.setFont(iconManager.getIconFont(size));
+		label.setForeground(color);
+		
+		return label;
 	}
 	
 	private Icon getIcon(String id) {
@@ -193,7 +237,10 @@ public class UiUtils {
 	
 	public JPanel createJPanel() {
 		JPanel panel = new JPanel();
-		panel.setOpaque(false);
+		
+		if (isAquaLAF())
+			panel.setOpaque(false);
+		
 		return panel;
 	}
 	
@@ -327,6 +374,175 @@ public class UiUtils {
 		} else {
 			return getFileSwing(parent, title, initialFile, typeDescription, extensions, mode);
 		}
+	}
+	
+	public boolean isAquaLAF() {
+		return UIManager.getLookAndFeel() != null && "Mac OS X".equals(UIManager.getLookAndFeel().getName());
+	}
+	
+	public boolean isNimbusLAF() {
+		return UIManager.getLookAndFeel() != null && "Nimbus".equals(UIManager.getLookAndFeel().getName());
+	}
+	
+	public boolean isWinLAF() {
+		return UIManager.getLookAndFeel() != null && "Windows".equals(UIManager.getLookAndFeel().getName());
+	}
+	
+	public Border createPanelBorder() {
+		// Try to create Aqua recessed borders on Mac OS
+		Border border = isAquaLAF() ? UIManager.getBorder("InsetBorder.aquaVariant") : null;
+		
+		if (border == null) {
+			if (isWinLAF())
+				border = new TitledBorder("");
+			else
+				border = BorderFactory.createTitledBorder("SAMPLE").getBorder();
+		}
+			
+		if (border == null)
+			border = BorderFactory.createLineBorder(UIManager.getColor("Separator.foreground"));
+		
+		return border;
+	}
+	
+	public Border createTitledBorder(final String title) {
+		final Border border;
+		
+		if (title == null || title.trim().isEmpty()) {
+			final Border aquaBorder = isAquaLAF() ? UIManager.getBorder("InsetBorder.aquaVariant") : null;
+			border = aquaBorder != null ? aquaBorder : BorderFactory.createTitledBorder("SAMPLE").getBorder();
+		} else {
+			final Border aquaBorder = isAquaLAF() ? UIManager.getBorder("TitledBorder.aquaVariant") : null;
+			final TitledBorder tb = aquaBorder != null ?
+					BorderFactory.createTitledBorder(aquaBorder, title) : BorderFactory.createTitledBorder(title);
+			border = tb;
+		}
+		
+		return border;
+	}
+	
+	public JPanel createOkCancelPanel(final JButton okBtn, final JButton cancelBtn) {
+		return createOkCancelPanel(okBtn, cancelBtn, new JButton[0]);
+	}
+	
+	public JPanel createOkCancelPanel(final JButton okBtn, final JButton cancelBtn, JButton... otherBtns) {
+		final JPanel panel = createJPanel();
+		
+		final GroupLayout layout = new GroupLayout(panel);
+		panel.setLayout(layout);
+		layout.setAutoCreateContainerGaps(false);
+		layout.setAutoCreateGaps(true);
+		
+		final SequentialGroup hg = layout.createSequentialGroup();
+		final ParallelGroup vg = layout.createParallelGroup(Alignment.CENTER, false);
+		
+		if (otherBtns != null) {
+			for (int i = 0; i < otherBtns.length; i++) {
+				final JButton btn = otherBtns[i];
+				hg.addComponent(btn);
+				vg.addComponent(btn);
+			}
+		}
+		
+		hg.addGap(0, 0, Short.MAX_VALUE);
+		
+		final JButton btn1 = isMacOSX() ? cancelBtn : okBtn;
+		final JButton btn2 = isMacOSX() ? okBtn : cancelBtn;
+		
+		if (btn1 != null) {
+			hg.addComponent(btn1);
+			vg.addComponent(btn1);
+		}
+		if (btn2 != null) {
+			hg.addComponent(btn2);
+			vg.addComponent(btn2);
+		}
+		
+		layout.setHorizontalGroup(hg);
+		layout.setVerticalGroup(vg);
+		
+		return panel;
+	}
+	
+	public void setDefaultOkCancelKeyStrokes(final JRootPane rootPane, final Action okAction,
+			final Action cancelAction) {
+		final InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		
+		if (okAction != null) {
+			final String OK_ACTION_KEY = "OK_ACTION_KEY";
+			final KeyStroke enterKey = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, false);
+			inputMap.put(enterKey, OK_ACTION_KEY);
+			rootPane.getActionMap().put(OK_ACTION_KEY, okAction);
+		}
+		
+		if (cancelAction != null) {
+			final String CANCEL_ACTION_KEY = "CANCEL_ACTION_KEY";
+			final KeyStroke escapeKey = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false);
+			inputMap.put(escapeKey, CANCEL_ACTION_KEY);
+			rootPane.getActionMap().put(CANCEL_ACTION_KEY, cancelAction);
+		}
+	}
+	
+	public void fixHorizontalAlignment(final int aligment, final JComponent... comps) {
+		int maxWidth = 0;
+		
+		// Find out the max width
+		for (JComponent c : comps) {
+			maxWidth = Math.max(maxWidth, c.getPreferredSize().width);
+		}
+		
+		// Update components' left/right margin by setting an empty border, so they are aligned properly
+		for (JComponent c : comps) {
+			int diff = maxWidth - c.getPreferredSize().width;
+			
+			if (diff > 0) {
+				if (aligment == SwingConstants.LEFT)
+					c.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, diff));
+				else if (aligment == SwingConstants.RIGHT)
+					c.setBorder(BorderFactory.createEmptyBorder(0, diff, 0, 0));
+				else // CENTER
+					c.setBorder(BorderFactory.createEmptyBorder(0, diff/2, 0, diff/2));
+			}
+		}
+	}
+	
+	/**
+	 * Resizes the given components making them equal in size.
+	 */
+	public void equalizeSize(final JComponent... components) {
+		if (components == null || components.length == 0)
+			return;
+		
+		final Dimension prefSize = components[0].getPreferredSize();
+		final Dimension maxSize = components[0].getMaximumSize();
+		
+		for (JComponent c : components) {
+			ensureSize(prefSize, c.getPreferredSize());
+			ensureSize(maxSize, c.getMaximumSize());
+		}
+		
+		for (JComponent c : components) {
+			c.setPreferredSize(prefSize);
+			c.setMaximumSize(maxSize);
+		}
+	}
+	
+	/**
+	 * Enlarges, if necessary, the given current size to cover the given other size.
+	 * <p>
+	 * If both the width and height of <code>aCurrentSize</code> are larger than the width and height of
+	 * <code>aSize</code>, respectively, calling this method has no effect.
+	 * </p>
+	 * 
+	 * @param currentSize Size to be enlarged if necessary.
+	 * @param minSize Minimal required size of <code>aCurrentSize</code>.
+	 */
+	public static void ensureSize(final Dimension currentSize, final Dimension minSize) {
+		if (currentSize.height < minSize.height)
+			currentSize.height = minSize.height;
+		
+		if (currentSize.width < minSize.width)
+			currentSize.width = minSize.width;
 	}
 	
 	public boolean isMacOSX() {

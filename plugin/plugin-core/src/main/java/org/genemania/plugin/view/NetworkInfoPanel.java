@@ -105,7 +105,7 @@ public class NetworkInfoPanel extends ToggleInfoPanel<Network<?>, NetworkDetailP
 	public void updateSelection(ViewState options) {
 		for (NetworkDetailPanel panel : dataModel) {
 			Network<?> network = panel.getSubject();
-			panel.setHighlighted(options.getNetworkHighlighted(network));
+			panel.setHighlighted(options.isNetworkHighlighted(network));
 		}
 	}
 

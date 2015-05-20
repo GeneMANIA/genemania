@@ -45,27 +45,29 @@ import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
 public class EditNetworkDialog extends AbstractEditDialog {
+	
 	private final NetworkGroupComboBox groupCombo;
 	private final JTextField nameField;
 	private final JTextArea descriptionField;
 	private final JTextField groupNameField;
 	
-	public EditNetworkDialog(Frame owner, boolean modality, UiUtils uiUtils) {
+	public EditNetworkDialog(final Frame owner, final boolean modality, final UiUtils uiUtils) {
 		super(owner, Strings.editNetwork_title, modality);
 		
-		JPanel contents = uiUtils.createJPanel();
+		final JPanel contents = uiUtils.createJPanel();
 		contents.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 		contents.setLayout(new GridBagLayout());
 
 		DocumentListener listener = new DocumentListener() {
+			@Override
 			public void removeUpdate(DocumentEvent e) {
 				validateSettings();
 			}
-			
+			@Override
 			public void insertUpdate(DocumentEvent e) {
 				validateSettings();
 			}
-			
+			@Override
 			public void changedUpdate(DocumentEvent e) {
 				validateSettings();
 			}
@@ -93,10 +95,11 @@ public class EditNetworkDialog extends AbstractEditDialog {
 		groupPanel.setLayout(new GridBagLayout());
 		
 		FocusListener focusListener = new FocusListener() {
+			@Override
 			public void focusLost(FocusEvent e) {
 				validateSettings();
 			}
-			
+			@Override
 			public void focusGained(FocusEvent e) {
 			}
 		};
@@ -128,6 +131,7 @@ public class EditNetworkDialog extends AbstractEditDialog {
 		add(contents, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 	}
 	
+	@Override
 	protected boolean isValidForm() {
 		int groupIndex = groupCombo.getSelectedIndex();
 		groupNameField.setVisible(groupIndex == 0);

@@ -55,12 +55,15 @@ public class GeneManiaImpl extends AbstractGeneMania<CyNetwork, CyNode, CyEdge> 
 	public GeneManiaImpl(
 			DataSetManager dataSetManager,
 			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils,
-			UiUtils uiUtils, FileUtils fileUtils,
+			UiUtils uiUtils,
+			FileUtils fileUtils,
 			NetworkUtils networkUtils,
-			TaskDispatcher taskDispatcher, CySwingApplication application,
+			TaskDispatcher taskDispatcher,
+			CySwingApplication application,
 			CyServiceRegistrar serviceRegistrar,
 			NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selectionManager,
-			final CyProperty<Properties> properties) {
+			final CyProperty<Properties> properties
+	) {
 		super(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils, taskDispatcher, selectionManager);
 		this.serviceRegistrar = serviceRegistrar;
 		this.application = application;

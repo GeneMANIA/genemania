@@ -19,12 +19,12 @@
 
 package org.genemania.plugin.view;
 
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+
+import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -34,15 +34,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 
-import javax.swing.BorderFactory;
+import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -60,44 +61,39 @@ import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
 public class DownloadDialog extends JDialog {
-	private JTable table;
+	
 	private String dataSetId;
-	private DownloadController controller;
+	private final DownloadController controller;
+	private final DynamicTableModel<ModelElement> model;
+	private Action action;
+	
+	private JPanel optionPanel;
+	private JTable table;
 	private JButton downloadButton;
 	private JButton selectButton;
-	private Action action;
-	private DynamicTableModel<ModelElement> model;
-	private ButtonGroup optionGroup;
+	private JButton cancelButton;
+	private final ButtonGroup optionGroup;
 	private Map<String, JRadioButton> optionMap;
 	private JRadioButton noSelectionButton;
+	
 	private final UiUtils uiUtils;
-	private final DataSetManager dataSetManager;
-	private final FileUtils fileUtils;
 
-	public DownloadDialog(Dialog parent, String title, boolean modal, String preamble, DataSetManager dataSetManager, UiUtils uiUtils, FileUtils fileUtils) throws ApplicationException {
-		super(parent, title, modal);
+	public DownloadDialog(
+			final Dialog parent,
+			final String title,
+			final String preamble,
+			final DataSetManager dataSetManager,
+			final UiUtils uiUtils,
+			final FileUtils fileUtils
+	) throws ApplicationException {
+		super(parent, title, ModalityType.APPLICATION_MODAL);
 		this.uiUtils = uiUtils;
-		this.dataSetManager = dataSetManager;
-		this.fileUtils = fileUtils;
-		initialize(preamble);
-	}
-
-	void initialize(String preamble) throws ApplicationException {
+		
+		optionGroup = new ButtonGroup();
 		controller = new DownloadController(dataSetManager, fileUtils);
 		
-		JRootPane pane = getRootPane();
-		pane.setLayout(new GridBagLayout());
+		List<DownloadController.ModelElement> items = null;
 		
-		JPanel panel = new JPanel();
-		panel.setLayout(new GridBagLayout());
-		Insets insets = new Insets(0, 0, 0, 0);
-		JLabel label = new JLabel(preamble);
-		
-		int row = 0;
-		panel.add(label, new GridBagConstraints(0, row, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 16, 0) , 0, 0));
-		row++;
-		
-		List<DownloadController.ModelElement> items;
 		try {
 			items = controller.createModel();
 		} catch (IOException e) {
@@ -105,6 +101,7 @@ public class DownloadDialog extends JDialog {
 		} 
 		
 		model = new DynamicTableModel<ModelElement>() {
+			@Override
 			public Class<?> getColumnClass(int columnIndex) {
 				switch (columnIndex) {
 				case 0:
@@ -118,10 +115,12 @@ public class DownloadDialog extends JDialog {
 				}
 			}
 			
+			@Override
 			public int getColumnCount() {
 				return 3;
 			}
 			
+			@Override
 			public String getColumnName(int columnIndex) {
 				switch (columnIndex) {
 				case 0:
@@ -135,6 +134,7 @@ public class DownloadDialog extends JDialog {
 				}
 			}
 			
+			@Override
 			public Object getValueAt(int rowIndex, int columnIndex) {
 				ModelElement element = get(rowIndex);
 				switch (columnIndex) {
@@ -152,10 +152,12 @@ public class DownloadDialog extends JDialog {
 				}
 			}
 			
+			@Override
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
 				return false;
 			}
 			
+			@Override
 			public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			}
 		};
@@ -164,115 +166,178 @@ public class DownloadDialog extends JDialog {
 			model.add(item);
 		}
 		
-		table = new JTable(model) {
-			@Override
-			public void addNotify() {
-				super.addNotify();
-				uiUtils.packColumns(this);
-			}
-		};
-		table.setRowSelectionAllowed(true);
-		table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				updateOptions();
-				validateState();
-			}
-		});
+		addComponents(preamble);
+	}
+
+	private void addComponents(final String preamble) throws ApplicationException {
+		final JLabel label = new JLabel(preamble);
+		final JScrollPane scrollPane = new JScrollPane(getTable());
 		
-		JScrollPane scrollPane = new JScrollPane(table);
-		panel.add(scrollPane, new GridBagConstraints(0, row, 1, 1, 1, 1, GridBagConstraints.PAGE_START, GridBagConstraints.BOTH, insets, 0, 0));
-		row++;
+		final JPanel buttonPanel = uiUtils.createOkCancelPanel(getDownloadButton(), getCancelButton(), getSelectButton());
 		
-		JPanel optionPanel = createOptionPanel();
-		panel.add(optionPanel, new GridBagConstraints(0, row, 1, 1, 1, 0, GridBagConstraints.PAGE_START, GridBagConstraints.HORIZONTAL, insets, 0, 0));
-		row++;
+		final JPanel panel = new JPanel();
+		final GroupLayout layout = new GroupLayout(panel);
+		panel.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
 		
-		JPanel buttonPanel = createButtonPanel();
-		panel.add(buttonPanel, new GridBagConstraints(0, row, 1, 1, 1, 0, GridBagConstraints.PAGE_START, GridBagConstraints.NONE, insets, 0, 0));
-		row++;
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+				.addComponent(label, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getOptionPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(buttonPanel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(label, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+				.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getOptionPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(buttonPanel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+		);
 		
-		pane.add(panel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.PAGE_START, GridBagConstraints.BOTH, new Insets(16, 16, 16, 16), 0, 0));
+		getContentPane().add(panel, BorderLayout.CENTER);
+		
+		uiUtils.setDefaultOkCancelKeyStrokes(getRootPane(), getDownloadButton().getAction(),
+				getCancelButton().getAction());
+		getRootPane().setDefaultButton(getDownloadButton());
+		
 		setMinimumSize(new Dimension(uiUtils.computeTextSizeHint(label.getFontMetrics(label.getFont()), 60, 25)));
 		setLocationByPlatform(true);
+		
 		updateOptions();
 		validateState();
+		
 		pack();
 	}
 	
-	private JPanel createButtonPanel() {
-		JPanel buttonPanel = new JPanel();
-		buttonPanel .setLayout(new FlowLayout());
-		downloadButton = new JButton(Strings.downloadDialogDownloadButton_label);
-		downloadButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleDownloadButton();
-			}
-		});
-		selectButton = new JButton(Strings.downloadDialogSelectButton_label);
-		selectButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleSelectButton();
-			}
-		});
-		JButton cancelButton = new JButton(Strings.downloadDialogCancelButton_label);
-		cancelButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleCancelButton();
-			}
-		});
-		buttonPanel.add(selectButton);
-		buttonPanel.add(downloadButton);
-		buttonPanel.add(cancelButton);
-		return buttonPanel;
-	}
-
-	private JPanel createOptionPanel() {
-		JPanel panel = new JPanel();
-		panel.setLayout(new GridBagLayout());
-		panel.setBorder(BorderFactory.createTitledBorder(Strings.downloadDialogOptionPanel_label));
-		
-		JRadioButton coreButton = new JRadioButton();
-		JRadioButton allButton = new JRadioButton();
-		JRadioButton openLicenseButton = new JRadioButton();
-		
-		optionMap = new HashMap<String, JRadioButton>();
-		optionMap.put("-core", coreButton); //$NON-NLS-1$
-		optionMap.put("", allButton); //$NON-NLS-1$
-		optionMap.put("-open_license", openLicenseButton); //$NON-NLS-1$
-		
-		ActionListener listener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				validateState();
-			}
-		};
-		
-		for (Entry<String, JRadioButton> entry : optionMap.entrySet()) {
-			JRadioButton button = entry.getValue();
-			button.addActionListener(listener);
-			button.setActionCommand(entry.getKey());
+	private JTable getTable() {
+		if (table == null) {
+			table = new JTable(model) {
+				@Override
+				public void addNotify() {
+					super.addNotify();
+					uiUtils.packColumns(this);
+				}
+			};
+			table.setRowSelectionAllowed(true);
+			table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+				@Override
+				public void valueChanged(ListSelectionEvent e) {
+					updateOptions();
+					validateState();
+				}
+			});
 		}
 		
-		optionGroup = new ButtonGroup();
-		optionGroup.add(coreButton);
-		optionGroup.add(allButton);
-		optionGroup.add(openLicenseButton);
+		return table;
+	}
+	
+	private JPanel getOptionPanel() {
+		if (optionPanel == null) {
+			optionPanel = new JPanel();
+			optionPanel.setBorder(uiUtils.createTitledBorder(Strings.downloadDialogOptionPanel_label));
+			
+			final JRadioButton coreButton = new JRadioButton();
+			final JRadioButton allButton = new JRadioButton();
+			final JRadioButton openLicenseButton = new JRadioButton();
+			
+			optionMap = new HashMap<String, JRadioButton>();
+			optionMap.put("-core", coreButton); //$NON-NLS-1$
+			optionMap.put("", allButton); //$NON-NLS-1$
+			optionMap.put("-open_license", openLicenseButton); //$NON-NLS-1$
+			
+			for (Entry<String, JRadioButton> entry : optionMap.entrySet()) {
+				final JRadioButton button = entry.getValue();
+				button.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent event) {
+						validateState();
+					}
+				});
+				button.setActionCommand(entry.getKey());
+			}
+			
+			optionGroup.add(coreButton);
+			optionGroup.add(allButton);
+			optionGroup.add(openLicenseButton);
+			optionGroup.add(getNoSelectionButton());
+			
+			final GroupLayout layout = new GroupLayout(optionPanel);
+			optionPanel.setLayout(layout);
+			layout.setAutoCreateGaps(uiUtils.isWinLAF());
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+					.addComponent(allButton)
+					.addComponent(coreButton)
+					.addComponent(openLicenseButton)
+			);
+			layout.setVerticalGroup(layout.createSequentialGroup()
+					.addComponent(allButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addComponent(coreButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addComponent(openLicenseButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+		}
 		
-		noSelectionButton = new JRadioButton();
-		noSelectionButton.addActionListener(listener);
-		noSelectionButton.setActionCommand("none"); //$NON-NLS-1$
-		optionGroup.add(noSelectionButton);
+		return optionPanel;
+	}
+	
+	private JRadioButton getNoSelectionButton() {
+		if (noSelectionButton == null) {
+			noSelectionButton = new JRadioButton();
+			noSelectionButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					validateState();
+				}
+			});
+			noSelectionButton.setActionCommand("none"); //$NON-NLS-1$
+		}
 		
-		panel.add(allButton, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		panel.add(coreButton, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		panel.add(openLicenseButton, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+		return noSelectionButton;
+	}
+	
+	private JButton getSelectButton() {
+		if (selectButton == null) {
+			selectButton = new JButton(new AbstractAction(Strings.downloadDialogSelectButton_label) {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleSelectButton();
+				}
+			});
+		}
 		
-		return panel;
+		return selectButton;
+	}
+	
+	private JButton getDownloadButton() {
+		if (downloadButton == null) {
+			downloadButton = new JButton(new AbstractAction(Strings.downloadDialogDownloadButton_label) {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleDownloadButton();
+				}
+			});
+		}
+		
+		return downloadButton;
+	}
+	
+	private JButton getCancelButton() {
+		if (cancelButton == null) {
+			cancelButton = new JButton(new AbstractAction(Strings.downloadDialogCancelButton_label) {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handleCancelButton();
+				}
+			});
+		}
+		
+		return cancelButton;
 	}
 
 	void deselectAllOptions() {
-		noSelectionButton.setSelected(true);
+		getNoSelectionButton().setSelected(true);
 	}
 	
 	void updateOptions() {
@@ -373,16 +438,24 @@ public class DownloadDialog extends JDialog {
 		if (element != null) {
 			download = !element.isInstalled();
 		}
-		downloadButton.setEnabled(download);
-		selectButton.setEnabled(element != null && !download);
+		getDownloadButton().setEnabled(download);
+		getSelectButton().setEnabled(element != null && !download);
 	}
 	
-	void handleCancelButton() {
+	private void handleCancelButton() {
 		action = Action.cancel;
 		setVisible(false);
 	}
+	
+	private void handleDownloadButton() {
+		handleAction(Action.download);
+	}
 
-	void handleAction(Action action) {
+	private void handleSelectButton() {
+		handleAction(Action.select);
+	}
+
+	private void handleAction(Action action) {
 		this.action = action;
 		ModelElement element = getSelection();
 		if (element != null) {
@@ -392,7 +465,7 @@ public class DownloadDialog extends JDialog {
 	}
 	
 	private ModelElement getSelection() {
-		int row = table.getSelectedRow();
+		int row = getTable().getSelectedRow();
 		if (row == -1) {
 			return null;
 		}
@@ -420,14 +493,6 @@ public class DownloadDialog extends JDialog {
 			}
 		}
 		return null;
-	}
-
-	void handleDownloadButton() {
-		handleAction(Action.download);
-	}
-
-	void handleSelectButton() {
-		handleAction(Action.select);
 	}
 
 	public String getSelectedDataSetId() {

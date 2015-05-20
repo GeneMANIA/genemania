@@ -20,9 +20,9 @@
 package org.genemania.plugin.data.lucene.view;
 
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -37,6 +37,8 @@ import java.util.Vector;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -46,6 +48,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -71,8 +74,8 @@ import org.genemania.plugin.view.util.FileSelectionMode;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.type.DataLayout;
 
+@SuppressWarnings("serial")
 public class ImportNetworkPanel extends JPanel {
-	private static final long serialVersionUID = 1L;
 
 	private List<Organism> organisms;
 
@@ -103,7 +106,12 @@ public class ImportNetworkPanel extends JPanel {
 	private final FileUtils fileUtils;
 	private final TaskDispatcher taskDispatcher;
 
-	public ImportNetworkPanel(DataSetManager dataSetManager, final UiUtils uiUtils, final FileUtils fileUtils, TaskDispatcher taskDispatcher) {
+	public ImportNetworkPanel(
+			final DataSetManager dataSetManager,
+			final UiUtils uiUtils,
+			final FileUtils fileUtils,
+			final TaskDispatcher taskDispatcher
+	) {
 		this.dataSetManager = dataSetManager;
 		this.uiUtils = uiUtils;
 		this.fileUtils = fileUtils;
@@ -112,11 +120,11 @@ public class ImportNetworkPanel extends JPanel {
 		importSettings = new DataImportSettings();
 		validationListeners = new ArrayList<ValidationEventListener>();
 		
-		setOpaque(false);
+		if (uiUtils.isAquaLAF())
+			setOpaque(false);
 		
-		setLayout(new GridBagLayout());
-		
-		ActionListener actionListener = new ActionListener() {
+		final ActionListener actionListener = new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				validateSettings();
 			}
@@ -124,6 +132,7 @@ public class ImportNetworkPanel extends JPanel {
 		
 		organismCombo = new JComboBox();
 		organismCombo.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				updateGroups();
 				validateSettings();
@@ -133,47 +142,49 @@ public class ImportNetworkPanel extends JPanel {
 		groupCombo = new NetworkGroupComboBox();
 		groupCombo.addActionListener(actionListener);
 		
-		DocumentListener documentListener = new DocumentListener() {
+		final DocumentListener documentListener = new DocumentListener() {
+			@Override
 			public void removeUpdate(DocumentEvent e) {
 				validateSettings();
 			}
-			
+			@Override
 			public void insertUpdate(DocumentEvent e) {
 				validateSettings();
 			}
-			
+			@Override
 			public void changedUpdate(DocumentEvent e) {
 				validateSettings();
 			}
 		};
 		
-		FocusListener focusListener = new FocusListener() {
+		final FocusListener focusListener = new FocusListener() {
+			@Override
 			public void focusLost(FocusEvent e) {
 				validateSettings();
 			}
-			
+			@Override
 			public void focusGained(FocusEvent e) {
 			}
 		};
 		
 		nameField = new JTextField(30);
 		nameField.getDocument().addDocumentListener(documentListener);
+		
 		descriptionField = new JTextArea();
 		descriptionField.getDocument().addDocumentListener(documentListener);
 		
-		fileField = new JTextField(30);
+		fileField = new JTextField(20);
 		fileField.getDocument().addDocumentListener(documentListener);
 		fileField.addFocusListener(focusListener);
 		
 		chooseButton = new JButton(Strings.importNetworkBrowseButton_label);
 		chooseButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent event) {
 				handleChoose();
 			}
 		});
 
-		JPanel typePanel = uiUtils.createJPanel();
-		typePanel.setLayout(new GridBagLayout());
 		interactionRadioButton = uiUtils.createRadioButton(Strings.importNetworkNetworkRadioButton_label);
 		interactionRadioButton.addActionListener(actionListener);
 		profileRadioButton = uiUtils.createRadioButton(Strings.importNetworkProfileRadioButton_label);
@@ -183,45 +194,22 @@ public class ImportNetworkPanel extends JPanel {
 		typeGroup.add(interactionRadioButton);
 		typeGroup.add(profileRadioButton);
 		
-		typePanel.add(interactionRadioButton, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		typePanel.add(profileRadioButton, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		
-		JPanel groupPanel = uiUtils.createJPanel();
-		groupPanel.setLayout(new GridBagLayout());
-		
-		groupNameField = new JTextField(30);
+		groupNameField = new JTextField(20);
 		groupNameField.getDocument().addDocumentListener(documentListener);
 		groupNameField.addFocusListener(focusListener);
 		
-		groupPanel.add(groupCombo, new GridBagConstraints(0, 0, 1, 1, Double.MIN_VALUE, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		groupPanel.add(groupNameField, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-		
-		add(new JLabel(Strings.importNetworkFilePath_label), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		add(new JLabel(Strings.importNetworkFileType_label), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		add(new JLabel(Strings.importNetworkOrganism_label), new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		add(new JLabel(Strings.importNetworkGroup_label), new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		add(new JLabel(Strings.importNetworkName_label), new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		add(new JLabel(Strings.importNetworkDescription_label), new GridBagConstraints(0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		
-		add(fileField, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-		add(chooseButton, new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-
-		add(typePanel, new GridBagConstraints(1, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		add(organismCombo, new GridBagConstraints(1, 2, 2, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		add(groupPanel, new GridBagConstraints(1, 3, 2, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-		add(nameField, new GridBagConstraints(1, 4, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-		add(new JScrollPane(descriptionField), new GridBagConstraints(1, 5, 2, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		
+		addComponents();
 		updateGroups();
 	}
 
 	public void setOrganisms(List<Organism> organisms) {
 		this.organisms = organisms;
+		final Vector<String> items = new Vector<String>();
 		
-		Vector<String> items = new Vector<String>();
 		for (Organism organism : organisms) {
 			items.add(String.format(Strings.importNetworkOrganism_description, organism.getName(), organism.getDescription()));
 		}
+		
 		DefaultComboBoxModel organismModel = new DefaultComboBoxModel(items);
 		organismCombo.setModel(organismModel);
 		updateGroups();
@@ -232,6 +220,7 @@ public class ImportNetworkPanel extends JPanel {
 			@Override
 			protected void runTask() throws Throwable {
 				progress.setStatus(Strings.importNetworkDetecting_status);
+				
 				try {
 					if (detectedFile != null && detectedFile.getCanonicalFile().equals(file.getCanonicalFile())) {
 						return;
@@ -239,15 +228,19 @@ public class ImportNetworkPanel extends JPanel {
 				} catch (IOException e) {
 					LogUtils.log(getClass(), e);
 				}
+				
 				if (!file.exists()) {
 					detectedFile = null;
 					detector = null;
 					return;
 				}
+				
 				DataSet data = dataSetManager.getDataSet();
 				DataFileClassifier classifier = new DataFileClassifier();
+				
 				try {
 					classifier.classify(importSettings, fileUtils.getUncompressedStream(file), maximumLinesToSample);
+					
 					if (importSettings.getDataLayout().equals(DataLayout.GEO_PROFILE)) {
 						typeGroup.setSelected(profileRadioButton.getModel(), true);
 					} else if (importSettings.getDataLayout().equals(DataLayout.WEIGHTED_NETWORK)) {
@@ -264,11 +257,15 @@ public class ImportNetworkPanel extends JPanel {
 					
 					detector = new OrganismClassifier(data.getGeneClassifier());
 					detector.classify(importSettings, fileUtils.getUncompressedReader(file), maximumLinesToSample);
+					
 					if (importSettings.getOrganism() == null) {
 						return;
 					}
+					
 					List<Match> mostLikelyOrganismIds = detector.getMostLikelyOrganismIds();
 					Long id;
+					
+					
 					if (mostLikelyOrganismIds.size() > 1) {
 						id = disambiguateOrganism(mostLikelyOrganismIds);
 					} else {
@@ -276,11 +273,14 @@ public class ImportNetworkPanel extends JPanel {
 					}
 					
 					detectedFile = file;
+					
 					if (id == null) {
 						return;
 					}
+					
 					for (int i = 0; i < organisms.size(); i++) {
 						Organism organism = organisms.get(i);
+						
 						if (organism.getId() == id) {
 							organismCombo.setSelectedIndex(i);
 							importSettings.setOrganism(organism);
@@ -292,48 +292,135 @@ public class ImportNetworkPanel extends JPanel {
 				}
 			}
 		};
+		
 		taskDispatcher.executeTask(task, uiUtils.getFrame(this), true, false);
+	}
+	
+	private void addComponents() {
+		final JLabel label1 = new JLabel(Strings.importNetworkFilePath_label);
+		final JLabel label2 = new JLabel(Strings.importNetworkFileType_label);
+		final JLabel label3 = new JLabel(Strings.importNetworkOrganism_label);
+		final JLabel label4 = new JLabel(Strings.importNetworkGroup_label);
+		final JLabel label5 = new JLabel(Strings.importNetworkName_label);
+		final JLabel label6 = new JLabel(Strings.importNetworkDescription_label);
+		
+		final JScrollPane scrollPane = new JScrollPane(descriptionField);
+		scrollPane.setPreferredSize(uiUtils.computeTextSizeHint(getFontMetrics(getFont()), 10, 4));
+		
+		final GroupLayout layout = new GroupLayout(this);
+		this.setLayout(layout);
+		layout.setAutoCreateGaps(false);
+		layout.setAutoCreateContainerGaps(true);
+		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
+						.addComponent(label1)
+						.addComponent(label2)
+						.addComponent(label3)
+						.addComponent(label4)
+						.addComponent(label5)
+						.addComponent(label6)
+				)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(fileField, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(chooseButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+						)
+						.addComponent(interactionRadioButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+						.addComponent(profileRadioButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+						.addComponent(organismCombo, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(groupCombo, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(groupNameField, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+						)
+						.addComponent(nameField, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+						.addComponent(label1)
+						.addComponent(fileField)
+						.addComponent(chooseButton)
+				)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+						.addComponent(label2)
+						.addComponent(interactionRadioButton)
+				)
+				.addComponent(profileRadioButton)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+						.addComponent(label3)
+						.addComponent(organismCombo)
+				)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+						.addComponent(label4)
+						.addComponent(groupCombo)
+						.addComponent(groupNameField)
+				)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+						.addComponent(label5)
+						.addComponent(nameField)
+				)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+						.addComponent(label6, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+						.addComponent(scrollPane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				)
+		);
 	}
 
 	private Long disambiguateOrganism(List<Match> mostLikelyOrganismIds) {
 		OrganismChoice[] choices = new OrganismChoice[mostLikelyOrganismIds.size()];
 		int index = 0;
+		
 		for (Match match : mostLikelyOrganismIds) {
 			Organism organism = findOrganism(match.organismId);
 			choices[index] = new OrganismChoice(organism, match.score);
 			index++;
 		}
+		
 		OrganismChoice choice = (OrganismChoice) JOptionPane.showInputDialog(uiUtils.getFrame(this), Strings.importNetworkDisambiguateMessage, Strings.importNetworkDisambiguateTitle, JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
-		if (choice == null) {
+		
+		if (choice == null)
 			return null;
-		}
+		
 		return choice.organism.getId();
 	}
 
 	private Organism findOrganism(long organismId) {
 		for (Organism organism : organisms) {
-			if (organism.getId() == organismId) {
+			if (organism.getId() == organismId)
 				return organism;
-			}
 		}
+		
 		return null;
 	}
 
 	protected void updateGroups() {
 		int index = organismCombo.getSelectedIndex();
+		
 		if (index == -1) {
 			groupCombo.updateNetworkGroups(null);
 			return;
 		}
+		
 		Organism organism = organisms.get(index);
 		groupCombo.updateNetworkGroups(organism.getInteractionNetworkGroups());
 	}
 
 	Organism getOrganism() {
 		int index = organismCombo.getSelectedIndex();
-		if (index == -1) {
+		
+		if (index == -1)
 			return null;
-		}
+		
 		return organisms.get(index);
 	}
 	
@@ -342,6 +429,7 @@ public class ImportNetworkPanel extends JPanel {
 		network.setDefaultSelected(false);
 		network.setDescription(descriptionField.getText());
 		network.setName(nameField.getText());
+		
 		return network;
 	}
 
@@ -351,6 +439,7 @@ public class ImportNetworkPanel extends JPanel {
 
 	public DataFileType getType() {
 		ButtonModel selection = typeGroup.getSelection();
+		
 		if (selection == null) {
 			return DataFileType.UNKNOWN;
 		}
@@ -360,6 +449,7 @@ public class ImportNetworkPanel extends JPanel {
 		if (selection.equals(profileRadioButton.getModel())) {
 			return DataFileType.EXPRESSION_PROFILE;
 		}
+		
 		return DataFileType.UNKNOWN;
 	}
 	
@@ -400,17 +490,19 @@ public class ImportNetworkPanel extends JPanel {
 		importSettings.setOrganism(getOrganism());
 		importSettings.setNetwork(getNetwork());
 		InteractionNetworkGroup group = groupCombo.getGroup();
+		
 		if (group.getId() == -1) {
 			String name = groupNameField.getText().trim();
 			group.setName(name);
 			group.setCode(name);
 			group.setDescription(""); //$NON-NLS-1$
 		}
+		
 		importSettings.setNetworkGroup(group);
+		
 		return importSettings;
 	}
 	
-
 	private void handleChoose() {
 		int maximumLinesToSample = 250;
 		HashSet<String> extensions = new HashSet<String>();
@@ -420,22 +512,26 @@ public class ImportNetworkPanel extends JPanel {
 		extensions.add("soft.gz"); //$NON-NLS-1$
 		File initialFile = fileUtils.getUserHome();
 		File file;
+		
 		try {
 			file = uiUtils.getFile(uiUtils.getFrame(this), Strings.importNetworkFile_title, initialFile, Strings.importNetworkPanelTypeDescription_label, extensions, FileSelectionMode.OPEN_FILE);
 		} catch (ApplicationException e) {
 			LogUtils.log(getClass(), e);
 			return;
 		}
+		
 		if (file == null) {
 			return;
 		}
+		
 		fileField.setText(file.getAbsolutePath());
+		
 		if (file.exists()) {
 			detectOrganism(file, maximumLinesToSample);
 		}
+		
 		validateSettings();
 	}
-
 	
 	public static class OrganismChoice {
 		public Organism organism;

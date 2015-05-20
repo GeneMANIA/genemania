@@ -28,8 +28,9 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 
 public class ImageCache {
-	public static final String ARROW_COLLAPSED_IMAGE = "arrow_collapsed.gif"; //$NON-NLS-1$
-	public static final String ARROW_EXPANDED_IMAGE = "arrow_expanded.gif"; //$NON-NLS-1$
+	
+	public static final String ARROW_COLLAPSED_IMAGE = "arrow_collapsed.png"; //$NON-NLS-1$
+	public static final String ARROW_EXPANDED_IMAGE = "arrow_expanded.png"; //$NON-NLS-1$
 	public static final String ICON = "helix.png"; //$NON-NLS-1$
 	
 	private Map<String, ImageIcon> iconCache;

@@ -20,12 +20,9 @@ package org.genemania.plugin.data.lucene.view;
 
 import java.awt.Component;
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -35,6 +32,7 @@ import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEditDialog extends JDialog {
+	
 	private boolean canceled;
 	private JButton saveButton;
 
@@ -47,28 +45,28 @@ public abstract class AbstractEditDialog extends JDialog {
 		return canceled;
 	}
 	
-	protected JPanel createButtonPanel(UiUtils uiUtils) {
+	protected JPanel createButtonPanel(final UiUtils uiUtils) {
 		final Component parent = this;
-		saveButton = new JButton(Strings.save_label);
-		saveButton.addActionListener(new ActionListener() {
+		saveButton = new JButton(new AbstractAction(Strings.save_label) {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				canceled = false;
 				parent.setVisible(false);
 			}
 		});
 		
-		JButton cancelButton = new JButton(Strings.cancel_label);
-		cancelButton.addActionListener(new ActionListener() {
+		final JButton cancelButton = new JButton(new AbstractAction(Strings.cancel_label) {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				canceled = true;
 				parent.setVisible(false);
 			}
 		});
 		
-		JPanel buttonPanel = uiUtils.createJPanel();
-		buttonPanel.setLayout(new GridBagLayout());
-		buttonPanel.add(saveButton, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0 ,0), 0, 0));
-		buttonPanel.add(cancelButton, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0 ,0), 0, 0));
+		final JPanel buttonPanel = uiUtils.createOkCancelPanel(saveButton, cancelButton);
+		uiUtils.setDefaultOkCancelKeyStrokes(getRootPane(), saveButton.getAction(), cancelButton.getAction());
+		getRootPane().setDefaultButton(saveButton);
+		
 		return buttonPanel;
 	}
 	

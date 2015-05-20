@@ -41,7 +41,13 @@ public class AboutAction extends AbstractCyAction {
 	private CySwingApplication application;
 	private UiUtils uiUtils;
 
-	public AboutAction(Map<String, String> properties, CyApplicationManager applicationManager, CySwingApplication application, UiUtils uiUtils, CyNetworkViewManager viewManager) {
+	public AboutAction(
+			Map<String, String> properties,
+			CyApplicationManager applicationManager,
+			CySwingApplication application,
+			UiUtils uiUtils,
+			CyNetworkViewManager viewManager
+	) {
 		super(properties, applicationManager, viewManager);
 		putValue(NAME, Strings.about_menuLabel);
 		this.application = application;

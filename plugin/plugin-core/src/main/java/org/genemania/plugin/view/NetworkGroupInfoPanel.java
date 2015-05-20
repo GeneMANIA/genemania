@@ -84,7 +84,7 @@ public class NetworkGroupInfoPanel<NETWORK, NODE, EDGE> extends ToggleInfoPanel<
 				continue;
 			}
 			
-			boolean enabledByDefault = options.getEnabled(group);
+			boolean enabledByDefault = options.isEnabled(group);
 			NetworkGroupDetailPanel<NETWORK, NODE, EDGE> panel = new NetworkGroupDetailPanel<NETWORK, NODE, EDGE>(group, this, plugin, networkUtils, uiUtils, enabledByDefault, options);
 			addDetailPanel(panel, index);
 			index++;
@@ -99,32 +99,34 @@ public class NetworkGroupInfoPanel<NETWORK, NODE, EDGE> extends ToggleInfoPanel<
 	
 	@Override
 	public void updateSelection(ViewState options) {
-		NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
-		if (cyNetwork == null) {
+		final NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
+		
+		if (cyNetwork == null)
 			return;
-		}
+		
 		int totalEnabled = 0;
 		NetworkGroupDetailPanel<NETWORK, NODE, EDGE> mostRecent = null;
-		Group<?, ?> mostRecentGroup = options.getMostRecentGroup();
+		final Group<?, ?> mostRecentGroup = options.getMostRecentGroup();
+		
 		for (NetworkGroupDetailPanel<NETWORK, NODE, EDGE> panel : dataModel) {
-			Group<?, ?> group = panel.getSubject();
-			boolean enabled = options.getGroupHighlighted(group);
+			final Group<?, ?> group = panel.getSubject();
+			final boolean enabled = options.isGroupHighlighted(group);
+			
 			if (enabled) {
 				totalEnabled++;
 				panel.showDetails(true, 1);
 			}
 
-			panel.setItemEnabled(options.getEnabled(group));
-			
+			panel.setItemEnabled(options.isEnabled(group));
 			panel.setSelected(enabled);
-			if (group.equals(mostRecentGroup)) {
+			
+			if (group.equals(mostRecentGroup))
 				mostRecent = panel;
-			}
+			
 			panel.getNetworkInfoPanel().updateSelection(options);
 		}
+		
 		if (totalEnabled == 0) {
-			cytoscapeUtils.setHighlighted(options, cyNetwork, false);
-			options.clearHighlightedNetworks();
 			mostRecent = null;
 		}
 		if (mostRecent != null) {

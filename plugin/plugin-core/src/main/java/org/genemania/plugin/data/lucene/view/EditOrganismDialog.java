@@ -54,14 +54,15 @@ public class EditOrganismDialog extends AbstractEditDialog {
 		contents.setLayout(new GridBagLayout());
 
 		DocumentListener listener = new DocumentListener() {
+			@Override
 			public void removeUpdate(DocumentEvent e) {
 				validateSettings();
 			}
-			
+			@Override
 			public void insertUpdate(DocumentEvent e) {
 				validateSettings();
 			}
-			
+			@Override
 			public void changedUpdate(DocumentEvent e) {
 				validateSettings();
 			}
@@ -113,10 +114,10 @@ public class EditOrganismDialog extends AbstractEditDialog {
 	@Override
 	protected boolean isValidForm() {
 		boolean isValid = true;
-		
 		isValid &= validator.isValidName(nameField.getText());
 		isValid &= validator.isValidAlias(aliasField.getText());
 		isValid &= validator.isValidTaxonomyId(taxIdField.getText());
+		
 		return isValid;
 	}
 
@@ -147,5 +148,4 @@ public class EditOrganismDialog extends AbstractEditDialog {
 	public long getTaxonomyId() {
 		return Long.parseLong(taxIdField.getText());
 	}
-
 }
