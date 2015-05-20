@@ -62,6 +62,8 @@ function( util, Result, io, cy ){ return function( Query ){
 
     qfn.splashed = true;
 
+    this.collapseHistory();
+
     PubSub.publish('query.succeed', newQuery);
     PubSub.publish('query.search', newQuery);
   };
@@ -85,7 +87,7 @@ function( util, Result, io, cy ){ return function( Query ){
 
     PubSub.publish('query.search', this);
 
-    if( initSplash ){
+    if( true || initSplash ){ // always collapse for now
       this.collapseHistory();
     }
   };

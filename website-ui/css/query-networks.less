@@ -101,13 +101,13 @@
 
 .query-network-name {
 	width: @qMoreW - @qNetNameSpacing;
-	//background: rgba(0, 255, 0, 0.5);
+	// background: rgba(0, 255, 0, 0.5);
 	display: inline-block;
 }
 
 .query-network-group-name {
 	width: @qMoreW - @qNetNameSpacing;
-	//background: rgba(255, 0, 0, 0.5);
+	// background: rgba(255, 0, 0, 0.5);
 	display: inline-block;
 }
 
@@ -123,9 +123,18 @@
 	padding: 0 0.4em;
 }
 
-.query-network-name,
 .query-network-group-name {
-	@caretOverlap: 0.75em;
+	@caretOverlap: 0.9em;
+
+	cursor: pointer;
+	//display: inline-block;
+	position: relative;
+	padding-left: @caretOverlap;
+	margin-left: -@caretOverlap;
+}
+
+.query-network-name {
+	@caretOverlap: 1.2em;
 
 	cursor: pointer;
 	//display: inline-block;
@@ -138,6 +147,7 @@
 	position: absolute;
 	right: 0.25em;
 	color: @qNetCountColor;
+	pointer-events: none;
 }
 
 .query-networks {

@@ -43,6 +43,7 @@
 	// background: red;
 	z-index: 999;
 	white-space: nowrap;
+	color: #fff;
 
 	.transform( translate3d(0, 0, 0) );
 	.transition( transform linear 150ms );
@@ -61,6 +62,13 @@
 	}
 
 	// background: blue;
+}
+
+.query-history-delete {
+	border: 1px solid rgba(255, 255, 255, 0.333);
+	box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.2);
+	margin-right: 0.5em;
 }
 
 .query-history-entry {
@@ -83,6 +91,7 @@
 	left: 0;
 	top: 0;
 	margin: 0.1em;
+	color: #000;
 }
 
 .query-history-image {
@@ -109,7 +118,7 @@
 	top: 50%;
 	margin-top: -0.5em;
 	font-size: 4em;
-	color: #555;
+	color: #fff;
 }
 
 .query-history-label,
@@ -121,6 +130,10 @@
 	right: 0;
 	bottom: 0;
 	text-align: center;
+}
+
+.query-history-delete-label {
+	color: #fff;
 }
 
 .query-history-label {
@@ -140,9 +153,9 @@
 }
 
 .query-history-empty {
-	color: #555;
+	//color: #fff;
 }
 
 .query-history-loading {
-	color: #555;
+	//color: #fff;
 }

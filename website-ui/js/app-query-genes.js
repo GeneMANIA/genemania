@@ -71,6 +71,18 @@ function( util ){ return function( Query ){
   qfn.updateGenesArea = function(){
     $('#query-genes-textarea').trigger('autosize.resize');
   };
+  
+  qfn.openGenesArea = function(){
+    return new Promise(function(resolve){
+      var $ta = $('#query-genes-textarea').focus();
+      
+      setTimeout(function(){
+        $ta.trigger('click');
+        
+        resolve();
+      }, 20);
+    });
+  };
 
   // PubSub.promise('query.ready').then(function(){
   //   $textarea.autosize({
@@ -163,4 +175,3 @@ function( util ){ return function( Query ){
   
 
 } } ]);
-

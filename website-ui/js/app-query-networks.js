@@ -160,7 +160,7 @@ function( util ){ return function( Query ){
       }
     }
 
-    this.showingNetworkCheckOptions = false; // because we set
+    //this.showingNetworkCheckOptions = false; // because we set
 
     PubSub.publish( 'query.setNetworks', {
       query: this
@@ -205,7 +205,7 @@ function( util ){ return function( Query ){
         }
       }
 
-      this.showingNetworkSortOptions = false; // because we've set it
+      //this.showingNetworkSortOptions = false; // because we've set it
 
       PubSub.publish('query.sortNetworksBy', {
         factor: factor,

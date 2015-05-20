@@ -143,14 +143,15 @@
 
 .query-genes-invalid-count {
 	//background: rgba(127, 127, 127, 0.1);
-	border-bottom: 1px solid rgba(127, 127, 127, 0.25);
-	border-left: 1px solid rgba(127, 127, 127, 0.25);
+	border-bottom: 1px solid @VALIDATION_ERROR_COLOR; //rgba(127, 127, 127, 0.25);
+	border-left: 1px solid @VALIDATION_ERROR_COLOR; //rgba(127, 127, 127, 0.25);
 }
 
 .query-genes-invalid-count-number {
 	.monospace;
 
-	border-bottom: 2px solid @VALIDATION_ERROR_COLOR;
+	color: @VALIDATION_ERROR_COLOR;
+	//border-bottom: 2px solid @VALIDATION_ERROR_COLOR;
 	margin: 0 0.25em;
 }
 

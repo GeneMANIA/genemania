@@ -19,20 +19,21 @@ function( util ){ return function( Result ){
         self.cyLayout = null;
       }
 
+      var container = cy.container();
+
+      cy.one('layoutstop', function(){
+        container.classList.remove('cy-layouting-shift');
+        container.classList.remove('cy-layouting-shift-history');
+
+        resolve();
+      });
+
       if( self.networksExpanded ){
-        var container = cy.container();
-
-        cy.one('layoutstop', function(){
-          container.classList.remove('cy-layouting-shift');
-
-          resolve();
-        });
-
         container.classList.add('cy-layouting-shift');
-      } else {
-        cy.one('layoutstop', function(){
-          resolve();
-        });
+      }
+      
+      if( self.query.historyExpanded ){
+        container.classList.add('cy-layouting-shift-history');
       }
     });
   };
@@ -66,7 +67,8 @@ function( util ){ return function( Result ){
     options = $.extend({
       randomize: true,
       animate: true,
-      maxSimulationTime: 2000
+      maxSimulationTime: 2000,
+      padding: 75
     }, options);
 
     var p = this.layoutPrepost();
@@ -114,6 +116,33 @@ function( util ){ return function( Result ){
     return p;
   };
 
+  rfn.fitGraph = function( options ){
+    options = $.extend({
+      animate: true
+    }, options);
+
+    var p = this.layoutPrepost();
+
+    var l = this.cyLayout = cy.makeLayout({
+      name: 'preset',
+      fit: !options.animate
+    });
+    
+    if( options.animate ){
+      cy.animate({
+        fit: {
+          eles: cy.elements(),
+          padding: 50
+        }
+      }, {
+        duration: 500
+      });
+    }
+
+    l.run();
+
+    return p;
+  };
 
 
 } } ]);
