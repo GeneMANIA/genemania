@@ -36,8 +36,9 @@ import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.view.components.ToggleInfoPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
+@SuppressWarnings("serial")
 public class NetworkGroupInfoPanel<NETWORK, NODE, EDGE> extends ToggleInfoPanel<Group<?, ?>, NetworkGroupDetailPanel<NETWORK, NODE, EDGE>> {
-	private static final long serialVersionUID = 1L;
+	
 	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
 	private final GeneMania<NETWORK, NODE, EDGE> plugin;
 	private final NetworkUtils networkUtils;

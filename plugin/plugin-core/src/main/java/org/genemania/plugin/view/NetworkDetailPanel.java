@@ -40,8 +40,9 @@ import org.genemania.plugin.model.Network;
 import org.genemania.plugin.view.components.ToggleDetailPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
+@SuppressWarnings("serial")
 public class NetworkDetailPanel extends ToggleDetailPanel<Network<?>> {
-	private static final long serialVersionUID = 1L;
+	
 	private final Network<?> network;
 	private final JEditorPane descriptionLabel;
 	private final JToggleButton expander;
@@ -60,16 +61,9 @@ public class NetworkDetailPanel extends ToggleDetailPanel<Network<?>> {
 		this.group = group;
 		this.data = data;
 		
-		Color textColor;
+		Color textColor = network.hasInteractions() ? SystemColor.textText : SystemColor.textInactiveText;
 		
-		if (network.hasInteractions()) {
-			textColor = Color.black;
-		} else {
-			setEnabled(false);
-			textColor = Color.gray;
-		}
-		
-		setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, Color.white));
+		setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
 		setBackground(SystemColor.text);
 		setOpaque(true);
 		

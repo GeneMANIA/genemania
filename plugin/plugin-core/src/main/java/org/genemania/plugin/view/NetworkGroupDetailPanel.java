@@ -26,6 +26,7 @@ import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.SystemColor;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -43,8 +44,9 @@ import org.genemania.plugin.view.components.BaseInfoPanel;
 import org.genemania.plugin.view.components.ToggleDetailPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
+@SuppressWarnings("serial")
 public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPanel<Group<?, ?>> {
-	private static final long serialVersionUID = 1L;
+	
 	private final Group<?, ?> group;
 	private final NetworkInfoPanel networksPanel;
 	private final JToggleButton expander;
@@ -56,7 +58,15 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 	private int barXOffset = -1;
 	private int barYOffset = -1;
 
-	public NetworkGroupDetailPanel(Group<?, ?> group, NetworkGroupInfoPanel<NETWORK, NODE, EDGE> groupInfoPanel, GeneMania<NETWORK, NODE, EDGE> plugin, NetworkUtils networkUtils, UiUtils uiUtils, boolean enabledByDefault, ViewState options) {
+	public NetworkGroupDetailPanel(
+			final Group<?, ?> group,
+			final NetworkGroupInfoPanel<NETWORK, NODE, EDGE> groupInfoPanel,
+			final GeneMania<NETWORK, NODE, EDGE> plugin,
+			final NetworkUtils networkUtils,
+			final UiUtils uiUtils,
+			final boolean enabledByDefault,
+			final ViewState options
+	) {
 		super(uiUtils);
 		
 		this.group = group;
@@ -67,14 +77,9 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 		NetworkSelectionManager<NETWORK, NODE, EDGE> manager = plugin.getNetworkSelectionManager();
 		networksPanel.addSelectionListener(manager.createNetworkSelectionListener());
 		
-		Color textColor;
-		if (group.hasInteractions()) {
-			textColor = Color.black;
-		} else {
-			textColor = Color.gray;
-		}
+		Color textColor = group.hasInteractions() ? SystemColor.textText : SystemColor.textInactiveText;
 		
-		setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, Color.white));
+		setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
 		
 		setLayout(new GridBagLayout());
 		JLabel nameLabel = new JLabel(group.getName());

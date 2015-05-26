@@ -110,9 +110,12 @@ public class UiUtils {
 		JEditorPane pane = new JEditorPane();
 		pane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
 		pane.setEditorKit(new HTMLEditorKit());
-		pane.setOpaque(false);
 		pane.setEditable(false);
 		pane.setText(text);
+		
+		if (isAquaLAF())
+			pane.setOpaque(false);
+		
 		return pane;
 	}
 	
@@ -133,6 +136,9 @@ public class UiUtils {
 			}
 		};
 		pane.addHyperlinkListener(linkListener);
+		
+		if (isAquaLAF())
+			pane.setOpaque(false);
 		
 		return pane;
 	}
