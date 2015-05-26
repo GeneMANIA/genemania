@@ -52,9 +52,9 @@ public class GeneManiaFDLayoutContext implements TunableValidator {
 	@Tunable(description="Min Node Mass:")
 	public double minNodeMass = 10.0;
 	@Tunable(description="Max Node Mass:")
-	public double maxNodeMass = 5000.0;
+	public double maxNodeMass = 1000.0;
 	@Tunable(description="Number of Edges when Node Mass is Half of Max Mass:")
-	public int midpointEdges = 700;
+	public int midpointEdges = 250;
 	@Tunable(description="Steepness of the Curve (Logistic Function):")
 	public double curveSteepness = 0.007;
 	@Tunable(description="Force deterministic layouts (slower):")

@@ -85,6 +85,7 @@ public class GeneManiaFDLayoutTask extends AbstractPartitionLayoutTask {
 		final double x = context.ignoreHiddenElements ? getVisibleEdgeCount(networkView) : networkView.getModel().getEdgeCount();
 		
 		// Apply logistic function (http://en.wikipedia.org/wiki/Logistic_function) to the node mass
+		// (also see: https://www.wolframalpha.com/input/?i=plot+%281000%2F%281%2Be^%28-0.007%28x-250%29%29%29+from+x%3D0+to+x%3D1000)
 		mass = L / ( 1 + Math.pow( Math.E, (-k * (x - x0)) ) );
 		mass = Math.max(context.minNodeMass, mass);
         
