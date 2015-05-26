@@ -290,7 +290,14 @@ public class CollapsiblePanel extends JPanel {
 
 			// We want to use the same font as those in the titled border font
 			Font font = BorderFactory.createTitledBorder(border, "Sample").getTitleFont();
-			if (font == null) font = UIManager.getFont("Label.font");
+			
+			if (font != null) {
+				if (uiUtils.isAquaLAF())
+					font = font.deriveFont(UiUtils.AQUA_TITLED_BORDER_FONT_SIZE);
+				
+				arrowBtn.setFont(font);
+			}
+			
 			Color color = BorderFactory.createTitledBorder(border, "Sample").getTitleColor();
 			if (color == null) color = UIManager.getColor("Label.foreground");
 			

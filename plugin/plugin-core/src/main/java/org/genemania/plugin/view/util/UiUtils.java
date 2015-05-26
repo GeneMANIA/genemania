@@ -92,6 +92,7 @@ public class UiUtils {
 	public static final float MISSING_FIELD_ICON_SIZE = 12.0f;
 	
 	public static final float INFO_FONT_SIZE = 11.0f;
+	public static final float AQUA_TITLED_BORDER_FONT_SIZE = 11.0f;
 	
 	private final ImageCache images;
 	private final IconManager iconManager;
@@ -170,6 +171,7 @@ public class UiUtils {
 		expandButton.setContentAreaFilled(false);
 		expandButton.setFocusable(false);
 		expandButton.setBorder(BorderFactory.createEmptyBorder());
+		
 		return expandButton;
 	}
 	
@@ -415,6 +417,10 @@ public class UiUtils {
 			final Border aquaBorder = isAquaLAF() ? UIManager.getBorder("TitledBorder.aquaVariant") : null;
 			final TitledBorder tb = aquaBorder != null ?
 					BorderFactory.createTitledBorder(aquaBorder, title) : BorderFactory.createTitledBorder(title);
+			
+			if (isAquaLAF())
+				tb.setTitleFont(UIManager.getFont("Label.font").deriveFont(AQUA_TITLED_BORDER_FONT_SIZE));
+			
 			border = tb;
 		}
 		
