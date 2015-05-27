@@ -18,12 +18,13 @@
  */
 package org.genemania.plugin.data.lucene.view;
 
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
 
-import javax.swing.BorderFactory;
+import java.awt.Frame;
+
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -45,15 +46,18 @@ public class EditOrganismDialog extends AbstractEditDialog {
 	private final JTextArea descriptionField;
 	private final OrganismValidator validator;
 
-	public EditOrganismDialog(Frame frame, boolean modality, UiUtils uiUtils, OrganismValidator validator) {
-		super(frame, Strings.editOrganism_title, modality);
+	public EditOrganismDialog(Frame frame, UiUtils uiUtils, OrganismValidator validator) {
+		super(frame, Strings.editOrganism_title, true);
+		setModalityType(ModalityType.APPLICATION_MODAL);
+		
 		this.validator = validator;
 
-		JPanel contents = uiUtils.createJPanel();
-		contents.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-		contents.setLayout(new GridBagLayout());
-
-		DocumentListener listener = new DocumentListener() {
+		final JLabel label1 = new JLabel(Strings.importOrganismName_label);
+		final JLabel label2 = new JLabel(Strings.importOrganismAlias_label);
+		final JLabel label3 = new JLabel(Strings.importOrganismTaxonomyId_label);
+		final JLabel label4 = new JLabel(Strings.importOrganismDescription_label);
+		
+		final DocumentListener listener = new DocumentListener() {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
 				validateSettings();
@@ -68,43 +72,65 @@ public class EditOrganismDialog extends AbstractEditDialog {
 			}
 		};
 		
-		Insets insets = new Insets(0, 0, 0, 0);
-		int row = 0;
-		
 		nameField = new JTextField(30);
 		nameField.getDocument().addDocumentListener(listener);
-
-		contents.add(new JLabel(Strings.importOrganismName_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, insets, 0, 0));
-		contents.add(nameField, new GridBagConstraints(1, row, 2, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, insets, 0, 0));
-		row++;
 		
 		aliasField = new JTextField(30);
 		aliasField.getDocument().addDocumentListener(listener);
 		
-		contents.add(new JLabel(Strings.importOrganismAlias_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, insets, 0, 0));
-		contents.add(aliasField, new GridBagConstraints(1, row, 2, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, insets, 0, 0));
-		row++;
-
 		taxIdField = new JTextField(30);
 		taxIdField.getDocument().addDocumentListener(listener);
 		
-		contents.add(new JLabel(Strings.importOrganismTaxonomyId_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, insets, 0, 0));
-		contents.add(taxIdField, new GridBagConstraints(1, row, 2, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, insets, 0, 0));
-		row++;
-
 		descriptionField = new JTextArea();
 		descriptionField.getDocument().addDocumentListener(listener);
-		
-		contents.add(new JLabel(Strings.importOrganismDescription_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, insets, 0, 0));
-		contents.add(new JScrollPane(descriptionField), new GridBagConstraints(1, row, 2, 1, 1, 1, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, insets, 0, 0));
-		row++;
-		
-		JPanel buttonPanel = createButtonPanel(uiUtils);
-		contents.add(buttonPanel, new GridBagConstraints(0, row, 3, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-		row++;
+		final JScrollPane scrollPane = new JScrollPane(descriptionField);
 
-		setLayout(new GridBagLayout());
-		add(contents, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		final JPanel buttonPanel = createButtonPanel(uiUtils);
+
+		final JPanel contents = uiUtils.createJPanel();
+		final GroupLayout layout = new GroupLayout(contents);
+		contents.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)
+				.addGroup(layout.createSequentialGroup()
+						.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
+								.addComponent(label1)
+								.addComponent(label2)
+								.addComponent(label3)
+								.addComponent(label4)
+						)
+						.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+								.addComponent(nameField)
+								.addComponent(aliasField)
+								.addComponent(taxIdField)
+								.addComponent(scrollPane)
+						)
+				)
+				.addComponent(buttonPanel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+						.addComponent(label1)
+						.addComponent(nameField)
+				)
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+						.addComponent(label2)
+						.addComponent(aliasField)
+				)
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+						.addComponent(label3)
+						.addComponent(taxIdField)
+				)
+				.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+						.addComponent(label4, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+						.addComponent(scrollPane, DEFAULT_SIZE, 160, Short.MAX_VALUE)
+				)
+				.addComponent(buttonPanel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+		);
+		
+		getContentPane().add(contents);
 	}
 
 	public void setDescription(String description) {

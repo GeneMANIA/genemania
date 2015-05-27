@@ -112,9 +112,7 @@ public class UiUtils {
 		pane.setEditorKit(new HTMLEditorKit());
 		pane.setEditable(false);
 		pane.setText(text);
-		
-		if (isAquaLAF())
-			pane.setOpaque(false);
+		pane.setOpaque(false);
 		
 		return pane;
 	}
@@ -136,9 +134,7 @@ public class UiUtils {
 			}
 		};
 		pane.addHyperlinkListener(linkListener);
-		
-		if (isAquaLAF())
-			pane.setOpaque(false);
+		pane.setOpaque(false);
 		
 		return pane;
 	}

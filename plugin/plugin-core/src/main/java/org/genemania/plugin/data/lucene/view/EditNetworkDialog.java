@@ -19,16 +19,17 @@
 
 package org.genemania.plugin.data.lucene.view;
 
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
-import javax.swing.BorderFactory;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -51,14 +52,15 @@ public class EditNetworkDialog extends AbstractEditDialog {
 	private final JTextArea descriptionField;
 	private final JTextField groupNameField;
 	
-	public EditNetworkDialog(final Frame owner, final boolean modality, final UiUtils uiUtils) {
-		super(owner, Strings.editNetwork_title, modality);
+	public EditNetworkDialog(final Frame owner, final UiUtils uiUtils) {
+		super(owner, Strings.editNetwork_title, true);
+		setModalityType(ModalityType.APPLICATION_MODAL);
 		
-		final JPanel contents = uiUtils.createJPanel();
-		contents.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-		contents.setLayout(new GridBagLayout());
-
-		DocumentListener listener = new DocumentListener() {
+		final JLabel label1 = new JLabel(Strings.importNetworkGroup_label);
+		final JLabel label2 = new JLabel(Strings.importNetworkName_label);
+		final JLabel label3 = new JLabel(Strings.importNetworkDescription_label);
+		
+		final DocumentListener listener = new DocumentListener() {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
 				validateSettings();
@@ -87,14 +89,11 @@ public class EditNetworkDialog extends AbstractEditDialog {
 		descriptionField = new JTextArea();
 		descriptionField.setRows(3);
 		descriptionField.getDocument().addDocumentListener(listener);
+		final JScrollPane scrollPane = new JScrollPane(descriptionField);
 		
-		JPanel buttonPanel = createButtonPanel(uiUtils);
-		JScrollPane scrollPane = new JScrollPane(descriptionField);
+		final JPanel buttonPanel = createButtonPanel(uiUtils);
 		
-		JPanel groupPanel = uiUtils.createJPanel();
-		groupPanel.setLayout(new GridBagLayout());
-		
-		FocusListener focusListener = new FocusListener() {
+		final FocusListener focusListener = new FocusListener() {
 			@Override
 			public void focusLost(FocusEvent e) {
 				validateSettings();
@@ -108,27 +107,48 @@ public class EditNetworkDialog extends AbstractEditDialog {
 		groupNameField.getDocument().addDocumentListener(listener);
 		groupNameField.addFocusListener(focusListener);
 		
-		groupPanel.add(groupCombo, new GridBagConstraints(0, 0, 1, 1, Double.MIN_VALUE, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		groupPanel.add(groupNameField, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-
-		int row = 0;
-		contents.add(new JLabel(Strings.importNetworkGroup_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0 ,0), 0, 0));
-		contents.add(groupPanel, new GridBagConstraints(1, row, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-		row++;
+		final JPanel contents = uiUtils.createJPanel();
+		final GroupLayout layout = new GroupLayout(contents);
+		contents.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
 		
-		contents.add(new JLabel(Strings.importNetworkName_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0 ,0), 0, 0));
-		contents.add(nameField, new GridBagConstraints(1, row, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-		row++;
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)
+				.addGroup(layout.createSequentialGroup()
+						.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
+								.addComponent(label1)
+								.addComponent(label2)
+								.addComponent(label3)
+						)
+						.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(groupCombo, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+										.addComponent(groupNameField, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+								)
+								.addComponent(nameField)
+								.addComponent(scrollPane)
+						)
+				)
+				.addComponent(buttonPanel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+						.addComponent(label1)
+						.addComponent(groupCombo)
+						.addComponent(groupNameField)
+				)
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+						.addComponent(label2)
+						.addComponent(nameField)
+				)
+				.addGroup(layout.createParallelGroup(Alignment.LEADING, true)
+						.addComponent(label3, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+						.addComponent(scrollPane, DEFAULT_SIZE, 160, Short.MAX_VALUE)
+				)
+				.addComponent(buttonPanel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+		);
 		
-		contents.add(new JLabel(Strings.importNetworkDescription_label), new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0 ,0), 0, 0));
-		contents.add(scrollPane, new GridBagConstraints(1, row, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		row++;
-		
-		contents.add(buttonPanel, new GridBagConstraints(0, row, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-		row++;
-		
-		setLayout(new GridBagLayout());
-		add(contents, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		getContentPane().add(contents);
 	}
 	
 	@Override

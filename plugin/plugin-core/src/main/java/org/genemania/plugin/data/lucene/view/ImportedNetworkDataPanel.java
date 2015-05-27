@@ -299,7 +299,7 @@ public class ImportedNetworkDataPanel extends JPanel {
 		for (int index : selection) {
 			final UserNetworkEntry entry = installedModel.get(index);
 			final InteractionNetwork network = entry.network;
-			final EditNetworkDialog dialog = new EditNetworkDialog(uiUtils.getFrame(this), true, uiUtils);
+			final EditNetworkDialog dialog = new EditNetworkDialog(uiUtils.getFrame(this), uiUtils);
 			dialog.setLocationByPlatform(true);
 			dialog.setOrganism(entry.organism);
 			dialog.setGroup(entry.group);

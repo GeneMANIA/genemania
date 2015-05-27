@@ -462,7 +462,7 @@ public class ImportOrganismPanel extends JPanel {
 			
 			try {
 				validator.setCurrentOrganism(organism);
-				dialog = new EditOrganismDialog(uiUtils.getFrame(this), true, uiUtils, validator);
+				dialog = new EditOrganismDialog(uiUtils.getFrame(this), uiUtils, validator);
 				dialog.setLocationByPlatform(true);
 				dialog.setOrganismName(organism.getName());
 				dialog.setAlias(organism.getAlias());
