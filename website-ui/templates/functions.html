@@ -23,15 +23,13 @@
           <td class="function-fdr">FDR</td>
           <td class="function-coverage">Coverage</td>
         </tr>
-        <tr class="function" ng-class="{ 'activatable-bg': result.functionColors.length !== 0 }" bindonce="fn" ng-repeat="fn in functions" on-tap="result.toggleFunctionColoring( fn )">
+        <tr class="function" ng-class="{ 'activatable-bg': result.functionColors.length !== 0 || fn.colored }" bindonce="fn" ng-repeat="fn in functions" on-tap="result.toggleFunctionColoring( fn )">
           <td class="function-name">
-            <span ng-if="fn.colored" class="fa-stack">
-              <i class="fa fa-square fa-stack-1x"></i>
-              <i class="fa fa-times fa-stack-1x" ng-style="{ 'color': fn.color }"></i>
+            <span ng-if="fn.colored" class="fa-stack function-list-remove-icon">
+              <i class="fa fa-square fa-stack-1x" ng-style="{ 'color': fn.color }"></i>
             </span>
-            <span ng-if="!fn.colored" ng-class="{ 'disabled': result.functionColors.length === 0 }" class="fa-stack">
-              <i class="fa fa-square fa-stack-1x"></i>
-              <i class="fa fa-plus fa-stack-1x function-icon-top"></i>
+            <span ng-if="!fn.colored" ng-class="{ 'disabled': result.functionColors.length === 0 }" class="fa-stack function-list-add-icon">
+              <i class="fa fa-square-o fa-stack-1x"></i>
             </span>
             <!-- {{fn.ontologyCategory.description}} -->
             <span bindonce bo-text="fn.ontologyCategory.description"></span>

@@ -177,10 +177,10 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
           var rIntn = rIntns[k];
 
           rIntn.weight = rIntn.interaction.weight;
-          rIntn.displayWeight = numeral( rIntn.weight ).format('0.0000%');
+          rIntn.displayWeight = numeral( rIntn.weight ).format('0.00%');
 
           rIntn.absoluteWeight = rIntn.interaction.weight * rNet.weight;
-          rIntn.absoluteDisplayWeight = numeral( rIntn.absoluteWeight ).format('0.0000%');
+          rIntn.absoluteDisplayWeight = numeral( rIntn.absoluteWeight ).format('0.00%');
 
           rIntn.id = self.makeResultInteractionId();
           rIntn.resultNetwork = rNet;

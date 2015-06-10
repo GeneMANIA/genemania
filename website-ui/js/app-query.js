@@ -11,6 +11,7 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
   var networkGroups;
   var attributeGroups;
   var version;
+  var lastOrgId;
 
   // when all resources are pulled in, the query is ready
   Promise.all([
@@ -29,6 +30,10 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
 
     $$version().then(function( v ){
       version = v;
+    }),
+    
+    io('organism').read().then(function( org ){
+      lastOrgId = org.lastOrgId;
     })
 
   ]).then(function(){
@@ -73,8 +78,8 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
       self.weighting = params.weighting;
 
     } else { // set defaults
-      self.organism = _.find( self.organisms, function( o ){ // default org is human
-        return o.id === 4;
+      self.organism = _.find( self.organisms, function( o ){ // default org is human or last used org
+        return lastOrgId != null ? o.id === lastOrgId : o.id === 4;
       } ) || self.organisms[0]; // fallback on first org
 
       self.weighting = config.networks.defaultWeighting;
@@ -196,6 +201,14 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
     self.selectedAttributeGroupCount = selCount;
     self.attributeGroupsExpanded = false;
     self.updateAttributeGroupsSelection();
+
+    var ioo = io('organism');
+    
+    ioo.read().then(function( orgJson ){
+      lastOrgId = orgJson.lastOrgId = org.id;
+      
+      return ioo.write();
+    });
 
     if( pub === undefined || pub ){
       PubSub.publish('query.setOrganism', self);

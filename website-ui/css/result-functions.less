@@ -60,12 +60,18 @@
   border-bottom: 1px solid #555;
 }
 
+.function:not(.activatable-bg) {
+  cursor: default;
+}
+
 .function-header {
   background: #444;
 }
 
 .function-name {
   padding-right: 1em;
+  padding-bottom: 0.25em;
+  line-height: 1.2;
 }
 
 .function-fdr {
@@ -88,4 +94,9 @@
 
 .function-icon-top {
   color: #666;
+}
+
+.function-list-add-icon,
+.function-list-remove-icon {
+    font-size: 1.25em;
 }
