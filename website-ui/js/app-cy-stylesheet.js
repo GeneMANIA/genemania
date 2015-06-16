@@ -86,7 +86,7 @@ function(){
       {
         selector: 'edge.filtered',
         css: {
-          'opacity': 0.1
+          'opacity': 0
         }
       }
     ];

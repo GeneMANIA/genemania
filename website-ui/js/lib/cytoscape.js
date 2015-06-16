@@ -1,5 +1,5 @@
 /*!
- * This file is part of Cytoscape.js 2.4.0.
+ * This file is part of Cytoscape.js 2.4.2.
  * 
  * Cytoscape.js is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the Free
@@ -29,7 +29,7 @@ var cytoscape;
     return cytoscape.init.apply(cytoscape, arguments);
   };
 
-  $$.version = '2.4.0';
+  $$.version = '2.4.2';
   
   // allow functional access to cytoscape.js
   // e.g. var cyto = $.cytoscape({ selector: "#foo", ... });
@@ -5123,8 +5123,8 @@ this.cytoscape = cytoscape;
           'text-transform': textTransform,
           'text-wrap': 'none',
           'text-max-width': textMaxWidth,
-          'text-background-color': 'none',
-          'text-background-opacity': 1,
+          'text-background-color': '#000',
+          'text-background-opacity': 0,
           'text-border-width': 0,
           'text-border-style': 'solid',
           'text-border-color':'#000',
@@ -12919,6 +12919,7 @@ this.cytoscape = cytoscape;
       for( var i = 0; i < eles.length; i++ ){
         var ele = eles[i];
         var _p = ele._private;
+        var style = _p.style;
         var display = styleEnabled ? _p.style['display'].value : 'element';
         var isNode = _p.group === 'nodes';
         var ex1, ex2, ey1, ey2, x, y;
@@ -12953,19 +12954,25 @@ this.cytoscape = cytoscape;
         } else if( ele.isEdge() && includeEdges ){
           includedEle = true;
 
-          var n1pos = ele._private.source._private.position;
-          var n2pos = ele._private.target._private.position;
+          var n1 = _p.source;
+          var n1_p = n1._private;
+          var n1pos = n1_p.position;
+          
+          var n2 = _p.target;
+          var n2_p = n2._private;
+          var n2pos = n2_p.position;
+          
 
           // handle edge dimensions (rough box estimate)
           //////////////////////////////////////////////
 
-          var rstyle = ele._private.rstyle || {};
+          var rstyle = _p.rstyle || {};
 
           ex1 = n1pos.x;
           ex2 = n2pos.x;
           ey1 = n1pos.y;
           ey2 = n2pos.y;
-
+          
           if( ex1 > ex2 ){
             var temp = ex1;
             ex1 = ex2;
@@ -12989,7 +12996,7 @@ this.cytoscape = cytoscape;
           if( styleEnabled ){
             var bpts = rstyle.bezierPts || [];
 
-            var w = ele._private.style['width'].pxValue;
+            var w = style['width'].pxValue;
             var wHalf = w/2;
 
             for( var j = 0; j < bpts.length; j++ ){
@@ -13006,8 +13013,38 @@ this.cytoscape = cytoscape;
               y2 = ey2 > y2 ? ey2 : y2;
             }
           }
+          
+          // precise haystacks (sanity check)
+          ///////////////////////////////////
+          
+          if( styleEnabled && style['curve-style'].strValue === 'haystack' ){
+            var hpts = _p.rscratch.haystackPts;
+            
+            ex1 = hpts[0];
+            ey1 = hpts[1];
+            ex2 = hpts[2];
+            ey2 = hpts[3];
+
+            if( ex1 > ex2 ){
+              var temp = ex1;
+              ex1 = ex2;
+              ex2 = temp;
+            }
+
+            if( ey1 > ey2 ){
+              var temp = ey1;
+              ey1 = ey2;
+              ey2 = temp;
+            }
+
+            x1 = ex1 < x1 ? ex1 : x1;
+            x2 = ex2 > x2 ? ex2 : x2;
+            y1 = ey1 < y1 ? ey1 : y1;
+            y2 = ey2 > y2 ? ey2 : y2;  
+          }
 
         } // edges
+            
 
         // handle label dimensions
         //////////////////////////
@@ -13877,7 +13914,7 @@ this.cytoscape = cytoscape;
             duration: options.animationDuration,
             step: !lastNode ? undefined : function(){
               if( options.fit ){
-                cy.fit( options.padding );
+                cy.fit( options.eles, options.padding );
               } 
             },
             complete: !lastNode ? undefined : function(){
@@ -13890,7 +13927,7 @@ this.cytoscape = cytoscape;
               } 
 
               if( options.fit ){
-                cy.fit( options.padding );
+                cy.fit( options.eles, options.padding );
               } 
               
               layout.one('layoutstop', options.stop);
@@ -13905,7 +13942,7 @@ this.cytoscape = cytoscape;
         nodes.positions( fn );
 
         if( options.fit ){
-          cy.fit( options.padding );
+          cy.fit( options.eles, options.padding );
         }
 
         if( options.zoom != null ){
@@ -14697,22 +14734,28 @@ this.cytoscape = cytoscape;
         otherNodes = cy.$( otherNodes );
       }
       
-      var edges = otherNodes.connectedEdges();
       var thisIds = this._private.ids;
+      var otherIds = otherNodes._private.ids;
       
-      for( var i = 0; i < edges.length; i++ ){
-        var edge = edges[i];
-        var foundId;
-        var edgeData = edge._private.data;
-
-        if( p.thisIs ){
-          var idToFind = edgeData[ p.thisIs ];
-          foundId = thisIds[ idToFind ];
-        } else {
-          foundId = thisIds[ edgeData.source ] || thisIds[ edgeData.target ];
-        }
+      for( var h = 0; h < otherNodes.length; h++ ){
+        var edges = otherNodes[h]._private.edges;
         
-        if( foundId ){
+        for( var i = 0; i < edges.length; i++ ){
+          var edge = edges[i];
+          var foundId;
+          var edgeData = edge._private.data;
+          var thisToOther = thisIds[ edgeData.source ] && otherIds[ edgeData.target ];
+          var otherToThis = otherIds[ edgeData.source ] && thisIds[ edgeData.target ];
+          var edgeConnectsThisAndOther = thisToOther || otherToThis;
+
+          if( !edgeConnectsThisAndOther ){ continue; }
+
+          if( p.thisIs ){
+            if( p.thisIs === 'source' && !thisToOther ){ continue; }
+            
+            if( p.thisIs === 'target' && !otherToThis ){ continue; }
+          }
+          
           elements.push( edge );
         }
       }
@@ -17328,6 +17371,12 @@ this.cytoscape = cytoscape;
       
       rs.arrowStartX = arrowStart[0];
       rs.arrowStartY = arrowStart[1];
+      
+      if( !$$.is.number(rs.startX) || !$$.is.number(rs.startY) || !$$.is.number(rs.endX) || !$$.is.number(rs.endY) ){
+        rs.badLine = true;
+      } else {
+        rs.badLine = false;
+      }
             
     } else if (rs.edgeType == 'bezier') {
       // if( window.badArrow) debugger;
@@ -17634,12 +17683,12 @@ this.cytoscape = cytoscape;
       if( context.beginPath ){ context.beginPath(); }
       context.moveTo(pts[0], pts[1]);
       
-      if (pts.length === 3 * 2) { // bezier
+      if( pts.length === 6 && !rs.badBezier ){ // bezier
         context.quadraticCurveTo(pts[2], pts[3], pts[4], pts[5]);
-      } else if( pts.length === 3 * 2 * 2 ){ // double bezier loop
+      } else if( pts.length === 12 && !rs.badBezier ){ // double bezier loop
         context.quadraticCurveTo(pts[2], pts[3], pts[4], pts[5]);
         context.quadraticCurveTo(pts[8], pts[9], pts[10], pts[11]);
-      } else { // line
+      } else if( pts.length === 4 && !rs.badLine ){ // line
         context.lineTo(pts[2], pts[3]);
       }
     }
@@ -17703,10 +17752,11 @@ this.cytoscape = cytoscape;
         arrowClearFill = 'hollow';
       }
 
-      if( style.opacity.value !== 1 ){ // then extra clear is needed
+      if( style.opacity.value !== 1 || arrowFill === 'hollow' ){ // then extra clear is needed
         context.globalCompositeOperation = 'destination-out';
         
         self.fillStyle(context, 255, 255, 255, 1);
+        self.strokeStyle(context, 255, 255, 255, 1);
         
         self.drawArrowShape( edge, prefix, context, 
           arrowClearFill, style['width'].pxValue, style[prefix + '-arrow-shape'].value, 
@@ -17718,6 +17768,7 @@ this.cytoscape = cytoscape;
 
       var color = style[prefix + '-arrow-color'].value;
       self.fillStyle(context, color[0], color[1], color[2], style.opacity.value);
+      self.strokeStyle(context, color[0], color[1], color[2], style.opacity.value);
 
       self.drawArrowShape( edge, prefix, context, 
         arrowFill, style['width'].pxValue, style[prefix + '-arrow-shape'].value, 
@@ -18195,11 +18246,11 @@ this.cytoscape = cytoscape;
     var rstyle = _p.rstyle;
     var rscratch = _p.rscratch;
     var parentOpacity = element.effectiveOpacity();
-    if( parentOpacity === 0 || style["text-opacity"].value === 0){ return; }
+    if( parentOpacity === 0 || style['text-opacity'].value === 0){ return; }
 
     var text = this.setupTextStyle( context, element );
-    var halign = style["text-halign"].value;
-    var valign = style["text-valign"].value;
+    var halign = style['text-halign'].value;
+    var valign = style['text-valign'].value;
 
     if( element.isEdge() ){
       halign = 'center';
@@ -18207,21 +18258,21 @@ this.cytoscape = cytoscape;
     }
 
     if ( text != null && !isNaN(textX) && !isNaN(textY)) {
-      var backgroundOpacity = style["text-background-opacity"].value;
-      if ((style["text-background-color"] && style["text-background-color"].value != "none" || style["text-border-width"].pxValue > 0) && backgroundOpacity > 0) {
-        var textBorderWidth = style["text-border-width"].pxValue;
+      var backgroundOpacity = style['text-background-opacity'].value;
+      if ((style['text-background-color'] || style['text-border-width'].pxValue > 0) && backgroundOpacity > 0) {
+        var textBorderWidth = style['text-border-width'].pxValue;
         var margin = 4 + textBorderWidth/2;
 
         if (element.isNode()) {
           //Move textX, textY to include the background margins
-          if (valign == "top") {
+          if (valign == 'top') {
             textY -=margin;
-          } else if (valign == "bottom") {
+          } else if (valign == 'bottom') {
             textY +=margin;
           }
-          if (halign == "left") {
+          if (halign == 'left') {
             textX -=margin;
-          } else if (halign == "right") {
+          } else if (halign == 'right') {
             textX +=margin;
           }
         }
@@ -18231,9 +18282,9 @@ this.cytoscape = cytoscape;
         var bgX = textX;
 
         if (halign) {
-          if (halign == "center") {
+          if (halign == 'center') {
             bgX = bgX - bgWidth / 2;
-          } else if (halign == "left") {
+          } else if (halign == 'left') {
             bgX = bgX- bgWidth;
           }
         }
@@ -18241,9 +18292,9 @@ this.cytoscape = cytoscape;
         var bgY = textY;
 
         if (element.isNode()) {
-          if (valign == "top") {
+          if (valign == 'top') {
              bgY = bgY - bgHeight;
-          } else if (valign == "center") {
+          } else if (valign == 'center') {
             bgY = bgY- bgHeight / 2;
           }
         } else {
@@ -18263,13 +18314,13 @@ this.cytoscape = cytoscape;
           bgWidth += margin*2;
         }
 
-        if (style["text-background-color"]) {
+        if (style['text-background-color']) {
           var textFill = context.fillStyle;
-          var textBackgroundColor = style["text-background-color"].value;
+          var textBackgroundColor = style['text-background-color'].value;
 
-          context.fillStyle = "rgba(" + textBackgroundColor[0] + "," + textBackgroundColor[1] + "," + textBackgroundColor[2] + "," + backgroundOpacity * parentOpacity + ")";
+          context.fillStyle = 'rgba(' + textBackgroundColor[0] + ',' + textBackgroundColor[1] + ',' + textBackgroundColor[2] + ',' + backgroundOpacity * parentOpacity + ')';
           var styleShape = style['text-background-shape'].strValue;
-          if (styleShape == "roundrectangle") {
+          if (styleShape == 'roundrectangle') {
             roundRect(context, bgX, bgY, bgWidth, bgHeight, 2);
           } else {
             context.fillRect(bgX,bgY,bgWidth,bgHeight);
@@ -18280,10 +18331,10 @@ this.cytoscape = cytoscape;
         if (textBorderWidth > 0) {
           var textStroke = context.strokeStyle;
           var textLineWidth = context.lineWidth;
-          var textBorderColor = style["text-border-color"].value;
+          var textBorderColor = style['text-border-color'].value;
           var textBorderStyle = style['text-border-style'].value;
 
-          context.strokeStyle = "rgba(" + textBorderColor[0] + "," + textBorderColor[1] + "," + textBorderColor[2] + "," + backgroundOpacity * parentOpacity + ")";
+          context.strokeStyle = 'rgba(' + textBorderColor[0] + ',' + textBorderColor[1] + ',' + textBorderColor[2] + ',' + backgroundOpacity * parentOpacity + ')';
           context.lineWidth = textBorderWidth;
 
           if( context.setLineDash ){ // for very outofdate browsers
@@ -19236,25 +19287,30 @@ this.cytoscape = cytoscape;
 
       // console.log('--');
 
-      if( needDraw[CR.DRAG] && motionBlur && needDraw[CR.NODE] && inNodeDragGesture ){
-        // console.log('NODE blurclean');
-
-        var context = data.contexts[CR.NODE];
-
-        setContextTransform( context, true );
-        drawElements(eles.nondrag, context);
-
-        needDraw[CR.NODE] = false; 
-        needMbClear[CR.NODE] = false;
-
-      } else 
+      // if( needDraw[CR.DRAG] && motionBlur && needDraw[CR.NODE] && inNodeDragGesture ){
+      //   console.log('NODE blurclean');
+      // 
+      //   var context = data.contexts[CR.NODE];
+      // 
+      //   setContextTransform( context, true );
+      //   drawElements(eles.nondrag, context);
+      // 
+      //   needDraw[CR.NODE] = false; 
+      //   needMbClear[CR.NODE] = false;
+      // 
+      // } else 
       if( needDraw[CR.NODE] || drawAllLayers || drawOnlyNodeLayer || needMbClear[CR.NODE] ){
         // console.log('NODE', needDraw[CR.NODE], needMbClear[CR.NODE]);
 
         var useBuffer = motionBlur && !needMbClear[CR.NODE] && mbPxRatio !== 1;
         var context = forcedContext || ( useBuffer ? r.data.bufferContexts[ CR.MOTIONBLUR_BUFFER_NODE ] : data.contexts[CR.NODE] );
+        var clear = motionBlur && !useBuffer ? 'motionBlur' : undefined;
 
-        setContextTransform( context, motionBlur && !useBuffer ? 'motionBlur' : undefined );
+        if( needDraw[CR.DRAG] && needDraw[CR.NODE] ){
+          clear = true;
+        }
+
+        setContextTransform( context, clear );
         drawElements(eles.nondrag, context);
         
         if( !drawAllLayers && !motionBlur ){
@@ -19768,6 +19824,30 @@ this.cytoscape = cytoscape;
       updateAncestorsInDragLayer( node, {
         inDragLayer: opts.inDragLayer
       } );
+    };
+    
+    var freeDraggedElements = function( draggedElements ){
+      if( !draggedElements ){ return; }
+      
+      for (var i=0; i < draggedElements.length; i++) {
+
+        var dEi_p = draggedElements[i]._private;
+
+        if(dEi_p.group === 'nodes') {
+          dEi_p.rscratch.inDragLayer = false;
+          dEi_p.grabbed = false;
+
+          var sEdges = dEi_p.edges;
+          for( var j = 0; j < sEdges.length; j++ ){ sEdges[j]._private.rscratch.inDragLayer = false; }
+
+          // for compound nodes, also remove related nodes and edges from the drag layer
+          updateAncestorsInDragLayer(draggedElements[i], { inDragLayer: false });
+
+        } else if( dEi_p.group === 'edges' ){
+          dEi_p.rscratch.inDragLayer = false;
+        }
+
+      }
     };
 
     // helper function to determine which ancestor nodes and edges should go
@@ -20458,7 +20538,7 @@ this.cytoscape = cytoscape;
         // Deselect all elements if nothing is currently under the mouse cursor and we aren't dragging something
         if ( (down == null) // not mousedown on node
           && !r.dragData.didDrag // didn't move the node around
-          && !(Math.pow(select[2] - select[0], 2) + Math.pow(select[3] - select[1], 2) > 7 && select[4]) // not box selection
+          //&& !(Math.pow(select[2] - select[0], 2) + Math.pow(select[3] - select[1], 2) > 7 && select[4]) // not box selection
           && !r.hoverData.dragged // didn't pan
         ) {
 
@@ -20516,8 +20596,8 @@ this.cytoscape = cytoscape;
           // console.log('trigger click et al');
 
           if(
-            Math.pow(select[2] - select[0], 2) + Math.pow(select[3] - select[1], 2) === 0
-            && !r.dragData.didDrag // didn't move a node around
+            //Math.pow(select[2] - select[0], 2) + Math.pow(select[3] - select[1], 2) === 0
+            !r.dragData.didDrag // didn't move a node around
             && !r.hoverData.dragged // didn't pan
           ){
             if (near != null) {
@@ -20630,23 +20710,7 @@ this.cytoscape = cytoscape;
           needsRedraw[CR.DRAG] = true;
           needsRedraw[CR.NODE] = true;
 
-          for (var i=0; i < draggedElements.length; i++) {
-
-            if(draggedElements[i]._private.group === 'nodes') {
-              draggedElements[i]._private.rscratch.inDragLayer = false;
-              draggedElements[i]._private.grabbed = false;
-
-              var sEdges = draggedElements[i]._private.edges;
-              for( var j = 0; j < sEdges.length; j++ ){ sEdges[j]._private.rscratch.inDragLayer = false; }
-
-              // for compound nodes, also remove related nodes and edges from the drag layer
-              updateAncestorsInDragLayer(draggedElements[i], { inDragLayer: false });
-
-            } else if( draggedElements[i]._private.group === 'edges' ){
-              draggedElements[i]._private.rscratch.inDragLayer = false;
-            }
-
-          }
+          freeDraggedElements( draggedElements );
 
           if( down ){ down.trigger('free'); }
 
@@ -21226,13 +21290,16 @@ this.cytoscape = cytoscape;
             var draggedEles = r.dragData.touchDragEles;
 
             if( draggedEles ){ for( var i = 0; i < draggedEles.length; i++ ){
-              draggedEles[i]._private.grabbed = false;
-              draggedEles[i]._private.rscratch.inDragLayer = false;
+              var dEi_p = draggedEles[i]._private;
+              
+              dEi_p.grabbed = false;
+              dEi_p.rscratch.inDragLayer = false;
             } }
 
-            r.touchData.start._private.active = false;
-            r.touchData.start._private.grabbed = false;
-            r.touchData.start._private.rscratch.inDragLayer = false;
+            var start_p = r.touchData.start._private;
+            start_p.active = false;
+            start_p.grabbed = false;
+            start_p.rscratch.inDragLayer = false;
 
             needsRedraw[CR.DRAG] = true;
 
@@ -21287,6 +21354,8 @@ this.cytoscape = cytoscape;
 
                 if( justStartedDrag ){
                   addNodeToDrag( draggedEle, { inDragLayer: true } );
+                  
+                  needsRedraw[CR.NODE] = true;
 
                   var dragDelta = r.touchData.dragDelta;
 
@@ -21592,39 +21661,21 @@ this.cytoscape = cytoscape;
 
         r.data.bgActivePosistion = undefined;
         needsRedraw[CR.SELECT_BOX] = true;
+        
+        var draggedEles = r.dragData.touchDragEles;
 
         if (start != null ) {
 
-          if( start._private.grabbed ){
-            start._private.grabbed = false;
-            start.trigger('free');
-            start._private.rscratch.inDragLayer = false;
-          }
-
-          var sEdges = start._private.edges;
-          for (var j=0;j<sEdges.length;j++) { sEdges[j]._private.rscratch.inDragLayer = false; }
-          updateAncestorsInDragLayer(start, false);
-
-          if( start.selected() ){
-            var selectedNodes = cy.$('node:selected');
-
-            for( var k = 0; k < selectedNodes.length; k++ ){
-
-              var selectedNode = selectedNodes[k];
-              selectedNode._private.rscratch.inDragLayer = false;
-              selectedNode._private.grabbed = false;
-
-              var sEdges = selectedNode._private.edges;
-              for (var j=0; j<sEdges.length; j++) {
-                sEdges[j]._private.rscratch.inDragLayer = false;
-              }
-
-              updateAncestorsInDragLayer(selectedNode, false);
-            }
-          }
+          var startWasGrabbed = start._private.grabbed;
+          
+          freeDraggedElements( draggedEles );
 
           needsRedraw[CR.DRAG] = true;
           needsRedraw[CR.NODE] = true;
+          
+          if( startWasGrabbed ){
+            start.trigger('free');
+          }
 
           start
             .trigger(new $$.Event(e, {
@@ -21752,7 +21803,7 @@ this.cytoscape = cytoscape;
 
       r.dragData.didDrag = false; // reset for next mousedown
 
-      if( e.touches[0] ){
+      if( e.touches.length === 0 ){
         r.touchData.dragDelta = [];
       }
 
@@ -22177,12 +22228,12 @@ this.cytoscape = cytoscape;
       }
 
       // arbor doesn't work with just 1 node 
-      if( cy.nodes().size() <= 1 ){
+      if( eles.nodes().size() <= 1 ){
         if( options.fit ){
           cy.reset();
         }
 
-        cy.nodes().position({
+        eles.nodes().position({
           x: Math.round( (bb.x1 + bb.x2)/2 ),
           y: Math.round( (bb.y1 + bb.y2)/2 )
         });
@@ -22997,7 +23048,7 @@ this.cytoscape = cytoscape;
 
   // default layout options
   var defaults = {
-    animate: false, // whether to show the layout as it's running
+    animate: true, // whether to show the layout as it's running
     refresh: 1, // number of ticks per frame; higher is faster but more jerky
     maxSimulationTime: 4000, // max length in ms to run the layout
     ungrabifyWhileSimulating: false, // so you can't drag nodes during layout
@@ -23042,6 +23093,8 @@ this.cytoscape = cytoscape;
   ColaLayout.prototype.run = function(){
     var layout = this;
     var options = this.options;
+    
+    layout.manuallyStopped = false;
 
     $$.util.require('cola', function(cola){
 
@@ -23110,8 +23163,6 @@ this.cytoscape = cytoscape;
       };
 
       var onDone = function(){
-        layout.manuallyStopped = false;
-
         if( options.ungrabifyWhileSimulating ){
           grabbableNodes.grabify();
         }
@@ -23140,7 +23191,7 @@ this.cytoscape = cytoscape;
         ticksPerFrame = Math.max( 1, ticksPerFrame ); // at least 1
       }
 
-      var adaptor = cola.adaptor({
+      var adaptor = layout.adaptor = cola.adaptor({
         trigger: function( e ){ // on sim event
           switch( e.type ){
             case 'tick':
@@ -23151,7 +23202,7 @@ this.cytoscape = cytoscape;
 
             case 'end': 
               updateNodePositions();
-              if( !options.infinite || layout.manuallyStopped ){ onDone(); }           
+              if( !options.infinite ){ onDone(); }           
               break;
           }
         },
@@ -23160,6 +23211,12 @@ this.cytoscape = cytoscape;
           var skip = 0;
 
           var inftick = function(){
+            if( layout.manuallyStopped ){
+              onDone();
+              
+              return true;
+            }
+            
             var ret = tick();
 
             if( ret && options.infinite ){ // resume layout if done
@@ -23173,11 +23230,11 @@ this.cytoscape = cytoscape;
             var ret;
 
             // skip ticks to slow down layout for debugging
-            var thisSkip = skip;
-            skip = (skip + 1) % tickSkip;
-            if( thisSkip !== 0 ){
-              return false;
-            }
+            // var thisSkip = skip;
+            // skip = (skip + 1) % tickSkip;
+            // if( thisSkip !== 0 ){
+            //   return false;
+            // }
 
             for( var i = 0; i < ticksPerFrame && !ret; i++ ){
               ret = ret || inftick(); // pick up true ret vals => sim done
@@ -23421,17 +23478,19 @@ this.cytoscape = cytoscape;
         adaptor.flowLayout( flow.axis , flow.minSeparation );
       }
 
+      layout.trigger({ type: 'layoutstart', layout: layout });
+
       adaptor
         .avoidOverlaps( options.avoidOverlap )
         .handleDisconnected( options.handleDisconnected )
         .start( options.unconstrIter, options.userConstIter, options.allConstIter)
       ;
 
-      layout.trigger({ type: 'layoutstart', layout: layout });
-
       if( !options.infinite ){
         setTimeout(function(){
-          adaptor.stop();
+          if( !layout.manuallyStopped ){
+            adaptor.stop();
+          }
         }, options.maxSimulationTime);
       }
 
@@ -23454,6 +23513,7 @@ this.cytoscape = cytoscape;
   $$('layout', 'cola', ColaLayout);
 
 })(cytoscape);
+
 ;(function($$){ 'use strict';
   
   var defaults = {
@@ -25559,6 +25619,10 @@ this.cytoscape = cytoscape;
       layout.one( "layoutready", options.ready );
 
       t1.pass( pData ).run( function( pData ) {
+        
+        foograph = eval('foograph');
+        Voronoi = eval('Voronoi');
+        
         // I need to retrieve the important data
         var lWidth = pData[ 'width' ];
         var lHeight = pData[ 'height' ];

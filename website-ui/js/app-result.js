@@ -118,7 +118,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
 
     this.coloringFunctions = [];
 
-    this.functionColors = config.functionColors;
+    this.functionColors = config.functionColors.slice();
   };
 
   rfn.updateGenesData = function(){

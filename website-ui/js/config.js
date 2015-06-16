@@ -90,7 +90,7 @@ var config = {
       '3': 'bio-fly', // fruit fly
       '4': 'bio-human', // human
       '5': 'bio-mouse', // mouse
-      '6': 'bio-cells', // yeast
+      '6': 'bio-yeast', // yeast
       '7': 'bio-rat', // rat
       '8': 'bio-fish', // zebrafish
       '9': 'bio-cells', // e coli

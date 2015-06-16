@@ -74,8 +74,18 @@ function( util ){ return function( Result ){
     var p = this.layoutPrepost();
 
     var layoutEles = cy.elements().stdFilter(function( ele ){
-      return ele.isNode() || ele.data('group') !== 'coexp';
+      return ele.isNode() || !ele.hasClass('filtered');
     });
+    
+    var layoutElesWoCoexp = layoutEles.stdFilter(function( ele ){
+      return ele.data('group') !== 'coexp';
+    });
+    
+    if( layoutElesWoCoexp.edges().length === 0 ){
+      // then keep coexp edges b/c we need some edges
+    } else {
+      layoutEles = layoutElesWoCoexp;
+    }
 
     var l = this.cyLayout = layoutEles.makeLayout({
       name: 'cola',

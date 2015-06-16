@@ -31,7 +31,9 @@
 .bio-mouse:before,
 .bio-plant:before,
 .bio-rat:before,
-.bio-worm:before {
+.bio-worm:before,
+.bio-yeast:before,
+.bio-yeasts:before {
   display: inline-block;
   font-family: "bio-icons";
   font-style: normal;
@@ -55,3 +57,5 @@
 .bio-plant:before { content: "\f106"; }
 .bio-rat:before { content: "\f107"; }
 .bio-worm:before { content: "\f108"; }
+.bio-yeast:before { content: "\f10a"; }
+.bio-yeasts:before { content: "\f109"; }
