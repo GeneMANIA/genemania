@@ -233,3 +233,22 @@
 .query-weightings-edit-link {
 	margin-left: 0.25em;
 }
+
+.query-searching-overlay {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background: #fff;
+	opacity: 0;
+	pointer-events: none;
+	z-index: 9998;
+	
+	.transition( opacity ease-out 150ms );
+}
+
+.query-searching-overlay-shown {
+	opacity: 0.5;
+	pointer-events: default;
+}

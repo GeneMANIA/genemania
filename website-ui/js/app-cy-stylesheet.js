@@ -28,8 +28,8 @@ function(){
           'font-size': 12,
           'text-valign': 'center',
           'text-halign': 'center',
-          'background-color': '#888',
-          'text-outline-color': '#888',
+          'background-color': '#555',
+          'text-outline-color': '#555',
           'text-outline-width': 2,
           'color': '#fff',
           'overlay-padding': 6,
@@ -76,7 +76,7 @@ function(){
         selector: 'edge',
         css: {
           'curve-style': 'haystack',
-          'opacity': 0.333,
+          'opacity': 0.4,
           'line-color': '#bbb',
           'width': 'mapData(weight, 0, 1, 1, 8)',
           'overlay-padding': 3

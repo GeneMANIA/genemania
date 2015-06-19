@@ -4,27 +4,38 @@ function( util ){ return function( Result ){
 
   var r = Result;
   var rfn = r.prototype;
+  
+  var defaultPadding = 100;
 
   var sortByWeight = function(a, b){
     return b.data('score') - a.data('score');
   };
 
+  var layoutDelay = function(fn){
+    setTimeout(fn, 10);
+  };
+
   rfn.layoutPrepost = function(){
     var self = this;
+    var container = cy.container();
 
-    return new Promise(function(resolve){
+    if( self.layoutPromise ){
+      self.layoutPromise.cancel();
+    }
+
+    // TODO layout can still get bad size
+    // race condition: classes removed after added from prev layout
+
+    return self.layoutPromise = new Promise(function(resolve){
 
       if( self.cyLayout ){
+        cy.elements().stop( true ); // because https://github.com/cytoscape/cytoscape.js/issues/983
+        
         self.cyLayout.stop();
         self.cyLayout = null;
       }
 
-      var container = cy.container();
-
       cy.one('layoutstop', function(){
-        container.classList.remove('cy-layouting-shift');
-        container.classList.remove('cy-layouting-shift-history');
-
         resolve();
       });
 
@@ -35,7 +46,10 @@ function( util ){ return function( Result ){
       if( self.query.historyExpanded ){
         container.classList.add('cy-layouting-shift-history');
       }
-    });
+    }).then(function(){
+      container.classList.remove('cy-layouting-shift');
+      container.classList.remove('cy-layouting-shift-history');
+    }).cancellable();
   };
 
   rfn.circleLayout = function(options){
@@ -58,7 +72,9 @@ function( util ){ return function( Result ){
       sort: sortByWeight
     });
 
-    l.run();
+    layoutDelay(function(){
+      l.run();
+    });
 
     return p;
   };
@@ -68,7 +84,7 @@ function( util ){ return function( Result ){
       randomize: true,
       animate: true,
       maxSimulationTime: 2000,
-      padding: 75
+      padding: defaultPadding
     }, options);
 
     var p = this.layoutPrepost();
@@ -77,25 +93,37 @@ function( util ){ return function( Result ){
       return ele.isNode() || !ele.hasClass('filtered');
     });
     
-    var layoutElesWoCoexp = layoutEles.stdFilter(function( ele ){
-      return ele.data('group') !== 'coexp';
-    });
-    
-    if( layoutElesWoCoexp.edges().length === 0 ){
-      // then keep coexp edges b/c we need some edges
-    } else {
-      layoutEles = layoutElesWoCoexp;
-    }
+    // var layoutElesWoCoexp = layoutEles.stdFilter(function( ele ){
+    //   return ele.data('group') !== 'coexp';
+    // });
+    // 
+    // if( layoutElesWoCoexp.edges().length === 0 ){
+    //   // then keep coexp edges b/c we need some edges
+    // } else {
+    //   layoutEles = layoutElesWoCoexp;
+    // }
 
     var l = this.cyLayout = layoutEles.makeLayout({
       name: 'cola',
       animate: options.animate,
       randomize: options.randomize,
       maxSimulationTime: options.maxSimulationTime,
-      edgeLength: function( e ){ return layoutEles.length / 8 / e.data('weight'); } // as w => inf, l => 0
+      edgeLength: function( e ){
+        function length(e){        
+          return layoutEles.length / 8 / e.data('weight'); // as w => inf, l => 0
+        }
+        
+        if( e.data('group') === 'coexp' ){
+          return 10 * length(e);
+        }
+        
+        return length(e);
+      } 
     });
 
-    l.run();
+    layoutDelay(function(){
+      l.run();
+    });
 
     return p;
   };
@@ -121,7 +149,9 @@ function( util ){ return function( Result ){
       padding: 50
     });
 
-    l.run();
+    layoutDelay(function(){
+      l.run();
+    });
 
     return p;
   };
@@ -142,14 +172,16 @@ function( util ){ return function( Result ){
       cy.animate({
         fit: {
           eles: cy.elements(),
-          padding: 50
+          padding: defaultPadding
         }
       }, {
         duration: 500
       });
     }
 
-    l.run();
+    layoutDelay(function(){
+      l.run();
+    });
 
     return p;
   };

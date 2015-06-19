@@ -1,6 +1,6 @@
 // colours
 @BG_COLOR: #fff;
-@CONTENT_BG_COLOR: rgba(102, 102, 102, 0.93);
+@CONTENT_BG_COLOR: rgba(33, 33, 33, 0.93);
 @CONTENT_TEXT_COLOR: #fff;
 @BUTTON_COLOR: #8BB0D0;
 @BUTTON_COLOR_SEMI: rgba(139, 176, 208, 0.85);
@@ -8,7 +8,7 @@
 @SEPARATOR_COLOR: #555;
 @VALIDATION_ERROR_COLOR: rgba(255, 0, 0, 0.666); //#E81515;
 @VALIDATION_ALL_VALID_COLOR: #4FC44F;
-@HEADER_COLOR: #444;
+@HEADER_COLOR: #666;
 
 // sizes
 @SMALL_SCREEN_WIDTH: 800px;
@@ -18,8 +18,8 @@
 @qH: 2.5em;
 @qTextColor: #fff;
 @qItemW: @qH * 1.125;
-@qBg: rgba(102, 102, 102, 0.85); //#eee;
-@qSepColor: darken(@qBg, 10%);
+@qBg: @CONTENT_BG_COLOR; //#eee;
+@qSepColor: lighten(@qBg, 25%);
 @qBorderColor: darken(@qBg, 1%);
 @qBorderRadius: 0.5em;
 @qMoveAniSpd: 0.25s;
@@ -70,11 +70,11 @@
 @qHistSize: 10em;
 @qHistP: 1em;
 @qHistExpSize: 3em;
-@qHistBg: rgba(0, 0, 0, 0.666);
+@qHistBg: rgba(0, 0, 0, 0.93);
 @qHistEntBg: rgba(255, 255, 255, 0.85);
 
 // networks
-@netListBg: darken(@SEPARATOR_COLOR, 5%);
+@netListBg: @CONTENT_BG_COLOR;
 @netListW: 14em;
 @netNameW: @netListW - 3em;
 @netBarH: 0.8em;
