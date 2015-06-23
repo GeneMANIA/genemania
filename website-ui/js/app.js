@@ -38,13 +38,21 @@ PubSub.promise = function( topic ){
 // because angularjs depends on this and it's not reliable
 window.scrollTo = window.scrollTo || function(){};
 
-app.factory('updateScope', [ '$timeout', function( $timeout ){
+app.factory('updateScope', [ '$timeout', '$rootScope', function( $timeout, $rootScope ){
   var lastUpdate;
-  function updateScope(){
-    lastUpdate && $timeout.cancel(lastUpdate);
-    lastUpdate = $timeout(function(){}, 0);
+  
+  return function(){
+    if( lastUpdate ){ return; clearTimeout(lastUpdate); }
+    
+    lastUpdate = setTimeout(function(){ lastUpdate = null; $rootScope.$digest(); }, 16);
   }
-
+  
+  function updateScope(){
+    if( lastUpdate ){ $timeout.cancel(lastUpdate); }
+    
+    lastUpdate = $timeout(function(){ lastUpdate = null; }, 16);
+  }
+  
   return updateScope;
 } ]);
 
