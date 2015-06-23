@@ -975,6 +975,8 @@ function shallowCopy(src, dst) {
  * @returns {boolean} True if arguments are equal.
  */
 function equals(o1, o2) {
+  if( o1 instanceof Promise || o2 instanceof Promise ){ return true; } // NOTE monkeypatch angular since it can't handle promises!!!
+  
   if (o1 === o2) return true;
   if (o1 === null || o2 === null) return false;
   if (o1 !== o1 && o2 !== o2) return true; // NaN === NaN
