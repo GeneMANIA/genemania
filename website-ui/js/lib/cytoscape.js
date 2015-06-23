@@ -17919,6 +17919,21 @@ this.cytoscape = cytoscape;
     
     return image;
   };
+  
+  CRp.safeDrawImage = function( context, img, x, y, w, h ){
+    var r = this;
+    
+    try {
+      context.drawImage( img, 0, 0, img.width, img.height, x, y, w, h );
+    } catch(e){
+      r.data.canvasNeedsRedraw[CanvasRenderer.NODE] = true;
+      r.data.canvasNeedsRedraw[CanvasRenderer.DRAG] = true;
+      
+      r.drawingImage = true;
+      
+      r.redraw();
+    }
+  };
     
   CRp.drawInscribedImage = function(context, img, node) {
     var r = this;
@@ -18021,7 +18036,8 @@ this.cytoscape = cytoscape;
         }
       }
 
-      context.drawImage( img, 0, 0, img.width, img.height, x, y, w, h );
+      // context.drawImage( img, 0, 0, img.width, img.height, x, y, w, h );
+      r.safeDrawImage( context, img, x, y, w, h );
 
       if( shouldClip ){
         context.restore();
