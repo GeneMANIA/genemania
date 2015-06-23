@@ -76,6 +76,7 @@ function(){
         selector: 'edge',
         css: {
           'curve-style': 'haystack',
+          'haystack-radius': 0.5,
           'opacity': 0.4,
           'line-color': '#bbb',
           'width': 'mapData(weight, 0, 1, 1, 8)',
@@ -87,6 +88,36 @@ function(){
         selector: 'edge.filtered',
         css: {
           'opacity': 0
+        }
+      },
+      
+      {
+        selector: 'node.unhighlighted',
+        css: {
+          'opacity': 0.333
+        }
+      },
+      
+      {
+        selector: 'edge.unhighlighted',
+        css: {
+          'opacity': 0.111
+        }
+      },
+      
+      {
+        selector: '.highlighted',
+        css: {
+          'border-width': 6,
+          'border-color': '#AAD8FF',
+          'border-opacity': 0.5,
+          'background-color': '#394855',
+          'text-outline-color': '#394855',
+          'shadow-blur': 12,
+          'shadow-color': '#000',
+          'shadow-opacity': 0.8,
+          'shadow-offset-x': 0,
+          'shadow-offset-y': 4
         }
       }
     ];
