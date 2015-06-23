@@ -5,7 +5,7 @@ function( util ){ return function( Result ){
   var r = Result;
   var rfn = r.prototype;
   
-  var defaultPadding = 100;
+  var defaultPadding = 50;
 
   var sortByWeight = function(a, b){
     return b.data('score') - a.data('score');
@@ -69,7 +69,8 @@ function( util ){ return function( Result ){
       levelWidth: function(){
         return 1;
       },
-      sort: sortByWeight
+      sort: sortByWeight,
+      padding: defaultPadding
     });
 
     layoutDelay(function(){
@@ -118,7 +119,8 @@ function( util ){ return function( Result ){
         }
         
         return length(e);
-      } 
+      },
+      padding: defaultPadding 
     });
 
     layoutDelay(function(){
@@ -146,7 +148,7 @@ function( util ){ return function( Result ){
         }
       },
       sort: sortByWeight,
-      padding: 50
+      padding: defaultPadding
     });
 
     layoutDelay(function(){
@@ -165,7 +167,8 @@ function( util ){ return function( Result ){
 
     var l = this.cyLayout = cy.makeLayout({
       name: 'preset',
-      fit: !options.animate
+      fit: !options.animate,
+      padding: defaultPadding
     });
     
     if( options.animate ){
