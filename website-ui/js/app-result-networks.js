@@ -156,5 +156,6 @@ function( $scope, updateScope, cy ){
   }
 
   PubSub.subscribe('result.searched', init);
+  PubSub.subscribe('result.updateHighlights', init);
 
 } ]);

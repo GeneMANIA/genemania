@@ -88,5 +88,6 @@ function( $scope, updateScope, cy ){
 
   PubSub.subscribe('result.openSelectedInfo', init);
   PubSub.subscribe('result.closeSelectedInfo', init);
+  PubSub.subscribe('result.updateHighlights', init);
 
 } ]);

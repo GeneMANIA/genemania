@@ -83,30 +83,30 @@ function(){
           'overlay-padding': 3
         }
       },
-
-      {
-        selector: 'edge.filtered',
-        css: {
-          'opacity': 0
-        }
-      },
       
       {
         selector: 'node.unhighlighted',
         css: {
-          'opacity': 0.333
+          'opacity': 0.2
         }
       },
       
       {
         selector: 'edge.unhighlighted',
         css: {
-          'opacity': 0.111
+          'opacity': 0.05
         }
       },
       
       {
         selector: '.highlighted',
+        css: {
+          'z-index': 999999
+        }
+      },
+      
+      {
+        selector: 'node.highlighted',
         css: {
           'border-width': 6,
           'border-color': '#AAD8FF',
@@ -119,7 +119,14 @@ function(){
           'shadow-offset-x': 0,
           'shadow-offset-y': 4
         }
-      }
+      },
+      
+      {
+        selector: 'edge.filtered',
+        css: {
+          'opacity': 0
+        }
+      },
     ];
 
     Array.prototype.push.apply( stylesheet, config.networks.colors.map(function( colorSpec ){

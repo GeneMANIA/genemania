@@ -44,7 +44,7 @@ app.factory('updateScope', [ '$timeout', '$rootScope', function( $timeout, $root
   return function(){
     if( lastUpdate ){ return; clearTimeout(lastUpdate); }
     
-    lastUpdate = setTimeout(function(){ lastUpdate = null; $rootScope.$digest(); }, 16);
+    lastUpdate = setTimeout(function(){ lastUpdate = null; $rootScope.$apply(); }, 16);
   }
   
   function updateScope(){

@@ -1,10 +1,10 @@
 <div ng-controller="SelectedInfoCtrl">
-  <div class="selected-info selected-info-open-{{result.selectedInfoOpen ? true : false}}">
+  <div class="selected-info selected-info-open-{{result.selectedInfoOpen ? true : false}} selected-info-highlighted-{{ result.highlights.genes.length > 0 || result.highlights.interactions.length > 0 || result.highlights.attributes.length > 0 }}">
     <div class="selected-info-close activatable" on-tap="result.closeSelectedInfo()">
       <i class="fa fa-times"></i>
     </div>
 
-    <div ng-if="rGene">
+    <div ng-if="rGene" on-hoverover="result.rateLimitedHighlight({ genes: [ rGene.gene.id ] })" on-hoverout="result.rateLimitedUnhighlight({ genes: [ rGene.gene.id ] })">
       <div class="selected-info-title">
         {{rGene.gene.symbol}}
       </div>
@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <div ng-if="rAttr">
+    <div ng-if="rAttr" on-hoverover="result.rateLimitedHighlight({ attributes: [ rAttr.attribute.id ] })" on-hoverout="result.rateLimitedUnhighlight({ attributes: [ rAttr.attribute.id ] })">
       <div class="selected-info-title">
         {{rAttr.attribute.name}}
       </div>
@@ -22,7 +22,7 @@
       </div>
     </div>
 
-    <div ng-if="rIntn">
+    <div ng-if="rIntn" on-hoverover="result.rateLimitedHighlight({ interactions: [ rIntn.id ] })" on-hoverout="result.rateLimitedUnhighlight({ interactions: [ rIntn.id ] })">
       <div class="selected-info-title">
         {{rIntn.fromGene.name}} - {{rIntn.toGene.name}}
       </div>

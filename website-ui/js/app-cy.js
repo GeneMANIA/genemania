@@ -7,7 +7,8 @@ function(  ){
 
     boxSelectionEnabled: false,
     autounselectify: true,
-    motionBlur: true
+    motionBlur: true,
+    motionBlurOpacity: cytoscape.is.khtmlEtc() ? 0.05 : 0.1
   });
 
   // interacting with the graph should close the genes box

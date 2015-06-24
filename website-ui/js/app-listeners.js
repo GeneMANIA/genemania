@@ -116,6 +116,44 @@ app.directive('onEscBlur', ['$parse', function ($parse) {
   };
 }]);
 
+app.directive('onHoverover', ['$parse', function ($parse) {
+  return function (scope, $ele, attr){
+
+    var handler = $parse(attr.onHoverover);
+
+    $ele[0].addEventListener('mouseenter', function(evt){
+      handler(scope, { $event: evt });
+    });
+    
+    $ele[0].addEventListener('touchstart', function(evt){
+      if( evt.touches.length === 1 ){    
+        handler(scope, { $event: evt });
+        
+        evt.preventDefault();
+      }
+    });
+
+  };
+}]);
+
+app.directive('onHoverout', ['$parse', function ($parse) {
+  return function (scope, $ele, attr){
+
+    var handler = $parse(attr.onHoverout);
+
+    $ele[0].addEventListener('mouseleave', function(evt){
+      handler(scope, { $event: evt });
+    });
+    
+    $ele[0].addEventListener('touchend', function(evt){
+      if( evt.touches.length === 0 ){      
+        handler(scope, { $event: evt });
+      }
+    });
+
+  };
+}]);
+
 app.directive('onLineSelect', ['$parse', function ($parse) {
   return function (scope, $ele, attr){
     var handler = $parse(attr.onLineSelect);

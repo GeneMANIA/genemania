@@ -148,6 +148,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     var rAllGrs = self.resultAllGroups = rAttrGrs.concat( rGrs );
     var rAttrsById = self.resultAttributesById = {};
     var rIntnsById = self.resultInteractionsById = {};
+    var rNetsById = self.resultNetworksById = {};
+    self.resultNetworks = [];
 
     var sortByWeight = function(a, b){
       return b.weight - a.weight;
@@ -171,6 +173,9 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
         rNet.enabled = true;
         rNet.expanded = false;
         rNet.resultNetworkGroup = rGr;
+        
+        rNetsById[ rNet.network.id ] = rNet;
+        self.resultNetworks.push( rNet );
 
         var rIntns = rNet.resultInteractions;
         for( var k = 0; k < rIntns.length; k++ ){
@@ -319,6 +324,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
               weight: rIntn.interaction.weight,
               group: gr.code,
               networkId: rNet.network.id,
+              networkGroupId: rGr.networkGroup.id,
               intn: true,
               rIntnId: rIntn.id
             }
