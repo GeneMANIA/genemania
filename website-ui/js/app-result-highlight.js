@@ -5,9 +5,25 @@ function( util ){ return function( Result ){
   var r = Result;
   var rfn = r.prototype;
   
-  rfn.rateLimitedHighlightFn = _.debounce( function(fn){
-    fn();
-  }, 150 );
+  rfn.rateLimitedHighlightFn = function( fn, immediate ){
+    
+    if( immediate ){
+      clearTimeout( this.rlhTimeout );
+      
+      rlhTimeout = null;
+      
+      fn();
+    } else {
+      clearTimeout( this.rlhTimeout );
+      
+      var rlhTimeout = this.rlhTimeout = setTimeout(function(){
+        rlhTimeout = null;
+        
+        fn();
+      }, 150);
+    }
+    
+  };
   
   rfn.rateLimitedHighlight = function(opts){
     var self = this; 
@@ -20,9 +36,9 @@ function( util ){ return function( Result ){
   rfn.rateLimitedUnhighlight = function(opts){
     var self = this;
     
-    // self.rateLimitedHighlightFn(function(){
+    self.rateLimitedHighlightFn(function(){
       self.unhighlight( opts );
-    // });
+    }, true);
   };
   
   rfn.highlight = function(opts){

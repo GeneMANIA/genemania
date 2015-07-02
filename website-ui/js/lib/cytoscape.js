@@ -1,5 +1,5 @@
 /*!
- * This file is part of Cytoscape.js 2.4.2.
+ * This file is part of Cytoscape.js snapshot-5d2773d444-1435858880486.
  * 
  * Cytoscape.js is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the Free
@@ -29,7 +29,7 @@ var cytoscape;
     return cytoscape.init.apply(cytoscape, arguments);
   };
 
-  $$.version = '2.4.2';
+  $$.version = 'snapshot-5d2773d444-1435858880486';
   
   // allow functional access to cytoscape.js
   // e.g. var cyto = $.cytoscape({ selector: "#foo", ... });
@@ -434,7 +434,7 @@ this.cytoscape = cytoscape;
     },
 
     khtmlEtc: function(){
-      return $$.is.khtml() || $$.is.webkit() || $$.is.blink();
+      return $$.is.khtml() || $$.is.webkit() || $$.is.chromium();
     },
 
     trident: function(){
@@ -4957,6 +4957,7 @@ this.cytoscape = cytoscape;
       { name: 'text-opacity', type: t.zeroOneNumber },
       { name: 'text-background-color', type: t.color },
       { name: 'text-background-opacity', type: t.zeroOneNumber },
+      { name: 'text-border-opacity', type: t.zeroOneNumber },
       { name: 'text-border-color', type: t.color },
       { name: 'text-border-width', type: t.size },
       { name: 'text-border-style', type: t.borderStyle },
@@ -5125,6 +5126,7 @@ this.cytoscape = cytoscape;
           'text-max-width': textMaxWidth,
           'text-background-color': '#000',
           'text-background-opacity': 0,
+          'text-border-opacity': 0,
           'text-border-width': 0,
           'text-border-style': 'solid',
           'text-border-color':'#000',
@@ -5288,7 +5290,7 @@ this.cytoscape = cytoscape;
           'selection-box-border-width': 1,
           'active-bg-color': 'black',
           'active-bg-opacity': 0.15,
-          'active-bg-size': $$.is.touch() ? 40 : 15,
+          'active-bg-size': 30,
           'outside-texture-bg-color': '#000',
           'outside-texture-bg-opacity': 0.125
         })
@@ -7632,8 +7634,6 @@ this.cytoscape = cytoscape;
 
 ;(function($$, window){ 'use strict';
 
-  var isTouch = $$.is.touch();
-
   var defaults = {
   };
   
@@ -7737,11 +7737,7 @@ this.cytoscape = cytoscape;
     if( selType === undefined || (selType !== 'additive' && selType !== 'single') ){
       // then set default
 
-      if( isTouch ){
-        _p.selectionType = 'additive';
-      } else {
-        _p.selectionType = 'single';
-      }
+      _p.selectionType = 'single';
     } else {
       _p.selectionType = selType;
     }
@@ -7794,7 +7790,8 @@ this.cytoscape = cytoscape;
         motionBlur: options.motionBlur === undefined ? true : options.motionBlur, // on by default
         motionBlurOpacity: options.motionBlurOpacity === undefined ? 0.05 : options.motionBlurOpacity,
         pixelRatio: $$.is.number(options.pixelRatio) && options.pixelRatio > 0 ? options.pixelRatio : (options.pixelRatio === 'auto' ? undefined : 1),
-        tapThreshold: defVal( $$.is.touch() ? 8 : 4, $$.is.touch() ? options.touchTapThreshold : options.desktopTapThreshold )
+        desktopTapThreshold: options.desktopTapThreshold === undefined ? 4 : options.desktopTapThreshold,
+        touchTapThreshold: options.touchTapThreshold === undefined ? 8 : options.touchTapThreshold
       }, options.renderer) );
 
       // trigger the passed function for the `initrender` event
@@ -15342,15 +15339,16 @@ this.cytoscape = cytoscape;
     this.minMbLowQualFrames = 4;
     this.fullQualityMb = false;
     this.clearedForMotionBlur = [];
-    this.tapThreshold = options.tapThreshold;
-    this.tapThreshold2 = options.tapThreshold * options.tapThreshold;
+    this.desktopTapThreshold = options.desktopTapThreshold;
+    this.desktopTapThreshold2 = options.desktopTapThreshold * options.desktopTapThreshold;
+    this.touchTapThreshold = options.touchTapThreshold;
+    this.touchTapThreshold2 = options.touchTapThreshold * options.touchTapThreshold;
     this.tapholdDuration = 500;
 
     this.load();
   }
 
   CanvasRenderer.panOrBoxSelectDelay = 400;
-  CanvasRenderer.isTouch = $$.is.touch();
 
   // whether to use Path2D caching for drawing
   var pathsImpld = typeof Path2D !== 'undefined';
@@ -15919,11 +15917,10 @@ this.cytoscape = cytoscape;
   };
 
   // Find nearest element
-  CRp.findNearestElement = function(x, y, visibleElementsOnly){
+  CRp.findNearestElement = function(x, y, visibleElementsOnly, isTouch){
     var self = this;
     var eles = this.getCachedZSortedEles();
     var near = [];
-    var isTouch = CanvasRenderer.isTouch;
     var zoom = this.data.cy.zoom();
     var hasCompounds = this.data.cy.hasCompoundNodes();
     var edgeThreshold = (isTouch ? 256 : 32) / zoom;
@@ -16917,6 +16914,12 @@ this.cytoscape = cytoscape;
         var stepDist = eStyle['control-point-distance'] !== undefined ? eStyle['control-point-distance'].pxValue : undefined;
         var stepWeight = eStyle['control-point-weight'].value;
         var edgeIsUnbundled = eStyle['curve-style'].value === 'unbundled-bezier';
+        
+        var swappedDirection = edge._private.source !== src;
+
+        if( swappedDirection ){
+          stepDist *= -1;
+        }
 
         var srcX1 = rs.lastSrcCtlPtX;
         var srcX2 = srcPos.x;
@@ -17060,7 +17063,6 @@ this.cytoscape = cytoscape;
           var w1 = (1 - stepWeight);
           var w2 = stepWeight;
 
-          var swappedDirection = edge._private.source !== src;
           if( swappedDirection ){
             w1 = stepWeight;
             w2 = (1 - stepWeight);
@@ -17920,11 +17922,11 @@ this.cytoscape = cytoscape;
     return image;
   };
   
-  CRp.safeDrawImage = function( context, img, x, y, w, h ){
+  CRp.safeDrawImage = function( context, img, ix, iy, iw, ih, x, y, w, h ){
     var r = this;
     
     try {
-      context.drawImage( img, 0, 0, img.width, img.height, x, y, w, h );
+      context.drawImage( img, ix, iy, iw, ih, x, y, w, h );
     } catch(e){
       r.data.canvasNeedsRedraw[CanvasRenderer.NODE] = true;
       r.data.canvasNeedsRedraw[CanvasRenderer.DRAG] = true;
@@ -17934,7 +17936,7 @@ this.cytoscape = cytoscape;
       r.redraw();
     }
   };
-    
+  
   CRp.drawInscribedImage = function(context, img, node) {
     var r = this;
     var nodeX = node._private.position.x;
@@ -18037,7 +18039,7 @@ this.cytoscape = cytoscape;
       }
 
       // context.drawImage( img, 0, 0, img.width, img.height, x, y, w, h );
-      r.safeDrawImage( context, img, x, y, w, h );
+      r.safeDrawImage( context, img, 0, 0, img.width, img.height, x, y, w, h );
 
       if( shouldClip ){
         context.restore();
@@ -18062,6 +18064,7 @@ this.cytoscape = cytoscape;
 
   
 })( cytoscape );
+
 ;(function($$){ 'use strict';
 
   var CanvasRenderer = $$('renderer', 'canvas');
@@ -18275,21 +18278,23 @@ this.cytoscape = cytoscape;
 
     if ( text != null && !isNaN(textX) && !isNaN(textY)) {
       var backgroundOpacity = style['text-background-opacity'].value;
-      if ((style['text-background-color'] || style['text-border-width'].pxValue > 0) && backgroundOpacity > 0) {
-        var textBorderWidth = style['text-border-width'].pxValue;
+      var borderOpacity = style['text-border-opacity'].value;
+      var textBorderWidth = style['text-border-width'].pxValue;
+      
+      if( backgroundOpacity > 0 || (textBorderWidth > 0 && borderOpacity > 0) ){
         var margin = 4 + textBorderWidth/2;
 
         if (element.isNode()) {
           //Move textX, textY to include the background margins
-          if (valign == 'top') {
-            textY -=margin;
-          } else if (valign == 'bottom') {
-            textY +=margin;
+          if (valign === 'top') {
+            textY -= margin;
+          } else if (valign === 'bottom') {
+            textY += margin;
           }
-          if (halign == 'left') {
-            textX -=margin;
-          } else if (halign == 'right') {
-            textX +=margin;
+          if (halign === 'left') {
+            textX -= margin;
+          } else if (halign === 'right') {
+            textX += margin;
           }
         }
 
@@ -18330,7 +18335,7 @@ this.cytoscape = cytoscape;
           bgWidth += margin*2;
         }
 
-        if (style['text-background-color']) {
+        if( backgroundOpacity > 0 ){
           var textFill = context.fillStyle;
           var textBackgroundColor = style['text-background-color'].value;
 
@@ -18344,13 +18349,13 @@ this.cytoscape = cytoscape;
           context.fillStyle = textFill;
         }
 
-        if (textBorderWidth > 0) {
+        if( textBorderWidth > 0 && borderOpacity > 0 ){
           var textStroke = context.strokeStyle;
           var textLineWidth = context.lineWidth;
           var textBorderColor = style['text-border-color'].value;
           var textBorderStyle = style['text-border-style'].value;
 
-          context.strokeStyle = 'rgba(' + textBorderColor[0] + ',' + textBorderColor[1] + ',' + textBorderColor[2] + ',' + backgroundOpacity * parentOpacity + ')';
+          context.strokeStyle = 'rgba(' + textBorderColor[0] + ',' + textBorderColor[1] + ',' + textBorderColor[2] + ',' + borderOpacity * parentOpacity + ')';
           context.lineWidth = textBorderWidth;
 
           if( context.setLineDash ){ // for very outofdate browsers
@@ -19989,7 +19994,7 @@ this.cytoscape = cytoscape;
       var cy = r.data.cy;
       var pos = r.projectIntoViewport(e.clientX, e.clientY);
       var select = r.data.select;
-      var near = r.findNearestElement(pos[0], pos[1], true);
+      var near = r.findNearestElement(pos[0], pos[1], true, false);
       var draggedElements = r.dragData.possibleDragElements;
 
       r.hoverData.mdownPos = pos;
@@ -20224,7 +20229,7 @@ this.cytoscape = cytoscape;
 
       var near = null;
       if( !r.hoverData.draggingEles ){
-        near = r.findNearestElement(pos[0], pos[1], true);
+        near = r.findNearestElement(pos[0], pos[1], true, false);
       }
       var last = r.hoverData.last;
       var down = r.hoverData.down;
@@ -20372,7 +20377,7 @@ this.cytoscape = cytoscape;
           && ( !cy.boxSelectionEnabled() || (+new Date() - r.hoverData.downTime >= CR.panOrBoxSelectDelay) )
           //&& (Math.abs(select[3] - select[1]) + Math.abs(select[2] - select[0]) < 4)
           && !r.hoverData.selecting
-          && rdist2 >= r.tapThreshold2
+          && rdist2 >= r.desktopTapThreshold2
           && cy.panningEnabled() && cy.userPanningEnabled()
       ){
         r.hoverData.dragging = true;
@@ -20424,7 +20429,7 @@ this.cytoscape = cytoscape;
 
         if( down && down.isNode() && r.nodeIsDraggable(down) ){
 
-          if( rdist2 >= r.tapThreshold2 ){ // then drag
+          if( rdist2 >= r.desktopTapThreshold2 ){ // then drag
 
             var justStartedDrag = !r.dragData.didDrag;
 
@@ -20503,7 +20508,7 @@ this.cytoscape = cytoscape;
       r.hoverData.capture = false;
 
       var cy = r.data.cy; var pos = r.projectIntoViewport(e.clientX, e.clientY); var select = r.data.select;
-      var near = r.findNearestElement(pos[0], pos[1], true);
+      var near = r.findNearestElement(pos[0], pos[1], true, false);
       var draggedElements = r.dragData.possibleDragElements; var down = r.hoverData.down;
       var shiftDown = e.shiftKey;
       var needsRedraw = r.data.canvasNeedsRedraw;
@@ -20918,8 +20923,8 @@ this.cytoscape = cytoscape;
         var cxtDistThresholdSq = cxtDistThreshold * cxtDistThreshold;
         if( distance1Sq < cxtDistThresholdSq && !e.touches[2] ){
 
-          var near1 = r.findNearestElement(now[0], now[1], true);
-          var near2 = r.findNearestElement(now[2], now[3], true);
+          var near1 = r.findNearestElement(now[0], now[1], true, true);
+          var near2 = r.findNearestElement(now[2], now[3], true, true);
 
           //console.log(distance1)
 
@@ -20974,7 +20979,7 @@ this.cytoscape = cytoscape;
       } else if (e.touches[1]) {
 
       } else if (e.touches[0]) {
-        var near = r.findNearestElement(now[0], now[1], true);
+        var near = r.findNearestElement(now[0], now[1], true, true);
 
         if (near != null) {
           near.activate();
@@ -21177,7 +21182,7 @@ this.cytoscape = cytoscape;
 
         //console.log('cxtdrag')
 
-        var near = r.findNearestElement(now[0], now[1], true);
+        var near = r.findNearestElement(now[0], now[1], true, true);
 
         if( !r.touchData.cxtOver || near !== r.touchData.cxtOver ){
 
@@ -21348,11 +21353,11 @@ this.cytoscape = cytoscape;
       } else if (e.touches[0]) {
         var start = r.touchData.start;
         var last = r.touchData.last;
-        var near = near || r.findNearestElement(now[0], now[1], true);
+        var near = near || r.findNearestElement(now[0], now[1], true, true);
 
         if( start != null && start._private.group == 'nodes' && r.nodeIsDraggable(start) ){
 
-          if( rdist2 >= r.tapThreshold2 ){ // then dragging can happen
+          if( rdist2 >= r.touchTapThreshold2 ){ // then dragging can happen
             var draggedEles = r.dragData.touchDragEles;
 
             for( var k = 0; k < draggedEles.length; k++ ){
@@ -21502,7 +21507,7 @@ this.cytoscape = cytoscape;
               y: disp[1] * zoom
             });
 
-          } else if( rdist2 >= r.tapThreshold2 ){
+          } else if( rdist2 >= r.touchTapThreshold2 ){
             r.swipePanning = true;
 
             cy.panBy({
@@ -21713,7 +21718,7 @@ this.cytoscape = cytoscape;
           r.touchData.start = null;
 
         } else {
-          var near = r.findNearestElement(now[0], now[1], true);
+          var near = r.findNearestElement(now[0], now[1], true, true);
 
           if (near != null) {
             near
@@ -21761,7 +21766,7 @@ this.cytoscape = cytoscape;
         if (start != null
             && !r.dragData.didDrag // didn't drag nodes around
             && start._private.selectable
-            && rdist2 < r.tapThreshold2
+            && rdist2 < r.touchTapThreshold2
             && !r.pinching // pinch to zoom should not affect selection
         ) {
 

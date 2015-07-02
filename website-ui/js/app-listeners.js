@@ -121,7 +121,7 @@ app.directive('onHoverover', ['$parse', function ($parse) {
 
     var handler = $parse(attr.onHoverover);
 
-    $ele[0].addEventListener('mouseenter', function(evt){
+    $ele[0].addEventListener('mouseover', function(evt){
       handler(scope, { $event: evt });
     });
     
@@ -141,7 +141,7 @@ app.directive('onHoverout', ['$parse', function ($parse) {
 
     var handler = $parse(attr.onHoverout);
 
-    $ele[0].addEventListener('mouseleave', function(evt){
+    $ele[0].addEventListener('mouseout', function(evt){
       handler(scope, { $event: evt });
     });
     
@@ -184,7 +184,7 @@ app.directive('onLineSelect', ['$parse', function ($parse) {
 }]);
 
 $(function(){
-  FastClick.attach(document); // so touch devices get click quick
+  FastClick.attach( document.body ); // so touch devices get click quick
 
   // make tap event alias
   // document.addEventListener('click', function(e){ 

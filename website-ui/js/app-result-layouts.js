@@ -64,7 +64,10 @@ function( util ){ return function( Result ){
       animate: options.animate,
       animationDuration: 500,
       concentric: function(){
-        return (this.data('query') ? 100 : 0) + this.data('score');
+        var isQuery = this.data('query');
+        var score = this.data('score') || 0;
+        
+        return (isQuery ? 100 : 0) + score;
       },
       levelWidth: function(){
         return 1;
@@ -104,22 +107,50 @@ function( util ){ return function( Result ){
     //   layoutEles = layoutElesWoCoexp;
     // }
 
+    var avgW = 0;
+    for( var i = 0; i < layoutEles.length; i++ ){
+      avgW += layoutEles.data('weight');
+    }
+    avgW /= layoutEles.length;
+    
+    var minLength = 10;
+    var maxLength = 9999999;
+
+    var edgeLength = function( e ){
+      function length(e){
+        var w = e.data('weight');
+        
+        if( w == null ){
+          w = avgW;
+        }
+        
+        var l = layoutEles.length / 8 / w; // as w => inf, l => 0
+        // TODO revise equation
+        
+        return l;
+      }
+      
+      if( e.data('group') === 'coexp' ){
+        return 10 * length(e);
+      }
+      
+      var l = length(e);
+      
+      if( l < minLength ){
+        return minLength;
+      } else if( l > maxLength ){
+        return maxLength;
+      } else {
+        return l;
+      }
+    };
+
     var l = this.cyLayout = layoutEles.makeLayout({
       name: 'cola',
       animate: options.animate,
       randomize: options.randomize,
       maxSimulationTime: options.maxSimulationTime,
-      edgeLength: function( e ){
-        function length(e){        
-          return layoutEles.length / 8 / e.data('weight'); // as w => inf, l => 0
-        }
-        
-        if( e.data('group') === 'coexp' ){
-          return 10 * length(e);
-        }
-        
-        return length(e);
-      },
+      edgeLength: edgeLength,
       padding: defaultPadding 
     });
 
