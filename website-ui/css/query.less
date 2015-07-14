@@ -18,12 +18,20 @@
 	.transition-duration( @qMoveAniSpd );
 }
 
-.query-ready-true {
-	z-index: 9999;
-}
-
 .query-splashed-false {
 	.transform( translate3d(@qSplashX, @qSplashY, 0) );
+}
+
+.query-ready-true {
+	z-index: 9999;
+	
+	.transform( translate3d(0, 0, 0) );
+}
+
+.splash-ready {
+	#linkouts {
+		.transform( translate3d(0, -@qSplashY, 0) );
+	}
 }
 
 .query-expander {

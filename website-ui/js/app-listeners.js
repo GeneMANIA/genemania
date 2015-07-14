@@ -183,6 +183,19 @@ app.directive('onLineSelect', ['$parse', function ($parse) {
   };
 }]);
 
+app.directive('onShortcutFocus', ['$parse', function ($parse) {
+  return function (scope, $ele, attr){
+    var ele = $ele[0]; console.log('shortcut bind')
+
+    Mousetrap.bind(attr.onShortcutFocus, function(e){ console.log('shortcut')
+      setTimeout(function(){
+        $ele.focus();
+      }, 0);
+    });
+
+  };
+}]);
+
 $(function(){
   FastClick.attach( document.body ); // so touch devices get click quick
 

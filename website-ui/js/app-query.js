@@ -304,6 +304,7 @@ function( $scope, updateScope, Query ){
 
   PubSub.subscribe('ready', updateScope);
 
+  PubSub.subscribe('result.search', updateScope);
   PubSub.subscribe('result.searched', updateScope);
   PubSub.subscribe('result.cancel', updateScope);
   PubSub.subscribe('$$search.progress', updateScope);

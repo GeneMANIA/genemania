@@ -38,8 +38,6 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
 
     self.searching = true;
 
-    PubSub.publish('result.search', self);
-
     return self.searchPromise = Promise.resolve().cancellable().then(function(){
       var netIds = [];
       for( var i = 0; i < q.networks.length; i++ ){
@@ -91,6 +89,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
 
       throw err;
     });
+    
+    PubSub.publish('result.search', self);
 
   };
 
