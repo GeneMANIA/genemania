@@ -12,12 +12,12 @@
 	text-align: center;
 	line-height: 1.5em;
 	left: 0.55em;
-	top: @qH + 2*@qMargin;
+	top: @qH + 2*@qMargin + 1em;
 	cursor: pointer;
 	z-index: 2;
 }
 
-.generate-rows(8);
+.generate-rows(16);
 
 .generate-rows(@n, @i: 1) when (@i =< @n) {
   .graph-button-row-@{i} {

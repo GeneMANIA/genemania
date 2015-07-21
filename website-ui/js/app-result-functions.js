@@ -1,6 +1,6 @@
 app.factory('Result_functions',
 [ 'util',
-function( util ){ return function( Query ){
+function( util ){ return function( Result ){
 
   var r = Result;
   var rfn = r.prototype;

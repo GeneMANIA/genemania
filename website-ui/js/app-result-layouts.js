@@ -11,34 +11,24 @@ function( util ){ return function( Result ){
     return b.data('score') - a.data('score');
   };
 
-  var layoutDelay = function(fn){
-    setTimeout(fn, 10);
-  };
-
-  rfn.layoutPrepost = function(){
+  rfn.layoutDelay = function( layout ){
     var self = this;
     var container = cy.container();
-
+    
     if( self.layoutPromise ){
       self.layoutPromise.cancel();
     }
 
-    // TODO layout can still get bad size
-    // race condition: classes removed after added from prev layout
-
-    return self.layoutPromise = new Promise(function(resolve){
-
-      if( self.cyLayout ){
-        cy.elements().stop( true ); // because https://github.com/cytoscape/cytoscape.js/issues/983
-        
-        self.cyLayout.stop();
-        self.cyLayout = null;
-      }
-
-      cy.one('layoutstop', function(){
-        resolve();
-      });
-
+    if( self.cyLayout ){
+      cy.elements().stop( true ); // because https://github.com/cytoscape/cytoscape.js/issues/983
+      
+      self.cyLayout.stop();
+      self.cyLayout = null;
+    }
+    
+    setTimeout(function(){
+      self.cyLayout = layout;
+      
       if( self.networksExpanded ){
         container.classList.add('cy-layouting-shift');
       }
@@ -46,9 +36,26 @@ function( util ){ return function( Result ){
       if( self.query.historyExpanded ){
         container.classList.add('cy-layouting-shift-history');
       }
+      
+      layout.run();
+    }, 100);
+  };
+
+  rfn.layoutPrepost = function( layout ){
+    var self = this;
+
+    // TODO layout can still get bad size
+    // race condition: classes removed after added from prev layout
+
+    return self.layoutPromise = new Promise(function(resolve){      
+      layout.one('layoutstop', function(){
+        resolve();
+      });
     }).then(function(){
-      container.classList.remove('cy-layouting-shift');
-      container.classList.remove('cy-layouting-shift-history');
+      var cl = container.classList;
+      
+      cl.remove('cy-layouting-shift');
+      cl.remove('cy-layouting-shift-history');
     }).cancellable();
   };
 
@@ -57,9 +64,7 @@ function( util ){ return function( Result ){
       animate: true
     }, options);
 
-    var p = this.layoutPrepost();
-
-    var l = this.cyLayout = cy.makeLayout({
+    var l = cy.makeLayout({
       name: 'concentric',
       animate: options.animate,
       animationDuration: 500,
@@ -76,9 +81,9 @@ function( util ){ return function( Result ){
       padding: defaultPadding
     });
 
-    layoutDelay(function(){
-      l.run();
-    });
+    var p = this.layoutPrepost( l );
+
+    this.layoutDelay(l);
 
     return p;
   };
@@ -90,8 +95,6 @@ function( util ){ return function( Result ){
       maxSimulationTime: 2000,
       padding: defaultPadding
     }, options);
-
-    var p = this.layoutPrepost();
 
     var layoutEles = cy.elements().stdFilter(function( ele ){
       return ele.isNode() || !ele.hasClass('filtered');
@@ -145,7 +148,7 @@ function( util ){ return function( Result ){
       }
     };
 
-    var l = this.cyLayout = layoutEles.makeLayout({
+    var l = layoutEles.makeLayout({
       name: 'cola',
       animate: options.animate,
       randomize: options.randomize,
@@ -153,11 +156,11 @@ function( util ){ return function( Result ){
       edgeLength: edgeLength,
       padding: defaultPadding 
     });
+    
+    var p = this.layoutPrepost( l );
 
-    layoutDelay(function(){
-      l.run();
-    });
-
+    this.layoutDelay(l);
+    
     return p;
   };
 
@@ -166,9 +169,7 @@ function( util ){ return function( Result ){
       animate: true
     }, options);
 
-    var p = this.layoutPrepost();
-
-    var l = this.cyLayout = cy.makeLayout({
+    var l = cy.makeLayout({
       name: 'grid',
       animate: options.animate,
       animationDuration: 500,
@@ -181,10 +182,10 @@ function( util ){ return function( Result ){
       sort: sortByWeight,
       padding: defaultPadding
     });
+    
+    var p = this.layoutPrepost( l );
 
-    layoutDelay(function(){
-      l.run();
-    });
+    this.layoutDelay(l);
 
     return p;
   };
@@ -194,9 +195,7 @@ function( util ){ return function( Result ){
       animate: true
     }, options);
 
-    var p = this.layoutPrepost();
-
-    var l = this.cyLayout = cy.makeLayout({
+    var l = cy.makeLayout({
       name: 'preset',
       fit: !options.animate,
       padding: defaultPadding
@@ -213,9 +212,9 @@ function( util ){ return function( Result ){
       });
     }
 
-    layoutDelay(function(){
-      l.run();
-    });
+    var p = this.layoutPrepost( l );
+
+    this.layoutDelay(l);
 
     return p;
   };
