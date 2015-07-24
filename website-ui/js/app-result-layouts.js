@@ -14,10 +14,6 @@ function( util ){ return function( Result ){
   rfn.layoutDelay = function( layout ){
     var self = this;
     var container = cy.container();
-    
-    if( self.layoutPromise ){
-      self.layoutPromise.cancel();
-    }
 
     if( self.cyLayout ){
       cy.elements().stop( true ); // because https://github.com/cytoscape/cytoscape.js/issues/983
@@ -43,10 +39,12 @@ function( util ){ return function( Result ){
 
   rfn.layoutPrepost = function( layout ){
     var self = this;
+    var container = cy.container();
 
-    // TODO layout can still get bad size
-    // race condition: classes removed after added from prev layout
-
+    if( self.layoutPromise ){
+      self.layoutPromise.cancel();
+    }
+    
     return self.layoutPromise = new Promise(function(resolve){      
       layout.one('layoutstop', function(){
         resolve();
@@ -92,6 +90,8 @@ function( util ){ return function( Result ){
     options = $.extend({
       randomize: true,
       animate: true,
+      nodeSpacing: 15,
+      lengthFactor: 38,
       maxSimulationTime: 2000,
       padding: defaultPadding
     }, options);
@@ -111,13 +111,35 @@ function( util ){ return function( Result ){
     // }
 
     var avgW = 0;
+    var minW = Infinity;
+    var maxW = -Infinity;
+    
     for( var i = 0; i < layoutEles.length; i++ ){
-      avgW += layoutEles.data('weight');
+      var ele = layoutEles[i];
+      var w = ele.data('weight');
+      
+      avgW += w;
+      
+      minW = Math.min( w, minW );
+      maxW = Math.max( w, maxW );
     }
+    
     avgW /= layoutEles.length;
     
-    var minLength = 10;
-    var maxLength = 9999999;
+    var norm = function( w ){
+      return (w - minW) / (maxW - minW) * 9 + 1; // ranges on (1, 10)
+    };
+    
+    for( var i = 0; i < layoutEles.length; i++ ){
+      var ele = layoutEles[i];
+      var w = ele.data('weight');
+      
+      ele.data( 'normWeight', norm(w) );
+    }
+    
+    var avgWNorm = norm( avgW );
+    var minLength = 0;
+    var maxLength = 200;
 
     var edgeLength = function( e ){
       function length(e){
@@ -127,8 +149,8 @@ function( util ){ return function( Result ){
           w = avgW;
         }
         
-        var l = layoutEles.length / 8 / w; // as w => inf, l => 0
-        // TODO revise equation
+        // as w => inf, l => 0
+        var l = options.lengthFactor / w; 
         
         return l;
       }

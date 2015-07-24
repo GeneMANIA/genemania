@@ -185,9 +185,9 @@ app.directive('onLineSelect', ['$parse', function ($parse) {
 
 app.directive('onShortcutFocus', ['$parse', function ($parse) {
   return function (scope, $ele, attr){
-    var ele = $ele[0]; console.log('shortcut bind')
+    var ele = $ele[0];
 
-    Mousetrap.bind(attr.onShortcutFocus, function(e){ console.log('shortcut')
+    Mousetrap.bind(attr.onShortcutFocus, function(e){
       setTimeout(function(){
         $ele.focus();
       }, 0);
