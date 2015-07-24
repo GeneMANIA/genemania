@@ -16,6 +16,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     } else {
       console.error('A result must have a query specified');
     }
+    
+    window.result = this;
 
     if( rfn.networksExpanded === undefined && !util.isSmallScreen() ){
       rfn.networksExpanded = true;
@@ -125,6 +127,18 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     var self = this;
 
     var m = self.resultGenesById = {};
+    var rankedRgenes = self.resultGenes.concat([]).sort(function( a, b ){
+      return b.score - a.score;
+    });
+    
+    var rank = 0;
+    rankedRgenes.forEach(function( rGene ){
+      if( !rGene.queryGene ){
+        rank++;
+      }
+      
+      rGene.rank = rank;
+    });
 
     for( var i = 0; i < self.resultGenes.length; i++ ){
       var rg = self.resultGenes[i];
@@ -173,6 +187,11 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
         rNet.enabled = true;
         rNet.expanded = false;
         rNet.resultNetworkGroup = rGr;
+        rNet.ele = rNet.network;
+        
+        if( rNet.network.metadata != null && rNet.network.metadata.yearPublished != null ){
+          rNet.network.metadata.yearPublished = '' + parseInt( rNet.network.metadata.yearPublished ); // fix from server data
+        }
         
         rNetsById[ rNet.network.id ] = rNet;
         self.resultNetworks.push( rNet );
@@ -204,6 +223,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
       rGr.displayWeight = makeDisplayWeight( rGr.weight );
       rGr.enabled = true;
       rGr.expanded = false;
+      rGr.children = rNets;
+      rGr.ele = rGr.networkGroup;
 
       rNets.sort( sortByWeight );
     }
@@ -222,6 +243,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
         rAttr.enabled = true;
         rAttr.expanded = false;
         rAttr.resultAttributeGroup = rGr;
+        rAttr.ele = rAttr.attribute;
 
         rAttrsById[ rAttr.attribute.id ] = rAttr;
       }
@@ -231,6 +253,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
       rGr.displayWeight = makeDisplayWeight( rGr.weight );
       rGr.enabled = true;
       rGr.expanded = false;
+      rGr.children = rAttrs;
+      rGr.ele = rGr.attributeGroup;
 
       rAttrs.sort( sortByWeight );
     }
@@ -242,7 +266,6 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     var self = this;
     var eles = [];
     var id2AttrEle = {};
-    var rank = 0;
 
     cy.startBatch();
     cy.elements().remove();
@@ -253,7 +276,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
       var gene = rGene.gene;
       var ele;
 
-      rank = rGene.queryGene ? 0 : rank + 1;
+      rank = rGene.rank;
 
       eles.push( ele = {
         group: 'nodes',

@@ -91,7 +91,7 @@ function( util ){ return function( Result ){
       randomize: true,
       animate: true,
       nodeSpacing: 15,
-      lengthFactor: 38,
+      lengthFactor: 75,
       maxSimulationTime: 2000,
       padding: defaultPadding
     }, options);

@@ -256,7 +256,15 @@ gulp.task('htmlminrefs', ['templates', 'js', 'css'], function(){
 
   return gulp.src( './index.html' )
     .pipe(inject( gulp.src(['./js-build/all.min.js', './css-build/all.min.css'], { read: false }), {
-      addRootSlash: false
+      addRootSlash: false,
+      transform: function( filepath ){
+        if( filepath.match('.js') ){
+          return '<script src="' + filepath + '" async defer></script>';
+        }
+        
+        // Use the default transform as fallback: 
+        return inject.transform.apply(inject.transform, arguments);
+      }
     } ))
 
     .pipe( gulp.dest('.') )
