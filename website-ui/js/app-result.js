@@ -116,6 +116,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
       var fn = fns[i];
 
       fn.qValueFormatted = new Number( fn.qValue ).toExponential( 2 );
+      fn.coverageFormatted = fn.numAnnotatedInSample + ' / ' + fn.numAnnotatedInTotal;
     }
 
     this.coloringFunctions = [];
@@ -162,6 +163,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     var rAllGrs = self.resultAllGroups = rAttrGrs.concat( rGrs );
     var rAttrsById = self.resultAttributesById = {};
     var rIntnsById = self.resultInteractionsById = {};
+    var rInteractions = self.resultInteractions = [];
     var rNetsById = self.resultNetworksById = {};
     self.resultNetworks = [];
 
@@ -213,6 +215,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
           rIntn.toGene.name = rIntn.toGene.gene.name = rIntn.toGene.typedName || rIntn.toGene.gene.symbol;
 
           rIntnsById[ rIntn.id ] = rIntn;
+          rInteractions.push( rIntn );
         }
 
         config.networks.postprocess( rNet.network );

@@ -83,17 +83,27 @@ function( util ){ return function( Result ){
       };
     };
     
+    var date = new Date();
+    
     var docDefinition = {
       content: [
         { text: 'GeneMANIA report', style: 'h1' },
         
         {
-          image: cy.png({
-            // bg: 'red',
+          text: [
+            'Created on : ' + moment(date).format('D MMMM YYYY HH:mm:ss') + '\n',
+            'Last database update : ' + qy.version.dbVersion + '\n',
+            'Application version : ' + qy.version.webappVersion
+          ],
+          style: 'subtitle'
+        },
+        
+        {
+          image: cy.jpg({
             maxHeight: 1000,
             full: true
           }),
-          fit: [600, 400],
+          fit: [500, 400],
           style: 'figure'
         },
         
@@ -225,7 +235,7 @@ function( util ){ return function( Result ){
         return {
           table: {
             headerRows: 1,
-            widths: ['*', 40,],
+            widths: ['*', 40],
             body: [ [
               { text: rGr.ele.name, style: 'tableh' },
               { text: rGr.displayWeight, style: 'tablenum' }
@@ -235,16 +245,24 @@ function( util ){ return function( Result ){
               
               return [
                 {
-                  text: [
-                    net.name,
-                    {
-                      text: meta && meta.title ? 
-                        '\n' + meta.title + ' ' + meta.shortAuthors + ' (' + meta.yearPublished + '). ' + meta.publicationName + '. '
-                          :
-                        '',
-                      style: 'netdetails'
-                    }
-                  ]
+                  table: {
+                    headerRows: 1,
+                    widths: ['*'],
+                    body: [
+                      [ net.name ]
+                    ]
+                      .concat( meta && meta.title ? [[
+                        {
+                          text: [
+                            { text: meta.title + ' ' + meta.shortAuthors + ' (' + meta.yearPublished + '). ', style: 'netdetails' },
+                            { text: meta.publicationName, style: 'netdetailspubname' }
+                          ]
+                        }
+                      ]] : [] )
+                      
+                      .concat( meta && meta.networkType ? [[{ text: meta.networkType + ' with ' + meta.interactionCountFormatted + ' interactions from ' + meta.sourceName, style: 'netdetails' }]] : [] )
+                  },
+                  layout: 'noBorders'
                 },
                 { text: rNet.displayWeight, style: 'tablenum' }
               ];
@@ -252,7 +270,59 @@ function( util ){ return function( Result ){
           },
           layout: 'lightHorizontalLines'
         };
-      }) ),
+      }) ).concat([
+        
+        // { text: 'Functions', style: 'h2', pageBreak: 'before' },
+        // 
+        // {
+        //   table: {
+        //     headerRows: 1,
+        //     widths: ['*', 60, 60],
+        //     body: [
+        //       [
+        //         { text: 'Function', style: 'tableh' },
+        //         { text: 'FDR', style: 'tableh' }, 
+        //         { text: 'Coverage', style: 'tableh' }
+        //       ]
+        //     ].concat( res.resultOntologyCategories.map(function( rOCat ){
+        //       return [
+        //         rOCat.ontologyCategory.description,
+        //         { text: rOCat.qValueFormatted },
+        //         { text: rOCat.coverageFormatted }
+        //       ];
+        //     }) )
+        //   },
+        //   layout: 'lightHorizontalLines'
+        // },
+        // 
+        // { text: 'Interactions', style: 'h2', pageBreak: 'before' },
+        // 
+        // {
+        //   table: {
+        //     headerRows: 1,
+        //     widths: ['auto', 'auto', 'auto', 'auto', '*'],
+        //     body: [
+        //       [
+        //         { text: 'Gene 1', style: 'tableh' },
+        //         { text: 'Gene 2', style: 'tableh' }, 
+        //         { text: 'Weight', style: 'tableh' },
+        //         { text: 'Network group', style: 'tableh' },
+        //         { text: 'Network', style: 'tableh' }
+        //       ]
+        //     ].concat( res.resultInteractions.map(function( rIntn ){
+        //       return [
+        //         rIntn.fromGene.name,
+        //         rIntn.toGene.name,
+        //         '' + rIntn.weight,
+        //         rIntn.resultNetwork.resultNetworkGroup.networkGroup.name,
+        //         rIntn.resultNetwork.network.name            
+        //       ];
+        //     }) )
+        //   },
+        //   layout: 'lightHorizontalLines'
+        // }
+        
+      ]),
       
       footer: function( currentPage, pageCount ){
         return {
@@ -273,7 +343,12 @@ function( util ){ return function( Result ){
       styles: {
         h1: {
           fontSize: 36,
-          margin: [ 0, 18, 0, 9 ]
+          margin: [ 0, 18, 0, 4 ]
+        },
+        
+        subtitle: {
+          fontSize: 8,
+          margin: [ 0, 0, 0, 8 ]
         },
         
         h2: {
@@ -306,24 +381,24 @@ function( util ){ return function( Result ){
           fontSize: 8
         },
         
+        netdetailspubname: {
+          fontSize: 8,
+          italics: true
+        },
+        
         ref: {
           italics: true
         }
       }
     };
     
-    pdfMake.createPdf( docDefinition ).open();
+    lazyLib().then(function( libs ){
+      var pdfMake = libs.pdfMake;
+      
+      pdfMake.createPdf( docDefinition ).open();
+    });
+    
   };
   
 
 } } ]);
-
-(function(){
-  pdfMake.fonts = {
-   latin: {
-     normal: 'lmroman10-regular.ttf',
-     bold: 'lmroman10-bold.ttf',
-     italics: 'lmroman10-italic.ttf'
-   }
- };
-})();

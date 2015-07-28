@@ -21,7 +21,7 @@ PubSub.promise = function( topic ){
 
 (function(){
   // when all pieces of the ui are ready, then the app overall is ready
-  Promise.all([
+  var readyPromise = Promise.all([
     PubSub.promise('query.ready'),
 
     new Promise(function( resolve ){
@@ -29,10 +29,24 @@ PubSub.promise = function( topic ){
     })
   ])
     .then(function(){
-      console.log('GeneMANIA app ready')
+      console.log('GeneMANIA app ready');
       PubSub.publish('ready'); // all app ready
     })
   ;
+  
+  var lazyPromise = new Promise(function( resolve ){
+    
+    readyPromise.then(function(){ // wait until app all ready before lazy loading libs
+      require(['js-build/lazy.js'], function( lazy ){
+        console.log('Lazy loaded libs pulled in');
+        
+        resolve( lazy );
+      });
+    });
+    
+  });
+  
+  window.lazyLib = function(){ return lazyPromise; };
 })();
 
 // because angularjs depends on this and it's not reliable

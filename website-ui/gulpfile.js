@@ -45,6 +45,11 @@ var paths = {
     './js/app-*.js',
     './js/*.js'
   ],
+  
+  lazyJs: [
+    './js/lazylib/*.js',
+    './js/lazylib/requires-def.js'
+  ],
 
   debug: [
     './js/debug/livereload.js' // for live reloading when source files change
@@ -236,7 +241,7 @@ gulp.task('build', ['minify'], function(next){
 });
 
 // update path refs
-gulp.task('htmlrefs', function(){
+gulp.task('htmlrefs', ['js-lazy-unmin'], function(){
   return gulp.src( './index.html' )
     .pipe(inject( gulp.src(paths.js.concat(paths.debug).concat(paths.cssCombined), { read: false }), {
       addRootSlash: false
@@ -247,12 +252,12 @@ gulp.task('htmlrefs', function(){
 });
 
 // update refs and include cached templates
-gulp.task('htmltemplatesref', ['templates', 'css-unmin'], function(next){
+gulp.task('htmltemplatesref', ['templates', 'js-lazy-unmin', 'css-unmin'], function(next){
   return runSequence( 'htmlrefs', next );
 });
 
 // update path refs with minified files
-gulp.task('htmlminrefs', ['templates', 'js', 'css'], function(){
+gulp.task('htmlminrefs', ['templates', 'js', 'js-lazy', 'css'], function(){
 
   return gulp.src( './index.html' )
     .pipe(inject( gulp.src(['./js-build/all.min.js', './css-build/all.min.css'], { read: false }), {
@@ -303,6 +308,29 @@ gulp.task('js', ['templates'], function(){
 
 });
 
+gulp.task('js-lazy-unmin', function(){
+
+  return gulp.src( paths.lazyJs )
+    .pipe( concat('lazy.js') )
+
+    .pipe( gulp.dest('./js-build') )
+  ;
+
+});
+
+gulp.task('js-lazy', function(){
+
+  return gulp.src( paths.lazyJs )
+    .pipe( concat('lazy.min.js') )
+
+    .pipe( uglify() )
+
+    .pipe( gulp.dest('./js-build') )
+  ;
+
+});
+
+
 gulp.task('css-unmin', function(){
   return gulp.src( paths.css )
 
@@ -331,7 +359,7 @@ gulp.task('css', function(){
 
 // make sure everything is uptodate before watching
 gulp.task('prewatch', function( next ){
-  return runSequence( 'css-unmin', 'htmlrefs', next );
+  return runSequence( 'css-unmin', 'js-lazy-unmin', 'htmlrefs', next );
 });
 
 // auto less compilation & livereload
@@ -339,7 +367,7 @@ gulp.task('watch', ['prewatch'], function(){
   livereload.listen();
 
   // reload all when page or js changed
-  gulp.watch( ['index.html', 'templates/*.html'].concat(paths.js) )
+  gulp.watch( ['index.html', 'templates/*.html'].concat(paths.js).concat(paths.lazyJs) )
     .on('change', livereload.changed)
   ;
 
