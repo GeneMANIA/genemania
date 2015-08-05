@@ -36,6 +36,21 @@ function(){
           'z-index': 10
         }
       },
+      
+      {
+        selector: 'node[?gene]',
+        css: ( function(){
+          var css = {};
+          
+          for( var p = 1; p <= 16; p++ ){
+            css['pie-'+p+'-background-size'] = 'data( css.pie_'+p+'_background_size )';
+            css['pie-'+p+'-background-color'] = 'data( css.pie_'+p+'_background_color )';
+            css['pie-'+p+'-background-opacity'] = 'data( css.pie_'+p+'_background_opacity )';
+          }
+          
+          return css;
+        } )()
+      },
 
       {
         selector: 'node[?attr]',
@@ -126,7 +141,7 @@ function(){
         css: {
           'opacity': 0
         }
-      },
+      }
     ];
 
     Array.prototype.push.apply( stylesheet, config.networks.colors.map(function( colorSpec ){

@@ -161,17 +161,32 @@ function( util ){ return function( Result ){
     var self = this;
     var hl = this.getHighlights();
     
+    var toHl = cy.collection();
+    var toUnhl = cy.collection();
+    
+    var highlight = function( eles ){
+      toHl = toHl.add( eles );
+      toUnhl = toUnhl.not( eles );
+    };
+    
+    var unhighlight = function( eles ){
+      toHl = toHl.not( eles );
+      toUnhl = toUnhl.add( eles );
+    };
+    
+    var normlight = function( eles ){
+      toUnhl = toUnhl.not( eles );
+    };
+    
     cy.batch(function(){
       
-      // start clear
-      cy.elements().removeClass('unhighlighted').removeClass('highlighted');
       hl.active = false;
       
       var initted = false;
       function initAllUnhighlighted(){
         if( initted ){ return; }
         
-        cy.elements().addClass('unhighlighted').removeClass('highlighted');
+        unhighlight( cy.elements() );
         
         initted = true;
         
@@ -184,11 +199,10 @@ function( util ){ return function( Result ){
       if( hl.genes.length > 0 ){
         initAllUnhighlighted();
         
-        cy.nodes( hl.genes.map(function(id){ return '#' + id; }).join(', ') )
-          .removeClass('unhighlighted')
-          .addClass('highlighted')
-          .neighborhood().removeClass('unhighlighted')
-        ;
+        var nodes = cy.nodes( hl.genes.map(function(id){ return '#' + id; }).join(', ') );
+        
+        highlight( nodes );
+        normlight( nodes.neighborhood() );
       }
       
       //
@@ -197,11 +211,10 @@ function( util ){ return function( Result ){
       if( hl.interactions.length > 0 ){
         initAllUnhighlighted();
         
-        cy.edges( hl.interactions.map(function(id){ return '[rIntnId = ' + id + ']'; }).join(', ') )
-          .removeClass('unhighlighted')
-          .addClass('highlighted')
-          .connectedNodes().removeClass('unhighlighted')
-        ;
+        var edges = cy.edges( hl.interactions.map(function(id){ return '[rIntnId = ' + id + ']'; }).join(', ') );
+        
+        highlight( edges );
+        normlight( edges.connectedNodes() );
       }
       
       //
@@ -210,11 +223,10 @@ function( util ){ return function( Result ){
       if( hl.attributes.length > 0 ){
         initAllUnhighlighted();
         
-        cy.nodes( hl.attributes.map(function(id){ return '#' + id; }).join(', ') )
-          .removeClass('unhighlighted')
-          .addClass('highlighted')
-          .neighborhood().removeClass('unhighlighted')
-        ;
+        var nodes = cy.nodes( hl.attributes.map(function(id){ return '#' + id; }).join(', ') );
+        
+        highlight( nodes );
+        normlight( nodes.neighborhood() );
       }
       
       //
@@ -223,11 +235,11 @@ function( util ){ return function( Result ){
       if( hl.networkGroups.length > 0 ){
         initAllUnhighlighted();
         
-        cy.edges( hl.networkGroups.map(function(id){ return '[networkGroupId = ' + id + ']'; }).join(', ') )
-          .removeClass('unhighlighted')
-          .addClass('highlighted')
-          .connectedNodes().removeClass('unhighlighted')
-        ;
+        var edges = cy.edges( hl.networkGroups.map(function(id){ return '[networkGroupId = ' + id + ']'; }).join(', ') );
+        
+        highlight( edges );
+        normlight( edges.connectedNodes() );
+        
       }
       
       var hasId = {};
@@ -250,11 +262,10 @@ function( util ){ return function( Result ){
       if( hl.networks.length > 0 ){
         initAllUnhighlighted();
         
-        cy.edges( hl.networks.map(function(id){ return '[networkId = ' + id + ']'; }).join(', ') )
-          .removeClass('unhighlighted')
-          .addClass('highlighted')
-          .connectedNodes().removeClass('unhighlighted')
-        ;
+        var edges = cy.edges( hl.networks.map(function(id){ return '[networkId = ' + id + ']'; }).join(', ') );
+        
+        highlight( edges );
+        normlight( edges.connectedNodes() );
       }
       
       var hasId = {};
@@ -270,6 +281,16 @@ function( util ){ return function( Result ){
         
         rNet.highlighted = hasId[ rNet.network.id ];
       }
+
+      //
+      // apply highlights
+      var eles = cy.elements();
+      
+      eles.not( toHl ).removeClass('highlighted');
+      eles.not( toUnhl ).removeClass('unhighlighted');
+      
+      toHl.removeClass('unhighlighted').addClass('highlighted');
+      toUnhl.removeClass('highlighted').addClass('unhighlighted');
 
     });
     

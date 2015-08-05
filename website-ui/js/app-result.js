@@ -289,7 +289,18 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
           name: (rGene.typedName || gene.symbol) + (rank !== 0 ? ' (' + rank + ')' : ''),
           score: rGene.score,
           query: rGene.queryGene,
-          gene: true
+          gene: true,
+          css: ( function(){
+            var css = {};
+            
+            for( var p = 1; p <= 16; p++ ){
+              css['pie_'+p+'_background_size'] = 0;
+              css['pie_'+p+'_background_color'] = '#000';
+              css['pie_'+p+'_background_opacity'] = 0;
+            }
+            
+            return css;
+          } )()
         },
         classes: rGene.resultOntologyCategories.map(function(fn){
           return 'fn' + fn.id;

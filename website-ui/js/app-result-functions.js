@@ -53,31 +53,38 @@ function( util ){ return function( Result ){
   };
 
   rfn.updateFunctionStylesheet = function(){
-    var stylesheet = cyStylesheet(cy);
-    var style = cy.style().fromJson( stylesheet );
-
     var cfns = this.coloringFunctions;
+    var nodes = cy.nodes();
+    
+    cy.batch(function(){ 
+      //debugger;
 
-    for( var i = 0; i < cfns.length; i++ ){
-      var cfn = cfns[i];
-      var selector = '.fn' + cfn.id;
-      var css = {};
-      var p = i + 1;
+      for( var j = 0; j < nodes.length; j++ ){
+        var node = nodes[j];
+        var css = node.data('css');
+        
+        for( var i = 0; i < 16; i++ ){
+          var cfn = cfns[i];
+          var p = i + 1;
+          
+          if( cfn ){
+            var cls = 'fn' + cfn.id;
+          
+            css['pie_'+p+'_background_size'] = 100/cfns.length;
+            css['pie_'+p+'_background_color'] = cfn.color;
+            css['pie_'+p+'_background_opacity'] = node.hasClass(cls) ? 0.4 : 0;
+          } else {
+            css['pie_'+p+'_background_size'] = 0;
+            css['pie_'+p+'_background_color'] = '#000';
+            css['pie_'+p+'_background_opacity'] = 0;
+          }
+        }
+      
+        node.data( 'css', css );
+      }
+      
+    });
 
-      css['pie-'+p+'-background-opacity'] = 0;
-      css['pie-'+p+'-background-size'] = 100/cfns.length;
-      css['pie-'+p+'-background-color'] = cfn.color;
-
-      style.selector('node').css( css );
-
-      css['pie-'+p+'-background-opacity'] = 0.4;
-      css['pie-'+p+'-background-size'] = 100/cfns.length;
-      css['pie-'+p+'-background-color'] = cfn.color;
-
-      style.selector( selector ).css( css );
-    }
-
-    style.update();
   };
 
 
