@@ -8,3 +8,5 @@ target
 local.properties
 build.xml
 profiles.xml
+/bin/
+.tomcatplugin
