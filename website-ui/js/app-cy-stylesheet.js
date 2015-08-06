@@ -20,6 +20,14 @@ function(){
       },
 
       {
+        selector: 'node, edge',
+        css: {
+          'transition-property': 'opacity',
+          'transition-duration': '250ms'
+        }
+      },
+
+      {
         selector: 'node',
         css: {
           'width': 'mapData(score, '+ minScore +', '+ maxScore +', 20, 60)',
@@ -36,18 +44,18 @@ function(){
           'z-index': 10
         }
       },
-      
+
       {
         selector: 'node[?gene]',
         css: ( function(){
           var css = {};
-          
+
           for( var p = 1; p <= 16; p++ ){
             css['pie-'+p+'-background-size'] = 'data( css.pie_'+p+'_background_size )';
             css['pie-'+p+'-background-color'] = 'data( css.pie_'+p+'_background_color )';
             css['pie-'+p+'-background-opacity'] = 'data( css.pie_'+p+'_background_opacity )';
           }
-          
+
           return css;
         } )()
       },
@@ -98,28 +106,28 @@ function(){
           'overlay-padding': 3
         }
       },
-      
+
       {
         selector: 'node.unhighlighted',
         css: {
           'opacity': 0.2
         }
       },
-      
+
       {
         selector: 'edge.unhighlighted',
         css: {
           'opacity': 0.05
         }
       },
-      
+
       {
         selector: '.highlighted',
         css: {
           'z-index': 999999
         }
       },
-      
+
       {
         selector: 'node.highlighted',
         css: {
@@ -135,7 +143,7 @@ function(){
           'shadow-offset-y': 4
         }
       },
-      
+
       {
         selector: 'edge.filtered',
         css: {

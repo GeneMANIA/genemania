@@ -55,21 +55,21 @@ function( util ){ return function( Result ){
   rfn.updateFunctionStylesheet = function(){
     var cfns = this.coloringFunctions;
     var nodes = cy.nodes();
-    
-    cy.batch(function(){ 
+
+    cy.batch(function(){
       //debugger;
 
       for( var j = 0; j < nodes.length; j++ ){
         var node = nodes[j];
         var css = node.data('css');
-        
+
         for( var i = 0; i < 16; i++ ){
           var cfn = cfns[i];
           var p = i + 1;
-          
+
           if( cfn ){
             var cls = 'fn' + cfn.id;
-          
+
             css['pie_'+p+'_background_size'] = 100/cfns.length;
             css['pie_'+p+'_background_color'] = cfn.color;
             css['pie_'+p+'_background_opacity'] = node.hasClass(cls) ? 0.4 : 0;
@@ -79,10 +79,10 @@ function( util ){ return function( Result ){
             css['pie_'+p+'_background_opacity'] = 0;
           }
         }
-      
+
         node.data( 'css', css );
       }
-      
+
     });
 
   };
