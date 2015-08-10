@@ -75,7 +75,7 @@
       <div id="query-more" class="query-item query-button query-more activatable"><span class="fa fa-ellipsis-v"></span></div>
       <qtip qtip-target="query-more" qtip-id="query-more" qtip-adjust-method="shift" qtip-adjust-resize="false" qtip-viewport-target="query-qtip-viewport" class="query-more-content" qtip-class="qtip-no-padding qtip-query-aligned qtip-top-pointing-fix" qtip-scope-id="queryMore" qtip-digest-on-show="true">
         
-        <div ng-show="!query.editingWeighting" class="query-network-groups-header">
+        <div ng-show="!query.editingAdvanced" class="query-network-groups-header">
 
           <span class="query-network-groups-master-checker" ng-hide="query.showingNetworkSortOptions">
             <span class="query-network-groups-master-checker-icon activatable-relative" on-tap="query.toggleNetworkCheckOptions()">   
@@ -107,7 +107,7 @@
 
         </div>
 
-        <div ng-show="!query.editingWeighting" class="query-network-groups scrollable scrollable-y" id="query-network-groups">
+        <div ng-show="!query.editingAdvanced" class="query-network-groups scrollable scrollable-y" id="query-network-groups">
           <div class="query-network-organism" bindonce ng-repeat="org in query.organisms track by org.id" ng-show="query.organism === org">
             <div class="query-network-group">
               <span class="query-network-group-check activatable-relative" on-tap="query.toggleAttributeGroupsSelection()"><span class="check check-{{query.attributeGroupsSelected}}"></span></span>
@@ -157,20 +157,31 @@
           </div>
         </div>
 
-        <div id="query-weighting-groups" class="query-weighting-groups scrollable" ng-show="query.editingWeighting">
+        <div id="query-adv-opts" class="query-adv-opts scrollable" ng-show="query.editingAdvanced">
+          <div class="query-adv-opt-name">Max resultant genes: {{query.maxGenes}}</div>
+          <div class="query-slider-container">
+            <input class="query-slider" type="range" ng-model="query.maxGenes" min="0" max="100" ng-jquery-plugin="{ rangeslider: { polyfill: false } }" change-on-ready />
+          </div>
+          
+          <div class="query-adv-opt-name">Max resultant attributes: {{query.maxAttrs}}</div>
+          <div class="query-slider-container">
+            <input class="query-slider" type="range" ng-model="query.maxAttrs" min="0" max="100" ng-jquery-plugin="{ rangeslider: { polyfill: false } }" change-on-ready />
+          </div>
+          
+          <div class="query-adv-opt-name">Network weighting</div>
           <div class="query-weighting-group" ng-repeat="wgGr in query.weightingGroups track by $index">
             <div class="query-weighting-group-name" bindonce bo-text="wgGr.name"></div>
 
-            <div class="query-weighting activatable-bg" ng-repeat="wg in wgGr.weightings track by $index" on-tap="query.setWeighting(wg); query.toggleEditWeighting()">
+            <div class="query-weighting activatable-bg" ng-repeat="wg in wgGr.weightings track by $index" on-tap="query.setWeighting(wg)">
               <span class="query-weighting-radio radio radio-{{wg.value === query.weighting.value}}"></span>
               <span class="query-weighting-name" bindonce bo-text="wg.name"></span>
             </div>
           </div>
         </div>
 
-        <div class="query-weightings-footer activatable-bg" on-tap="query.toggleEditWeighting()">
-          <span ng-show="!query.editingWeighting" class="query-weightings-edit-link"><span class="fa fa-wrench"></span> Customise network weighting</span>
-          <span ng-show="query.editingWeighting" class="query-weightings-edit-link"><span class="fa fa-arrow-left"></span> Back to networks</span>
+        <div class="query-adv-footer activatable-bg" on-tap="query.toggleEditAdvanced()">
+          <span ng-show="!query.editingAdvanced" class="query-weightings-edit-link"><span class="fa fa-wrench"></span> Customise advanced options</span>
+          <span ng-show="query.editingAdvanced" class="query-weightings-edit-link"><span class="fa fa-arrow-left"></span> Back to networks</span>
         </div>
 
       </qtip>

@@ -84,6 +84,9 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
 
       self.weighting = config.networks.defaultWeighting;
     }
+    
+    self.maxGenes = 20;
+    self.maxAttrs = 20;
 
     self.setOrganism( self.organism, false ); // update org related deps
 
@@ -225,8 +228,8 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
     this.weighting = w;
   };
 
-  qfn.toggleEditWeighting = function(){
-    this.editingWeighting = this.editingWeighting ? false : true;
+  qfn.toggleEditAdvanced = function(){
+    this.editingAdvanced = this.editingAdvanced ? false : true;
   };
 
 

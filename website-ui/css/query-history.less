@@ -57,11 +57,16 @@
 	cursor: pointer;
 	display: inline-block;
 
-	& + .query-history-entry {
-		border-left: 1px solid rgba(0, 0, 0, 0.125);
-	}
+	// & + .query-history-entry {
+	// 	border-left: 1px solid rgba(0, 0, 0, 0.125);
+	// }
 
 	// background: blue;
+}
+
+.query-history-entry-wrapper {
+	position: relative;
+	display: inline-block;
 }
 
 .query-history-delete {
@@ -73,6 +78,8 @@
 
 .query-history-entry {
 	background-color: @qHistEntBg;
+	
+	margin-right: 0.75em;
 }
 
 .query-history-ender {
@@ -143,6 +150,8 @@
 .query-history-number {
 	position: absolute;
 	right: 0;
+	left: 0;
+	text-align: center;
 	top: 0;
 	color: #888;
 	margin: 0.25em;
@@ -158,4 +167,23 @@
 
 .query-history-loading {
 	//color: #fff;
+}
+
+.query-history-delete-entry {
+	position: absolute;
+	left: @qHistSize;
+	top: 0;
+	border: 1px solid rgba(255, 0, 0, 0.25);
+	box-sizing: border-box;
+	background: rgba(127, 0, 0, 1);
+	margin-left: -1.666em;
+	margin-top: -0.333em;
+	width: 2em;
+	height: 2em;
+	border-radius: 999px;
+	text-align: center;
+}
+
+.query-history-delete-entry-icon {
+	margin-top: 0.275em;
 }

@@ -64,7 +64,9 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
         genes: q.genesText,
         weighting: q.weighting.value,
         networks: netIds,
-        attrGroups: attrGrIds
+        attrGroups: attrGrIds,
+        geneThreshold: q.maxGenes,
+        attrThreshold: q.maxAttrs
       });
     }).then(function( searchResult ){
       for( var i in searchResult ){
@@ -270,6 +272,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     var eles = [];
     var id2AttrEle = {};
 
+    cy.reset();
+
     cy.startBatch();
     cy.elements().remove();
 
@@ -283,6 +287,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
 
       eles.push( ele = {
         group: 'nodes',
+        position: { x: -9999, y: -9999 },
         data: {
           id: '' + gene.id,
           idInt: gene.id,
@@ -318,6 +323,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
         if( !attrEle ){
           eles.push( attrEle = {
             group: 'nodes',
+            position: { x: -9999, y: -9999 },
             data: {
               id: '' + attr.id,
               idInt: attr.id,
@@ -388,7 +394,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     var container = cy.container();
 
     return self.forceLayout({
-      animate: false
+      animate: false,
+      randomize: true
     });
 
   };

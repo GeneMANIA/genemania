@@ -196,6 +196,21 @@ app.directive('onShortcutFocus', ['$parse', function ($parse) {
   };
 }]);
 
+app.directive('changeOnReady', [function() {
+    return {
+        link : function(scope, element, attrs) {
+            var $e=$(element);
+            
+            PubSub.subscribe('ready', function(){
+              setTimeout(function(){
+                $e.change();
+              }, 20);
+            });
+
+        }
+    };
+}]);
+
 $(function(){
   FastClick.attach( document.body ); // so touch devices get click quick
 

@@ -16,7 +16,7 @@ function( util, Result, io, cy ){ return function( Query ){
     // store query data params in clientside datastore
 
     return Promise.delay(100).then(function(){
-      return ioq.read('queries');
+      return ioq.read();
     }).then(function( qJson ){
       var history = qJson.history = qJson.history || [];
       var bb = cy.elements().boundingBox();
@@ -70,6 +70,27 @@ function( util, Result, io, cy ){ return function( Query ){
 
   qfn.clearHistory = function(){
     return io('queries').delete().then(function(){
+      PubSub.publish('query.clearHistory', this);
+    });
+  };
+  
+  qfn.clearHistoryEntry = function( entry ){
+    var ioq = io('queries');
+    
+    return ioq.read().then(function( qJson ){
+      var history = qJson.history = qJson.history || [];
+      
+      for( var i = 0; i < history.length; i++ ){
+        var hi = history[i];
+        
+        if( hi.timestamp === entry.timestamp ){
+          history.splice( i, 1 );
+          break;
+        }
+      }
+    }).then(function(){
+      return ioq.write();
+    }).then(function(){
       PubSub.publish('query.clearHistory', this);
     });
   };

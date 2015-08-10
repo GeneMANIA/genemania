@@ -63,6 +63,7 @@ var paths = {
     './css/animate-extras.less',
     './css/font-awesome.css',
     './css/bio-icons.css',
+    './css/rangeslider.css',
     './css/jquery.qtip.css',
     './css/qtip-config.less',
     './css/ng-animations.less',

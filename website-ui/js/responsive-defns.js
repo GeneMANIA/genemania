@@ -25,7 +25,7 @@
     },
 
     {
-      id: 'query-weighting-groups',
+      id: 'query-adv-opts',
       handler: function(){
         var vp = document.getElementById('query-qtip-viewport');
 

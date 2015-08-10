@@ -9,19 +9,27 @@
   <div id="query-history" class="query-history scrollable scrollable-x query-history-splashed-{{query.splashed ? true : false}} query-history-expanded-{{query.historyExpanded ? true : false}}">
     <div class="query-history-delete activatable animated-very-slow fadeIn" on-tap="query.clearHistory()" ng-if="history && history.length > 0">
       <span class="query-history-delete-icon"><i class="fa fa-times"></i></span>
-      <span class="query-history-delete-label">Clear history</span>
+      <span class="query-history-delete-label">Clear all history</span>
     </div>
 
-    <div class="query-history-entry activatable animated-very-slow fadeIn" on-tap="query.succeed( entry )" ng-repeat="entry in history track by entry.timestamp" bindonce="entry">
-      <span class="query-history-organism-icon" bo-class="entry.organismIcon"></span>
-      <span class="query-history-image" bo-style="{ 'background-image': 'url(' + entry.image + ')' }"></span>
-      <span class="query-history-label">
-        <span bo-text="entry.genes[0]"></span>
-        <span bo-if="entry.genes.length > 1">
-          +<span bo-text="entry.genes.length - 1"></span><span class="bio-helix"></span>
+    <div class="query-history-entry-wrapper" ng-repeat="entry in history track by entry.timestamp" bindonce="entry">
+      <div class="query-history-entry activatable animated-very-slow fadeIn" on-tap="query.succeed( entry )">
+        <span class="query-history-organism-icon" bo-class="entry.organismIcon"></span>
+        <span class="query-history-image" bo-style="{ 'background-image': 'url(' + entry.image + ')' }"></span>
+        <span class="query-history-label">
+          <span bo-text="entry.genes[0]"></span>
+          <span bo-if="entry.genes.length > 1">
+            +<span bo-text="entry.genes.length - 1"></span><span class="bio-helix"></span>
+          </span>
         </span>
+        <span class="query-history-number" bo-text="history.length - $index"></span>
+      </div>
+      <span
+        class="query-history-delete-entry activatable animated-very-slow fadeIn"
+        on-tap="query.clearHistoryEntry( entry )"
+      >
+        <i class="query-history-delete-entry-icon fa fa-times"></i>
       </span>
-      <span class="query-history-number" bo-text="history.length - $index"></span>
     </div>
 
     <div class="query-history-empty" ng-show=" (!history || history.length === 0) && query.historyInitLoaded ">
@@ -32,7 +40,7 @@
       <span class="fa fa-refresh fa-spin"></span> Loading search history...
     </div>
 
-    <div class="query-history-ender"></div>
+    <!-- <div class="query-history-ender"></div> -->
   </div>
 
 </div>
