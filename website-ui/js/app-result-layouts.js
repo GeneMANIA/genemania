@@ -4,7 +4,7 @@ function( util ){ return function( Result ){
 
   var r = Result;
   var rfn = r.prototype;
-  
+
   var defaultPadding = 50;
 
   var sortByWeight = function(a, b){
@@ -17,24 +17,24 @@ function( util ){ return function( Result ){
 
     if( self.cyLayout ){
       cy.elements().stop( true ); // because https://github.com/cytoscape/cytoscape.js/issues/983
-      
+
       self.cyLayout.stop();
       self.cyLayout = null;
     }
-    
+
     setTimeout(function(){
       self.cyLayout = layout;
-      
+
       if( self.networksExpanded ){
         container.classList.add('cy-layouting-shift');
       }
-      
+
       if( self.query.historyExpanded ){
         container.classList.add('cy-layouting-shift-history');
       }
-      
+
       layout.run();
-    }, 100);
+    }, 0);
   };
 
   rfn.layoutPrepost = function( layout ){
@@ -44,14 +44,14 @@ function( util ){ return function( Result ){
     if( self.layoutPromise ){
       self.layoutPromise.cancel();
     }
-    
-    return self.layoutPromise = new Promise(function(resolve){      
+
+    return self.layoutPromise = new Promise(function(resolve){
       layout.one('layoutstop', function(){
         resolve();
       });
     }).then(function(){
       var cl = container.classList;
-      
+
       cl.remove('cy-layouting-shift');
       cl.remove('cy-layouting-shift-history');
     }).cancellable();
@@ -69,7 +69,7 @@ function( util ){ return function( Result ){
       concentric: function(){
         var isQuery = this.data('query');
         var score = this.data('score') || 0;
-        
+
         return (isQuery ? 100 : 0) + score;
       },
       levelWidth: function(){
@@ -88,6 +88,7 @@ function( util ){ return function( Result ){
 
   rfn.forceLayout = function(options){
     options = $.extend({
+      fit: true,
       randomize: true,
       animate: true,
       nodeSpacing: 15,
@@ -99,11 +100,11 @@ function( util ){ return function( Result ){
     var layoutEles = cy.elements().stdFilter(function( ele ){
       return ele.isNode() || !ele.hasClass('filtered');
     });
-    
+
     // var layoutElesWoCoexp = layoutEles.stdFilter(function( ele ){
     //   return ele.data('group') !== 'coexp';
     // });
-    // 
+    //
     // if( layoutElesWoCoexp.edges().length === 0 ){
     //   // then keep coexp edges b/c we need some edges
     // } else {
@@ -113,30 +114,32 @@ function( util ){ return function( Result ){
     var avgW = 0;
     var minW = Infinity;
     var maxW = -Infinity;
-    
-    for( var i = 0; i < layoutEles.length; i++ ){
-      var ele = layoutEles[i];
+
+    var layoutEdges = layoutEles.edges();
+
+    for( var i = 0; i < layoutEdges.length; i++ ){
+      var ele = layoutEdges[i];
       var w = ele.data('weight');
-      
+
       avgW += w;
-      
+
       minW = Math.min( w, minW );
       maxW = Math.max( w, maxW );
     }
-    
-    avgW /= layoutEles.length;
-    
+
+    avgW /= layoutEdges.length;
+
     var norm = function( w ){
       return (w - minW) / (maxW - minW) * 9 + 1; // ranges on (1, 10)
     };
-    
-    for( var i = 0; i < layoutEles.length; i++ ){
-      var ele = layoutEles[i];
+
+    for( var i = 0; i < layoutEdges.length; i++ ){
+      var ele = layoutEdges[i];
       var w = ele.data('weight');
-      
+
       ele.data( 'normWeight', norm(w) );
     }
-    
+
     var avgWNorm = norm( avgW );
     var minLength = 0;
     var maxLength = 200;
@@ -144,23 +147,23 @@ function( util ){ return function( Result ){
     var edgeLength = function( e ){
       function length(e){
         var w = e.data('weight');
-        
+
         if( w == null ){
           w = avgW;
         }
-        
+
         // as w => inf, l => 0
-        var l = options.lengthFactor / w; 
-        
+        var l = options.lengthFactor / w;
+
         return l;
       }
-      
+
       if( e.data('group') === 'coexp' ){
         return 10 * length(e);
       }
-      
+
       var l = length(e);
-      
+
       if( l < minLength ){
         return minLength;
       } else if( l > maxLength ){
@@ -176,13 +179,13 @@ function( util ){ return function( Result ){
       randomize: options.randomize,
       maxSimulationTime: options.maxSimulationTime,
       edgeLength: edgeLength,
-      padding: defaultPadding 
+      padding: defaultPadding
     });
-    
+
     var p = this.layoutPrepost( l );
 
     this.layoutDelay(l);
-    
+
     return p;
   };
 
@@ -204,7 +207,7 @@ function( util ){ return function( Result ){
       sort: sortByWeight,
       padding: defaultPadding
     });
-    
+
     var p = this.layoutPrepost( l );
 
     this.layoutDelay(l);
@@ -222,7 +225,7 @@ function( util ){ return function( Result ){
       fit: !options.animate,
       padding: defaultPadding
     });
-    
+
     if( options.animate ){
       cy.animate({
         fit: {

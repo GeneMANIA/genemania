@@ -2,12 +2,7 @@ app.factory('cyStylesheet',
 [
 function(){
 
-  return window.cyStylesheet = function( cy ){
-
-    var getScore = function(n){ return n.data('score'); };
-    var nqNodes = cy.$('node[!query]');
-    var minScore = 0; //nqNodes.min(getScore).value;
-    var maxScore = nqNodes.max(getScore).value;
+  return window.cyStylesheet = function(){
 
     var stylesheet = [
       {
@@ -30,8 +25,8 @@ function(){
       {
         selector: 'node',
         css: {
-          'width': 'mapData(score, '+ minScore +', '+ maxScore +', 20, 60)',
-          'height': 'mapData(score, '+ minScore +', '+ maxScore +', 20, 60)',
+          'width': 'mapData(normScore, 0, 1, 20, 60)',
+          'height': 'mapData(normScore, 0, 1, 20, 60)',
           'content': 'data(name)',
           'font-size': 12,
           'text-valign': 'center',

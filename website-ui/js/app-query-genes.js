@@ -1,16 +1,58 @@
-app.factory('Query_genes', 
+app.factory('Query_genes',
 [ 'util',
 function( util ){ return function( Query ){
 
   var q = Query;
   var qfn = q.prototype;
-  
+
   //
   // GENES
 
-  qfn.addGenes = function(){};
-  qfn.removeGenes = function(){};
-  qfn.removeAllGenes = function(){};
+  qfn.addGenes = function( genes ){
+    var self = this;
+
+    self.settingGenes = true;
+
+    self.genesText += '\n' + (_.isArray( genes ) ? genes.join('\n') : genes);
+
+    PubSub.publish('query.setGenes', self);
+    self.validateGenesFromText();
+  };
+
+  qfn.removeGenes = function( genes ){
+    var self = this;
+    genes = _.isArray(genes) ? genes : [genes];
+
+    self.settingGenes = true;
+
+    var lines = self.genesText.split('\n');
+
+    var geneToBeRemoved = {};
+    for( var i = 0; i < genes.length; i++ ){
+      var gene = genes[i].toLowerCase();
+
+      geneToBeRemoved[gene] = true;
+    }
+
+    var lineMatches = function( line ){
+      return !!geneToBeRemoved[line];
+    };
+
+    for( var i = 0; i < lines.length; i++ ){
+      var line = lines[i].trim().toLowerCase();
+
+      if( lineMatches(line) ){
+        lines.splice( i, 1 );
+        i--;
+        continue;
+      }
+    }
+
+    self.genesText = lines.join('\n');
+
+    PubSub.publish('query.setGenes', self);
+    self.validateGenesFromText();
+  };
 
   qfn.setGenes = function( genes ){
     var self = this;
@@ -71,14 +113,14 @@ function( util ){ return function( Query ){
   qfn.updateGenesArea = function(){
     $('#query-genes-textarea').trigger('autosize.resize');
   };
-  
+
   qfn.openGenesArea = function(){
     return new Promise(function(resolve){
       var $ta = $('#query-genes-textarea').focus();
-      
+
       setTimeout(function(){
         $ta.trigger('click');
-        
+
         resolve();
       }, 20);
     });
@@ -149,7 +191,7 @@ function( util ){ return function( Query ){
         self.geneValidations = [];
         self.geneSpellchecks = '';
         self.invalidGenesCount = 0;
-        
+
         PubSub.publish('query.validateGenes', self);
       });
     }
@@ -172,6 +214,6 @@ function( util ){ return function( Query ){
 
     PubSub.publish('query.collapseGenes', this);
   };
-  
+
 
 } } ]);

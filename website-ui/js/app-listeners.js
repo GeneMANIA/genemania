@@ -121,14 +121,14 @@ app.directive('onHoverover', ['$parse', function ($parse) {
 
     var handler = $parse(attr.onHoverover);
 
-    $ele[0].addEventListener('mouseover', function(evt){
+    $ele[0].addEventListener('mouseenter', function(evt){
       handler(scope, { $event: evt });
     });
-    
+
     $ele[0].addEventListener('touchstart', function(evt){
-      if( evt.touches.length === 1 ){    
+      if( evt.touches.length === 1 ){
         handler(scope, { $event: evt });
-        
+
         evt.preventDefault();
       }
     });
@@ -141,12 +141,12 @@ app.directive('onHoverout', ['$parse', function ($parse) {
 
     var handler = $parse(attr.onHoverout);
 
-    $ele[0].addEventListener('mouseout', function(evt){
+    $ele[0].addEventListener('mouseleave', function(evt){
       handler(scope, { $event: evt });
     });
-    
+
     $ele[0].addEventListener('touchend', function(evt){
-      if( evt.touches.length === 0 ){      
+      if( evt.touches.length === 0 ){
         handler(scope, { $event: evt });
       }
     });
@@ -200,7 +200,7 @@ app.directive('changeOnReady', [function() {
     return {
         link : function(scope, element, attrs) {
             var $e=$(element);
-            
+
             PubSub.subscribe('ready', function(){
               setTimeout(function(){
                 $e.change();
@@ -215,7 +215,7 @@ $(function(){
   FastClick.attach( document.body ); // so touch devices get click quick
 
   // make tap event alias
-  // document.addEventListener('click', function(e){ 
+  // document.addEventListener('click', function(e){
   //   var el = e.target;
 
   //   if (window.CustomEvent) {

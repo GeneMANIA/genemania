@@ -12,7 +12,11 @@
       Networks
     </div>
 
-    <div bindonce="result" ng-repeat="rGr in result.resultAllGroups">
+    <div class="network-list-loading" ng-if="query.result != null && query.result.searchPromise != null">
+      <i class="fa fa-refresh fa-spin"></i>
+    </div>
+
+    <div bindonce="result" ng-repeat="rGr in result.resultAllGroups" ng-show="query.result != null && query.result.searchPromise == null">
 
       <div class="network-group">
         <span class="network-group-check activatable-relative" on-tap="result.toggleNetworkGroup(rGr)"><span class="check check-{{rGr.enabled}}"></span></span>
@@ -29,7 +33,7 @@
           <span class="network-group-color" bo-style="{ 'width': rGr.weight * 100 + '%', 'background-color': rGr.color }"></span>
         </span>
         <span class="network-group-percent" bo-text="rGr.displayWeight"></span>
-   
+
         <div class="network-group-networks network-group-networks-expanded-{{rGr.expanded ? true : false}}">
           <div class="network" ng-if="rGr.isResultNetworkGroup" ng-repeat="rNet in rGr.resultNetworks">
             <div ng-include="'templates/result-network.html'"></div>

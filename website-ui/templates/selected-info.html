@@ -1,19 +1,31 @@
 <div ng-controller="SelectedInfoCtrl">
-  <div class="selected-info selected-info-open-{{result.selectedInfoOpen ? true : false}} selected-info-highlighted-{{ result.highlights.genes.length > 0 || result.highlights.interactions.length > 0 || result.highlights.attributes.length > 0 }}">
-    <div class="selected-info-close activatable" on-tap="result.closeSelectedInfo()">
-      <i class="fa fa-times"></i>
-    </div>
+  <div ng-show="query.result != null && query.result.searchPromise == null" class="selected-info selected-info-open-{{result.selectedInfoOpen ? true : false}} selected-info-highlighted-{{ result.highlights.genes.length > 0 || result.highlights.interactions.length > 0 || result.highlights.attributes.length > 0 }}">
 
     <div ng-if="rGene" on-hoverover="result.rateLimitedHighlight({ genes: [ rGene.gene.id ] })" on-hoverout="result.rateLimitedUnhighlight({ genes: [ rGene.gene.id ] })">
+      <div ng-include="'templates/selected-info-close.html'"></div>
       <div class="selected-info-title">
         {{rGene.gene.symbol}}
       </div>
       <div class="selected-info-details">
         <div ng-include="'templates/gene-details-dyn.html'"></div>
       </div>
+      <div class="selected-info-commands">
+        <span class="activatable selected-info-command" ng-class="{ 'disabled': rGene.queryGene }" on-tap="query.addGenes(rGene.name); query.search();">
+          <sup><i class="fa fa-plus"></i></sup><i class="fa fa-search"></i>
+        </span>
+
+        <span class="activatable selected-info-command" ng-class="{ 'disabled': !rGene.queryGene }" on-tap="query.removeGenes(rGene.name); query.search();">
+          <sup><i class="fa fa-minus"></i></sup><i class="fa fa-search"></i>
+        </span>
+
+        <span class="activatable selected-info-command"  on-tap="query.setGenes(rGene.name); query.search();">
+          <sup><i class="fa fa-circle"></i></sup><i class="fa fa-search"></i>
+        </span>
+      </div>
     </div>
 
     <div ng-if="rAttr" on-hoverover="result.rateLimitedHighlight({ attributes: [ rAttr.attribute.id ] })" on-hoverout="result.rateLimitedUnhighlight({ attributes: [ rAttr.attribute.id ] })">
+      <div ng-include="'templates/selected-info-close.html'"></div>
       <div class="selected-info-title">
         {{rAttr.attribute.name}}
       </div>
@@ -23,6 +35,7 @@
     </div>
 
     <div ng-if="rIntn" on-hoverover="result.rateLimitedHighlight({ interactions: [ rIntn.id ] })" on-hoverout="result.rateLimitedUnhighlight({ interactions: [ rIntn.id ] })">
+      <div ng-include="'templates/selected-info-close.html'"></div>
       <div class="selected-info-title">
         {{rIntn.fromGene.name}} - {{rIntn.toGene.name}}
       </div>
@@ -30,5 +43,6 @@
         <div ng-include="'templates/interaction-details-dyn.html'"></div>
       </div>
     </div>
+
   </div>
 </div>

@@ -37,6 +37,8 @@ var paths = {
     './js/lib/fastclick.js',
     './js/lib/angular.js',
     './js-build/angular-templates.js', // include templates if built
+    './js/lib/cytoscape.js',
+    './js/lib/cytoscape-*.js',
     './js/lib/*.js',
     './js/config.js',
     './js/website-config.js', // so if website config exists, then it overwrites the local config
@@ -45,7 +47,7 @@ var paths = {
     './js/app-*.js',
     './js/*.js'
   ],
-  
+
   lazyJs: [
     './js/lazylib/*.js',
     './js/lazylib/requires-def.js'
@@ -267,8 +269,8 @@ gulp.task('htmlminrefs', ['templates', 'js', 'js-lazy', 'css'], function(){
         if( filepath.match('.js') ){
           return '<script src="' + filepath + '" async defer></script>';
         }
-        
-        // Use the default transform as fallback: 
+
+        // Use the default transform as fallback:
         return inject.transform.apply(inject.transform, arguments);
       }
     } ))

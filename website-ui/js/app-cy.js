@@ -1,9 +1,11 @@
 app.factory('cy',
-[
-function(  ){
+[ 'cyStylesheet',
+function( cyStylesheet ){
 
   var cy = window.cy = cytoscape({
     container: document.getElementById('cy'),
+
+    style: cyStylesheet(),
 
     boxSelectionEnabled: false,
     autounselectify: true,

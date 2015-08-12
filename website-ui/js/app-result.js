@@ -16,7 +16,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     } else {
       console.error('A result must have a query specified');
     }
-    
+
     window.result = this;
 
     if( rfn.networksExpanded === undefined && !util.isSmallScreen() ){
@@ -93,7 +93,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
 
       throw err;
     });
-    
+
     PubSub.publish('result.search', self);
 
   };
@@ -133,13 +133,14 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     var rankedRgenes = self.resultGenes.concat([]).sort(function( a, b ){
       return b.score - a.score;
     });
-    
+
     var rank = 0;
+
     rankedRgenes.forEach(function( rGene ){
       if( !rGene.queryGene ){
         rank++;
       }
-      
+
       rGene.rank = rank;
     });
 
@@ -192,11 +193,11 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
         rNet.expanded = false;
         rNet.resultNetworkGroup = rGr;
         rNet.ele = rNet.network;
-        
+
         if( rNet.network.metadata != null && rNet.network.metadata.yearPublished != null ){
           rNet.network.metadata.yearPublished = '' + parseInt( rNet.network.metadata.yearPublished ); // fix from server data
         }
-        
+
         rNetsById[ rNet.network.id ] = rNet;
         self.resultNetworks.push( rNet );
 
@@ -272,23 +273,34 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     var eles = [];
     var id2AttrEle = {};
 
-    cy.reset();
-
     cy.startBatch();
-    cy.elements().remove();
+    var oldEles = cy.elements().remove();
+    var oldElesById = {};
+    var someOldEles = false;
+
+    for( var i = 0; i < oldEles.length; i++){
+      oldElesById[ oldEles[i].id() ] = oldEles[i];
+    }
 
     // gene nodes
     for( var i = 0; i < self.resultGenes.length; i++ ){
       var rGene = self.resultGenes[i];
       var gene = rGene.gene;
       var ele;
+      var oldEle = oldElesById[ gene.id ];
+
+      if( oldEle ){
+        someOldEles = true;
+      }
 
       rank = rGene.rank;
 
       eles.push( ele = {
         group: 'nodes',
-        position: { x: -9999, y: -9999 },
+        position: oldEle ? oldEle.position() : undefined,
+        //locked: !!oldEle,
         data: {
+          oldEle: !!oldEle,
           id: '' + gene.id,
           idInt: gene.id,
           name: (rGene.typedName || gene.symbol) + (rank !== 0 ? ' (' + rank + ')' : ''),
@@ -297,13 +309,13 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
           gene: true,
           css: ( function(){
             var css = {};
-            
+
             for( var p = 1; p <= 16; p++ ){
               css['pie_'+p+'_background_size'] = 0;
               css['pie_'+p+'_background_color'] = '#000';
               css['pie_'+p+'_background_opacity'] = 0;
             }
-            
+
             return css;
           } )()
         },
@@ -323,7 +335,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
         if( !attrEle ){
           eles.push( attrEle = {
             group: 'nodes',
-            position: { x: -9999, y: -9999 },
+            // position: { x: -9999, y: -9999 },
             data: {
               id: '' + attr.id,
               idInt: attr.id,
@@ -379,14 +391,17 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     cy.add( eles );
 
     // normalise scores
-    var qNodes = cy.$('node[?query]');
-    var nqNodes = cy.$('node[!query]');
+    var nodes = cy.nodes();
+    var qNodes = nodes.filter('[?query]');
+    var nqNodes = nodes.filter('[!query]');
     var maxScore = nqNodes.max(function( n ){ return n.data('score'); }).value;
-    qNodes.data('score', maxScore);
 
-    // generate the stylesheet for the graph
-    var stylesheet = cyStylesheet(cy);
-    cy.style().fromJson( stylesheet );
+    for( var i = 0; i < nodes.length; i++ ){
+      var n = nodes[i];
+      var score = n.data('score');
+
+      n.data( 'normScore', Math.min(score/maxScore, 1) );
+    }
 
     cy.endBatch(); // will trigger new stylesheet etc
 
@@ -395,7 +410,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
 
     return self.forceLayout({
       animate: false,
-      randomize: true
+      randomize: !someOldEles
     });
 
   };

@@ -33,19 +33,19 @@ PubSub.promise = function( topic ){
       PubSub.publish('ready'); // all app ready
     })
   ;
-  
+
   var lazyPromise = new Promise(function( resolve ){
-    
+
     readyPromise.then(function(){ // wait until app all ready before lazy loading libs
       require(['js-build/lazy.js'], function( lazy ){
         console.log('Lazy loaded libs pulled in');
-        
+
         resolve( lazy );
       });
     });
-    
+
   });
-  
+
   window.lazyLib = function(){ return lazyPromise; };
 })();
 
@@ -54,19 +54,19 @@ window.scrollTo = window.scrollTo || function(){};
 
 app.factory('updateScope', [ '$timeout', '$rootScope', function( $timeout, $rootScope ){
   var lastUpdate;
-  
+
   return function(){
     if( lastUpdate ){ return; clearTimeout(lastUpdate); }
-    
+
     lastUpdate = setTimeout(function(){ lastUpdate = null; $rootScope.$apply(); }, 16);
   }
-  
+
   function updateScope(){
     if( lastUpdate ){ $timeout.cancel(lastUpdate); }
-    
+
     lastUpdate = $timeout(function(){ lastUpdate = null; }, 16);
   }
-  
+
   return updateScope;
 } ]);
 
