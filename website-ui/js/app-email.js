@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('$$email', 
 ['$http', 'util',
 function( $http, util ){

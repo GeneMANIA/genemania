@@ -1,7 +1,7 @@
 <div ng-controller="NetworksCtrl">
 
   <div class="network-list-expander activatable network-list-expanded-{{result.networksExpanded ? true : false}}" on-tap="result.toggleNetworksExpansion()">
-    <span class="network-list-expander-icon fa fa-share-alt"></span>
+    <span class="network-list-expander-icon fa fa-navicon"></span>
     <span class="network-list-expander-arrow fa fa-angle-left" ng-show="!result.networksExpanded"></span>
     <span class="network-list-expander-arrow fa fa-angle-right" ng-show="result.networksExpanded"></span>
   </div>
@@ -23,8 +23,8 @@
         <span class="network-group-expander"><span class="fa" ng-class="{ 'fa-caret-right': !rGr.expanded, 'fa-caret-down': rGr.expanded }"></span></span>
         <span class="network-group-name activatable-relative network-group-name-highlighted-{{rGr.highlighted ? true : false}}"
           on-tap="result.toggleNetworkGroupExpansion(rGr)"
-          on-hoverover="result.rateLimitedHighlight({ networkGroups: [ rGr.networkGroup.id ] })"
-          on-hoverout="result.rateLimitedUnhighlight({ networkGroups: '*' })"
+          on-hoverover="result.rateLimitedHighlight(rGr.isResultAttributeGroup ? { attributeGroups: [ rGr.attributeGroup.id ] } : { networkGroups: [ rGr.networkGroup.id ] })"
+          on-hoverout="result.rateLimitedUnhighlight(rGr.isResultAttributeGroup ? { attributeGroups: '*' } : { networkGroups: '*' })"
         >
           <span bo-if="rGr.isResultNetworkGroup" bo-text="rGr.networkGroup.name"></span>
           <span bo-if="rGr.isResultAttributeGroup" bo-text="rGr.attributeGroup.name"></span>

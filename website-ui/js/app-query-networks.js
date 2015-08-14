@@ -1,7 +1,9 @@
+'use strict';
+
 app.factory('Query_networks', 
 [ 'util',
 function( util ){ return function( Query ){
-  
+
   var q = Query;
   var qfn = q.prototype;
 
@@ -148,7 +150,7 @@ function( util ){ return function( Query ){
 
       if( !setter ){ return; } // can't set w/o setter
       setter = setter.setter; // we only want the function
- 
+
       for( var i = 0; i < this.networks.length; i++ ){
         var network = this.networks[i];
 
@@ -213,6 +215,6 @@ function( util ){ return function( Query ){
       });
     }
   };
-  
+
 
 } } ]);

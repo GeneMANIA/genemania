@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('$$organisms', 
 ['$http', 'util',
 function( $http, util ){
@@ -27,7 +29,7 @@ function( $http, util ){
             return -1;
           } else if( b.alias < a.alias ){
             return 1;
-          } 
+          }
 
           return 0;
         });

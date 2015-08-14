@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('$$genes', 
 ['$http', 'util',
 function( $http, util ){

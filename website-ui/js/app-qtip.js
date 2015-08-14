@@ -1,3 +1,5 @@
+'use strict';
+
 app.directive('qtip', function(){
   return {
     restrict: 'E',

@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('$$features', 
 ['$http', 'util',
 function( $http, util ){

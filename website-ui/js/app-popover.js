@@ -1,3 +1,5 @@
+'use strict';
+
 app.directive('popover', function(){
   return {
     restrict: 'E',

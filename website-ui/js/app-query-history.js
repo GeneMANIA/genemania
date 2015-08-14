@@ -73,16 +73,16 @@ function( util, Result, io, cy ){ return function( Query ){
       PubSub.publish('query.clearHistory', this);
     });
   };
-  
+
   qfn.clearHistoryEntry = function( entry ){
     var ioq = io('queries');
-    
+
     return ioq.read().then(function( qJson ){
       var history = qJson.history = qJson.history || [];
-      
+
       for( var i = 0; i < history.length; i++ ){
         var hi = history[i];
-        
+
         if( hi.timestamp === entry.timestamp ){
           history.splice( i, 1 );
           break;
@@ -148,6 +148,8 @@ function( util, Result, io, cy ){ return function( Query ){
       genesText: this.genesText,
       attributeGroupIds: attrGrIds,
       networkIds: netIds,
+      maxGenes: this.maxGenes,
+      maxAttrs: this.maxAttrs,
       weighting: this.weighting.value || config.networks.defaultWeighting.value
     };
   };

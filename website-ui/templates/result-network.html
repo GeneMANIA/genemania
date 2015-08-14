@@ -2,8 +2,8 @@
 <span class="network-expander"><span class="fa" ng-class="{ 'fa-caret-right': !rNet.expanded, 'fa-caret-down': rNet.expanded }"></span></span>
 <span class="network-name activatable-relative network-name-highlighted-{{rNet.highlighted ? true : false}}"
   on-tap="result.toggleNetworkExpansion(rNet)"
-  on-hoverover="result.rateLimitedHighlight({ networks: [ rNet.network.id ] })"
-  on-hoverout="result.rateLimitedUnhighlight({ networks: '*' })"
+  on-hoverover="result.rateLimitedHighlight(rNet.isResultAttribute ? { attrs: [ rNet.attribute.id ] } : { networks: [ rNet.network.id ] })"
+  on-hoverout="result.rateLimitedUnhighlight(rNet.isResultAttribute ? { attrs: '*' } : { networks: '*' })"
 >
   <span bo-if="rGr.isResultNetworkGroup" bo-text="rNet.network.name"></span>
   <span bo-if="rGr.isResultAttributeGroup" bo-text="rNet.attribute.name"></span>

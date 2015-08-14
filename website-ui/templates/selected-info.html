@@ -1,5 +1,5 @@
 <div ng-controller="SelectedInfoCtrl">
-  <div ng-show="query.result != null && query.result.searchPromise == null" class="selected-info selected-info-open-{{result.selectedInfoOpen ? true : false}} selected-info-highlighted-{{ result.highlights.genes.length > 0 || result.highlights.interactions.length > 0 || result.highlights.attributes.length > 0 }}">
+  <div ng-show="query.result != null && query.result.searchPromise == null" class="selected-info selected-info-open-{{result.selectedInfoOpen ? true : false}} selected-info-highlighted-{{ result.highlights.genes.length > 0 || result.highlights.interactions.length > 0 || result.highlights.attrs.length > 0 }}">
 
     <div ng-if="rGene" on-hoverover="result.rateLimitedHighlight({ genes: [ rGene.gene.id ] })" on-hoverout="result.rateLimitedUnhighlight({ genes: [ rGene.gene.id ] })">
       <div ng-include="'templates/selected-info-close.html'"></div>
@@ -24,7 +24,7 @@
       </div>
     </div>
 
-    <div ng-if="rAttr" on-hoverover="result.rateLimitedHighlight({ attributes: [ rAttr.attribute.id ] })" on-hoverout="result.rateLimitedUnhighlight({ attributes: [ rAttr.attribute.id ] })">
+    <div ng-if="rAttr" on-hoverover="result.rateLimitedHighlight({ attrs: [ rAttr.attribute.id ] })" on-hoverout="result.rateLimitedUnhighlight({ attrs: [ rAttr.attribute.id ] })">
       <div ng-include="'templates/selected-info-close.html'"></div>
       <div class="selected-info-title">
         {{rAttr.attribute.name}}

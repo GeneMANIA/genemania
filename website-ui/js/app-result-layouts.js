@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('Result_layouts',
 [ 'util',
 function( util ){ return function( Result ){
@@ -215,33 +217,37 @@ function( util ){ return function( Result ){
     return p;
   };
 
-  rfn.fitGraph = function( options ){
-    options = $.extend({
-      animate: true
-    }, options);
+  rfn.fitGraph = function(){
+    var self = this;
+    var container = cy.container();
 
-    var l = cy.makeLayout({
-      name: 'preset',
-      fit: !options.animate,
-      padding: defaultPadding
-    });
-
-    if( options.animate ){
-      cy.animate({
-        fit: {
-          eles: cy.elements(),
-          padding: defaultPadding
-        }
-      }, {
-        duration: 500
-      });
+    if( self.networksExpanded ){
+      container.classList.add('cy-layouting-shift');
     }
 
-    var p = this.layoutPrepost( l );
+    if( self.query.historyExpanded ){
+      container.classList.add('cy-layouting-shift-history');
+    }
 
-    this.layoutDelay(l);
+    cy.resize();
 
-    return p;
+    cy.animate({
+      fit: {
+        eles: cy.elements(),
+        padding: defaultPadding
+      }
+    }, {
+      duration: 500,
+      complete: function(){
+        var cl = container.classList;
+
+        cl.remove('cy-layouting-shift');
+        cl.remove('cy-layouting-shift-history');
+      }
+    });
+
+
+    return Promise.resolve();
   };
 
 

@@ -1,4 +1,6 @@
-app.factory('$$attributes', 
+'use strict';
+
+app.factory('$$attributes',
 ['$http', 'util',
 function( $http, util ){
 

@@ -1,5 +1,7 @@
+'use strict';
+
 app.factory('$$networks', 
-['$http', 'util', 
+['$http', 'util',
 function( $http, util ){
 
   var cache;

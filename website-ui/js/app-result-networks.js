@@ -1,7 +1,9 @@
+'use strict';
+
 app.factory('Result_networks', 
 [ 'util',
 function( util ){ return function( Result ){
-  
+
   var r = Result;
   var rfn = r.prototype;
 
@@ -32,7 +34,7 @@ function( util ){ return function( Result ){
 
   // toggling the individual nets
 
-  rfn.toggleNetwork = function( rNet ){     
+  rfn.toggleNetwork = function( rNet ){
     var netEnabled = rNet.enabled = !rNet.enabled;
     var rGr = rNet.resultNetworkGroup;
     var rNets = rGr.resultNetworks;
@@ -139,7 +141,7 @@ function( util ){ return function( Result ){
       network: rNet
     });
   };
-  
+
 
 } } ]);
 

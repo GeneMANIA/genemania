@@ -1,3 +1,5 @@
+'use strict';
+
 // if templates not built, then define a dummy module
 (function(){
   var templates;

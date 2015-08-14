@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('Result_selectedinfo',
 [ 'util', 'cy',
 function( util, cy ){ return function( Result ){
@@ -54,7 +56,7 @@ function( util, cy ){ return function( Result ){
 
   rfn.selectInteraction = function( idOrObj ){
     var rIntn = typeof idOrObj === typeof {} ? idOrObj : this.resultInteractionsById[ idOrObj ];
-    
+
     this.openSelectedInfo({
       rIntn: rIntn
     });

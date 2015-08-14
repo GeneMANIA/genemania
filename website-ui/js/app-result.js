@@ -1,8 +1,10 @@
-app.factory('Result',
-[ '$$search', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts', 'Result_selectedinfo', 'Result_functions', 'Result_highlight', 'Result_report',
-function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report ){
+'use strict';
 
-  var rmods = [ Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report ];
+app.factory('Result',
+[ '$$search', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts', 'Result_selectedinfo', 'Result_functions', 'Result_highlight', 'Result_report', 'Result_save',
+function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save ){
+
+  var rmods = [ Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save ];
 
   var Result = window.Result = function( opts ){
     if( !(this instanceof Result) ){
@@ -244,6 +246,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
       for( var j = 0; j < rAttrs.length; j++ ){
         var rAttr = rAttrs[j];
 
+        rAttr.isResultAttribute = true;
         rAttr.color = color;
         rAttr.displayWeight = makeDisplayWeight( rAttr.weight );
         rAttr.enabled = true;
@@ -293,7 +296,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
         someOldEles = true;
       }
 
-      rank = rGene.rank;
+      var rank = rGene.rank;
 
       eles.push( ele = {
         group: 'nodes',
@@ -351,7 +354,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
             source: '' + gene.id,
             target: '' + attr.id,
             group: 'attr',
-            attr: true
+            attr: true,
+            attributeGroupId: self.resultAttributesById[ rAttr.attribute.id ].resultAttributeGroup.attributeGroup.id
           }
         } );
       }

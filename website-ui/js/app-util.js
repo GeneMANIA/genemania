@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('util', [ function(){
   return {
     copy: function ( obj ){

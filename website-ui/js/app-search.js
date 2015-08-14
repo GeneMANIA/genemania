@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('$$search', 
 ['$http', 'util',
 function( $http, util ){
@@ -28,7 +30,7 @@ function( $http, util ){
 
         if( e.lengthComputable ){
           var ratio = e.loaded / e.total;
-          
+
           $$search.progress = Math.round( t100Val * ratio );
 
           if( ratio === 1 ){
@@ -54,7 +56,7 @@ function( $http, util ){
           PubSub.publish('$$search.progress', $$search);
         }, deltaT);
       }
-      
+
       // handle success
       oReq.addEventListener("load", function(e){
         // console.log(e)

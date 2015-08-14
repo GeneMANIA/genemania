@@ -6,6 +6,55 @@
   <div class="graph-button activatable graph-button-row-4" on-tap="result.forceLayout({ randomize: false })"><i class="fa fa-refresh"></i></div>
   <div class="graph-button activatable graph-button-row-5" on-tap="result.fitGraph()"><i class="fa fa-arrows-h fa-rotate-45"></i></div>
 
-  <div class="graph-button activatable graph-button-row-7" on-tap="result.report()"><i class="fa fa-print"></i></div>
+  <div id="graph-button-save" class="graph-button activatable graph-button-row-7"><i class="fa fa-save"></i></div>
+
+  <qtip
+    qtip-target="graph-button-save"
+    qtip-id="save-data"
+    qtip-adjust-method="shift"
+    qtip-adjust-resize="false"
+    qtip-pos-my="left center" qtip-pos-at="right center"
+  >
+    <div class="save-data-option activatable-relative" on-tap="result.report()">
+      <i class="fa fa-file-pdf-o"></i> Report
+    </div>
+
+    <div class="save-data-option activatable-relative" on-tap="result.saveImage()">
+      <i class="fa fa-file-image-o"></i> Network image
+    </div>
+
+    <div class="save-data-option activatable-relative" on-tap="result.saveText()">
+      <i class="fa fa-file-text-o"></i> Network
+    </div>
+
+    <div class="save-data-option activatable-relative" on-tap="result.saveNetworks()">
+      <i class="fa fa-file-text-o"></i> Networks data
+    </div>
+
+    <div class="save-data-option activatable-relative" on-tap="result.saveAttributes()">
+      <i class="fa fa-file-text-o"></i> Attributes data
+    </div>
+
+    <div class="save-data-option activatable-relative" on-tap="result.saveGenes()">
+      <i class="fa fa-file-text-o"></i> Genes data
+    </div>
+
+    <div class="save-data-option activatable-relative" on-tap="result.saveFunctions()">
+      <i class="fa fa-file-text-o"></i> Functions data
+    </div>
+
+    <div class="save-data-option activatable-relative" on-tap="result.saveInteractions()">
+      <i class="fa fa-file-text-o"></i> Interactions data
+    </div>
+
+    <div class="save-data-option activatable-relative" on-tap="result.saveParamsText()">
+      <i class="fa fa-file-text-o"></i> Search parameters as text
+    </div>
+
+    <div class="save-data-option activatable-relative" on-tap="result.saveParamsJson()">
+      <i class="fa fa-file-code-o"></i> Search parameters as JSON
+    </div>
+
+  </qtip>
 
 </div>

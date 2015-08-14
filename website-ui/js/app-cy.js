@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('cy',
 [ 'cyStylesheet',
 function( cyStylesheet ){

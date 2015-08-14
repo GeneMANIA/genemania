@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('$$version', 
 ['$http', 'util',
 function( $http, util ){

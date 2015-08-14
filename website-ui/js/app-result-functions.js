@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('Result_functions',
 [ 'util',
 function( util ){ return function( Result ){

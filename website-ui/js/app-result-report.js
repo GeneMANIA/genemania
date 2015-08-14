@@ -1,7 +1,9 @@
+'use strict';
+
 app.factory('Result_report', 
 [ 'util',
 function( util ){ return function( Result ){
-  
+
   var r = Result;
   var rfn = r.prototype;
 
@@ -10,35 +12,35 @@ function( util ){ return function( Result ){
     var res = this;
     var params = res.parameters;
     var qy = res.query;
-    
+
     var binify = function( arr, binner ){
       var idToBin = {};
       var bins = [];
-      
+
       var getBin = function( id ){
         if( !idToBin[id] ){
           var bin = idToBin[id] = {
             id: id,
             els: []
           };
-          
+
           bins.push( bin );
         }
-        
+
         return idToBin[id];
       };
-      
+
       arr.forEach(function( el ){
         var id = binner( el ).toLowerCase();
         var bin = getBin( id );
-        
+
         bin.els.push( el );
       });
-      
+
       return bins.sort(function( a, b ){
         a = a.id.toLowerCase();
         b = b.id.toLowerCase();
-        
+
         if( a < b ){
           return -1;
         } else if( a > b ){
@@ -48,20 +50,20 @@ function( util ){ return function( Result ){
         }
       });
     };
-    
+
     var make1pxPng = function( color ){
       var canvas = document.createElement('canvas');
       var cxt = canvas.getContext('2d');
-      
+
       canvas.width = 1;
       canvas.height = 1;
-      
+
       cxt.fillStyle = color;
       cxt.fillRect( 0, 0, 1, 1 );
-      
+
       return canvas.toDataURL("image/png");
     };
-    
+
     var legendLayout = function(){
       return {
         hLineWidth: function(i, node) {
@@ -82,13 +84,13 @@ function( util ){ return function( Result ){
         paddingBottom: function(i, node) { return 0; }
       };
     };
-    
+
     var date = new Date();
-    
+
     var docDefinition = {
       content: [
         { text: 'GeneMANIA report', style: 'h1' },
-        
+
         {
           text: [
             'Created on : ' + moment(date).format('D MMMM YYYY HH:mm:ss') + '\n',
@@ -97,7 +99,7 @@ function( util ){ return function( Result ){
           ],
           style: 'subtitle'
         },
-        
+
         {
           image: cy.jpg({
             maxHeight: 1000,
@@ -106,10 +108,10 @@ function( util ){ return function( Result ){
           fit: [500, 400],
           style: 'figure'
         },
-        
+
         {
           columns: [
-                      
+
             {
               width: '50%',
               table: {
@@ -126,7 +128,7 @@ function( util ){ return function( Result ){
               },
               layout: 'noBorders'
             },
-            
+
             {
               width: '50%',
               table: {
@@ -136,7 +138,7 @@ function( util ){ return function( Result ){
                   [ { text: 'Functions', colSpan: 2, style: 'tableh' }, {} ]
                 ].concat( (
                   result.coloringFunctions.length === 0
-                    ? [[ { text: 'N/A', colSpan: 2, style: 'legend' }, {} ]] 
+                    ? [[ { text: 'N/A', colSpan: 2, style: 'legend' }, {} ]]
                     : result.coloringFunctions.map(function( cfn ){
                         return [
                           { image: make1pxPng( cfn.color ), width: 6, height: 6, margin: [0, 4, 0, 4] },
@@ -147,12 +149,12 @@ function( util ){ return function( Result ){
               },
               layout: 'noBorders'
             }
-            
+
           ]
         },
-        
+
         { text: 'Search parameters', style: 'h2', pageBreak: 'before' },
-        
+
         {
           table: {
             headerRows: 0,
@@ -161,29 +163,29 @@ function( util ){ return function( Result ){
             body: [
               [ { text: 'Organism', style: 'tableh' }, params.organism.alias + ' (' + params.organism.description + ')' ],
               [ { text: 'Genes', style: 'tableh' }, params.genes.map(function(g){ return g.symbol; }).join(' , ') ],
-              [ 
-                { text: 'Network weighting', style: 'tableh' }, 
+              [
+                { text: 'Network weighting', style: 'tableh' },
                 config.networks.weightings.filter(function(w){ return w.value === params.weighting; })[0].name
               ],
-              [ 
-                { text: 'Networks', style: 'tableh' }, 
-                
+              [
+                { text: 'Networks', style: 'tableh' },
+
                 binify(
                   params.networks.concat( params.attributeGroups )
                     .map(function(n){ return n.name; })
                     .sort(function(a, b){
                       a = a.toLowerCase();
                       b = b.toLowerCase();
-                      
+
                       if( a < b ){
                         return -1;
                       } else if( a > b ){
                         return 1;
                       }
-                      
+
                       return 0;
                     }),
-                  
+
                   function( name ){
                     return name[0].toLowerCase();
                   }
@@ -205,9 +207,9 @@ function( util ){ return function( Result ){
           },
           layout: 'noBorders'
         },
-        
+
         { text: 'Genes', style: 'h2', pageBreak: 'before' },
-        
+
         {
           table: {
             headerRows: 1,
@@ -228,9 +230,9 @@ function( util ){ return function( Result ){
           },
           layout: 'lightHorizontalLines'
         },
-        
+
         { text: 'Networks', style: 'h2', pageBreak: 'before' },
-        
+
       ].concat( res.resultAllGroups.map(function( rGr ){
         return {
           table: {
@@ -242,7 +244,7 @@ function( util ){ return function( Result ){
             ] ].concat( rGr.children.map(function( rNet ){
               var net = rNet.ele;
               var meta = net.metadata;
-              
+
               return [
                 {
                   table: {
@@ -259,7 +261,7 @@ function( util ){ return function( Result ){
                           ]
                         }
                       ]] : [] )
-                      
+
                       .concat( meta && meta.networkType ? [[{ text: meta.networkType + ' with ' + meta.interactionCountFormatted + ' interactions from ' + meta.sourceName, style: 'netdetails' }]] : [] )
                   },
                   layout: 'noBorders'
@@ -271,9 +273,9 @@ function( util ){ return function( Result ){
           layout: 'lightHorizontalLines'
         };
       }) ).concat([
-        
+
         // { text: 'Functions', style: 'h2', pageBreak: 'before' },
-        // 
+        //
         // {
         //   table: {
         //     headerRows: 1,
@@ -281,7 +283,7 @@ function( util ){ return function( Result ){
         //     body: [
         //       [
         //         { text: 'Function', style: 'tableh' },
-        //         { text: 'FDR', style: 'tableh' }, 
+        //         { text: 'FDR', style: 'tableh' },
         //         { text: 'Coverage', style: 'tableh' }
         //       ]
         //     ].concat( res.resultOntologyCategories.map(function( rOCat ){
@@ -294,9 +296,9 @@ function( util ){ return function( Result ){
         //   },
         //   layout: 'lightHorizontalLines'
         // },
-        // 
+        //
         // { text: 'Interactions', style: 'h2', pageBreak: 'before' },
-        // 
+        //
         // {
         //   table: {
         //     headerRows: 1,
@@ -304,7 +306,7 @@ function( util ){ return function( Result ){
         //     body: [
         //       [
         //         { text: 'Gene 1', style: 'tableh' },
-        //         { text: 'Gene 2', style: 'tableh' }, 
+        //         { text: 'Gene 2', style: 'tableh' },
         //         { text: 'Weight', style: 'tableh' },
         //         { text: 'Network group', style: 'tableh' },
         //         { text: 'Network', style: 'tableh' }
@@ -315,90 +317,90 @@ function( util ){ return function( Result ){
         //         rIntn.toGene.name,
         //         '' + rIntn.weight,
         //         rIntn.resultNetwork.resultNetworkGroup.networkGroup.name,
-        //         rIntn.resultNetwork.network.name            
+        //         rIntn.resultNetwork.network.name
         //       ];
         //     }) )
         //   },
         //   layout: 'lightHorizontalLines'
         // }
-        
+
       ]),
-      
+
       footer: function( currentPage, pageCount ){
         return {
           text: currentPage.toString() + ' of ' + pageCount,
           alignment: 'center'
         }
       },
-      
+
       header: function( currentPage, pageCount ){
         return ''; //{ text: 'simple text', alignment: (currentPage % 2) ? 'left' : 'right' };
       },
-      
+
       defaultStyle: {
         font: 'latin',
         fontSize: 12
       },
-      
+
       styles: {
         h1: {
           fontSize: 36,
           margin: [ 0, 18, 0, 4 ]
         },
-        
+
         subtitle: {
           fontSize: 8,
           margin: [ 0, 0, 0, 8 ]
         },
-        
+
         h2: {
           fontSize: 24,
           margin: [ 0, 12, 0, 6 ]
         },
-        
+
         tableh: {
           bold: true
         },
-        
+
         tablehnum: {
           bold: true,
           alignment: 'right'
         },
-        
+
         tablenum: {
           alignment: 'right'
         },
-        
+
         figure: {
           alignment: 'center'
         },
-        
+
         legend: {
           fontSize: 8
         },
-        
+
         netdetails: {
           fontSize: 8
         },
-        
+
         netdetailspubname: {
           fontSize: 8,
           italics: true
         },
-        
+
         ref: {
           italics: true
         }
       }
     };
-    
+
     lazyLib().then(function( libs ){
       var pdfMake = libs.pdfMake;
-      
+
       pdfMake.createPdf( docDefinition ).open();
     });
-    
+
   };
-  
+
 
 } } ]);

@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('Query_genes',
 [ 'util',
 function( util ){ return function( Query ){

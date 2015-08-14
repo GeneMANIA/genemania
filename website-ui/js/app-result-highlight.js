@@ -1,3 +1,5 @@
+'use strict';
+
 app.factory('Result_highlight',
 [ 'util',
 function( util ){ return function( Result ){
@@ -51,7 +53,7 @@ function( util ){ return function( Result ){
       hl[ list ] = []; // start empty
 
       for( var i = 0; i < optIds.length; i++ ){
-        id = optIds[i];
+        var id = optIds[i];
 
         hl[ list ].push( id );
 
@@ -69,8 +71,12 @@ function( util ){ return function( Result ){
       addToIdList( opts.interactions, 'interactions' );
     }
 
-    if( opts.attributes ){
-      addToIdList( opts.attributes, 'attributes' );
+    if( opts.attrs ){
+      addToIdList( opts.attrs, 'attrs' );
+    }
+
+    if( opts.attributeGroups ){
+      addToIdList( opts.attributeGroups, 'attributeGroups' );
     }
 
     if( opts.networkGroups ){
@@ -126,8 +132,16 @@ function( util ){ return function( Result ){
       removeFromIdList( opts.interactions, 'interactions' );
     }
 
-    if( opts.attributes ){
-      removeFromIdList( opts.attributes, 'attributes' );
+    if( opts.attrs ){
+      removeFromIdList( opts.attrs, 'attrs' );
+    }
+
+    if( opts.attributeGroups ){
+      removeFromIdList( opts.attributeGroups, 'attributeGroups', function(id){
+        self.resultAttributeGroups.filter(function( rGr ){
+          return rGr.attributeGroup.id === id;
+        })[0].highlighted = false;
+      } );
     }
 
     if( opts.networkGroups ){
@@ -151,7 +165,8 @@ function( util ){ return function( Result ){
     return this.highlights = this.highlights || {
       genes: [],
       interactions: [],
-      attributes: [],
+      attrs: [],
+      attributeGroups: [],
       networkGroups: [],
       networks: []
     };
@@ -220,10 +235,10 @@ function( util ){ return function( Result ){
       //
       // attrs
 
-      if( hl.attributes.length > 0 ){
+      if( hl.attrs.length > 0 ){
         initAllUnhighlighted();
 
-        var nodes = cy.nodes( hl.attributes.map(function(id){ return '#' + id; }).join(', ') );
+        var nodes = cy.nodes( hl.attrs.map(function(id){ return '#' + id; }).join(', ') );
 
         highlight( nodes );
         normlight( nodes.neighborhood() );
@@ -254,6 +269,33 @@ function( util ){ return function( Result ){
         var rGr = rGrs[i];
 
         rGr.highlighted = hasId[ rGr.networkGroup.id ];
+      }
+
+      //
+      // attr groups
+
+      if( hl.attributeGroups.length > 0 ){
+        initAllUnhighlighted();
+
+        var edges = cy.edges( hl.attributeGroups.map(function(id){ return '[attributeGroupId = ' + id + ']'; }).join(', ') );
+
+        highlight( edges );
+        normlight( edges.connectedNodes() );
+
+      }
+
+      var hasId = {};
+      for( var i = 0; i < hl.attributeGroups.length; i++ ){
+        var id = hl.attributeGroups[i];
+
+        hasId[ id ] = true;
+      }
+
+      var rGrs = self.resultAttributeGroups;
+      for( var i = 0; i < rGrs.length; i++ ){
+        var rGr = rGrs[i];
+
+        rGr.highlighted = hasId[ rGr.attributeGroup.id ];
       }
 
       //

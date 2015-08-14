@@ -1,3 +1,5 @@
+'use strict';
+
 // simple api to read and write json "files"
 app.factory('io', [ function(){
 
@@ -27,7 +29,7 @@ app.factory('io', [ function(){
     var self = this;
 
     return new Promise(function( resolve, reject ){
-      if( self.json ){ resolve( self.json ); return; } // used cached val once read in 
+      if( self.json ){ resolve( self.json ); return; } // used cached val once read in
 
       localforage.getItem( self.ns, function( err, jsonStr ){
         if( err ){ reject( err ); }
@@ -64,7 +66,7 @@ app.factory('io', [ function(){
 
     return new Promise(function( resolve, reject ){
       delete self.json;
-      
+
       localforage.removeItem( self.ns, function( err ){
         if( err ){ reject(err); return; }
 

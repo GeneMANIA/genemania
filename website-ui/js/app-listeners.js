@@ -1,3 +1,5 @@
+'use strict';
+
 app.directive('onTap', ['$parse', function ($parse) {
   return function (scope, ele, attr){
 

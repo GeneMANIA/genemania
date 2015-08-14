@@ -1,4 +1,4 @@
-app.factory('Query', 
+app.factory('Query',
 [ '$$organisms', '$$networks', '$$attributes', '$$version', 'util', '$$genes', 'Query_genes', 'Query_history', 'Query_networks', 'Query_attributes', 'Result', 'io',
 function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query_genes, Query_history, Query_networks, Query_attributes, Result, io ){
   var copy = util.copy;
@@ -15,7 +15,7 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
 
   // when all resources are pulled in, the query is ready
   Promise.all([
-    
+
     $$organisms().then(function( orgs ){
       organisms = orgs;
     }),
@@ -31,7 +31,7 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
     $$version().then(function( v ){
       version = v;
     }),
-    
+
     io('organism').read().then(function( org ){
       lastOrgId = org.lastOrgId;
     })
@@ -70,8 +70,8 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
     }
 
     if( params ){ // set from other query
-      
-      self.organism = _.find( self.organisms, function( o ){ 
+
+      self.organism = _.find( self.organisms, function( o ){
         return o.id === params.organismId;
       } );
 
@@ -84,9 +84,14 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
 
       self.weighting = config.networks.defaultWeighting;
     }
-    
-    self.maxGenes = 20;
-    self.maxAttrs = 20;
+
+    if( params ){
+      self.maxGenes = +params.maxGenes;
+      self.maxAttrs = +params.maxAttrs;
+    } else {
+      self.maxGenes = 20;
+      self.maxAttrs = 10;
+    }
 
     self.setOrganism( self.organism, false ); // update org related deps
 
@@ -121,7 +126,7 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
   qfn.weightingGroups = config.networks.weightingGroups; // categorised groups of weightings used in ui
   qfn.$$search = $$search;
 
-  // 
+  //
   // EXPANDING AND COLLAPSING THE QUERY INTERFACE
 
   qfn.expanded = true;
@@ -137,12 +142,12 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
   qfn.toggleExpand = function(){
     qfn.expanded = !qfn.expanded;
   };
-  
+
 
   //
   // ORGANISM
 
-  qfn.setOrganism = function( org, pub ){ 
+  qfn.setOrganism = function( org, pub ){
     var self = this;
 
     this.organism = org;
@@ -180,7 +185,7 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
       group.selectedCount = selCount;
 
       self.updateNetworkGroupSelection( group );
-      
+
     }
 
     self.attributeGroups = copy( attributeGroups[ self.organism.id ] );
@@ -206,10 +211,10 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
     self.updateAttributeGroupsSelection();
 
     var ioo = io('organism');
-    
+
     ioo.read().then(function( orgJson ){
       lastOrgId = orgJson.lastOrgId = org.id;
-      
+
       return ioo.write();
     });
 
@@ -257,7 +262,7 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
 
 
 app.controller('QueryCtrl',
-[ '$scope', 'updateScope', 'Query', 
+[ '$scope', 'updateScope', 'Query',
 function( $scope, updateScope, Query ){
 
   // initialise once whole app is ready
@@ -311,7 +316,7 @@ function( $scope, updateScope, Query ){
   PubSub.subscribe('result.searched', updateScope);
   PubSub.subscribe('result.cancel', updateScope);
   PubSub.subscribe('$$search.progress', updateScope);
-  
+
   $scope.respRestyle = function(){ // allow access to resp restyle inside template
     responsive.restyle();
   };
