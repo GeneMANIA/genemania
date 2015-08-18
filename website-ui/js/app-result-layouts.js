@@ -13,7 +13,33 @@ function( util ){ return function( Result ){
     return b.data('score') - a.data('score');
   };
 
-  rfn.layoutDelay = function( layout ){
+  rfn.layoutResizeCyPre = function(){
+    var self = this;
+    var container = cy.container();
+
+    if( self.networksExpanded ){
+      container.classList.add('cy-layouting-shift');
+    }
+
+    if( self.query.historyExpanded ){
+      container.classList.add('cy-layouting-shift-history');
+    }
+  };
+
+  rfn.layoutResizeCyPost = function(){
+    var self = this;
+    var container = cy.container();
+
+    if( self.networksExpanded ){
+      container.classList.remove('cy-layouting-shift');
+    }
+
+    if( self.query.historyExpanded ){
+      container.classList.remove('cy-layouting-shift-history');
+    }
+  };
+
+  rfn.layoutDelay = function( layout, options ){
     var self = this;
     var container = cy.container();
 
@@ -27,11 +53,11 @@ function( util ){ return function( Result ){
     setTimeout(function(){
       self.cyLayout = layout;
 
-      if( self.networksExpanded ){
+      if( self.networksExpanded && options.resizeCy ){
         container.classList.add('cy-layouting-shift');
       }
 
-      if( self.query.historyExpanded ){
+      if( self.query.historyExpanded && options.resizeCy ){
         container.classList.add('cy-layouting-shift-history');
       }
 
@@ -39,7 +65,7 @@ function( util ){ return function( Result ){
     }, 0);
   };
 
-  rfn.layoutPrepost = function( layout ){
+  rfn.layoutPrepost = function( layout, options ){
     var self = this;
     var container = cy.container();
 
@@ -54,14 +80,17 @@ function( util ){ return function( Result ){
     }).then(function(){
       var cl = container.classList;
 
-      cl.remove('cy-layouting-shift');
-      cl.remove('cy-layouting-shift-history');
+      if( options.resizeCy ){
+        cl.remove('cy-layouting-shift');
+        cl.remove('cy-layouting-shift-history');
+      }
     }).cancellable();
   };
 
   rfn.circleLayout = function(options){
     options = $.extend({
-      animate: true
+      animate: true,
+      resizeCy: true
     }, options);
 
     var l = cy.makeLayout({
@@ -81,9 +110,9 @@ function( util ){ return function( Result ){
       padding: defaultPadding
     });
 
-    var p = this.layoutPrepost( l );
+    var p = this.layoutPrepost( l, options );
 
-    this.layoutDelay(l);
+    this.layoutDelay(l, options);
 
     return p;
   };
@@ -96,7 +125,8 @@ function( util ){ return function( Result ){
       nodeSpacing: 15,
       lengthFactor: 75,
       maxSimulationTime: 2000,
-      padding: defaultPadding
+      padding: defaultPadding,
+      resizeCy: true
     }, options);
 
     var layoutEles = cy.elements().stdFilter(function( ele ){
@@ -177,6 +207,7 @@ function( util ){ return function( Result ){
 
     var l = layoutEles.makeLayout({
       name: 'cola',
+      fit: options.fit,
       animate: options.animate,
       randomize: options.randomize,
       maxSimulationTime: options.maxSimulationTime,
@@ -184,16 +215,17 @@ function( util ){ return function( Result ){
       padding: defaultPadding
     });
 
-    var p = this.layoutPrepost( l );
+    var p = this.layoutPrepost( l, options );
 
-    this.layoutDelay(l);
+    this.layoutDelay(l, options);
 
     return p;
   };
 
   rfn.linearLayout = function(options){
     options = $.extend({
-      animate: true
+      animate: true,
+      resizeCy: true
     }, options);
 
     var l = cy.makeLayout({
@@ -210,44 +242,55 @@ function( util ){ return function( Result ){
       padding: defaultPadding
     });
 
-    var p = this.layoutPrepost( l );
+    var p = this.layoutPrepost( l, options );
 
-    this.layoutDelay(l);
+    this.layoutDelay(l, options);
 
     return p;
   };
 
-  rfn.fitGraph = function(){
+  rfn.fitGraph = function(options){
+    options = $.extend({
+      duration: 500,
+      resizeCy: true
+    }, options);
+
     var self = this;
     var container = cy.container();
 
-    if( self.networksExpanded ){
+    if( self.networksExpanded && options.resizeCy ){
       container.classList.add('cy-layouting-shift');
     }
 
-    if( self.query.historyExpanded ){
+    if( self.query.historyExpanded && options.resizeCy ){
       container.classList.add('cy-layouting-shift-history');
     }
 
-    cy.resize();
-
-    cy.animate({
-      fit: {
-        eles: cy.elements(),
-        padding: defaultPadding
+    return new Promise(function( resolve ){
+      if( options.resizeCy ){
+        cy.resize();
       }
-    }, {
-      duration: 500,
-      complete: function(){
-        var cl = container.classList;
 
-        cl.remove('cy-layouting-shift');
-        cl.remove('cy-layouting-shift-history');
-      }
+      cy.animate({
+        fit: {
+          eles: cy.elements(),
+          padding: defaultPadding
+        }
+      }, {
+        duration: options.duration,
+        complete: function(){
+          var cl = container.classList;
+
+          if( options.resizeCy ){
+            cl.remove('cy-layouting-shift');
+            cl.remove('cy-layouting-shift-history');
+          }
+
+          resolve();
+        }
+      });
     });
 
-
-    return Promise.resolve();
   };
 
 

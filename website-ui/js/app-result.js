@@ -277,7 +277,7 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     var id2AttrEle = {};
 
     cy.startBatch();
-    var oldEles = cy.elements().remove();
+    var oldEles = cy.elements();
     var oldElesById = {};
     var someOldEles = false;
 
@@ -366,6 +366,8 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
       var rGr = self.resultNetworkGroups[i];
       var gr = rGr.networkGroup;
       var rNets = rGr.resultNetworks;
+      var nodePairs = {}; // per network group
+      var pairIds = [];
 
       for( var j = 0; j < rNets.length; j++ ){
         var rNet = rNets[j];
@@ -374,12 +376,15 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
         for( var k = 0; k < rIntns.length; k++ ){
           var rIntn = rIntns[k];
           var ele;
+          var src = rIntn.fromGene.gene.id;
+          var tgt = rIntn.toGene.gene.id;
 
           eles.push( ele = {
             group: 'edges',
             data: {
-              source: '' + rIntn.fromGene.gene.id,
-              target: '' + rIntn.toGene.gene.id,
+              id: 'intn-' + rIntn.id,
+              source: src,
+              target: tgt,
               weight: rIntn.interaction.weight,
               group: gr.code,
               networkId: rNet.network.id,
@@ -388,10 +393,57 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
               rIntnId: rIntn.id
             }
           } );
-        }
-      }
-    }
 
+          continue; // disable metaintn
+
+          var pairId = src < tgt ? (src + '$' + tgt) : (tgt + '$' + src);
+
+          var pair = nodePairs[pairId];
+          if( !pair ){
+            pair = nodePairs[pairId] = [];
+            pairIds.push( pairId );
+          }
+
+          pair.push( ele );
+        } // intns
+      } // nets
+
+      // create metainteractions to reduce total number of edges
+      for( var j = 0; j < pairIds.length; j++ ){ break; // disabled
+        var pairId = pairIds[j];
+        var pairs = nodePairs[ pairId ];
+
+        if( pairs.length > 1 ){
+          var pairEle;
+
+          eles.push( pairEle = {
+            group: 'edges',
+            data: {
+              id: 'metaintn-' + pairId,
+              source: pairs[0].data.source,
+              target: pairs[0].data.target,
+              weight: pairs.reduce(function( currWeight, ele ){
+                return currWeight + ele.data.weight;
+              }, 0),
+              group: pairs[0].data.group,
+              networkGroupId: pairs[0].data.networkGroupId,
+              metaintn: true,
+              edgeIds: pairs.map(function( ele ){
+                return ele.data.id;
+              })
+            }
+          } );
+
+          pairs.forEach(function( ele ){
+            ele.metaId = pairEle.data.id;
+            ele.classes = 'collapsed metaintn-child';
+          });
+        }
+
+      } // pair ids
+    } // grs
+
+    oldEles.remove();
     cy.add( eles );
 
     // normalise scores
@@ -412,9 +464,50 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     var $list = $('#network-list');
     var container = cy.container();
 
+    var lockedNodes = nodes.filter('[?oldEle][?query]').lock();
+
+    // cy.pon('layoutready').then(function(){
+    //   lockedNodes.unlock();
+    // });
+
+    self.layoutResizeCyPre();
+
     return self.forceLayout({
-      animate: false,
-      randomize: !someOldEles
+      animate: someOldEles,
+      fit: !someOldEles,
+      randomize: !someOldEles,
+      resizeCy: false
+    }).then(function(){
+      lockedNodes.unlock();
+
+      if( someOldEles ){
+
+        var delay = function( l ){
+          return new Promise(function( resolve ){
+            setTimeout(resolve, l);
+          });
+        };
+
+        return delay(25).then(function(){
+          return self.fitGraph({
+            duration: 250,
+            resizeCy: false
+          });
+        }).then(function(){
+          return delay(25);
+        }).then(function(){
+          return self.forceLayout({
+            animate: true,
+            fit: true,
+            randomize: false,
+            maxSimulationTime: 1000,
+            resizeCy: false
+          });
+        });
+
+      }
+    }).then(function(){
+      self.layoutResizeCyPost();
     });
 
   };

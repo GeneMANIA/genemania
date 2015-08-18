@@ -108,7 +108,7 @@ function( util ){ return function( Result ){
       } else {
 
         for( var i = 0; i < optIds.length; i++ ){
-          id = optIds[i];
+          var id = optIds[i];
 
           removeId[ id ] = true;
 
@@ -265,11 +265,11 @@ function( util ){ return function( Result ){
       }
 
       var rGrs = self.resultNetworkGroups;
-      for( var i = 0; i < rGrs.length; i++ ){
+      if( rGrs ){ for( var i = 0; i < rGrs.length; i++ ){
         var rGr = rGrs[i];
 
         rGr.highlighted = hasId[ rGr.networkGroup.id ];
-      }
+      } }
 
       //
       // attr groups
@@ -292,11 +292,11 @@ function( util ){ return function( Result ){
       }
 
       var rGrs = self.resultAttributeGroups;
-      for( var i = 0; i < rGrs.length; i++ ){
+      if( rGrs ){ for( var i = 0; i < rGrs.length; i++ ){
         var rGr = rGrs[i];
 
         rGr.highlighted = hasId[ rGr.attributeGroup.id ];
-      }
+      } }
 
       //
       // networks
@@ -318,11 +318,11 @@ function( util ){ return function( Result ){
       }
 
       var rNets = self.resultNetworks;
-      for( var i = 0; i < rNets.length; i++ ){
+      if( rNets ){ for( var i = 0; i < rNets.length; i++ ){
         var rNet = rNets[i];
 
         rNet.highlighted = hasId[ rNet.network.id ];
-      }
+      } }
 
       //
       // apply highlights

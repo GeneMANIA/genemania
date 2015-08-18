@@ -75,7 +75,7 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
         return o.id === params.organismId;
       } );
 
-      self.weighting = params.weighting;
+      self.weighting = config.networks.weightings[ params.weighting ];
 
     } else { // set defaults
       self.organism = _.find( self.organisms, function( o ){ // default org is human or last used org

@@ -123,6 +123,10 @@
           'vertical-align': 'middle',
           'display': 'table-cell'
         });
+        
+        if( command.disabled ){
+          $content.addClass('cxtmenu-disabled');
+        }
 
         $parent.append( $item );
         $item.append( $content );
@@ -372,6 +376,10 @@
 
               var inThisCommand = theta1 <= theta && theta <= theta2
                 || theta1 <= theta + 2*Math.PI && theta + 2*Math.PI <= theta2;
+                
+              if( command.disabled ){
+                inThisCommand = false;
+              }
 
               if( inThisCommand ){
                 // console.log('in command ' + i)
