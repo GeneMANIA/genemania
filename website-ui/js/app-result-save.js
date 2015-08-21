@@ -17,6 +17,7 @@ function( util ){ return function( Result ){
 
     pom.setAttribute('href', content);
     pom.setAttribute('download', filename);
+    pom.setAttribute('target', '_blank');
 
     if( document.createEvent ){
       var event = document.createEvent('MouseEvents');
