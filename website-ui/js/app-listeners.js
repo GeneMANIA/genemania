@@ -122,6 +122,18 @@ app.directive('onHoverover', ['$parse', function ($parse) {
   return function (scope, $ele, attr){
 
     var handler = $parse(attr.onHoverover);
+    var scrolling = true;
+    var scrollTimout;
+
+    $ele.parents().on('scroll', function(evt){
+      clearTimeout(scrollTimout);
+
+      scrolling = true;
+
+      scrollTimout = setTimeout(function(){
+        scrolling = false;
+      }, 100);
+    });
 
     $ele[0].addEventListener('mouseenter', function(evt){
       handler(scope, { $event: evt });
