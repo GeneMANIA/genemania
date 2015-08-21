@@ -19,6 +19,8 @@ function( cyStylesheet ){
     return edgeIds.map(function(id){ return '#' + id; }).join(', ')
   };
 
+  var hoverTimeout;
+
   var debounceRate = 16;
 
   // interacting with the graph should close the genes box
@@ -71,11 +73,11 @@ function( cyStylesheet ){
       }
     })
 
-    .on('taphold', '[?gene]', function(){
+    .on('taphold hoverover', '[?gene]', function(){
       result.rateLimitedHighlight({ genes: [ this.data('idInt') ] })
     })
 
-    .on('tapend free', '[?gene]', _.debounce( function(){
+    .on('tapend drag hoverout', '[?gene]', _.debounce( function(){
       result.rateLimitedUnhighlight({ genes: [ this.data('idInt') ] })
     }, debounceRate ) )
 
@@ -87,11 +89,11 @@ function( cyStylesheet ){
     //   result.rateLimitedUnhighlight({ interactions: [ this.data('rIntnId') ] })
     // }, debounceRate ) )
 
-    .on('taphold', '[?attr]', function(){
+    .on('taphold hoverover', '[?attr]', function(){
       result.rateLimitedHighlight({ attrs: [ this.data('id') ] })
     })
 
-    .on('tapend free', '[?attr]', _.debounce( function(){
+    .on('tapend drag hoverout', '[?attr]', _.debounce( function(){
       result.rateLimitedUnhighlight({ attrs: [ this.data('id') ] })
     }, debounceRate ) )
 
@@ -106,6 +108,24 @@ function( cyStylesheet ){
     //
     //   result.rateLimitedUnhighlight({ attrs: [ attrNode.data('id') ] })
     // }, debounceRate ) )
+
+    .on('mouseover', '[?gene], [?attr]', function(){
+      var ele = this;
+
+      hoverTimeout = setTimeout(function(){
+        ele.trigger('hoverover');
+      }, 500);
+    })
+
+    .on('mousedown', '[?gene], [?attr]', function(){
+      clearTimeout( hoverTimeout );
+    })
+
+    .on('mouseout', '[?gene], [?attr]', function(){
+      clearTimeout( hoverTimeout );
+
+      this.trigger('hoverout');
+    })
   ;
 
   var menuCommands = function( opts ){
