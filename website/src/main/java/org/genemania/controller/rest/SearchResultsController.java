@@ -69,11 +69,12 @@ public class SearchResultsController {
 		private Integer attrThreshold = 10;
 		private Long[] networks;
 		private Long[] attrGroups;
+		private String sessionId = null;
 
-		public SearchRequest(){
+		public SearchRequest() {
 			super();
 		}
-		
+
 		public Long getOrganism() {
 			return organism;
 		}
@@ -81,7 +82,7 @@ public class SearchResultsController {
 		public void setOrganismFromLong(Long organism) {
 			this.organism = organism;
 		}
-		
+
 		public void setOrganism(Integer organism) {
 			this.organism = organism.longValue();
 		}
@@ -149,11 +150,11 @@ public class SearchResultsController {
 		public void setNetworksFromString(String s) {
 			String[] idStrs = s.split("\\s*,\\s*");
 			Long[] ids = new Long[idStrs.length];
-			
-			for( int i = 0; i < idStrs.length; i++ ){
+
+			for (int i = 0; i < idStrs.length; i++) {
 				ids[i] = Long.parseLong(idStrs[i]);
 			}
-			
+
 			this.networks = ids;
 		}
 
@@ -168,19 +169,27 @@ public class SearchResultsController {
 		public void setAttrGroupsFromString(String s) {
 			String[] idStrs = s.split("\\s*,\\s*");
 			Long[] ids = new Long[idStrs.length];
-			
-			for( int i = 0; i < idStrs.length; i++ ){
+
+			for (int i = 0; i < idStrs.length; i++) {
 				ids[i] = Long.parseLong(idStrs[i]);
 			}
-			
+
 			this.attrGroups = ids;
 		}
-		
-		public boolean assertParamsSet() throws ApplicationException{
+
+		public String getSessionId() {
+			return sessionId;
+		}
+
+		public void setSessionId(String sessionId) {
+			this.sessionId = sessionId;
+		}
+
+		public boolean assertParamsSet() throws ApplicationException {
 			if (this.genes == null) {
 				throw new ApplicationException("`genes` not set");
 			}
-			
+
 			return true;
 		}
 
@@ -197,8 +206,7 @@ public class SearchResultsController {
 
 		if (contentType.toLowerCase().contains("application/json")) {
 			try {
-				sReq = httpConverter.getObjectMapper().readValue(
-						req.getInputStream(), SearchRequest.class);
+				sReq = httpConverter.getObjectMapper().readValue(req.getInputStream(), SearchRequest.class);
 			} catch (Exception e) {
 
 			}
@@ -212,14 +220,23 @@ public class SearchResultsController {
 			sReq.setAttrThresholdFromString(req.getParameter("attrThreshold"));
 			sReq.setNetworksFromString(req.getParameter("networks"));
 			sReq.setAttrGroupsFromString(req.getParameter("attrGroups"));
+			sReq.setSessionId(req.getParameter("sessionId"));
 		}
-		
+
 		sReq.assertParamsSet();
-		
+
 		// set up search params
 		//
 		SearchParameters params = new SearchParameters();
-		String sessionId = session.getId();
+
+		String sessionId = sReq.getSessionId();
+
+		if (sessionId == null || sessionId.isEmpty()) {
+			sessionId = session.getId();
+		}
+
+		params.setNamespace(sessionId);
+
 		boolean includeUserNetworks = true;
 
 		// set organism
@@ -230,8 +247,7 @@ public class SearchResultsController {
 			organism = organismService.findOrganismById(organismId);
 			params.setOrganism(organism);
 		} catch (DataStoreException e) {
-			return new SearchResults(e.getMessage(),
-					SearchResultsErrorCode.DATASTORE);
+			return new SearchResults(e.getMessage(), SearchResultsErrorCode.DATASTORE);
 		}
 
 		// set genes
@@ -242,12 +258,10 @@ public class SearchResultsController {
 		List<String> geneLines = Arrays.asList(genesSplit);
 		Collection<Gene> genes;
 		try {
-			genes = geneService.findGenesForOrganism(organismId.intValue(),
-					geneLines);
+			genes = geneService.findGenesForOrganism(organismId.intValue(), geneLines);
 			params.setGenes(genes);
 		} catch (DataStoreException e) {
-			return new SearchResults(e.getMessage(),
-					SearchResultsErrorCode.DATASTORE);
+			return new SearchResults(e.getMessage(), SearchResultsErrorCode.DATASTORE);
 		}
 
 		// set weighting
@@ -256,8 +270,7 @@ public class SearchResultsController {
 		// set gene threshold
 		Integer geneThreshold = sReq.getGeneThreshold();
 		if (geneThreshold < 0) {
-			return new SearchResults("Non-negative gene threshold required",
-					SearchResultsErrorCode.DATASTORE);
+			return new SearchResults("Non-negative gene threshold required", SearchResultsErrorCode.DATASTORE);
 		} else {
 			params.setResultsSize(geneThreshold);
 		}
@@ -265,9 +278,7 @@ public class SearchResultsController {
 		// set attr threshold
 		Integer attrThreshold = sReq.getAttrThreshold();
 		if (attrThreshold < 0) {
-			return new SearchResults(
-					"The attribute threshold must be non-negative",
-					SearchResultsErrorCode.DATASTORE);
+			return new SearchResults("The attribute threshold must be non-negative", SearchResultsErrorCode.DATASTORE);
 		} else {
 			params.setAttributeResultsSize(attrThreshold);
 		}
@@ -277,17 +288,16 @@ public class SearchResultsController {
 		Collection<InteractionNetwork> networks;
 		try {
 			if (networkIds == null) {
-				networks = networkService.findDefaultNetworksForOrganism(
-						(long) organismId, sessionId, includeUserNetworks);
+				networks = networkService.findDefaultNetworksForOrganism((long) organismId, sessionId,
+						includeUserNetworks);
 			} else {
-				networks = networkService.getNetworks(organismId.intValue(),
-						networkIds, sessionId, includeUserNetworks);
+				networks = networkService.getNetworks(organismId.intValue(), networkIds, sessionId,
+						includeUserNetworks);
 			}
 
 			params.setNetworks(networks);
 		} catch (DataStoreException e) {
-			return new SearchResults(e.getMessage(),
-					SearchResultsErrorCode.DATASTORE);
+			return new SearchResults(e.getMessage(), SearchResultsErrorCode.DATASTORE);
 		}
 
 		// set attrs
@@ -295,17 +305,14 @@ public class SearchResultsController {
 		Collection<AttributeGroup> attrs;
 		try {
 			if (attrGroupIds == null) {
-				attrs = attributeGroupService
-						.findDefaultAttributeGroups(organismId);
+				attrs = attributeGroupService.findDefaultAttributeGroups(organismId);
 			} else {
-				attrs = attributeGroupService.findAttributeGroups(organismId,
-						attrGroupIds);
+				attrs = attributeGroupService.findAttributeGroups(organismId, attrGroupIds);
 			}
 
 			params.setAttributeGroups(attrs);
 		} catch (DataStoreException e) {
-			return new SearchResults(e.getMessage(),
-					SearchResultsErrorCode.DATASTORE);
+			return new SearchResults(e.getMessage(), SearchResultsErrorCode.DATASTORE);
 		}
 
 		//
@@ -322,11 +329,9 @@ public class SearchResultsController {
 		} catch (ApplicationException e) {
 			return new SearchResults(e.getMessage(), SearchResultsErrorCode.APP);
 		} catch (DataStoreException e) {
-			return new SearchResults(e.getMessage(),
-					SearchResultsErrorCode.DATASTORE);
+			return new SearchResults(e.getMessage(), SearchResultsErrorCode.DATASTORE);
 		} catch (NoUserNetworkException e) {
-			return new SearchResults(e.getMessage(),
-					SearchResultsErrorCode.USER_NETWORK);
+			return new SearchResults(e.getMessage(), SearchResultsErrorCode.USER_NETWORK);
 		}
 
 	}
@@ -335,8 +340,7 @@ public class SearchResultsController {
 		return httpConverter;
 	}
 
-	public void setHttpConverter(
-			MappingJacksonHttpMessageConverter httpConverter) {
+	public void setHttpConverter(MappingJacksonHttpMessageConverter httpConverter) {
 		this.httpConverter = httpConverter;
 	}
 
@@ -344,8 +348,7 @@ public class SearchResultsController {
 		return attributeGroupService;
 	}
 
-	public void setAttributeGroupService(
-			AttributeGroupService attributeGroupService) {
+	public void setAttributeGroupService(AttributeGroupService attributeGroupService) {
 		this.attributeGroupService = attributeGroupService;
 	}
 

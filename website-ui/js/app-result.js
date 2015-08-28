@@ -1,8 +1,8 @@
 'use strict';
 
 app.factory('Result',
-[ '$$search', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts', 'Result_selectedinfo', 'Result_functions', 'Result_highlight', 'Result_report', 'Result_save',
-function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save ){
+[ '$$search', '$$user', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts', 'Result_selectedinfo', 'Result_functions', 'Result_highlight', 'Result_report', 'Result_save',
+function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save ){
 
   var rmods = [ Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save ];
 
@@ -92,6 +92,9 @@ function( $$search, cy, cyStylesheet, util, Result_genes, Result_networks, Resul
     }).catch(function( err ){
       self.searching = false;
       self.searchPromise = null;
+      self.error = true;
+
+      PubSub.publish('result.error');
 
       throw err;
     });
@@ -533,5 +536,6 @@ function( $scope, updateScope, cy ){
   }
 
   PubSub.subscribe('result.searched', init);
+  PubSub.subscribe('result.error', updateScope);
 
 } ]);

@@ -118,6 +118,22 @@ app.directive('onEscBlur', ['$parse', function ($parse) {
   };
 }]);
 
+app.directive('onSelectFile', ['$parse', function ($parse) {
+  return function (scope, $ele, attr){
+
+    var handler = $parse(attr.onSelectFile);
+
+    $ele[0].addEventListener('change', function(evt){
+      var $file = $ele[0].files[0];
+
+      if( $file ){
+        handler(scope, { $file: $file });
+      }
+    });
+
+  };
+}]);
+
 app.directive('onHoverover', ['$parse', function ($parse) {
   return function (scope, $ele, attr){
 

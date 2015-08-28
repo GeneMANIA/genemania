@@ -24,6 +24,16 @@
   </span>
 </p>
 
+<p bo-if="net.metadata.invalidInteractions">
+  <span class="query-network-invalid-interactions">
+    <span class="fa fa-warning"></span> Invalid gene symbols:
+
+    <span ng-repeat="intn in net.metadata.invalidInteractions" bindonce>
+      <span bo-text="intn"></span>;
+    </span>
+  </span>
+</p>
+
 <p>
   <span class="query-network-tag" bindonce ng-repeat="tag in net.tags"><span class="fa fa-tag"></span>&nbsp;<span bo-text="tag.nameFormatted"></span></span>
 </p>

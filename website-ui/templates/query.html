@@ -6,7 +6,7 @@
     </div>
 
     <div class="query-item query-button query-expander activatable" on-tap="query.toggleExpand()"><span class="query-expander-icon fa fa-chevron-right"></span></div>
-    
+
     <div class="query-item query-expander-content">
       <div id="query-organism" class="query-item query-button query-organism activatable">
         <span class="query-organism-icon {{query.organism.icon}}"></span>
@@ -74,17 +74,17 @@
 
       <div id="query-more" class="query-item query-button query-more activatable"><span class="fa fa-ellipsis-v"></span></div>
       <qtip qtip-target="query-more" qtip-id="query-more" qtip-adjust-method="shift" qtip-adjust-resize="false" qtip-viewport-target="query-qtip-viewport" class="query-more-content" qtip-class="qtip-no-padding qtip-query-aligned qtip-top-pointing-fix" qtip-scope-id="queryMore" qtip-digest-on-show="true">
-        
+
         <div ng-show="!query.editingAdvanced" class="query-network-groups-header">
 
           <span class="query-network-groups-master-checker" ng-hide="query.showingNetworkSortOptions">
-            <span class="query-network-groups-master-checker-icon activatable-relative" on-tap="query.toggleNetworkCheckOptions()">   
+            <span class="query-network-groups-master-checker-icon activatable-relative" on-tap="query.toggleNetworkCheckOptions()">
               <span ng-if="!query.showingNetworkCheckOptions"><span class="fa fa-check"></span><span class="fa fa-ellipsis-h"></span></span>
               <span ng-if="query.showingNetworkCheckOptions"><span class="fa fa-times"></span></span>
             </span>
 
             <span class="query-network-groups-master-checker-options" ng-show="query.showingNetworkCheckOptions">
-              <span class="fa fa-check"></span> Enable: 
+              <span class="fa fa-check"></span> Enable:
               <a class="query-network-groups-master-checker-option" ng-repeat="opt in query.setNetworkOptions track by $index" bindonce bo-text="opt.name" on-tap="query.setNetworks( opt.name )"></a>
             </span>
           </span>
@@ -99,7 +99,7 @@
               <a class="query-network-groups-sorter-option" ng-repeat="factor in query.networkSortFactors track by $index" bindonce bo-text="factor.name" on-tap="query.sortNetworksBy(factor)" ng-class="{ 'query-network-groups-sorter-option-selected': query.selectedNetworkSortFactor.name === factor.name }"></a>
             </span>
 
-            <span class="query-network-groups-sorter-icon activatable-relative" on-tap="query.toggleNetworkSortOptions()">  
+            <span class="query-network-groups-sorter-icon activatable-relative" on-tap="query.toggleNetworkSortOptions()">
               <span ng-if="!query.showingNetworkSortOptions"><span class="fa fa-sort"></span><span class="fa fa-ellipsis-h"></span></span>
               <span ng-if="query.showingNetworkSortOptions"><span class="fa fa-times"></span></span>
             </span>
@@ -124,7 +124,7 @@
                   <span class="query-network-check activatable-relative" on-tap="query.toggleAttributeGroupSelection( attrGr )"><span class="check check-{{attrGr.selected}}"></span></span>
                   <span class="query-network-expander fa" ng-class="{ 'fa-caret-right': !attrGr.expanded, 'fa-caret-down': attrGr.expanded }"></span>
                   <span class="query-network-name activatable-relative" bo-text="attrGr.name" on-tap-scroll-parent="#query-network-groups" on-tap="query.toggleAttributeGroupExpansion( attrGr )"></span>
-                  
+
                   <div class="query-network-info" ng-if="attrGr.expanded">
                     <div ng-include="'templates/attribute-group-details.html'"></div>
                   </div>
@@ -132,7 +132,7 @@
               </div>
             </div>
 
-            <div class="query-network-group" bindonce ng-repeat="netGr in org.networkGroups track by netGr.id">
+            <div class="query-network-group" bindonce ng-repeat="netGr in org.networkGroups track by netGr.id" bo-attr bo-attr-data-code="netGr.code">
               <span class="query-network-group-check" ng-class="{ 'activatable-relative': netGr.interactionNetworks.length > 0 }" on-tap="query.toggleNetworkGroupSelection( netGr )"><span class="check check-{{netGr.selected}}"></span></span>
               <span class="query-network-group-expander fa" ng-class="{ 'fa-caret-right': !netGr.expanded, 'fa-caret-down': netGr.expanded }"></span>
               <span class="query-network-group-name activatable-relative" bo-text="netGr.name" on-tap-scroll-parent="#query-network-groups" on-tap="query.toggleNetworkGroupExpansion( netGr )"></span>
@@ -147,11 +147,36 @@
                   <span class="query-network-check activatable-relative" on-tap="query.toggleNetworkSelection( net )"><span class="check check-{{net.selected}}"></span></span>
                   <span class="query-network-expander fa" ng-class="{ 'fa-caret-right': !net.expanded, 'fa-caret-down': net.expanded }"></span>
                   <span class="query-network-name activatable-relative" bo-text="net.name" on-tap-scroll-parent="#query-network-groups" on-tap="query.toggleNetworkExpansion( net )"></span>
-                  
-                  <div class="query-network-info" ng-if="net.expanded">
+
+                  <span class="query-network-delete activatable" bo-if="net.uploaded" on-tap="net.removing ? false : query.removeNetwork( net )">
+                    <i ng-show="!net.removing" class="fa fa-times"></i>
+                    <i ng-show="net.removing" class="fa fa-refresh fa-spin"></i>
+                  </span>
+
+                  <div class="query-network-info" on-tap="query.removeNetwork( net )" ng-if="net.expanded">
                     <div ng-include="'templates/network-details.html'"></div>
                   </div>
                 </div>
+              </div>
+
+              <div class="query-network-upload" ng-if="netGr.expanded && netGr.code === 'uploaded'">
+                <span class="query-network-upload-text">
+                  <a class="query-network-upload-link plain-link" ng-show="!query.addingNetwork">
+                    <i class="fa fa-plus"></i>
+                    Upload a network
+                  </a>
+
+                  <span ng-show="query.addingNetwork">
+                    <i class="fa fa-refresh fa-spin"></i>
+                    Uploading network
+                  </span>
+
+                  <div class="query-upload-input-area activatable query-upload-adding-network-{{query.addingNetwork ? true : false}}">
+                    <div class="query-upload-input-area-wrapper">
+                      <input type="file" class="query-upload-input" on-select-file="query.addNetwork( $file )" />
+                    </div>
+                  </div>
+                </span>
               </div>
             </div>
           </div>
@@ -162,12 +187,12 @@
           <div class="query-slider-container">
             <input class="query-slider" type="range" ng-model="query.maxGenes" min="0" max="100" ng-jquery-plugin="{ rangeslider: { polyfill: false } }" change-on-ready />
           </div>
-          
+
           <div class="query-adv-opt-name">Max resultant attributes: {{query.maxAttrs}}</div>
           <div class="query-slider-container">
             <input class="query-slider" type="range" ng-model="query.maxAttrs" min="0" max="100" ng-jquery-plugin="{ rangeslider: { polyfill: false } }" change-on-ready />
           </div>
-          
+
           <div class="query-adv-opt-name">Network weighting</div>
           <div class="query-weighting-group" ng-repeat="wgGr in query.weightingGroups track by $index">
             <div class="query-weighting-group-name" bindonce bo-text="wgGr.name"></div>
@@ -185,7 +210,7 @@
         </div>
 
       </qtip>
-      
+
       <div class="query-item query-button query-submit activatable" on-tap="query.searchOrCancel()">
         <span class="query-search-icon spiral-white fa"></span>
         <span class="query-submit-icon fa fa-search" ng-show="!query.result || !query.result.searchPromise"></span>
@@ -199,6 +224,20 @@
 
   <div id="query-qtip-viewport" class="query-qtip-viewport query-qtip-viewport-splashed-{{query.splashed ? true : false}}"></div>
 
-  <div class="query-searching-overlay" ng-class="{ 'query-searching-overlay-shown': query.result != null && query.result.searchPromise != null }"></div>
+  <div class="query-overlay" ng-class="{ 'query-overlay-shown': query.result != null && query.result.searchPromise != null }"></div>
+
+  <div class="query-overlay" ng-class="{ 'query-overlay-shown': query.result != null && query.result.error }">
+
+    <div class="query-overlay-notification">
+      <div class="query-overlay-notification-icon">
+        <i class="fa fa-warning"></i>
+      </div>
+
+      <div class="query-overlay-notification-text">
+        Your search could not be completed as specified.  Please revise your search and try again.
+      </div>
+    </div>
+
+  </div>
 
 </div>

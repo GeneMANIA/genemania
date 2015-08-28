@@ -193,7 +193,16 @@ var config = {
     meta.firstAuthor = authors[0];
     meta.lastAuthor = authors[ authors.length - 1 ];
 
+    meta.networkType = meta.networkType[0].toUpperCase() + meta.networkType.substr(1);
+
     var mappedSourceName = config.networks.sourceName[ meta.source ];
+
+    if( meta.networkType === 'Uploaded' ){
+      mappedSourceName = 'a file';
+
+      net.uploaded = true;
+    }
+
     meta.sourceName = mappedSourceName ? mappedSourceName : 'unknown';
 
     meta.interactionCountFormatted = numeral( meta.interactionCount ).format('0,0');

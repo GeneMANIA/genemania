@@ -143,6 +143,14 @@
 	margin-left: -@caretOverlap;
 }
 
+.query-network-delete {
+	color: @DELETE_COLOR;
+	padding: 0 0.5em;
+	position: absolute;
+	right: 0;
+	z-index: 9999;
+}
+
 .query-network-group-count {
 	position: absolute;
 	right: 0.25em;
@@ -157,6 +165,62 @@
 	// .transition-duration( 100ms );
 	.animated;
 	.fadeIn;
+}
+
+.query-network-upload {
+	margin-left: 3em;
+
+	// .transition-property( opacity );
+	// .transition-duration( 100ms );
+	.animated;
+	.fadeIn;
+
+}
+
+.query-network-group[data-code="uploaded"] .query-network {
+	.animated;
+	.fadeIn;
+}
+
+.query-network-upload-text {
+	font-size: 0.8em;
+	padding: 0.25em 0.6em;
+	display: block;
+	border-top: 1px solid @SEPARATOR_COLOR;
+	margin-top: 0.25em;
+}
+
+.query-network-upload-link {
+
+}
+
+.query-upload-input {
+	background: red;
+	width: 200%;
+	margin-left: -50%;
+	height: 100%;
+	opacity: 0.001;
+	cursor: pointer !important;
+}
+
+.query-upload-adding-network-true {
+	pointer-events: none;
+}
+
+.query-upload-input-area {
+	position: absolute;
+	height: 1.75em;
+	width: 80%;
+	margin-top: -2em;
+}
+
+.query-upload-input-area-wrapper {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
 }
 
 .query-network-info.ng-hide-remove,

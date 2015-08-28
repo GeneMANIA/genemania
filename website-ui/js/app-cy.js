@@ -12,7 +12,7 @@ function( cyStylesheet ){
     boxSelectionEnabled: false,
     autounselectify: true,
     motionBlur: true,
-    motionBlurOpacity: cytoscape.is.khtmlEtc() ? 0.05 : 0.1
+    motionBlurOpacity: 0.075
   });
 
   var edgeIdsToSelector = function( edgeIds ){

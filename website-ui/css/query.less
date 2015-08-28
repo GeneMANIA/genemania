@@ -247,23 +247,50 @@
 	margin-left: 0.25em;
 }
 
-.query-searching-overlay {
-	position: absolute;
+.query-overlay {
+	position: fixed;
 	left: 0;
 	right: 0;
 	top: 0;
 	bottom: 0;
-	background: #fff;
+	background-color: rgba(255, 255, 255, 0.5);
 	opacity: 0;
-	pointer-events: none;
 	z-index: 9998;
+	pointer-events: none;
 
 	.transition( opacity ease-out 150ms );
 }
 
-.query-searching-overlay-shown {
-	opacity: 0.5;
-	pointer-events: default;
+.query-overlay-shown {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.query-overlay-notification-icon {
+	font-size: 3em;
+	display: block;
+	text-align: center;
+	margin-bottom: 0.25em;
+	margin-top: 0.25em;
+}
+
+.query-overlay-notification-text {
+	font-size: 0.8em;
+}
+
+.query-overlay-notification {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	padding: 2em;
+	width: 10em;
+	height: 10em;
+	margin-left: -7em;
+	margin-top: -7em;
+	z-index: 99999;
+	color: @BG_COLOR;
+	border-radius: 7em;
+	background: @ERROR_COLOR;
 }
 
 .query-slider {

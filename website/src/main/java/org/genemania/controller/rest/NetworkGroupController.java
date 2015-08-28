@@ -36,6 +36,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -63,13 +64,17 @@ public class NetworkGroupController {
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/network_groups/{organismId}")
 	@ResponseBody
-	public Collection<InteractionNetworkGroup> list(
-			@PathVariable Long organismId, HttpSession session)
-			throws DataStoreException {
+	public Collection<InteractionNetworkGroup> list(@PathVariable Long organismId,
+			@RequestParam(value = "session_id", required = false) String sessionId, HttpSession session)
+					throws DataStoreException {
 		logger.debug("Return Network Groups list...");
 
-		Collection<InteractionNetworkGroup> groups = networkGroupService
-				.findNetworkGroupsByOrganism(organismId, session.getId());
+		if (sessionId == null || sessionId.isEmpty()) {
+			sessionId = session.getId();
+		}
+
+		Collection<InteractionNetworkGroup> groups = networkGroupService.findNetworkGroupsByOrganism(organismId,
+				sessionId);
 
 		return groups;
 	}
@@ -77,7 +82,12 @@ public class NetworkGroupController {
 	@RequestMapping(method = RequestMethod.GET, value = "/network_groups")
 	@ResponseBody
 	public Map<Long, Collection<InteractionNetworkGroup>> listAll(
-			HttpSession session) throws DataStoreException {
+			@RequestParam(value = "session_id", required = false) String sessionId, HttpSession session)
+					throws DataStoreException {
+
+		if (sessionId == null || sessionId.isEmpty()) {
+			sessionId = session.getId();
+		}
 
 		Map<Long, Collection<InteractionNetworkGroup>> idToNetworks = new HashMap<Long, Collection<InteractionNetworkGroup>>();
 
@@ -86,8 +96,8 @@ public class NetworkGroupController {
 		for (Organism organism : organisms) {
 			Long organismId = organism.getId();
 
-			Collection<InteractionNetworkGroup> groups = networkGroupService
-					.findNetworkGroupsByOrganism(organismId, session.getId());
+			Collection<InteractionNetworkGroup> groups = networkGroupService.findNetworkGroupsByOrganism(organismId,
+					sessionId);
 
 			idToNetworks.put(organismId, groups);
 		}

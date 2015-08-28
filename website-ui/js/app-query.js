@@ -309,6 +309,10 @@ function( $scope, updateScope, Query ){
   PubSub.subscribe('query.toggleNetworkSortOptions', updateScope);
   PubSub.subscribe('query.sortNetworksBy', updateScope);
   PubSub.subscribe('query.setNetworks', updateScope);
+  PubSub.subscribe('query.removeNetwork', updateScope);
+  PubSub.subscribe('query.removingNetwork', updateScope);
+  PubSub.subscribe('query.addingNetwork', updateScope);
+  PubSub.subscribe('query.addNetwork', updateScope);
 
   PubSub.subscribe('ready', updateScope);
 

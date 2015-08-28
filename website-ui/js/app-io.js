@@ -15,7 +15,7 @@ app.factory('io', [ function(){
     }
 
     if( !(this instanceof io) ){
-      return new io( ns );
+      return new io( ns, defaultJson );
     }
 
     this.ns = ns;

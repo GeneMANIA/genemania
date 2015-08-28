@@ -27,24 +27,25 @@ public class UploadNetworkController {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/upload_network")
 	@ResponseBody
-	public NetworkUploadResponse create(
-			@RequestParam("organism_id") Integer organismId,
-			@RequestParam("file") String file,
-			@RequestParam("file_name") String fileName, HttpSession session) {
+	public NetworkUploadResponse create(@RequestParam("organism_id") Integer organismId,
+			@RequestParam("file") String file, @RequestParam("file_name") String fileName,
+			@RequestParam(value = "session_id", required = false) String sessionId, HttpSession session) {
 
 		NetworkUploadResponse response = new NetworkUploadResponse();
 		InteractionNetwork network = null;
 
+		if (sessionId == null || sessionId.isEmpty()) {
+			sessionId = session.getId();
+		}
+
 		try {
 			InputStream is = new ByteArrayInputStream(file.getBytes("UTF-8"));
 
-			network = uploadNetworkService.upload(fileName, is, organismId,
-					session.getId());
+			network = uploadNetworkService.upload(fileName, is, organismId, sessionId);
 			response.setNetwork(network);
 
 			if (network.getMetadata().getInteractionCount() == 0) {
-				response
-						.setError("No interactions were able to be read in the uploaded network; no recognised genes?");
+				response.setError("No interactions were able to be read in the uploaded network; no recognised genes?");
 			}
 
 		} catch (Exception e) {
@@ -56,14 +57,18 @@ public class UploadNetworkController {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/delete_network")
 	@ResponseBody
-	public NetworkDeleteResponse delete(
-			@RequestParam("organism_id") Integer organismId,
-			@RequestParam("network_id") Long networkId, HttpSession session) {
+	public NetworkDeleteResponse delete(@RequestParam("organism_id") Integer organismId,
+			@RequestParam("network_id") Long networkId,
+			@RequestParam(value = "session_id", required = false) String sessionId, HttpSession session) {
 
 		NetworkDeleteResponse response = new NetworkDeleteResponse();
 
+		if (sessionId == null || sessionId.isEmpty()) {
+			sessionId = session.getId();
+		}
+
 		try {
-			uploadNetworkService.delete(organismId, networkId, session.getId());
+			uploadNetworkService.delete(organismId, networkId, sessionId);
 		} catch (DataStoreException e) {
 			response.setError(e.getMessage());
 		}
@@ -75,8 +80,7 @@ public class UploadNetworkController {
 		return uploadNetworkService;
 	}
 
-	public void setUploadNetworkService(
-			UploadNetworkService uploadNetworkService) {
+	public void setUploadNetworkService(UploadNetworkService uploadNetworkService) {
 		this.uploadNetworkService = uploadNetworkService;
 	}
 

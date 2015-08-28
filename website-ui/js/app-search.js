@@ -1,8 +1,8 @@
 'use strict';
 
-app.factory('$$search', 
-['$http', 'util',
-function( $http, util ){
+app.factory('$$search',
+['$http', 'util', '$$user',
+function( $http, util, $$user ){
 
   var doneTimeout;
   var fakeProgInt;
@@ -15,91 +15,110 @@ function( $http, util ){
   // networks : array of network ids to use in search
   // attrGroups : array of attribute group ids to use in search
   var $$search = window.$$search = function( opts ){
-    return new Promise(function( resolve, reject ){
-      var oReq = $$search.request = new XMLHttpRequest();
-      var tStart = Date.now();
-      var t100;
-      var t100Val = 1.5;
-      var deltaT = 100;
+    return $$user.read().then(function( user ){
+      var sessionId = user.localId;
 
-      // handle progress
-      clearTimeout( doneTimeout );
-      $$search.progress = 0;
-      oReq.upload.addEventListener("progress", function(e){
-        // console.log(e)
+      opts.sessionId = sessionId;
+    }).then(function(){
+      return new Promise(function( resolve, reject ){
+        var oReq = $$search.request = new XMLHttpRequest();
+        var tStart = Date.now();
+        var t100;
+        var t100Val = 1.5;
+        var deltaT = 100;
 
-        if( e.lengthComputable ){
-          var ratio = e.loaded / e.total;
+        // handle progress
+        clearTimeout( doneTimeout );
+        $$search.progress = 0;
+        oReq.upload.addEventListener("progress", function(e){
+          // console.log(e)
 
-          $$search.progress = Math.round( t100Val * ratio );
+          if( e.lengthComputable ){
+            var ratio = e.loaded / e.total;
 
-          if( ratio === 1 ){
-            t100 = Date.now();
+            $$search.progress = Math.round( t100Val * ratio );
 
-            fakeProgressUntilLoad();
+            if( ratio === 1 ){
+              t100 = Date.now();
+
+              fakeProgressUntilLoad();
+            }
           }
+
+          PubSub.publish('$$search.progress', $$search);
+        }, false);
+
+        function fakeProgressUntilLoad(){
+          fakeProgInt = setInterval(function(){
+            var tNow = Date.now();
+            var t100Duration = t100 - tStart;
+            var duration = tNow - t100;
+            var addedProgress = duration/t100Duration * t100Val;
+
+            $$search.progress = t100Val + addedProgress;
+            $$search.progress = Math.min( $$search.progress, 100 ); // bound to 100
+
+            PubSub.publish('$$search.progress', $$search);
+          }, deltaT);
         }
 
-        PubSub.publish('$$search.progress', $$search);
-      }, false);
+        // handle success
+        oReq.addEventListener("load", function(e){
+          // console.log(e)
+          // console.log(oReq);
+          // console.log('LOAD TIME, T100 TIME');
+          // console.log( Date.now() - tStart, t100 - tStart );
 
-      function fakeProgressUntilLoad(){
-        fakeProgInt = setInterval(function(){
-          var tNow = Date.now();
-          var t100Duration = t100 - tStart;
-          var duration = tNow - t100;
-          var addedProgress = duration/t100Duration * t100Val;
-
-          $$search.progress = t100Val + addedProgress;
-          $$search.progress = Math.min( $$search.progress, 100 ); // bound to 100
+          $$search.progress = 100;
+          clearInterval( fakeProgInt );
 
           PubSub.publish('$$search.progress', $$search);
-        }, deltaT);
-      }
 
-      // handle success
-      oReq.addEventListener("load", function(e){
-        // console.log(e)
-        // console.log(oReq);
-        // console.log('LOAD TIME, T100 TIME');
-        // console.log( Date.now() - tStart, t100 - tStart );
+          clearTimeout( doneTimeout );
+          doneTimeout = setTimeout(function(){
+            $$search.progress = 0;
 
-        $$search.progress = 100;
+            PubSub.publish('$$search.progress', $$search);
+          }, 2*deltaT);
+
+          setTimeout(function(){
+            var resp = oReq.responseText;
+
+            if( !resp ){
+              reject('Empty result response');
+            } else {
+              resolve( JSON.parse( resp ) );
+            }
+          }, deltaT);
+        }, false);
+
+        // handle errors
+        oReq.addEventListener("error", reject, false);
+        oReq.addEventListener("abort", reject, false);
+
+        // send req
+        oReq.open( 'POST', config.service.baseUrl + 'search_results', true );
+        oReq.setRequestHeader('Content-Type', 'application/json');
+        oReq.send( JSON.stringify(opts) );
+      }).cancellable().then(function( result ){
+        if( result.error ){
+          return Promise.reject( result.error );
+        };
+
+        return result;
+      }).catch(function( err ){
+        if( $$search.request ){
+          $$search.request.abort();
+        }
+
+        $$search.progress = 0;
+        clearTimeout( doneTimeout );
         clearInterval( fakeProgInt );
 
-        PubSub.publish('$$search.progress', $$search);
-
-        clearTimeout( doneTimeout );
-        doneTimeout = setTimeout(function(){
-          $$search.progress = 0;
-
-          PubSub.publish('$$search.progress', $$search);
-        }, 2*deltaT);
-
-        setTimeout(function(){
-          resolve( JSON.parse( oReq.responseText ) );
-        }, deltaT);
-      }, false);
-
-      // handle errors
-      oReq.addEventListener("error", reject, false);
-      oReq.addEventListener("abort", reject, false);
-
-      // send req
-      oReq.open( 'POST', config.service.baseUrl + 'search_results', true );
-      oReq.setRequestHeader('Content-Type', 'application/json');
-      oReq.send( JSON.stringify(opts) );
-    }).cancellable().catch(function( err ){
-      if( $$search.request ){
-        $$search.request.abort();
-      }
-
-      $$search.progress = 0;
-      clearTimeout( doneTimeout );
-      clearInterval( fakeProgInt );
-
-      throw err;
+        throw err;
+      });
     });
+
   };
 
   return $$search;

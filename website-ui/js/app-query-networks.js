@@ -1,8 +1,8 @@
 'use strict';
 
-app.factory('Query_networks', 
-[ 'util',
-function( util ){ return function( Query ){
+app.factory('Query_networks',
+[ 'util', '$$networks',
+function( util, $$networks ){ return function( Query ){
 
   var q = Query;
   var qfn = q.prototype;
@@ -214,6 +214,105 @@ function( util ){ return function( Query ){
         query: this
       });
     }
+  };
+
+  qfn.addNetwork = function( file ){
+    var self = this;
+
+    var readFile = function(){
+      return new Promise(function( resolve, reject ){
+        var reader = new FileReader();
+
+        reader.addEventListener('loadend', function(){
+          resolve({
+            name: file.name,
+            contents: reader.result
+          });
+        });
+
+        reader.addEventListener('error', function(){
+          reject('File could not be read');
+        });
+
+        reader.readAsText( file );
+      });
+    };
+
+    self.addingNetwork = true;
+
+    PubSub.publish('query.addingNetwork', this);
+
+    return readFile().then(function( file ){
+      return $$networks.add({
+        organismId: self.organism.id,
+        file: file.contents,
+        fileName: file.name
+      });
+    }).then(function( net ){
+      config.networks.postprocess( net );
+
+      var gr = self.getUploadNetworkGroup();
+
+      // add to group
+      net.group = gr;
+      gr.interactionNetworks.push( net );
+
+      // add to master list
+      self.networks.push( net );
+
+      // add to id map
+      self.networksById[ net.id ] = net;
+
+      // check
+      self.toggleNetworkSelection( net, net.defaultSelected, false );
+
+      self.addingNetwork = false;
+
+      PubSub.publish('query.addNetwork', this);
+    });
+  };
+
+  qfn.getUploadNetworkGroup = function(){
+    return this.networkGroups.filter(function( gr ){
+      return gr.code === 'uploaded';
+    })[0];
+  };
+
+  qfn.removeNetwork = function( net ){
+    var self = this;
+
+    net.removing = true;
+    PubSub.publish('query.removingNetwork', this);
+
+    return $$networks.remove({
+      organismId: self.organism.id,
+      networkId: net.id
+    }).then(function(){
+      var removeFromList = function( list ){
+        for( var i = 0; i < list.length; i++ ){
+          if( list[i].id === net.id ){
+            list.splice( i, 1 );
+            break;
+          }
+        }
+      }
+
+      // uncheck
+      self.toggleNetworkSelection( net, false, false );
+
+      // remove from master list
+      removeFromList( self.networks );
+
+      // remove from id map
+      self.networksById[ net.id ] = null;
+
+      // remove from group
+      var gr = self.getUploadNetworkGroup();
+
+      removeFromList( gr.interactionNetworks );
+
+      PubSub.publish('query.removeNetwork', this);
+    });
   };
 
 
