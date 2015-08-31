@@ -9,7 +9,28 @@
   <div id="network-list" class="network-list networks scrollable scrollable-y networks-query-history-expanded-{{query.historyExpanded ? true : false}} network-list-expanded-{{result.networksExpanded ? true : false}}">
 
     <div class="network-list-title">
-      Networks
+      <span class="network-list-mod-icon network-list-mod-icon-left activatable" on-tap="result.toggleNetworkListEnables()" ng-show="!result.showNetworkListExpands">
+        <i class="fa" ng-class="{ 'fa-check': !result.showNetworkListEnables, 'fa-times': result.showNetworkListEnables }"></i>
+      </span>
+      <span class="network-list-mod-icon network-list-mod-icon-right activatable" on-tap="result.toggleNetworkListExpands()" ng-show="!result.showNetworkListEnables">
+        <i class="fa" ng-class="{ 'fa-caret-down': !result.showNetworkListExpands, 'fa-times': result.showNetworkListExpands }"></i>
+      </span>
+      <span class="network-list-title-text" ng-show="!result.showNetworkListEnables && !result.showNetworkListExpands">
+        Networks
+      </span>
+
+      <span class="network-list-mod-items" ng-show="result.showNetworkListEnables">
+        <i class="fa fa-check"></i> Enable:
+        <a class="network-list-mod-item plain-link" on-tap="result.enableNetworksByEnum('all')">all</a>
+        <a class="network-list-mod-item plain-link" on-tap="result.enableNetworksByEnum('none')">none</a>
+      </span>
+
+      <span class="network-list-mod-items" ng-show="result.showNetworkListExpands">
+        <i class="fa fa-caret-down"></i> Expand:
+        <a class="network-list-mod-item plain-link" on-tap="result.expandNetworksByEnum('all')">all</a>
+        <a class="network-list-mod-item plain-link" on-tap="result.expandNetworksByEnum('top')">top</a>
+        <a class="network-list-mod-item plain-link" on-tap="result.expandNetworksByEnum('none')">none</a>
+      </span>
     </div>
 
     <div class="network-list-loading" ng-if="query.result != null && query.result.searchPromise != null">

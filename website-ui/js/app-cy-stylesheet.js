@@ -20,7 +20,8 @@ function(){
         selector: 'node, edge',
         css: {
           'transition-property': 'opacity',
-          'transition-duration': '250ms'
+          'transition-duration': '200ms',
+          'transition-timing-function': 'ease-in-out-quad'
         }
       },
 

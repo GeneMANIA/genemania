@@ -1,6 +1,6 @@
 'use strict';
 
-app.factory('Result_networks', 
+app.factory('Result_networks',
 [ 'util',
 function( util ){ return function( Result ){
 
@@ -35,7 +35,7 @@ function( util ){ return function( Result ){
   // toggling the individual nets
 
   rfn.toggleNetwork = function( rNet ){
-    var netEnabled = rNet.enabled = !rNet.enabled;
+    var netEnabled = this.getFilterNetworksCache()[ rNet.network.id ] = rNet.enabled = !rNet.enabled;
     var rGr = rNet.resultNetworkGroup;
     var rNets = rGr.resultNetworks;
     var anyEnabled = netEnabled;
@@ -56,7 +56,7 @@ function( util ){ return function( Result ){
       rGr.enabled = false;
     }
 
-    this.filterNetworksFromEnables({ invalidateCache: true });
+    this.filterNetworksFromEnables();
     PubSub.publish('result.toggleNetwork', {
       result: this,
       network: rNet
@@ -72,14 +72,42 @@ function( util ){ return function( Result ){
     for( var i = 0; i < rNets.length; i++ ){
       var rNet = rNets[i];
 
-      rNet.enabled = rGr.enabled;
+      this.getFilterNetworksCache()[ rNet.network.id ] = rNet.enabled = rGr.enabled;
     }
 
-    this.filterNetworksFromEnables({ invalidateCache: true });
+    this.filterNetworksFromEnables();
     PubSub.publish('result.toggleNetworkGroup', {
       result: this,
       networkGroup: rGr
     });
+  };
+
+  rfn.getFilterNetworksCache = function(){
+    if( !this.netEnabled ){
+      this.updateFilterNetworksCache();
+    }
+
+    return this.netEnabled;
+  };
+
+  rfn.updateFilterNetworksCache = function(){
+    var netEnabled = this.netEnabled = {};
+
+    var rGrs = this.resultNetworkGroups;
+    for( var i = 0; i < rGrs.length; i++ ){
+      var rGr = rGrs[i];
+      var rNets = rGr.resultNetworks;
+
+      for( var j = 0; j < rNets.length; j++ ){
+        var rNet = rNets[j];
+        var id = rNet.network.id;
+        var strId = '' + id;
+
+        netEnabled[ strId ] = rNet.enabled;
+      }
+    }
+
+    return netEnabled;
   };
 
   rfn.filterNetworksFromEnables = function( opts ){
@@ -89,21 +117,7 @@ function( util ){ return function( Result ){
     var netEnabled = this.netEnabled;
 
     if( invalCache ){
-      netEnabled = this.netEnabled = {};
-
-      var rGrs = this.resultNetworkGroups;
-      for( var i = 0; i < rGrs.length; i++ ){
-        var rGr = rGrs[i];
-        var rNets = rGr.resultNetworks;
-
-        for( var j = 0; j < rNets.length; j++ ){
-          var rNet = rNets[j];
-          var id = rNet.network.id;
-          var strId = '' + id;
-
-          netEnabled[ strId ] = rNet.enabled;
-        }
-      }
+      netEnabled = this.updateFilterNetworksCache();
     }
 
     var edges = cy.edges();
@@ -140,6 +154,81 @@ function( util ){ return function( Result ){
       result: this,
       network: rNet
     });
+  };
+
+  rfn.toggleNetworkListEnables = function(){
+    this.showNetworkListEnables = !this.showNetworkListEnables;
+  };
+
+  rfn.enableNetworksByEnum = function( e ){
+
+    var update = function( self ){
+      switch( e ){
+        case 'all':
+          self.enabled = true;
+          break;
+        case 'none':
+        default:
+          self.enabled = false;
+      }
+    };
+
+    for( var i = 0; i < this.resultAllGroups.length; i++ ){
+      var gr = this.resultAllGroups[i];
+
+      update(gr);
+
+      if( gr.children ){ for( var j = 0; j < gr.children.length; j++ ){
+        var ch = gr.children[j];
+
+        update(ch);
+      } }
+    }
+
+    this.filterNetworksFromEnables({ invalidateCache: true });
+
+    PubSub.publish('result.enableNetworksByEnum', {
+      result: this
+    });
+
+  };
+
+  rfn.toggleNetworkListExpands = function(){
+    this.showNetworkListExpands = !this.showNetworkListExpands;
+  };
+
+  rfn.expandNetworksByEnum = function( e ){
+
+    var update = function( self ){
+      switch( e ){
+        case 'all':
+          self.expanded = true;
+          break;
+        case 'top':
+          self.expanded = self.children != null;
+          break;
+        case 'none':
+        default:
+          self.expanded = false;
+      }
+    };
+
+    for( var i = 0; i < this.resultAllGroups.length; i++ ){
+      var gr = this.resultAllGroups[i];
+
+      update(gr);
+
+      if( gr.children ){ for( var j = 0; j < gr.children.length; j++ ){
+        var ch = gr.children[j];
+
+        update(ch);
+      } }
+    }
+
+    PubSub.publish('result.expandNetworksByEnum', {
+      result: this
+    });
+
   };
 
 

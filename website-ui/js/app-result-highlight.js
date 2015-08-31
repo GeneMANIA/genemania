@@ -22,7 +22,7 @@ function( util ){ return function( Result ){
         rlhTimeout = null;
 
         fn();
-      }, 500);
+      }, 150);
     }
 
   };

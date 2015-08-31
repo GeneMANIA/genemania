@@ -19,7 +19,7 @@ function( cyStylesheet ){
     return edgeIds.map(function(id){ return '#' + id; }).join(', ')
   };
 
-  var hoverTimeout;
+  var hoverTimeout, hoverEle, hoverIsHold;
 
   var debounceRate = 16;
 
@@ -73,58 +73,52 @@ function( cyStylesheet ){
       }
     })
 
-    .on('taphold hoverover', '[?gene]', function(){
+    .on('hoverover', '[?gene]', function(){
       result.rateLimitedHighlight({ genes: [ this.data('idInt') ] })
     })
 
-    .on('tapend drag hoverout', '[?gene]', _.debounce( function(){
+    .on('hoverout', '[?gene]', _.debounce( function(){
       result.rateLimitedUnhighlight({ genes: [ this.data('idInt') ] })
     }, debounceRate ) )
 
-    // .on('taphold', '[?intn]', function(){
-    //   result.rateLimitedHighlight({ interactions: [ this.data('rIntnId') ] })
-    // })
-    //
-    // .on('tapend free', '[?intn]', _.debounce( function(){
-    //   result.rateLimitedUnhighlight({ interactions: [ this.data('rIntnId') ] })
-    // }, debounceRate ) )
-
-    .on('taphold hoverover', '[?attr]', function(){
+    .on('hoverover', '[?attr]', function(){
       result.rateLimitedHighlight({ attrs: [ this.data('id') ] })
     })
 
-    .on('tapend drag hoverout', '[?attr]', _.debounce( function(){
+    .on('hoverout', '[?attr]', _.debounce( function(){
       result.rateLimitedUnhighlight({ attrs: [ this.data('id') ] })
     }, debounceRate ) )
 
-    // .on('taphold', 'edge[?attr]', function(){
-    //   var attrNode = this.connectedNodes('[?attr]');
-    //
-    //   result.rateLimitedHighlight({ attrs: [ attrNode.data('id') ] })
-    // })
-    //
-    // .on('tapend', 'edge[?attr]', _.debounce( function(){
-    //   var attrNode = this.connectedNodes('[?attr]');
-    //
-    //   result.rateLimitedUnhighlight({ attrs: [ attrNode.data('id') ] })
-    // }, debounceRate ) )
-
-    .on('mouseover', '[?gene], [?attr]', function(){
+    .on('mouseover taphold', 'node', function(e){
       var ele = this;
 
       hoverTimeout = setTimeout(function(){
-        ele.trigger('hoverover');
-      }, 500);
+        if( !ele.same(hoverEle) ){
+          ele.trigger('hoverover');
+          hoverEle = ele;
+          hoverIsHold = e.type === 'taphold';
+        }
+      }, 150);
     })
 
-    .on('mousedown', '[?gene], [?attr]', function(){
-      clearTimeout( hoverTimeout );
-    })
+    .on('mouseout', 'node', function(){
+      if( this.grabbed() ){ return; }
 
-    .on('mouseout', '[?gene], [?attr]', function(){
       clearTimeout( hoverTimeout );
 
       this.trigger('hoverout');
+
+      hoverEle = null;
+    })
+
+    .on('tapend', 'node', function(){
+      if( this.same(hoverEle) && !hoverIsHold ){ return; }
+
+      clearTimeout( hoverTimeout );
+
+      this.trigger('hoverout');
+
+      hoverEle = null;
     })
   ;
 
