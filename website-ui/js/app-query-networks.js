@@ -254,6 +254,10 @@ function( util, $$networks ){ return function( Query ){
       var gr = self.getUploadNetworkGroup();
 
       // add to group
+      if( !gr.interactionNetworks ){
+        gr.interactionNetworks = [];
+      }
+
       net.group = gr;
       gr.interactionNetworks.push( net );
 
