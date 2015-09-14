@@ -7,7 +7,7 @@
         <version>3.4.0</version>
         <relativePath>..</relativePath>
     </parent>
-    
+
 	<groupId>org.genemania</groupId>
 	<artifactId>genemania-website</artifactId>
 	<packaging>war</packaging>
@@ -57,11 +57,11 @@
 		<repository>
 		    <id>codehaus-snapshots</id>
 		    <name>Maven Codehaus snapshot repository</name>
-		    <url>http://snapshots.repository.codehaus.org/</url>
+		    <url>https://repository-master.mulesoft.org/nexus/content/groups/public/</url>
 		</repository>
 		<repository>
 			<id>codehaus</id>
-			<url>http://repository.codehaus.org/</url>
+			<url>https://repository-master.mulesoft.org/nexus/content/groups/public/</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -260,84 +260,6 @@
 
 		<plugins>
 			<plugin>
-				<groupId>com.samaxes.maven</groupId>
-				<artifactId>maven-minify-plugin</artifactId>
-				<version>1.2</version>
-				<executions>
-					<execution>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>minify</goal>
-						</goals>
-						<configuration>
-							<webappSourceDir>${basedir}/target/genemania</webappSourceDir>
-							<webappTargetDir>${basedir}/target/genemania</webappTargetDir>
-							<cssSourceDir>css</cssSourceDir>
-							<jsSourceDir>js</jsSourceDir>
-							<cssSourceIncludes>style.*.css</cssSourceIncludes>
-							<jsSourceIncludes>script.*.js</jsSourceIncludes>
-							<cssFinalFile>style.${version}.release.css</cssFinalFile>
-							<jsFinalFile>script.${version}.release.js</jsFinalFile>
-							<linebreak>1000</linebreak>
-							<nomunge>false</nomunge>
-							<verbose>false</verbose>
-							<preserveAllSemiColons>false</preserveAllSemiColons>
-							<disableOptimizations>false</disableOptimizations>
-							<bufferSize>4096</bufferSize>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>minify</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-                                <property name="debug.extension" value="${version}"/>
-                                <property name="deploy.dir" value="target/genemania"/>
-
-                                <property name="web.src.dir" value="src/main/webapp"/>
-                                <property name="resources.dir" value="src/main/resources"/>
-
-                                <copy todir="${deploy.dir}/i18n">
-                                    <fileset dir="${resources.dir}" includes="**/messages*.properties"/>
-                                </copy>
-
-                                <delete failonerror="false">
-                                    <fileset dir="${deploy.dir}/js" includes="script.*.js"/>
-                                </delete>
-                                <concat destfile="${deploy.dir}/js/script.${debug.extension}.js" append="true">
-                                    <fileset dir="${web.src.dir}/js/plugins" includes="jquery-*.js"/>
-                                    <fileset dir="${web.src.dir}/js/plugins" includes="**/*.js" excludes="jquery-*.js" />
-                                    <fileset dir="${web.src.dir}/js/cytoweb" includes="**/*.js" />
-                                    <fileset dir="${web.src.dir}/js/init" includes="**/*.js" />
-                                    <fileset dir="${web.src.dir}/js/graph" includes="**/*.js" />
-                                    <fileset dir="${web.src.dir}/js" includes="**/*.js" excludes="plugins/**,cytoweb/**,init/**,graph/**" />
-                                </concat>
-                                <delete failonerror="false">
-                                    <fileset dir="${deploy.dir}/css" includes="style.*.css"/>
-                                </delete>
-                                <concat destfile="${deploy.dir}/css/style.${debug.extension}.css" append="true">
-                                    <fileset dir="${web.src.dir}/css" includes="jquery/custom-theme/jquery-ui.custom.css"/>
-                                    <fileset dir="${web.src.dir}/css/jquery" includes="**/*.css" excludes="custom-theme/**" />
-                                    <fileset dir="${web.src.dir}/css" includes="main.css"/>
-                                </concat>
-                                <copy file="${web.src.dir}/css/main.ie.css" tofile="${deploy.dir}/css/main.ie.${debug.extension}.css" />
-                                <copy file="${web.src.dir}/css/noscript.css" tofile="${deploy.dir}/css/noscript.${debug.extension}.css" />
-                            </tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
@@ -352,7 +274,12 @@
 				<configuration>
 					<nonFilteredFileExtensions>
 						<!-- default value contains jpg,jpeg,gif,bmp,png -->
-						<nonFilteredFileExtension>swf</nonFilteredFileExtension>
+						<nonFilteredFileExtension>png</nonFilteredFileExtension>
+						<nonFilteredFileExtension>svg</nonFilteredFileExtension>
+						<nonFilteredFileExtension>eot</nonFilteredFileExtension>
+						<nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+						<nonFilteredFileExtension>woff</nonFilteredFileExtension>
+						<nonFilteredFileExtension>otf</nonFilteredFileExtension>
 						<nonFilteredFileExtension>ico</nonFilteredFileExtension>
 						<nonFilteredFileExtension>pdf</nonFilteredFileExtension>
 						<nonFilteredFileExtension>psd</nonFilteredFileExtension>
@@ -421,28 +348,56 @@
 						<goals>
 							<goal>exec</goal>
 						</goals>
+						<configuration>
+							<executable>runSuites.bat</executable>
+							<workingDirectory>${sahiTestsWorkingDirectory}</workingDirectory>
+							<arguments>
+								<argument>regressionSet1.suite</argument>
+							</arguments>
+						</configuration>
 					</execution>
+					<execution>
+			      <id>copy-webapp-via-gulp</id>
+			      <phase>generate-sources</phase>
+			      <goals>
+			        <goal>exec</goal>
+			      </goals>
+			      <configuration>
+			        <executable>../website/scripts/copy-webapp-via-gulp.sh</executable>
+							<workingDirectory>../website-ui</workingDirectory>
+			      </configuration>
+			    </execution>
 				</executions>
-				<configuration>
-					<executable>runSuites.bat</executable>
-					<workingDirectory>${sahiTestsWorkingDirectory}</workingDirectory>
-					<arguments>
-						<argument>regressionSet1.suite</argument>
-					</arguments>
-				</configuration>
 			</plugin>
-            <plugin>
-                <groupId>com.mycila.maven-license-plugin</groupId>
-                <artifactId>maven-license-plugin</artifactId>
-                <configuration>
-                    <header>src/etc/header.txt</header>
-                    <strictCheck>true</strictCheck>
-                    <includes>
-                        <include>src/**/*.java</include>
-                        <include>src/**/*.py</include>
-                    </includes>
-                </configuration>
-            </plugin>
+			<!-- <plugin>
+			  <artifactId>exec-maven-plugin</artifactId>
+			  <groupId>org.codehaus.mojo</groupId>
+			  <executions>
+			    <execution>
+			      <id>copy-webapp-via-gulp</id>
+			      <phase>generate-sources</phase>
+			      <goals>
+			        <goal>exec</goal>
+			      </goals>
+			      <configuration>
+			        <executable>scripts/copy-webapp-via-gulp.sh</executable>
+							<workingDirectory>./</workingDirectory>
+			      </configuration>
+			    </execution>
+			  </executions>
+			</plugin> -->
+      <plugin>
+          <groupId>com.mycila.maven-license-plugin</groupId>
+          <artifactId>maven-license-plugin</artifactId>
+          <configuration>
+              <header>src/etc/header.txt</header>
+              <strictCheck>true</strictCheck>
+              <includes>
+                  <include>src/**/*.java</include>
+                  <include>src/**/*.py</include>
+              </includes>
+          </configuration>
+      </plugin>
 		</plugins>
 		<resources>
 			<resource>

@@ -1,12 +1,11 @@
 'use strict';
 
 var config = {
-  debug: false,
+  debug: !!window.DEBUG || !!window.location.href.match(/\?debug/),
 
   service: {
-    // baseUrl: 'http://localhost:8080/genemania/json/'
-    // baseUrl: 'http://max.local:8080/genemania/json/'
-    baseUrl: 'http://192.168.81.119:8080/genemania/json/'
+    baseUrl: window.DEBUG_URL || 'http://server4.baderlab.med.utoronto.ca:8080/genemania/json/',
+    baseUrlProd: tomcatContextPath() + '/json/' // assuming that the ui is deployed in tomcat
   },
 
   query: {
@@ -223,6 +222,12 @@ var config = {
   };
 
   if( config.debug ){
-    Promise.longStackTraces(); // enable long stack traces in bluebird for debugging
+    //Promise.longStackTraces(); // enable long stack traces in bluebird for debugging
   }
+
+  if( !config.debug ){
+    config.service.baseUrl = config.service.baseUrlProd;
+  }
+
+  console.log('Init app with debug=' + config.debug);
 })();

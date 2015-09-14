@@ -3,3 +3,4 @@ css-build
 js-build
 cordova
 crosswalk
+js/debug/debug.js

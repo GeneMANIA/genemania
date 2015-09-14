@@ -1,3 +1,0 @@
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %><%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %><%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%><%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %><%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %><%@ page contentType="text/plain" %><% response.setHeader("Content-Disposition", "attachment"); response.setHeader("charset", "UTF-8"); %>Attribute	Gene
-<c:forEach items="${vis.data.edges}" var="edge"><c:if test="${edge != null && edge.attributeId != null}">${edge.sourceName}	${edge.targetName}
-</c:if></c:forEach>

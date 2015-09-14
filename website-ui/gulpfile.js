@@ -54,7 +54,8 @@ var paths = {
   ],
 
   debug: [
-    './js/debug/livereload.js' // for live reloading when source files change
+    './js/debug/livereload.js', // for live reloading when source files change
+    './js/debug/debug.js'
   ],
 
   css: [
@@ -221,16 +222,27 @@ gulp.task('java-deploy-clean', function(next){
   ;
 });
 
-// use website config
-gulp.task('website-config', function(){
-  gulp.src('./js/website/*.js')
-    .pipe( gulp.dest('./js') );
-  ;
-});
-
 // minified website config
 gulp.task('website', function( next ){
-  return runSequence( 'website-config', 'minify', next );
+  return runSequence( 'minify', 'deploy-website-res', 'deploy-website-index', next );
+});
+
+gulp.task('deploy-website-res', function(){
+  return gulp.src([
+    './css-build/**',
+    './fonts/**',
+    './img/**',
+    './js-build/**',
+  ], { base: './' }).pipe( gulp.dest('../website/src/main/webapp/') );
+});
+
+gulp.task('deploy-website-index', function(){
+  return gulp.src([
+    'index.html'
+  ])
+    .pipe( rename('index.jsp') )
+    .pipe( gulp.dest('../website/src/main/webapp/WEB-INF/jsp') )
+  ;
 });
 
 // build minified ui
@@ -246,7 +258,7 @@ gulp.task('build', ['minify'], function(next){
 // update path refs
 gulp.task('htmlrefs', ['js-lazy-unmin'], function(){
   return gulp.src( './index.html' )
-    .pipe(inject( gulp.src(paths.js.concat(paths.debug).concat(paths.cssCombined), { read: false }), {
+    .pipe(inject( gulp.src(paths.debug.concat(paths.js).concat(paths.cssCombined), { read: false }), {
       addRootSlash: false
     } ))
 
@@ -302,7 +314,7 @@ gulp.task('templates', function(){
 gulp.task('js', ['templates'], function(){
 
   return gulp.src( paths.js )
-    .pipe( concat('all.min.js') )
+    .pipe( concat('all.min.js', { newLine: ';\n' }) )
 
     .pipe( uglify() )
 
@@ -314,7 +326,7 @@ gulp.task('js', ['templates'], function(){
 gulp.task('js-lazy-unmin', function(){
 
   return gulp.src( paths.lazyJs )
-    .pipe( concat('lazy.js') )
+    .pipe( concat('lazy.js', { newLine: ';\n' }) )
 
     .pipe( gulp.dest('./js-build') )
   ;

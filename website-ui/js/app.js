@@ -11,7 +11,7 @@
   }
 })();
 
-var app = angular.module('app', ['templates', 'pasvaz.bindonce', 'pragmatic-angular']);
+var app = window.app = angular.module('app', ['templates', 'pasvaz.bindonce', 'pragmatic-angular']);
 
 PubSub.promise = function( topic ){
   return new Promise(function( resolve ){

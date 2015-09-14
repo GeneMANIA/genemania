@@ -157,9 +157,6 @@
 		<property name="statsService" ref="statsService" />
 	</bean>
 
-	<bean id="visualizationDataService" class="org.genemania.service.impl.VisualizationDataServiceImpl">
-	</bean>
-
 
 	<!-- DAO definitions -->
 
