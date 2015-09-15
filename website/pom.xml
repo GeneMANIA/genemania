@@ -363,8 +363,8 @@
 			        <goal>exec</goal>
 			      </goals>
 			      <configuration>
-			        <executable>../website/scripts/copy-webapp-via-gulp.sh</executable>
-							<workingDirectory>../website-ui</workingDirectory>
+			        <executable>scripts/copy-webapp-via-gulp.sh</executable>
+							<!-- <workingDirectory>./</workingDirectory> -->
 			      </configuration>
 			    </execution>
 				</executions>
