@@ -22,7 +22,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>Codehaus Snapshots</id>
-			<url>http://snapshots.repository.codehaus.org/</url>
+			<url>https://repository-master.mulesoft.org/nexus/content/groups/public/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -369,23 +369,6 @@
 			    </execution>
 				</executions>
 			</plugin>
-			<!-- <plugin>
-			  <artifactId>exec-maven-plugin</artifactId>
-			  <groupId>org.codehaus.mojo</groupId>
-			  <executions>
-			    <execution>
-			      <id>copy-webapp-via-gulp</id>
-			      <phase>generate-sources</phase>
-			      <goals>
-			        <goal>exec</goal>
-			      </goals>
-			      <configuration>
-			        <executable>scripts/copy-webapp-via-gulp.sh</executable>
-							<workingDirectory>./</workingDirectory>
-			      </configuration>
-			    </execution>
-			  </executions>
-			</plugin> -->
       <plugin>
           <groupId>com.mycila.maven-license-plugin</groupId>
           <artifactId>maven-license-plugin</artifactId>
