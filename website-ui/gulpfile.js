@@ -224,7 +224,7 @@ gulp.task('java-deploy-clean', function(next){
 
 // minified website config
 gulp.task('website', function( next ){
-  return runSequence( 'minify', 'deploy-website-res', 'deploy-website-index', next );
+  return runSequence( 'minify', 'website-clean', 'deploy-website-res', 'deploy-website-index', next );
 });
 
 gulp.task('deploy-website-res', function(){
@@ -243,6 +243,16 @@ gulp.task('deploy-website-index', function(){
     .pipe( rename('index.jsp') )
     .pipe( gulp.dest('../website/src/main/webapp/WEB-INF/jsp') )
   ;
+});
+
+gulp.task('website-clean', function(){
+  return gulp.src( [
+    'css-build/**',
+    'fonts/**',
+    'img/**',
+    'js-build/**',
+    'WEB-INF/jsp/index.jsp'
+  ].map(function( f ){ return '../website/src/main/webapp/' + f; }) ).pipe( clean({ force: true }) );
 });
 
 // build minified ui
