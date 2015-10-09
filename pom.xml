@@ -16,7 +16,7 @@
         <module>broker</module>
         <module>website</module>
         <module>plugin</module>
-        <module>adminweb</module>
+        <!-- disabled while it's deps error out <module>adminweb</module> -->
     </modules>
 
     <repositories>
