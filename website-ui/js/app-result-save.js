@@ -31,7 +31,7 @@ function( util ){ return function( Result ){
   rfn.saveImage = function(){
     var png = cy.jpg({
       full: true,
-      maxHeight: 4000
+      maxHeight: 2000
     });
 
     download( 'genemania-network.jpg', png );

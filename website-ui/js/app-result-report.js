@@ -110,7 +110,7 @@ function( util ){ return function( Result ){
 
         {
           image: cy.jpg({
-            maxHeight: 1000,
+            maxHeight: 800,
             full: true
           }),
           fit: [500, 400],
