@@ -12,7 +12,9 @@ function( cyStylesheet ){
     boxSelectionEnabled: false,
     autounselectify: true,
     motionBlur: true,
-    motionBlurOpacity: 0.075
+    motionBlurOpacity: 0.075,
+    maxZoom: 10,
+    minZoom: 0.1
   });
 
   var edgeIdsToSelector = function( edgeIds ){
