@@ -15,8 +15,8 @@
         <module>engine</module>
         <module>broker</module>
         <module>website</module>
-        <module>plugin</module>
-        <module>adminweb</module>
+        <!-- disabled b/c it can be built separately (and outside of jenkins) <module>plugin</module> -->
+        <!-- same <module>adminweb</module> -->
     </modules>
 
     <repositories>
