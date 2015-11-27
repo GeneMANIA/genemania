@@ -14,7 +14,7 @@
 	text-align: center;
 	cursor: pointer;
 
-	.transform( translate3d(0, 0, 0) );
+	.transform( translate3d(0, @qHistSize + 1.5*@qHistP, 0) );
 	.transition( transform linear 150ms );
 }
 
@@ -45,7 +45,7 @@
 	white-space: nowrap;
 	color: #fff;
 
-	.transform( translate3d(0, 0, 0) );
+	.transform( translate3d(0, @qHistSize + 1.5*@qHistP, 0) );
 	.transition( transform linear 150ms );
 }
 
@@ -157,8 +157,8 @@
 	margin: 0.25em;
 }
 
-.query-history-expanded-false {
-	.transform( translate3d(0, @qHistSize + 1.5*@qHistP, 0) );
+.query-history-expanded-true {
+	.transform( translate3d(0, 0, 0) );
 }
 
 .query-history-empty {

@@ -110,7 +110,7 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
 
     if( !qfn.historyInitLoaded ){
       io('queries').read().then(function( qJson ){
-        qfn.historyExpanded = true;
+        qfn.historyExpanded = qJson.history.length > 0;
         qfn.historyInitLoaded = true;
 
         PubSub.publish('query.historyLoaded');
