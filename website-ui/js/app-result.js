@@ -309,7 +309,7 @@ function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_network
           oldEle: !!oldEle,
           id: '' + gene.id,
           idInt: gene.id,
-          name: (rGene.typedName || gene.symbol) + (rank !== 0 ? ' (' + rank + ')' : ''),
+          name: rGene.name,
           score: rGene.score,
           query: rGene.queryGene,
           gene: true,
