@@ -35,20 +35,6 @@ PubSub.promise = function( topic ){
       PubSub.publish('ready'); // all app ready
     })
   ;
-
-  var lazyPromise = new Promise(function( resolve ){
-
-    readyPromise.then(function(){ // wait until app all ready before lazy loading libs
-      require(['js-build/lazy.js'], function( lazy ){
-        console.log('Lazy loaded libs pulled in');
-
-        resolve( lazy );
-      });
-    });
-
-  });
-
-  window.lazyLib = function(){ return lazyPromise; };
 })();
 
 // because angularjs depends on this and it's not reliable

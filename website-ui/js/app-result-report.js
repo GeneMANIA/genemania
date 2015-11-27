@@ -1,6 +1,14 @@
 'use strict';
 
-app.factory('Result_report', 
+pdfMake.fonts = {
+  latin: {
+    normal: 'lmroman10-regular.ttf',
+    bold: 'lmroman10-bold.ttf',
+    italics: 'lmroman10-italic.ttf'
+  }
+};
+
+app.factory('Result_report',
 [ 'util',
 function( util ){ return function( Result ){
 
@@ -394,11 +402,7 @@ function( util ){ return function( Result ){
       }
     };
 
-    lazyLib().then(function( libs ){
-      var pdfMake = libs.pdfMake;
-
-      pdfMake.createPdf( docDefinition ).open();
-    });
+    pdfMake.createPdf( docDefinition ).open();
 
   };
 
