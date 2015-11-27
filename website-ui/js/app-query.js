@@ -1,6 +1,6 @@
 app.factory('Query',
-[ '$$organisms', '$$networks', '$$attributes', '$$version', 'util', '$$genes', 'Query_genes', 'Query_history', 'Query_networks', 'Query_attributes', 'Result', 'io',
-function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query_genes, Query_history, Query_networks, Query_attributes, Result, io ){
+[ '$$organisms', '$$networks', '$$attributes', '$$version', '$$stats', 'util', '$$genes', 'Query_genes', 'Query_history', 'Query_networks', 'Query_attributes', 'Result', 'io',
+function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$genes, Query_genes, Query_history, Query_networks, Query_attributes, Result, io ){
   var copy = util.copy;
   var strcmp = util.strcmp;
 
@@ -12,6 +12,7 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
   var attributeGroups;
   var version;
   var lastOrgId;
+  var stats;
 
   // when all resources are pulled in, the query is ready
   Promise.all([
@@ -30,6 +31,10 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
 
     $$version().then(function( v ){
       version = v;
+    }),
+
+    $$stats().then(function( s ){
+      stats = s;
     }),
 
     io('organism').read().then(function( org ){
@@ -61,6 +66,7 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
     self.setNetworkOptions = config.networks.setters;
     self.organisms = copy( organisms );
     self.version = copy( version );
+    self.stats = copy( stats );
 
     var params = opts.params;
     var otherQ = opts.copyParamsFrom;
@@ -110,7 +116,7 @@ function( $$organisms, $$networks, $$attributes, $$version, util, $$genes, Query
 
     if( !qfn.historyInitLoaded ){
       io('queries').read().then(function( qJson ){
-        qfn.historyExpanded = qJson.history.length > 0;
+        qfn.historyExpanded = qJson && qJson.history && qJson.history.length > 0;
         qfn.historyInitLoaded = true;
 
         PubSub.publish('query.historyLoaded');

@@ -58,10 +58,11 @@ app.factory('updateScope', [ '$timeout', '$rootScope', function( $timeout, $root
   return updateScope;
 } ]);
 
-app.controller('SplashCtrl', ['$scope', 'updateScope', function( $scope, updateScope ){
+app.controller('SplashCtrl', ['$scope', 'updateScope', 'Query', function( $scope, updateScope, Query ){
 
   PubSub.promise('query.ready').then(function(){
     $scope.ready = true;
+    $scope.stats = Query.current.stats;
 
     updateScope();
   });
