@@ -1,5 +1,5 @@
 <div ng-controller="SelectedInfoCtrl">
-  <div ng-show="query.result != null && query.result.searchPromise == null" class="selected-info selected-info-open-{{result.selectedInfoOpen ? true : false}} selected-info-highlighted-{{ result.highlights.genes.length > 0 || result.highlights.interactions.length > 0 || result.highlights.attrs.length > 0 }}">
+  <div ng-show="query.result != null && query.result.searchPromise == null" class="selected-info selected-info-open-{{result.selectedInfoOpen ? true : false}}">
 
     <div ng-if="rGene" on-hoverover="result.rateLimitedHighlight({ genes: [ rGene.gene.id ] })" on-hoverout="result.rateLimitedUnhighlight({ genes: [ rGene.gene.id ] })">
       <div ng-include="'templates/selected-info-close.html'"></div>
