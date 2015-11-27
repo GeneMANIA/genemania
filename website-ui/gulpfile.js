@@ -37,6 +37,7 @@ var paths = {
     './js/lib/fastclick.js',
     './js/lib/angular.js',
     './js-build/angular-templates.js', // include templates if built
+    './js/lib/cola.v3.min.js',
     './js/lib/cytoscape.js',
     './js/lib/cytoscape-*.js',
     './js/lib/*.js',

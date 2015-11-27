@@ -16,14 +16,15 @@ function(){
         }
       },
 
-      {
-        selector: 'node, edge',
-        css: {
-          'transition-property': 'opacity',
-          'transition-duration': '200ms',
-          'transition-timing-function': 'ease-in-out-quad'
-        }
-      },
+      // disable this for performance for now...
+      // {
+      //   selector: 'node, edge',
+      //   css: {
+      //     'transition-property': 'opacity',
+      //     'transition-duration': '200ms',
+      //     'transition-timing-function': 'ease-in-out-quad'
+      //   }
+      // },
 
       {
         selector: 'node',
