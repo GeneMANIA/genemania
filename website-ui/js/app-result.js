@@ -30,7 +30,8 @@ function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_network
     }
 
     this.search({
-      store: opts.store || opts.store === undefined ? true : false
+      store: opts.store || opts.store === undefined ? true : false,
+      positions: opts.positions
     });
   };
   var r = Result;
@@ -79,7 +80,7 @@ function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_network
       self.updateGenesData();
       self.updateFunctionsData();
 
-      self.loadGraph().then(function(){
+      self.loadGraph({ positions: opts.positions }).then(function(){
         if( opts.store ){
           q.store();
         }
@@ -274,10 +275,19 @@ function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_network
     rAllGrs.sort( sortByWeight );
   };
 
-  rfn.loadGraph = function(){
+  rfn.loadGraph = function( opts ){
     var self = this;
     var eles = [];
     var id2AttrEle = {};
+
+    var pos = {};
+    if( opts.positions ){
+      for( var i = 0; i < opts.positions.length; i++ ){
+        var p = opts.positions[i];
+
+        pos[ p.id ] = p.position;
+      }
+    }
 
     cy.startBatch();
     var oldEles = cy.elements();
@@ -303,7 +313,7 @@ function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_network
 
       eles.push( ele = {
         group: 'nodes',
-        position: oldEle ? oldEle.position() : { x: -9999, y: -9999 },
+        position: pos[ gene.id ] ? pos[ gene.id ] : oldEle ? oldEle.position() : undefined,
         //locked: !!oldEle,
         data: {
           oldEle: !!oldEle,
@@ -473,45 +483,58 @@ function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_network
     //   lockedNodes.unlock();
     // });
 
-    self.layoutResizeCyPre();
+    var delay = function( l ){
+      return new Promise(function( resolve ){
+        setTimeout(resolve, l);
+      });
+    };
 
-    return self.forceLayout({
-      animate: someOldEles,
-      fit: !someOldEles,
-      randomize: !someOldEles,
-      resizeCy: false
-    }).then(function(){
-      lockedNodes.unlock();
+    if( !opts.positions ){
 
-      if( someOldEles ){
+      self.layoutResizeCyPre();
 
-        var delay = function( l ){
-          return new Promise(function( resolve ){
-            setTimeout(resolve, l);
+      return self.forceLayout({
+        animate: someOldEles,
+        fit: !someOldEles,
+        randomize: !someOldEles,
+        resizeCy: false
+      }).then(function(){
+        lockedNodes.unlock();
+
+        if( someOldEles ){
+
+          return delay(25).then(function(){
+            return self.fitGraph({
+              duration: 250,
+              resizeCy: false
+            });
+          }).then(function(){
+            return delay(25);
+          }).then(function(){
+            return self.forceLayout({
+              animate: true,
+              fit: true,
+              randomize: false,
+              maxSimulationTime: 1000,
+              resizeCy: false
+            });
           });
-        };
 
-        return delay(25).then(function(){
-          return self.fitGraph({
-            duration: 250,
-            resizeCy: false
-          });
-        }).then(function(){
-          return delay(25);
-        }).then(function(){
-          return self.forceLayout({
-            animate: true,
-            fit: true,
-            randomize: false,
-            maxSimulationTime: 1000,
-            resizeCy: false
-          });
-        });
+        }
+      }).then(function(){
+        self.layoutResizeCyPost();
+      });
 
-      }
-    }).then(function(){
-      self.layoutResizeCyPost();
-    });
+    } else {
+      self.layoutResizeCyPre();
+
+      return self.fitGraph({
+        duration: 0,
+        resizeCy: false
+      }).then(function(){
+        self.layoutResizeCyPost();
+      });
+    }
 
   };
 

@@ -37,7 +37,13 @@ function( util, Result, io, cy ){ return function( Query ){
         timestamp: Date.now(),
         genes: genes,
         version: copy( query.version ),
-        organismIcon: query.organism.icon
+        organismIcon: query.organism.icon,
+        positions: cy.nodes().map(function( ele ){
+          return {
+            id: ele.id(),
+            position: ele.position()
+          };
+        })
       });
 
       return ioq.write();
@@ -57,6 +63,7 @@ function( util, Result, io, cy ){ return function( Query ){
 
     var result = newQuery.result = new Result({
       query: newQuery,
+      positions: hEnt.positions,
       store: false
     });
 
