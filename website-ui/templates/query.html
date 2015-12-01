@@ -23,7 +23,7 @@
 
       <div class="query-item query-genes">
         <a class="query-genes-example ng-animate-fade plain-link" ng-show="!query.validatingGenes && !query.genesExpanded || !query.genesText" on-tap="query.setExampleGenes(); query.openGenesArea();">e.g.</a>
-        <span class="query-genes-loader" ng-show="query.validatingGenes"><span class="fa fa-refresh fa-spin"></span></span>
+        <span class="query-genes-loader" ng-show="query.validatingGenesUi"><span class="fa fa-refresh fa-spin"></span></span>
         <span class="query-genes-invalid-count ng-animate-fade" ng-show="!query.validatingGenes && query.genesExpanded && query.genesText && query.invalidGenesCount !== 0">
           <span class="query-genes-invalid-count-number">
             <span ng-bind="query.invalidGenesCount"></span>

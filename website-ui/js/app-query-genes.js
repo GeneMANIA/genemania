@@ -154,6 +154,11 @@ function( util ){ return function( Query ){
       prev.cancel('Cancelling stale gene validation query');
     }
 
+    var uiTimeout = setTimeout(function(){
+      self.validatingGenesUi = true;
+      PubSub.publish('query.validateGenesUiStart', self);
+    }, 250);
+
     if( txt && !txt.match(/^\s+$/) ){
       p = $$genes.validate({
         organism: this.organism.id,
@@ -200,6 +205,11 @@ function( util ){ return function( Query ){
 
     p = p.then(function(){
       self.describeGeneLine();
+
+      clearTimeout( uiTimeout );
+
+      self.validatingGenesUi = false;
+      PubSub.publish('query.validateGenesUiEnd', self);
     });
 
     return self.prevValidateGenes = p;

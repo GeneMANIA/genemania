@@ -285,6 +285,8 @@ function( $scope, updateScope, Query ){
 
   PubSub.subscribe('query.validateGenes', updateScope);
   PubSub.subscribe('query.validateGenesStart', updateScope);
+  PubSub.subscribe('query.validateGenesUiStart', updateScope);
+  PubSub.subscribe('query.validateGenesEnd', updateScope);
   PubSub.subscribe('query.describeGeneLine', updateScope);
 
 
