@@ -303,7 +303,7 @@ function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_network
 
       eles.push( ele = {
         group: 'nodes',
-        position: oldEle ? oldEle.position() : undefined,
+        position: oldEle ? oldEle.position() : { x: -9999, y: -9999 },
         //locked: !!oldEle,
         data: {
           oldEle: !!oldEle,
