@@ -160,6 +160,12 @@ function( util, $$networks ){ return function( Query ){
           this.unselectNetwork( network, false );
         }
       }
+
+      for( var i = 0; i < this.attributeGroups.length; i++ ){
+        var attrGr = this.attributeGroups[i];
+
+        this.toggleAttributeGroupSelection( attrGr, setter( attrGr ), false );
+      }
     }
 
     //this.showingNetworkCheckOptions = false; // because we set
