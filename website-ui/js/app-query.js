@@ -123,6 +123,12 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
       });
     }
 
+    if( !qfn.firstQuery ){
+      qfn.firstQuery = true;
+
+      self.checkLink();
+    }
+
   };
   var q = Query;
   var qfn = q.prototype;
@@ -255,6 +261,87 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
   // results attrs size
   qfn.setMaxAttrs = function( max ){
     this.maxAttrs = max;
+  };
+
+
+  //
+  // LINKS
+  qfn.checkLink = function(){
+    var self = this;
+    var pathname = window.location.pathname;
+    var hash = window.location.hash;
+
+    try {
+
+      if( pathname.match(/link$/) ){
+        var vars = {};
+
+        window.location.search.substring(1).split('&').forEach(function( nameVal ){
+          nameVal = nameVal.split('=');
+
+          vars[ nameVal[0] ] = nameVal[1];
+        });
+
+        if( vars.o ){
+          var org = self.organisms.filter(function( org ){
+            return org.taxonomyId === vars.o;
+          })[0];
+
+          if( org ){
+            self.setOrganism( org );
+          }
+        }
+
+        if( vars.g ){
+          var genes = vars.g.replace(/\|/g, '\n');
+
+          self.setGenes( genes );
+        }
+
+        if( vars.m ){
+          var weighting = self.weightings.filter(function( w ){
+            return w.value.toLowerCase() === vars.m;
+          })[0];
+
+          if( weighting ){
+            self.setWeighting( weighting );
+          }
+        }
+
+        if( vars.r ){
+          self.setMaxGenes( parseInt( vars.r ) );
+        }
+
+        self.search();
+      } else if( pathname.match(/\/search\//) || hash.match(/\/search\//) ){
+        var match = pathname.match(/\/search\/(.+?)\/(.+)/) || hash.match(/\/search\/(.+?)\/(.+)/);
+
+        var sanitize = function( str ){ return ('' + str).toLowerCase().replace(/ /g, '-').replace(/\'/g, ''); };
+
+        var org = self.organisms.filter(function( org ){
+          var matches = function( str ){
+            return sanitize( str ) === match[1];
+          };
+
+          return matches( org.name ) || matches( org.alias ) || matches( org.description ) || matches( org.taxonomyId );
+        })[0];
+
+        if( org ){
+          self.setOrganism( org );
+        }
+
+        var genes = match[2].replace(/\|/g, '\n').replace(/\%7C/g, '\n').replace(/\//g, '\n');
+
+        if( genes ){
+          self.setGenes( genes );
+        }
+
+        self.search();
+      }
+
+    } catch( err ){
+      // just allow user to revise query
+    }
   };
 
   // inject the individual query submodules
