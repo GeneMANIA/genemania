@@ -73,6 +73,8 @@ function( util ){ return function( Result ){
       self.layoutPromise.cancel();
     }
 
+    cy.nodes().removeClass('with-descr');
+
     return self.layoutPromise = new Promise(function(resolve){
       layout.one('layoutstop', function(){
         resolve();
@@ -243,6 +245,8 @@ function( util ){ return function( Result ){
     });
 
     var p = this.layoutPrepost( l, options );
+
+    cy.nodes().addClass('with-descr');
 
     this.layoutDelay(l, options);
 

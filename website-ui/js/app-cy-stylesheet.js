@@ -45,6 +45,21 @@ function(){
       },
 
       {
+        selector: 'node.with-descr',
+        css: {
+          'content': 'data(nameDescr)',
+          'text-halign': 'right'
+        }
+      },
+
+      {
+        selector: 'node[?query].with-descr',
+        css: {
+          'text-halign': 'left'
+        }
+      },
+
+      {
         selector: 'node[?gene]',
         css: ( function(){
           var css = {};

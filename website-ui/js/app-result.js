@@ -320,6 +320,7 @@ function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_network
           id: '' + gene.id,
           idInt: gene.id,
           name: rGene.name,
+          nameDescr: rGene.name + ' : ' + rGene.gene.node.geneData.description,
           score: rGene.score,
           query: rGene.queryGene,
           gene: true,
@@ -356,6 +357,7 @@ function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_network
               id: '' + attr.id,
               idInt: attr.id,
               name: attr.name,
+              nameDescr: attr.name,
               attr: true
             }
           } );
