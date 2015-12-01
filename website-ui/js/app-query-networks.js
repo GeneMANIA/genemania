@@ -187,8 +187,12 @@ function( util, $$networks ){ return function( Query ){
     });
   };
 
-  qfn.sortNetworksBy = function( factor ){
+  qfn.sortNetworksBy = function( factor, autoOpen ){
     var self = this;
+
+    if( autoOpen === undefined ){
+      autoOpen = true;
+    }
 
     factor = _.find(self.networkSortFactors, function(f){
       return f.name === factor || f === factor;
@@ -205,6 +209,22 @@ function( util, $$networks ){ return function( Query ){
         if( nets ){
           nets.sort( factor.sorter );
         }
+      }
+
+      if( self.attributeGroups ){
+        try{
+          self.attributeGroups.sort( factor.sorter );
+        } catch(err){
+          // if attr sorting fails, we don't care since the sorting doesn't apply then
+        }
+      }
+
+      var grsExpd = this.networkGroups.filter(function( gr ){
+        return gr.expanded;
+      }).length !== 0;
+
+      if( autoOpen && !grsExpd ){
+        self.toggleNetworkGroupExpansion( this.networkGroups[0], true );
       }
 
       //this.showingNetworkSortOptions = false; // because we've set it

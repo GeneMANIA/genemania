@@ -101,7 +101,7 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
 
     self.setOrganism( self.organism, false ); // update org related deps
 
-    self.sortNetworksBy('first author');
+    self.sortNetworksBy('first author', false);
 
     if( params ){
       if( opts.version && self.version.dbVersion === opts.version.dbVersion ){
