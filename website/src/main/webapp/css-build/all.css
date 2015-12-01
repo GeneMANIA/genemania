@@ -6249,13 +6249,14 @@ sup {
   top: 0;
   right: 0;
   text-align: center;
-  pointer-events: none;
+  cursor: default;
 }
 .query-network-groups-master-checker,
 .query-network-groups-sorter {
   margin: 0 0.25em;
   position: absolute;
   display: inline-block;
+  z-index: 1;
 }
 .query-network-groups-sorter-icon,
 .query-network-groups-master-checker-icon {
@@ -6318,7 +6319,7 @@ sup {
   display: inline-block;
 }
 .query-network-group-name {
-  width: 18.25em;
+  width: 17.375em;
   display: inline-block;
 }
 .query-network-expander,
