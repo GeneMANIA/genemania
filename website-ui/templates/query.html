@@ -59,9 +59,13 @@
             <span class="fa fa-info-circle"></span> Enter one gene per line
           </span>
           <span ng-if="query.geneLineDescr">
-            <span ng-if="query.geneLineDescr.type === 'VALID' || query.geneLineDescr.type === 'DUPLICATE'">
+            <span ng-if="query.geneLineDescr.type === 'VALID'">
               <span class="bio-helix"></span> {{query.geneLineDescr.name}} <br />
               <span class="query-genes-expander-descr">{{query.geneLineDescr.description}}</span>
+            </span>
+            <span ng-if="query.geneLineDescr.type === 'DUPLICATE'">
+              <span class="bio-helix"></span> {{query.geneLineDescr.name}} <br />
+              <span class="query-genes-expander-descr"><i class="fa fa-copy"></i> This gene is a duplicate of a previous entry in this list.</span>
             </span>
             <span ng-if="query.geneLineDescr.type === 'INVALID'">
               <span class="fa fa-question-circle"></span> {{query.geneLineDescr.name}} <br />
