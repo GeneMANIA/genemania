@@ -2,7 +2,7 @@
 
 app.factory('Result_selectedinfo',
 [ 'util', 'cy',
-function( util, cy ){ return function( Result ){
+function( util, ngCy ){ return function( Result ){
 
   var r = Result;
   var rfn = r.prototype;
@@ -66,7 +66,7 @@ function( util, cy ){ return function( Result ){
 
 app.controller('SelectedInfoCtrl',
 [ '$scope', 'updateScope', 'cy',
-function( $scope, updateScope, cy ){
+function( $scope, updateScope, ngCy ){
 
   function init(){
     $scope.query = Query.current;

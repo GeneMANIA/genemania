@@ -1,6 +1,6 @@
 'use strict';
 
-app.factory('Result_genes', 
+app.factory('Result_genes',
 [ 'util',
 function( util ){ return function( Result ){
 
@@ -50,7 +50,7 @@ function( util ){ return function( Result ){
 
 app.controller('GenesCtrl',
 [ '$scope', 'updateScope', 'cy',
-function( $scope, updateScope, cy ){
+function( $scope, updateScope, ngCy ){
 
   function init(){
     $scope.query = Query.current;

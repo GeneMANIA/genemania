@@ -2,7 +2,7 @@
 
 app.factory('Result',
 [ '$$search', '$$user', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts', 'Result_selectedinfo', 'Result_functions', 'Result_highlight', 'Result_report', 'Result_save',
-function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save ){
+function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save ){
 
   var rmods = [ Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save ];
 
@@ -320,7 +320,7 @@ function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_network
           id: '' + gene.id,
           idInt: gene.id,
           name: rGene.name,
-          nameDescr: rGene.name + ' : ' + rGene.gene.node.geneData.description,
+          nameDescr: rGene.name + '\n' + rGene.gene.node.geneData.description.replace('[Source', '\n[Source'),
           score: rGene.score,
           query: rGene.queryGene,
           gene: true,
@@ -551,7 +551,7 @@ function( $$search, $$user, cy, cyStylesheet, util, Result_genes, Result_network
 
 app.controller('ResultCtrl',
 [ '$scope', 'updateScope', 'cy',
-function( $scope, updateScope, cy ){
+function( $scope, updateScope, ngCy ){
 
   function init(){
     $scope.query = Query.current;

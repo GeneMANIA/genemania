@@ -95,7 +95,7 @@ function( util ){ return function( Result ){
 
 app.controller('FunctionsCtrl',
 [ '$scope', 'updateScope', 'cy',
-function( $scope, updateScope, cy ){
+function( $scope, updateScope, ngCy ){
 
   function init(){
     $scope.query = Query.current;

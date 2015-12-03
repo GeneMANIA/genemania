@@ -1,6 +1,6 @@
 app.factory('Query_history',
 [ 'util', 'Result', 'io', 'cy',
-function( util, Result, io, cy ){ return function( Query ){
+function( util, Result, io, ngCy ){ return function( Query ){
 
   var q = Query;
   var qfn = q.prototype;

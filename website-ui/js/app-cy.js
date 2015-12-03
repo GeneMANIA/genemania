@@ -4,174 +4,194 @@ app.factory('cy',
 [ 'cyStylesheet',
 function( cyStylesheet ){
 
-  var cy = window.cy = cytoscape({
-    container: document.getElementById('cy'),
+  return new Promise(function( resolve ){
 
-    style: cyStylesheet(),
+    var loadCy = function(){
 
-    boxSelectionEnabled: false,
-    autounselectify: true,
-    motionBlur: true,
-    motionBlurOpacity: 0.075,
-    maxZoom: 10,
-    minZoom: 0.1
-  });
+      var cy = window.cy = cytoscape({
+        container: document.getElementById('cy'),
 
-  var edgeIdsToSelector = function( edgeIds ){
-    return edgeIds.map(function(id){ return '#' + id; }).join(', ')
-  };
+        style: cyStylesheet(),
 
-  var hoverTimeout, hoverEle, hoverIsHold;
+        boxSelectionEnabled: false,
+        autounselectify: true,
+        motionBlur: true,
+        motionBlurOpacity: 0.075,
+        maxZoom: 10,
+        minZoom: 0.1
+      });
 
-  var debounceRate = 16;
+      var edgeIdsToSelector = function( edgeIds ){
+        return edgeIds.map(function(id){ return '#' + id; }).join(', ')
+      };
 
-  // interacting with the graph should close the genes box
-  cy
-    .on('tapstart', function(){
-      var qg = document.getElementById('query-genes-textarea');
+      var hoverTimeout, hoverEle, hoverIsHold;
 
-      if( qg && document.activeElement === qg ){
-        qg.blur();
-      }
-    })
+      var debounceRate = 16;
 
-    .on('tap taphold', '[?gene]', function(){
-      query.result.selectGene( this.data('id') );
-    })
+      // interacting with the graph should close the genes box
+      cy
+        .on('tapstart', function(){
+          var qg = document.getElementById('query-genes-textarea');
 
-    .on('tap taphold', '[?attr]', function(){
-      query.result.selectAttribute( this.data('id') );
-    })
+          if( qg && document.activeElement === qg ){
+            qg.blur();
+          }
+        })
 
-    .on('tap', 'edge[?attr]', function(){
-      var attrNode = this.connectedNodes('[?attr]');
+        .on('tap taphold', '[?gene]', function(){
+          query.result.selectGene( this.data('id') );
+        })
 
-      query.result.selectAttribute( attrNode.data('id') );
-    })
+        .on('tap taphold', '[?attr]', function(){
+          query.result.selectAttribute( this.data('id') );
+        })
 
-    .on('tap', 'edge[?intn]', function(){
-      query.result.selectInteraction( this.data('rIntnId') );
-    })
+        .on('tap', 'edge[?attr]', function(){
+          var attrNode = this.connectedNodes('[?attr]');
 
-    .on('tap', 'edge[?metaintn]', function(){
-      var edgeIds = this.data('edgeIds');
+          query.result.selectAttribute( attrNode.data('id') );
+        })
 
-      cy.$( edgeIdsToSelector(edgeIds) ).removeClass('collapsed');
-      this.addClass('collapsed');
-    })
+        .on('tap', 'edge[?intn]', function(){
+          query.result.selectInteraction( this.data('rIntnId') );
+        })
 
-    .on('tap', function(e){
-      if( e.cyTarget === cy ){
-        query.result.closeSelectedInfo();
+        .on('tap', 'edge[?metaintn]', function(){
+          var edgeIds = this.data('edgeIds');
 
-        // var metaedge = cy.$('[?metaintn].collapsed');
-        //
-        // if( metaedge.nonempty() ){
-        //   metaedge.forEach(function( e ){
-        //     e.removeClass('collapsed');
-        //     cy.$( edgeIdsToSelector( e.data('edgeIds') ) ).addClass('collapsed');
-        //   });
-        // }
-      }
-    })
+          cy.$( edgeIdsToSelector(edgeIds) ).removeClass('collapsed');
+          this.addClass('collapsed');
+        })
 
-    .on('hoverover', '[?gene]', function(){
-      result.rateLimitedHighlight({ genes: [ this.data('idInt') ] })
-    })
+        .on('tap', function(e){
+          if( e.cyTarget === cy ){
+            query.result.closeSelectedInfo();
 
-    .on('hoverout', '[?gene]', _.debounce( function(){
-      result.rateLimitedUnhighlight({ genes: [ this.data('idInt') ] })
-    }, debounceRate ) )
+            // var metaedge = cy.$('[?metaintn].collapsed');
+            //
+            // if( metaedge.nonempty() ){
+            //   metaedge.forEach(function( e ){
+            //     e.removeClass('collapsed');
+            //     cy.$( edgeIdsToSelector( e.data('edgeIds') ) ).addClass('collapsed');
+            //   });
+            // }
+          }
+        })
 
-    .on('hoverover', '[?attr]', function(){
-      result.rateLimitedHighlight({ attrs: [ this.data('id') ] })
-    })
+        .on('hoverover', '[?gene]', function(){
+          result.rateLimitedHighlight({ genes: [ this.data('idInt') ] })
+        })
 
-    .on('hoverout', '[?attr]', _.debounce( function(){
-      result.rateLimitedUnhighlight({ attrs: [ this.data('id') ] })
-    }, debounceRate ) )
+        .on('hoverout', '[?gene]', _.debounce( function(){
+          result.rateLimitedUnhighlight({ genes: [ this.data('idInt') ] })
+        }, debounceRate ) )
 
-    .on('mouseover taphold', 'node', function(e){
-      var ele = this;
+        .on('hoverover', '[?attr]', function(){
+          result.rateLimitedHighlight({ attrs: [ this.data('id') ] })
+        })
 
-      hoverTimeout = setTimeout(function(){
-        if( !ele.same(hoverEle) ){
-          ele.trigger('hoverover');
-          hoverEle = ele;
-          hoverIsHold = e.type === 'taphold';
-        }
-      }, 150);
-    })
+        .on('hoverout', '[?attr]', _.debounce( function(){
+          result.rateLimitedUnhighlight({ attrs: [ this.data('id') ] })
+        }, debounceRate ) )
 
-    .on('mouseout', 'node', function(){
-      if( this.grabbed() ){ return; }
+        .on('mouseover taphold', 'node', function(e){
+          var ele = this;
 
-      clearTimeout( hoverTimeout );
+          hoverTimeout = setTimeout(function(){
+            if( !ele.same(hoverEle) ){
+              ele.trigger('hoverover');
+              hoverEle = ele;
+              hoverIsHold = e.type === 'taphold';
+            }
+          }, 150);
+        })
 
-      this.trigger('hoverout');
+        .on('mouseout', 'node', function(){
+          if( this.grabbed() ){ return; }
 
-      hoverEle = null;
-    })
+          clearTimeout( hoverTimeout );
 
-    .on('tapend', 'node', function(){
-      if( this.same(hoverEle) && !hoverIsHold ){ return; }
+          this.trigger('hoverout');
 
-      clearTimeout( hoverTimeout );
+          hoverEle = null;
+        })
 
-      this.trigger('hoverout');
+        .on('tapend', 'node', function(){
+          if( this.same(hoverEle) && !hoverIsHold ){ return; }
 
-      hoverEle = null;
-    })
-  ;
+          clearTimeout( hoverTimeout );
 
-  var menuCommands = function( opts ){
-    opts = opts || {};
+          this.trigger('hoverout');
 
-    var getName = function(n){
-      var id = n.data('idInt');
+          hoverEle = null;
+        })
+      ;
 
-      return result.resultGenesById[ id ].name;
+      var menuCommands = function( opts ){
+        opts = opts || {};
+
+        var getName = function(n){
+          var id = n.data('idInt');
+
+          return result.resultGenesById[ id ].name;
+        };
+
+        return [
+          {
+            content: '<sup><i class="fa fa-plus"></i></sup><i class="fa fa-search"></i>',
+            select: function(){
+              query.addGenes( getName(this) );
+              query.search();
+            },
+            disabled: opts.queryGene
+          },
+
+          {
+            content: '<sup><i class="fa fa-minus"></i></sup><i class="fa fa-search"></i>',
+            select: function(){
+              query.removeGenes( getName(this) );
+              query.search();
+            },
+            disabled: !opts.queryGene
+          },
+
+          {
+            content: '<sup><i class="fa fa-circle"></i></sup><i class="fa fa-search"></i>',
+            select: function(){
+              query.setGenes( getName(this) );
+              query.search();
+            }
+          }
+        ];
+      };
+
+      // cy.cxtmenu({
+      //   selector: 'node[?query]',
+      //   commands: menuCommands({ queryGene: true })
+      // });
+      //
+      // cy.cxtmenu({
+      //   selector: 'node[!query]',
+      //   commands: menuCommands({ queryGene: false })
+      // });
+
+      resolve( cy );
     };
 
-    return [
-      {
-        content: '<sup><i class="fa fa-plus"></i></sup><i class="fa fa-search"></i>',
-        select: function(){
-          query.addGenes( getName(this) );
-          query.search();
-        },
-        disabled: opts.queryGene
-      },
+    switch( document.readyState ){
+      case 'interactive':
+      case 'complete':
+        loadCy();
+        break;
 
-      {
-        content: '<sup><i class="fa fa-minus"></i></sup><i class="fa fa-search"></i>',
-        select: function(){
-          query.removeGenes( getName(this) );
-          query.search();
-        },
-        disabled: !opts.queryGene
-      },
+      case 'loading':
+      default:
+        document.addEventListener('DOMContentLoaded', laodCy);
+    }
 
-      {
-        content: '<sup><i class="fa fa-circle"></i></sup><i class="fa fa-search"></i>',
-        select: function(){
-          query.setGenes( getName(this) );
-          query.search();
-        }
-      }
-    ];
-  };
 
-  // cy.cxtmenu({
-  //   selector: 'node[?query]',
-  //   commands: menuCommands({ queryGene: true })
-  // });
-  //
-  // cy.cxtmenu({
-  //   selector: 'node[!query]',
-  //   commands: menuCommands({ queryGene: false })
-  // });
 
-  return cy;
+  });
 
 }]);
