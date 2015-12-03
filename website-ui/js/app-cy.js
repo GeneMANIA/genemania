@@ -6,7 +6,7 @@ function( cyStylesheet ){
 
   return new Promise(function( resolve ){
 
-    var loadCy = function(){ 
+    var loadCy = function(){
 
       var cy = window.cy = cytoscape({
         container: document.getElementById('cy'),
@@ -18,7 +18,8 @@ function( cyStylesheet ){
         motionBlur: true,
         motionBlurOpacity: 0.075,
         maxZoom: 10,
-        minZoom: 0.1
+        minZoom: 0.1,
+        pixelRatio: 'auto'
       });
 
       var edgeIdsToSelector = function( edgeIds ){
