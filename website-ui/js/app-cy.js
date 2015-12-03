@@ -6,7 +6,7 @@ function( cyStylesheet ){
 
   return new Promise(function( resolve ){
 
-    var loadCy = function(){
+    var loadCy = function(){ 
 
       var cy = window.cy = cytoscape({
         container: document.getElementById('cy'),
@@ -180,18 +180,14 @@ function( cyStylesheet ){
     };
 
     switch( document.readyState ){
-      case 'interactive':
       case 'complete':
         loadCy();
         break;
 
-      case 'loading':
       default:
-        document.addEventListener('DOMContentLoaded', laodCy);
+        window.addEventListener('load', loadCy);
     }
 
-
-
-  });
+  }); // promise
 
 }]);
