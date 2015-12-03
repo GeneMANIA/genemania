@@ -24,8 +24,8 @@ function( $http, util, $$user ){
         var oReq = $$search.request = new XMLHttpRequest();
         var tStart = Date.now();
         var t100;
-        var t100Val = 1.5;
-        var deltaT = 100;
+        var t100Val = 10; // percent (normalised on 0-100) of time it takes to do the initial upload
+        var deltaT = 50;
 
         // handle progress
         clearTimeout( doneTimeout );
@@ -56,7 +56,7 @@ function( $http, util, $$user ){
             var addedProgress = duration/t100Duration * t100Val;
 
             $$search.progress = t100Val + addedProgress;
-            $$search.progress = Math.min( $$search.progress, 100 ); // bound to 100
+            $$search.progress = Math.min( $$search.progress, 90 );
 
             PubSub.publish('$$search.progress', $$search);
           }, deltaT);
@@ -69,9 +69,9 @@ function( $http, util, $$user ){
           // console.log('LOAD TIME, T100 TIME');
           // console.log( Date.now() - tStart, t100 - tStart );
 
-          $$search.progress = 100;
           clearInterval( fakeProgInt );
 
+          $$search.progress = 100;
           PubSub.publish('$$search.progress', $$search);
 
           clearTimeout( doneTimeout );
