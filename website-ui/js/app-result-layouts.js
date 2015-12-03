@@ -232,9 +232,12 @@ function( util ){ return function( Result ){
 
     var l = cy.makeLayout({
       name: 'grid',
+      avoidOverlap: true,
+      avoidOverlapPadding: 2,
+      condense: true,
       animate: options.animate,
       animationDuration: 500,
-      columns: 1,
+      cols: 2,
       position: function(n){
         return {
           col: n.data('query') ? 0 : 1

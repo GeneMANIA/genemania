@@ -47,8 +47,11 @@ function(){
       {
         selector: 'node.with-descr',
         css: {
+          'text-wrap': 'wrap',
           'content': 'data(nameDescr)',
-          'text-halign': 'right'
+          'text-halign': 'right',
+          'color': '#000',
+          'text-outline-width': 0
         }
       },
 
