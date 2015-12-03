@@ -63,6 +63,16 @@ function(){
       },
 
       {
+        selector: 'node.plain-label',
+        css: {
+          'text-valign': 'top',
+          'text-halign': 'center',
+          'color': '#000',
+          'text-outline-width': 0
+        }
+      },
+
+      {
         selector: 'node[?gene]',
         css: ( function(){
           var css = {};

@@ -12,49 +12,55 @@
     qtip-target="graph-button-save"
     qtip-id="save-data"
     qtip-adjust-method="shift"
-    qtip-adjust-resize="false"
+    qtip-adjust-resize="true"
     qtip-pos-my="left center" qtip-pos-at="right center"
+    qtip-class="qtip-no-padding"
   >
-    <div class="save-data-option activatable-relative" on-tap="result.report()">
-      <i class="fa fa-file-pdf-o"></i> Report
-    </div>
+    <div class="save-data-qtip-content">
+      <div class="save-data-option activatable-bg" on-tap="result.report()">
+        <i class="fa fa-file-pdf-o"></i> Report
+      </div>
 
-    <div class="save-data-option activatable-relative" on-tap="result.saveImage()">
-      <i class="fa fa-file-image-o"></i> Network image
-    </div>
+      <div class="save-data-option activatable-bg" on-tap="result.saveImage()">
+        <i class="fa fa-file-image-o"></i> Network image <br/> <span class="small">As shown</span>
+      </div>
 
-    <div class="save-data-option activatable-relative" on-tap="result.saveText()">
-      <i class="fa fa-file-text-o"></i> Network
-    </div>
+      <div class="save-data-option activatable-bg" on-tap="result.saveImage({ plainLabels: true })">
+        <i class="fa fa-file-image-o"></i> Network image <br/> <span class="small">With plain, top labels</span>
+      </div>
 
-    <div class="save-data-option activatable-relative" on-tap="result.saveNetworks()">
-      <i class="fa fa-file-text-o"></i> Networks data
-    </div>
+      <div class="save-data-option activatable-bg" on-tap="result.saveText()">
+        <i class="fa fa-file-text-o"></i> Network
+      </div>
 
-    <div class="save-data-option activatable-relative" on-tap="result.saveAttributes()">
-      <i class="fa fa-file-text-o"></i> Attributes data
-    </div>
+      <div class="save-data-option activatable-bg" on-tap="result.saveNetworks()">
+        <i class="fa fa-file-text-o"></i> Networks data
+      </div>
 
-    <div class="save-data-option activatable-relative" on-tap="result.saveGenes()">
-      <i class="fa fa-file-text-o"></i> Genes data
-    </div>
+      <div class="save-data-option activatable-bg" on-tap="result.saveAttributes()">
+        <i class="fa fa-file-text-o"></i> Attributes data
+      </div>
 
-    <div class="save-data-option activatable-relative" on-tap="result.saveFunctions()">
-      <i class="fa fa-file-text-o"></i> Functions data
-    </div>
+      <div class="save-data-option activatable-bg" on-tap="result.saveGenes()">
+        <i class="fa fa-file-text-o"></i> Genes data
+      </div>
 
-    <div class="save-data-option activatable-relative" on-tap="result.saveInteractions()">
-      <i class="fa fa-file-text-o"></i> Interactions data
-    </div>
+      <div class="save-data-option activatable-bg" on-tap="result.saveFunctions()">
+        <i class="fa fa-file-text-o"></i> Functions data
+      </div>
 
-    <div class="save-data-option activatable-relative" on-tap="result.saveParamsText()">
-      <i class="fa fa-file-text-o"></i> Search parameters as text
-    </div>
+      <div class="save-data-option activatable-bg" on-tap="result.saveInteractions()">
+        <i class="fa fa-file-text-o"></i> Interactions data
+      </div>
 
-    <div class="save-data-option activatable-relative" on-tap="result.saveParamsJson()">
-      <i class="fa fa-file-code-o"></i> Search parameters as JSON
-    </div>
+      <div class="save-data-option activatable-bg" on-tap="result.saveParamsText()">
+        <i class="fa fa-file-text-o"></i> Search parameters as text
+      </div>
 
+      <div class="save-data-option activatable-bg" on-tap="result.saveParamsJson()">
+        <i class="fa fa-file-code-o"></i> Search parameters as JSON
+      </div>
+    </div>
   </qtip>
 
 </div>

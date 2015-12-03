@@ -28,11 +28,21 @@ function( util ){ return function( Result ){
     }
   }
 
-  rfn.saveImage = function(){
+  rfn.saveImage = function( opts ){
+    opts = opts || {};
+
+    if( opts.plainLabels ){
+      cy.nodes().addClass('plain-label');
+    }
+
     var png = cy.jpg({
       full: true,
       maxHeight: 2000
     });
+
+    if( opts.plainLabels ){
+      cy.nodes().removeClass('plain-label');
+    }
 
     download( 'genemania-network.jpg', png );
   };
