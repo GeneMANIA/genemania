@@ -357,7 +357,7 @@ gulp.task('css', function(){
 
 // make sure everything is uptodate before watching
 gulp.task('prewatch', function( next ){
-  return runSequence( 'css-unmin', 'htmlrefs', next );
+  return runSequence( 'clean', 'css-unmin', 'htmlrefs', next );
 });
 
 // auto less compilation & livereload
