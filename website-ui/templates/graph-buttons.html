@@ -6,8 +6,29 @@
   <div class="graph-button activatable graph-button-row-4" on-tap="result.forceLayout({ randomize: false })"><i class="fa fa-refresh"></i></div>
   <div class="graph-button activatable graph-button-row-5" on-tap="result.fitGraph()"><i class="fa fa-arrows-h fa-rotate-45"></i></div>
 
-  <div id="graph-button-save" class="graph-button activatable graph-button-row-7"><i class="fa fa-save"></i></div>
+  <div id="graph-button-info" class="graph-button activatable graph-button-row-7"><i class="fa fa-info-circle"></i></div>
+  <qtip
+    qtip-target="graph-button-info"
+    qtip-id="graph-info"
+    qtip-adjust-method="shift"
+    qtip-adjust-resize="true"
+    qtip-pos-my="left center" qtip-pos-at="right center"
+    qtip-class="qtip-no-padding"
+  >
+    <div class="graph-info-qtip-content">
+      Showing {{result.query.maxGenes}} related genes,
+      with {{result.resultGenes.length}} total genes,
+      {{result.resultAttributeGroups.length}} attributes, and
+      and {{result.resultInteractions.length}} total links.
 
+      <div class="search-genes-legend">
+        <span class="search-genes-legend-color"><span class="fa-stack"><i class="fa fa-square fa-stack-1x"></i><i class="fa fa-bars fa-stack-1x fa-rotate-315 search-genes-legend-stripe-icon"></i></span></span>
+        <span class="search-genes-legend-name">Genes you searched with are indicated with stripes</span>
+      </div>
+    </div>
+  </qtip>
+
+  <div id="graph-button-save" class="graph-button activatable graph-button-row-8"><i class="fa fa-save"></i></div>
   <qtip
     qtip-target="graph-button-save"
     qtip-id="save-data"
