@@ -5645,6 +5645,9 @@ sup {
 .invisible {
   visibility: hidden;
 }
+.small {
+  font-size: 0.8em;
+}
 .activatable {
   cursor: pointer;
 }
@@ -6648,7 +6651,7 @@ sup {
   text-align: center;
 }
 .query-history-delete-entry-icon {
-  margin-top: 0.275em;
+  margin-top: 0.4em;
 }
 .graph-button {
   font-size: 1.25em;
@@ -6717,10 +6720,31 @@ sup {
   margin-top: 26.25em;
 }
 .save-data-option {
-  padding: 0.25em 0;
+  padding: 0.125em 0.25em;
+  border-radius: 0.25em;
 }
 .save-data-option + .save-data-option {
   border-top: 1px solid #666;
+}
+.save-data-qtip-content {
+  overflow-y: auto;
+  max-height: 80%;
+  position: relative;
+  padding: 0;
+}
+.graph-info-qtip-content {
+  max-width: 18em;
+  padding: 0.125em 0.25em;
+}
+.search-genes-legend {
+  border-top: 1px solid #444;
+}
+.search-genes-legend-color {
+  color: transparent;
+}
+.search-genes-legend-stripe-icon {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8em;
 }
 .network-list {
   position: absolute;
