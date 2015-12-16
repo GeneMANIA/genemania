@@ -45,34 +45,6 @@ function(){
       },
 
       {
-        selector: 'node.with-descr',
-        css: {
-          'text-wrap': 'wrap',
-          'content': 'data(nameDescr)',
-          'text-halign': 'right',
-          'color': '#000',
-          'text-outline-width': 0
-        }
-      },
-
-      {
-        selector: 'node[?query].with-descr',
-        css: {
-          'text-halign': 'left'
-        }
-      },
-
-      {
-        selector: 'node.plain-label',
-        css: {
-          'text-valign': 'top',
-          'text-halign': 'center',
-          'color': '#000',
-          'text-outline-width': 0
-        }
-      },
-
-      {
         selector: 'node[?gene]',
         css: ( function(){
           var css = {};
@@ -180,6 +152,43 @@ function(){
         selector: 'edge.collapsed',
         css: {
           'opacity': 0
+        }
+      },
+
+      {
+        selector: 'node.plain-label',
+        css: {
+          'text-valign': 'top',
+          'text-halign': 'center',
+          'color': '#000',
+          'text-outline-width': 1.5,
+          'text-outline-color': '#fff',
+          'text-outline-opacity': 0.8
+        }
+      },
+
+      {
+        selector: 'node[?attr].plain-label',
+        css: {
+          'text-outline-width': 0.75
+        }
+      },
+
+      {
+        selector: 'node.with-descr',
+        css: {
+          'text-wrap': 'wrap',
+          'content': 'data(nameDescr)',
+          'text-halign': 'right',
+          'color': '#000',
+          'text-outline-width': 0
+        }
+      },
+
+      {
+        selector: 'node[?query].with-descr',
+        css: {
+          'text-halign': 'left'
         }
       }
     ];

@@ -562,5 +562,6 @@ function( $scope, updateScope, ngCy ){
 
   PubSub.subscribe('result.searched', init);
   PubSub.subscribe('result.error', updateScope);
+  PubSub.subscribe('result.layoutUndone', updateScope);
 
 } ]);

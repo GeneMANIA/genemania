@@ -189,12 +189,12 @@
         <div id="query-adv-opts" class="query-adv-opts scrollable" ng-show="query.editingAdvanced">
           <div class="query-adv-opt-name">Max resultant genes: {{query.maxGenes}}</div>
           <div class="query-slider-container">
-            <input class="query-slider" type="range" ng-model="query.maxGenes" min="0" max="100" ng-jquery-plugin="{ rangeslider: { polyfill: false } }" change-on-ready />
+            <input class="query-slider" type="range" autocomplete="off" ng-model="query.maxGenes" min="0" max="100" ng-rangeslider ng-rangeslider-update-on="query.editingAdvanced" />
           </div>
 
           <div class="query-adv-opt-name">Max resultant attributes: {{query.maxAttrs}}</div>
           <div class="query-slider-container">
-            <input class="query-slider" type="range" ng-model="query.maxAttrs" min="0" max="100" ng-jquery-plugin="{ rangeslider: { polyfill: false } }" change-on-ready />
+            <input class="query-slider" type="range" autocomplete="off" ng-model="query.maxAttrs" min="0" max="100" ng-rangeslider ng-rangeslider-update-on="query.editingAdvanced" />
           </div>
 
           <div class="query-adv-opt-name">Network weighting</div>

@@ -69,6 +69,22 @@ function( util ){ return function( Result ){
     var self = this;
     var container = cy.container();
 
+    options = options || {};
+
+    if( !r.prelayoutPosns && !options.undo ){
+      var posns = self.prelayoutPosns = {};
+      var nodes = cy.nodes();
+
+      for( var i = 0; i < nodes.length; i++ ){
+        var node = nodes[i];
+        var p = node.position();
+
+        posns[ node.id() ] = { x: p.x, y: p.y };
+      }
+
+      self.layoutUndone = false;
+    }
+
     if( self.layoutPromise ){
       self.layoutPromise.cancel();
     }
@@ -125,7 +141,7 @@ function( util ){ return function( Result ){
       randomize: true,
       animate: true,
       nodeSpacing: 15,
-      lengthFactor: 75,
+      lengthFactor: 100,
       maxSimulationTime: 2000,
       padding: defaultPadding,
       resizeCy: true
@@ -176,7 +192,7 @@ function( util ){ return function( Result ){
 
     var avgWNorm = norm( avgW );
     var minLength = 0;
-    var maxLength = 200;
+    var maxLength = 150;
 
     var edgeLength = function( e ){
       function length(e){
@@ -192,11 +208,11 @@ function( util ){ return function( Result ){
         return l;
       }
 
-      if( e.data('group') === 'coexp' ){
-        return 10 * length(e);
-      }
-
       var l = length(e);
+
+      if( e.data('group') === 'coexp' ){
+        l *= 10;
+      }
 
       if( l < minLength ){
         return minLength;
@@ -250,6 +266,37 @@ function( util ){ return function( Result ){
     var p = this.layoutPrepost( l, options );
 
     cy.nodes().addClass('with-descr');
+
+    this.layoutDelay(l, options);
+
+    return p;
+  };
+
+  rfn.undoLayout = function( options ){
+    var self = this;
+
+    options = $.extend({
+      animate: true,
+      resizeCy: true,
+      fit: true,
+      undo: true
+    }, options);
+
+    var l = cy.makeLayout({
+      name: 'preset',
+      animate: options.animate,
+      animationDuration: 500,
+      positions: this.prelayoutPosns,
+      padding: defaultPadding
+    });
+
+    self.layoutUndone = true;
+
+    PubSub.publish('result.layoutUndone', {
+      result: self
+    });
+
+    var p = this.layoutPrepost( l, options );
 
     this.layoutDelay(l, options);
 

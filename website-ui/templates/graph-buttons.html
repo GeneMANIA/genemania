@@ -1,9 +1,57 @@
 <div ng-controller="ResultCtrl">
 
-  <div class="graph-button activatable graph-button-row-1" on-tap="result.circleLayout()"><i class="fa fa-dot-circle-o"></i></div>
-  <div class="graph-button activatable graph-button-row-2" on-tap="result.linearLayout()"><i class="fa fa-long-arrow-down"></i><i class="fa fa-long-arrow-down"></i></div>
-  <div class="graph-button activatable graph-button-row-3" on-tap="result.forceLayout()"><i class="fa fa-random"></i></div>
-  <div class="graph-button activatable graph-button-row-4" on-tap="result.forceLayout({ randomize: false })"><i class="fa fa-refresh"></i></div>
+  <div id="layout-circle" class="graph-button activatable graph-button-row-1" on-tap="result.circleLayout()"><i class="fa fa-dot-circle-o"></i></div>
+  <qtip
+    qtip-target="layout-circle"
+    qtip-pos-my="left center" qtip-pos-at="right center"
+    qtip-class="qtip-no-padding"
+    qtip-hide-after="5000"
+    qtip-force-hide-on="result.layoutUndone"
+  >
+    <div class="undo-layout activatable-bg" on-tap="result.undoLayout()">
+      <i class="fa fa-undo"></i> Undo
+    </div>
+  </qtip>
+
+  <div id="layout-linear" class="graph-button activatable graph-button-row-2" on-tap="result.linearLayout()"><i class="fa fa-long-arrow-down"></i><i class="fa fa-long-arrow-down"></i></div>
+  <qtip
+    qtip-target="layout-linear"
+    qtip-pos-my="left center" qtip-pos-at="right center"
+    qtip-class="qtip-no-padding"
+    qtip-hide-after="5000"
+    qtip-force-hide-on="result.layoutUndone"
+  >
+    <div class="undo-layout activatable-bg" on-tap="result.undoLayout()">
+      <i class="fa fa-undo"></i> Undo
+    </div>
+  </qtip>
+
+  <div id="layout-force-refresh" class="graph-button activatable graph-button-row-3" on-tap="result.forceLayout()"><i class="fa fa-random"></i></div>
+  <qtip
+    qtip-target="layout-force-refresh"
+    qtip-pos-my="left center" qtip-pos-at="right center"
+    qtip-class="qtip-no-padding"
+    qtip-hide-after="7500"
+    qtip-force-hide-on="result.layoutUndone"
+  >
+    <div class="undo-layout activatable-bg" on-tap="result.undoLayout()">
+      <i class="fa fa-undo"></i> Undo
+    </div>
+  </qtip>
+
+  <div id="layout-force" class="graph-button activatable graph-button-row-4" on-tap="result.forceLayout({ randomize: false })"><i class="fa fa-refresh"></i></div>
+  <qtip
+    qtip-target="layout-force"
+    qtip-pos-my="left center" qtip-pos-at="right center"
+    qtip-class="qtip-no-padding"
+    qtip-hide-after="7500"
+    qtip-force-hide-on="result.layoutUndone"
+  >
+    <div class="undo-layout activatable-bg" on-tap="result.undoLayout()">
+      <i class="fa fa-undo"></i> Undo
+    </div>
+  </qtip>
+
   <div class="graph-button activatable graph-button-row-5" on-tap="result.fitGraph()"><i class="fa fa-arrows-h fa-rotate-45"></i></div>
 
   <div id="graph-button-info" class="graph-button activatable graph-button-row-7"><i class="fa fa-info-circle"></i></div>

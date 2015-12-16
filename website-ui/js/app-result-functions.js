@@ -65,6 +65,8 @@ function( util ){ return function( Result ){
         var node = nodes[j];
         var css = node.data('css');
 
+        if( node.data('attr') ){ continue; }
+
         for( var i = 0; i < 16; i++ ){
           var cfn = cfns[i];
           var p = i + 1;

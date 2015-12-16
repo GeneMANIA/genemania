@@ -232,10 +232,38 @@ app.directive('changeOnReady', [function() {
             var $e=$(element);
 
             PubSub.subscribe('ready', function(){
-              setTimeout(function(){
+              scope.$apply(function(){
                 $e.change();
-              }, 20);
+              });
             });
+
+        }
+    };
+}]);
+
+app.directive('ngRangeslider', [function() {
+    return {
+        link : function(scope, element, attrs) {
+            var $e=$(element);
+
+            $e.rangeslider({
+              polyfill: false
+            });
+
+            var updateOn = attrs.ngRangesliderUpdateOn;
+            var updated = false;
+
+            if( updateOn ){
+              scope.$parent.$watch(updateOn, function(val){
+                if( !updated && val ){
+                  updated = true;
+
+                  setTimeout(function(){
+                    $e.rangeslider('update', true);
+                  }, 0);
+                }
+              });
+            }
 
         }
     };

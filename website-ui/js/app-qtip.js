@@ -27,6 +27,7 @@ app.directive('qtip', function(){
       var visible = false;
       var qtipScopeId = attrs.qtipScopeId || Math.round( Math.random() * 1000000 );
       var digestOnShow = attrs.qtipDigestOnShow === 'true' || attrs.qtipDigestOnShow === true;
+      var hideDelay = attrs.qtipHideAfter;
 
       if( attrs.showEvent === 'none' ){
         attrs.showEvent = '';
@@ -49,6 +50,19 @@ app.directive('qtip', function(){
           if( show ){
             $target.qtip('show');
           } else if( hide ){
+            $target.qtip('hide');
+          }
+        });
+      }
+
+      if( attrs.qtipForceHideOn ){
+        $callingScope.$watch(attrs.qtipForceHideOn, function(val){
+          var api = $target.qtip('api');
+          if( !api ){ return; } // or else err
+
+          var tooltip = api.elements.tooltip;
+
+          if( val ){
             $target.qtip('hide');
           }
         });
@@ -137,6 +151,12 @@ app.directive('qtip', function(){
             // if( digestOnShow && !$callingScope.$$phase ){
             //   $callingScope.$digest();
             // }
+
+            if( hideDelay != null ){
+              setTimeout( function(){
+                $target.qtip('hide');
+              }, parseInt(hideDelay ));
+            }
           },
           hide: function(){
             // visible = false;
