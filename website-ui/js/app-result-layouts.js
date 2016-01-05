@@ -136,6 +136,8 @@ function( util ){ return function( Result ){
   };
 
   rfn.forceLayout = function(options){
+    var result = this;
+
     options = $.extend({
       fit: true,
       randomize: true,
@@ -150,16 +152,6 @@ function( util ){ return function( Result ){
     var layoutEles = cy.elements().stdFilter(function( ele ){
       return ele.isNode() || !ele.hasClass('filtered');
     });
-
-    // var layoutElesWoCoexp = layoutEles.stdFilter(function( ele ){
-    //   return ele.data('group') !== 'coexp';
-    // });
-    //
-    // if( layoutElesWoCoexp.edges().length === 0 ){
-    //   // then keep coexp edges b/c we need some edges
-    // } else {
-    //   layoutEles = layoutElesWoCoexp;
-    // }
 
     var avgW = 0;
     var minW = Infinity;
@@ -223,13 +215,26 @@ function( util ){ return function( Result ){
       }
     };
 
+    var layoutNodes = layoutEles.nodes();
+
+    for( var i = 0; i < layoutNodes.length; i++ ){
+      var node = layoutNodes[i];
+      var pos = node.position();
+
+      node.data( 'preForcePos', {
+        x: pos.x,
+        y: pos.y
+      } );
+    }
+
     var l = layoutEles.makeLayout({
-      name: 'cola',
+      name: 'cose',
+      nodeOverlap: 30,
       fit: options.fit,
-      animate: options.animate,
+      animate: false,
       randomize: options.randomize,
       maxSimulationTime: options.maxSimulationTime,
-      edgeLength: edgeLength,
+      idealEdgeLength: edgeLength,
       padding: defaultPadding
     });
 
@@ -237,7 +242,37 @@ function( util ){ return function( Result ){
 
     this.layoutDelay(l, options);
 
-    return p;
+    if( options.animate ){
+      return p.then(function(){
+        var id2pos = {};
+
+        for( var i = 0; i < layoutNodes.length; i++ ){
+          var node = layoutNodes[i];
+          var pos1 = node.data('preForcePos');
+          var pos = node.position();
+          var pos2 = { x: pos.x, y: pos.y };
+
+          node.position( pos1 );
+
+          id2pos[ node.id() ] = pos2;
+        }
+
+        var presetLayout = layoutNodes.makeLayout({
+          name: 'preset',
+          positions: id2pos,
+          fit: options.fit,
+          animate: true,
+          animationDuration: 500,
+          padding: defaultPadding
+        });
+
+        result.layoutDelay( presetLayout, options );
+
+        return presetLayout.promiseOn('layoutstop');
+      });
+    } else {
+      return p;
+    }
   };
 
   rfn.linearLayout = function(options){

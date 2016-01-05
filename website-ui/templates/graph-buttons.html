@@ -26,20 +26,7 @@
     </div>
   </qtip>
 
-  <div id="layout-force-refresh" class="graph-button activatable graph-button-row-3" on-tap="result.forceLayout()"><i class="fa fa-random"></i></div>
-  <qtip
-    qtip-target="layout-force-refresh"
-    qtip-pos-my="left center" qtip-pos-at="right center"
-    qtip-class="qtip-no-padding"
-    qtip-hide-after="7500"
-    qtip-force-hide-on="result.layoutUndone"
-  >
-    <div class="undo-layout activatable-bg" on-tap="result.undoLayout()">
-      <i class="fa fa-undo"></i> Undo
-    </div>
-  </qtip>
-
-  <div id="layout-force" class="graph-button activatable graph-button-row-4" on-tap="result.forceLayout({ randomize: false })"><i class="fa fa-refresh"></i></div>
+  <div id="layout-force" class="graph-button activatable graph-button-row-3" on-tap="result.forceLayout()"><i class="fa fa-random"></i></div>
   <qtip
     qtip-target="layout-force"
     qtip-pos-my="left center" qtip-pos-at="right center"
@@ -64,14 +51,24 @@
     qtip-class="qtip-no-padding"
   >
     <div class="graph-info-qtip-content">
-      Showing {{result.query.maxGenes}} related genes,
-      with {{result.resultGenes.length}} total genes,
-      {{result.resultAttributeGroups.length}} attributes, and
-      and {{result.resultInteractions.length}} total links.
+      <div class="info-section">
+        Showing {{result.query.maxGenes}} related genes,
+        with {{result.resultGenes.length}} total genes,
+        {{result.resultAttributeGroups.length}} attributes, and
+        and {{result.resultInteractions.length}} total links.
+      </div>
 
-      <div class="search-genes-legend">
+      <div class="info-section search-genes-legend">
         <span class="search-genes-legend-color"><span class="fa-stack"><i class="fa fa-square fa-stack-1x"></i><i class="fa fa-bars fa-stack-1x fa-rotate-315 search-genes-legend-stripe-icon"></i></span></span>
         <span class="search-genes-legend-name">Genes you searched with are indicated with stripes</span>
+      </div>
+
+      <div class="info-section">
+        <a target="_blank" href="http://apps.cytoscape.org/apps/genemania">Cytoscape app</a> |
+        <a target="_blank" href="http://pages.genemania.org/help/">Help</a> |
+        <a target="_blank" href="http://pages.genemania.org/contact/">Contact</a> |
+        <a target="_blank" href="http://pages.genemania.org/help/faq/#How_do_I_cite_GeneMANIA?">Cite</a> |
+        <a target="_blank" href="http://www.utoronto.ca/">&copy; UToronto</a>
       </div>
     </div>
   </qtip>

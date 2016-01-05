@@ -298,6 +298,10 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
       oldElesById[ oldEles[i].id() ] = oldEles[i];
     }
 
+    var initNodePos = function(){
+      return { x: cy.width()/2, y: cy.height()/2 };
+    };
+
     // gene nodes
     for( var i = 0; i < self.resultGenes.length; i++ ){
       var rGene = self.resultGenes[i];
@@ -313,7 +317,7 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
 
       eles.push( ele = {
         group: 'nodes',
-        position: pos[ gene.id ] ? pos[ gene.id ] : oldEle ? oldEle.position() : { x: cy.width()/2, y: cy.height()/2 },
+        position: pos[ gene.id ] ? pos[ gene.id ] : oldEle ? oldEle.position() : initNodePos(),
         //locked: !!oldEle,
         data: {
           oldEle: !!oldEle,
@@ -352,7 +356,7 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
         if( !attrEle ){
           eles.push( attrEle = {
             group: 'nodes',
-            // position: { x: -9999, y: -9999 },
+            position: initNodePos,
             data: {
               id: '' + attr.id,
               idInt: attr.id,
@@ -474,6 +478,24 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
       n.data( 'normScore', Math.min(score/maxScore, 1) );
     }
 
+    // instant result if all nodes have the default position
+    var defPos = initNodePos();
+    var allSamePos = true;
+
+    for( var i = 0; i < nodes.length; i++ ){
+      var n = nodes[i];
+      var pos = n.position();
+
+      if( pos.x !== defPos.x || pos.y !== defPos.y ){
+        allSamePos = false;
+        break;
+      }
+    }
+
+    if( allSamePos ){
+      nodes.addClass('hidden');
+    }
+
     cy.endBatch(); // will trigger new stylesheet etc
 
     var $list = $('#network-list');
@@ -494,6 +516,12 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
     if( !opts.positions ){
 
       self.layoutResizeCyPre();
+
+      if( allSamePos ){
+        cy.pon('layoutready').then(function(){
+          nodes.removeClass('hidden');
+        });
+      }
 
       return self.forceLayout({
         animate: someOldEles,

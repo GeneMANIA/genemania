@@ -178,10 +178,6 @@ function( cyStylesheet ){
       // });
 
       resolve( cy );
-
-      Mousetrap.bind('l', function(){
-        cy.nodes().toggleClass('plain-label');
-      });
     };
 
     switch( document.readyState ){
