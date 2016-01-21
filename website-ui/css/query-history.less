@@ -14,13 +14,13 @@
 	text-align: center;
 	cursor: pointer;
 
-	.transform( translate3d(0, @qHistSize + 1.5*@qHistP, 0) );
+	.transform( translate3d(0, @qHistSize + 2*@qHistP, 0) );
 	.transition( transform linear 150ms );
 }
 
 .query-history-expander-icon {
 	font-size: 1.25em;
-	margin: 0.666em 0;
+	margin: 0.4em 0;
 	color: @CONTENT_TEXT_COLOR;
 }
 
@@ -30,6 +30,7 @@
 	margin-left: -0.25em;
 	font-size: 1.15em;
 	color: darken(@CONTENT_TEXT_COLOR, 15%);
+	visibility: hidden;
 }
 
 .query-history {
@@ -45,7 +46,7 @@
 	white-space: nowrap;
 	color: #fff;
 
-	.transform( translate3d(0, @qHistSize + 1.5*@qHistP, 0) );
+	.transform( translate3d(0, @qHistSize + 2*@qHistP, 0) );
 	.transition( transform linear 150ms );
 }
 

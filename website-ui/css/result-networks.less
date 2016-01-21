@@ -1,6 +1,4 @@
 .network-list {
-	@bc: @netListBg;
-
 	position: absolute;
 	right: 0;
 	top: 0;
@@ -11,9 +9,6 @@
 
 	color: @CONTENT_TEXT_COLOR;
 	background: @CONTENT_BG_COLOR;
-	border-left: 2px solid @bc;
-	border-top: 1px solid @bc;
-	border-bottom: 1px solid @bc;
 	border-top-left-radius: 0.5em;
 	border-bottom-left-radius: 0.5em;
 	//background: red;
@@ -32,13 +27,12 @@
 	width: 2em;
 	height: 3em;
 	cursor: pointer;
-	margin-right: 2px;
 }
 
 .network-list-expander-icon {
 	font-size: 1.25em;
 	position: absolute;
-	left: 0.6em;
+	left: 0.45em;
 	top: 50%;
 	margin-top: -0.5em;
 }
@@ -49,6 +43,7 @@
 	top: 50%;
 	margin-top: -0.5em;
 	color: darken(@CONTENT_TEXT_COLOR, 15%);
+	visibility: hidden;
 }
 
 
@@ -170,6 +165,7 @@
 .network-group-check,
 .network-check {
 	padding: 0 0.25em;
+	margin-left: 0.25em;
 	cursor: pointer;
 }
 
@@ -206,15 +202,15 @@
 .network-bar,
 .interaction-bar {
 	@m: 0.25em;
-	@mL: 2.5em;
+	@mL: 2.75em;
 
 	display: block;
-	width: @netNameW - @mL + 1em;
+	width: @netNameW - @mL - 0.85em;
 	margin: @m;
 	margin-left: @mL;
 	height: @netBarH;
 	// background: blue;
-	border: 1px solid @SEPARATOR_COLOR;
+	border: 0px solid transparent;
 
 	&.network-group-bar {
 		margin-left: @netLeftM + @mL;

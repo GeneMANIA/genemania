@@ -184,6 +184,8 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
       return numeral( weight ).format('0.00%');
     };
 
+    var maxWeight = _.max( rGrs.map(function( rGr ){ return rGr.weight; }) );
+
     // process the (real) networks
     for( var i = 0; i < rGrs.length; i++ ){
       var rGr = rGrs[i];
@@ -194,6 +196,7 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
         var rNet = rNets[j];
 
         rNet.color = color;
+        rNet.relativeWeight = rNet.weight / maxWeight;
         rNet.displayWeight = makeDisplayWeight( rNet.weight );
         rNet.enabled = true;
         rNet.expanded = false;
@@ -232,6 +235,7 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
 
       rGr.isResultNetworkGroup = true;
       rGr.color = color;
+      rGr.relativeWeight = rGr.weight / maxWeight;
       rGr.displayWeight = makeDisplayWeight( rGr.weight );
       rGr.enabled = true;
       rGr.expanded = false;
