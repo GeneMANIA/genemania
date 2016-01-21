@@ -6746,6 +6746,14 @@ sup {
   color: rgba(255, 255, 255, 0.5);
   font-size: 0.8em;
 }
+.undo-layout {
+  padding: 0.25em;
+}
+.info-section + .info-section {
+  border-top: 1px solid #444;
+  margin-top: 0.25em;
+  padding-top: 0.25em;
+}
 .network-list {
   position: absolute;
   right: 0;
@@ -6884,11 +6892,11 @@ sup {
   box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(170, 216, 255, 0.5);
 }
 .network-group-name {
-  width: 11em;
+  width: 10.5em;
 }
 .network-name {
   font-size: 0.8em;
-  width: 11.25em;
+  width: 10.625em;
 }
 .network-group-check,
 .network-check {

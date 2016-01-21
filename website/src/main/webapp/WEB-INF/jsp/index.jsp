@@ -72,6 +72,10 @@
       margin: 12px 0;
     }
 
+    #splash-tagline {
+      font-size: 16px;
+    }
+
     #splash-stats {
       opacity: 0;
     }
@@ -122,6 +126,13 @@
       font-size: 12px;
       color: #ccc;
       margin-top: 12px;
+      text-align: justify;
+    }
+
+    #linkouts:after {
+      content: "";
+      display: inline-block;
+      width: 100%;
     }
 
     #splash a {
@@ -546,9 +557,8 @@
         <a target="_blank" href="http://apps.cytoscape.org/apps/genemania">Cytoscape app</a> |
         <a target="_blank" href="http://pages.genemania.org/help/">Help</a> |
         <a target="_blank" href="http://pages.genemania.org/contact/">Contact</a> |
-        <a target="_blank" href="http://pages.genemania.org/">About</a> |
         <a target="_blank" href="http://pages.genemania.org/help/faq/#How_do_I_cite_GeneMANIA?">Cite</a> |
-        <a target="_blank" href="http://www.utoronto.ca/">&copy; U of T</a>
+        <a target="_blank" href="http://www.utoronto.ca/">&copy; UToronto</a>
       </div>
 
       <div id="splash-tagline">GeneMANIA helps you predict the function of your favourite genes and gene sets.</div>
