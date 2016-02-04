@@ -1,8 +1,8 @@
 'use strict';
 
-app.factory('$$organisms', 
-['$http', 'util',
-function( $http, util ){
+app.factory('$$organisms',
+['$http', 'util', '$$resources',
+function( $http, util, $$resources ){
 
   var id2icon = config.organisms.icons;
 
@@ -11,9 +11,9 @@ function( $http, util ){
   var $$organisms = window.$$organisms = function(){
     if( cache ){ return Promise.resolve(cache); }
 
-    return util.nativePromise( $http.get(config.service.baseUrl + 'organisms') )
+    return $$resources()
       .then(function( res ){
-        return res.data;
+        return res.organisms;
       })
 
       .then(function( orgs ){ // add icons & sort

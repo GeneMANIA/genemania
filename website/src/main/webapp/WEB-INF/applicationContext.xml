@@ -98,11 +98,12 @@
 		<property name="localeResolver" ref="localeResolver" />
 	</bean>
 
-	<bean id="versionController" class="org.genemania.controller.rest.VersionController">
-		<property name="appVersion" ref="appVersion" />
-	</bean>
-
 	<!-- Service definitions -->
+	
+	<bean id="versionService" class="org.genemania.service.impl.VersionServiceImpl">
+		<property name="appVersion" ref="appVersion" />
+		<property name="statsService" ref="statsService" />
+	</bean>
 
 	<bean id="attributeService" class="org.genemania.service.impl.AttributeServiceImpl">
 		<property name="attributeDao" ref="attributeDao" />

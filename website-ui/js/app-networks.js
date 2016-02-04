@@ -1,8 +1,8 @@
 'use strict';
 
 app.factory('$$networks',
-['$http', 'util', '$$user',
-function( $http, util, $$user ){
+['$http', 'util', '$$resources',
+function( $http, util, $$resources ){
 
   var cache;
   var strcmp = util.strcmp;
@@ -11,12 +11,8 @@ function( $http, util, $$user ){
   var $$networks = window.$$networks = function(){
     if( cache ){ return Promise.resolve(cache); }
 
-    return $$user.read().then(function( user ){
-      return util.nativePromise(
-        $http.get(config.service.baseUrl + 'network_groups?session_id=' + user.localId)
-      ).then(function( res ){
-        return res.data;
-      });
+    return $$resources().then(function( resources ){
+      return resources.networkGroups;
     }).then(function( orgNetGrs ){
 
       for( var orgId in orgNetGrs ){

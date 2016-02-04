@@ -1,13 +1,13 @@
 'use strict';
 
 app.factory('$$stats',
-['$http', 'util',
-function( $http, util ){
+['$http', 'util', '$$resources',
+function( $http, util, $$resources ){
 
   var $$stats = window.$$stats = function( opts ){
-    return util.nativePromise( $http.get( config.service.baseUrl + 'stats', opts )
+    return $$resources()
       .then(function( res ){
-        var stats = res.data;
+        var stats = res.stats;
 
         stats.networksFormatted = numeral( stats.networks ).format('000,000,000,000');
         stats.interactionsFormatted = numeral( stats.interactions ).format('000,000,000,000');
@@ -16,7 +16,7 @@ function( $http, util ){
 
         return stats;
       })
-    );
+    ;
   };
 
   return $$stats;

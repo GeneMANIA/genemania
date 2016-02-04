@@ -1,8 +1,8 @@
 'use strict';
 
 app.factory('$$attributes',
-['$http', 'util',
-function( $http, util ){
+['$http', 'util', '$$resources',
+function( $http, util, $$resources ){
 
   var cache;
   var strcmp = util.strcmp;
@@ -10,9 +10,9 @@ function( $http, util ){
   var $$attributes = window.$$attributes = function(){
     if( cache ){ return Promise.resolve(cache); }
 
-    return util.nativePromise( $http.get(config.service.baseUrl + 'attribute_groups') )
+    return $$resources()
       .then(function( res ){
-        return res.data;
+        return res.attributeGroups;
       })
 
       .then(function( attrs ){

@@ -1,18 +1,15 @@
 'use strict';
 
-app.factory('$$version', 
-['$http', 'util',
-function( $http, util ){
+app.factory('$$version',
+['$http', 'util', '$$resources',
+function( $http, util, $$resources ){
 
   var $$version = window.$$version = function( opts ){
-    return util.nativePromise( $http.get( config.service.baseUrl + 'version', opts )
+    return $$resources()
       .then(function( res ){
-        return res.data;
+        return res.versions;
       })
-      // .then(function(t){
-      //   return util.timeoutPromise(t, 3000);
-      // })
-    );
+    ;
   };
 
   return $$version;
