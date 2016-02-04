@@ -24,6 +24,8 @@ function( util ){ return function( Result ){
     if( self.query.historyExpanded ){
       container.classList.add('cy-layouting-shift-history');
     }
+
+    cy.resize();
   };
 
   rfn.layoutResizeCyPost = function(){
@@ -37,6 +39,8 @@ function( util ){ return function( Result ){
     if( self.query.historyExpanded ){
       container.classList.remove('cy-layouting-shift-history');
     }
+
+    cy.resize();
   };
 
   rfn.layoutDelay = function( layout, options ){
