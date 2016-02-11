@@ -12,14 +12,17 @@
       <div class="selected-info-commands">
         <span class="activatable selected-info-command" ng-class="{ 'disabled': rGene.queryGene }" on-tap="query.addGenes(rGene.name); query.search();">
           <sup><i class="fa fa-plus"></i></sup><i class="fa fa-search"></i>
+          <span class="selected-info-description">Add</span>
         </span>
 
         <span class="activatable selected-info-command" ng-class="{ 'disabled': !rGene.queryGene }" on-tap="query.removeGenes(rGene.name); query.search();">
           <sup><i class="fa fa-minus"></i></sup><i class="fa fa-search"></i>
+          <span class="selected-info-description">Remove</span>
         </span>
 
         <span class="activatable selected-info-command"  on-tap="query.setGenes(rGene.name); query.search();">
           <sup><i class="fa fa-circle"></i></sup><i class="fa fa-search"></i>
+          <span class="selected-info-description">Only</span>
         </span>
       </div>
     </div>
