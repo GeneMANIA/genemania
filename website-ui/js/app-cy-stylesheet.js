@@ -32,7 +32,7 @@ function(){
           'width': 'mapData(normScore, 0, 1, 20, 60)',
           'height': 'mapData(normScore, 0, 1, 20, 60)',
           'content': 'data(name)',
-          'font-size': 12,
+          'font-size': 16,
           'text-valign': 'center',
           'text-halign': 'center',
           'background-color': '#555',
@@ -65,10 +65,11 @@ function(){
           'shape': 'rectangle',
           'background-color': '#aaa',
           'text-outline-color': '#aaa',
-          'width': 16,
-          'height': 16,
-          'font-size': 6,
-          'z-index': 1
+          'width': 20,
+          'height': 20,
+          'font-size': 12,
+          'z-index': 1,
+          'text-wrap': 'none'
         }
       },
 
@@ -101,6 +102,13 @@ function(){
           'line-color': '#bbb',
           'width': 'mapData(weight, 0, 1, 1, 8)',
           'overlay-padding': 3
+        }
+      },
+
+      {
+        selector: 'edge[?attr]',
+        css: {
+          'haystack-radius': 0
         }
       },
 
@@ -142,7 +150,7 @@ function(){
       },
 
       {
-        selector: 'edge.filtered',
+        selector: '.filtered',
         css: {
           'opacity': 0
         }
@@ -178,6 +186,7 @@ function(){
         selector: 'node.with-descr',
         css: {
           'text-wrap': 'wrap',
+          'text-max-width': 400,
           'content': 'data(nameDescr)',
           'text-halign': 'right',
           'color': '#000',

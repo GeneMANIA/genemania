@@ -9,8 +9,8 @@ function( util ){ return function( Result ){
 
   var defaultPadding = 50;
 
-  var sortByWeight = function(a, b){
-    return b.data('score') - a.data('score');
+  var getLayoutEles = function(){
+    return cy.elements();
   };
 
   rfn.layoutResizeCyPre = function(){
@@ -115,20 +115,25 @@ function( util ){ return function( Result ){
       resizeCy: true
     }, options);
 
-    var l = cy.makeLayout({
+    var l = getLayoutEles().makeLayout({
       name: 'concentric',
       animate: options.animate,
       animationDuration: 500,
       concentric: function(){
         var isQuery = this.data('query');
-        var score = this.data('score') || 0;
+        var isAttr = this.data('attr');
 
-        return (isQuery ? 100 : 0) + score;
+        if( isQuery ){
+          return 100 + this.data('score');
+        } else if( isAttr ){
+          return -100;
+        } else {
+          return this.data('score');
+        }
       },
       levelWidth: function(){
-        return 1;
+        return 100;
       },
-      sort: sortByWeight,
       padding: defaultPadding
     });
 
@@ -285,20 +290,40 @@ function( util ){ return function( Result ){
       resizeCy: true
     }, options);
 
-    var l = cy.makeLayout({
+    var nodeSortVal = function( n ){
+      if( n.data('query') ){
+        return n.data('avgConndScore');
+      } else {
+        return 100 + n.data('score');
+      }
+    };
+
+    var nodeSort = function( a, b ){
+      return nodeSortVal(b) - nodeSortVal(a);
+    };
+
+    var hasAttrs = result.resultNetworkGroups.length > 0;
+
+    var l = getLayoutEles().makeLayout({
       name: 'grid',
       avoidOverlap: true,
       avoidOverlapPadding: 2,
       condense: true,
       animate: options.animate,
       animationDuration: 500,
-      cols: 2,
+      cols: hasAttrs ? 3 : 2,
       position: function(n){
-        return {
-          col: n.data('query') ? 0 : 1
+        if( !hasAttrs ){
+          return {
+            col: n.data('query') ? 0 : 1
+          }
+        } else {
+          return {
+            col: n.data('query') ? 0 : n.data('gene') ? 1 : 2
+          };
         }
       },
-      sort: sortByWeight,
+      sort: nodeSort,
       padding: defaultPadding
     });
 
@@ -321,7 +346,7 @@ function( util ){ return function( Result ){
       undo: true
     }, options);
 
-    var l = cy.makeLayout({
+    var l = getLayoutEles().makeLayout({
       name: 'preset',
       animate: options.animate,
       animationDuration: 500,

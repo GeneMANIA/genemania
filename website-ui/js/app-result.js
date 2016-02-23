@@ -184,7 +184,7 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
       return numeral( weight ).format('0.00%');
     };
 
-    var maxWeight = _.max( rGrs.map(function( rGr ){ return rGr.weight; }) );
+    var maxWeight = _.max( rAllGrs.map(function( rGr ){ return rGr.weight; }) );
 
     // process the (real) networks
     for( var i = 0; i < rGrs.length; i++ ){
@@ -256,6 +256,7 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
 
         rAttr.isResultAttribute = true;
         rAttr.color = color;
+        rAttr.relativeWeight = rAttr.weight / maxWeight;
         rAttr.displayWeight = makeDisplayWeight( rAttr.weight );
         rAttr.enabled = true;
         rAttr.expanded = false;
@@ -267,6 +268,7 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
 
       rGr.isResultAttributeGroup = true;
       rGr.color = color;
+      rGr.relativeWeight = rGr.weight / maxWeight;
       rGr.displayWeight = makeDisplayWeight( rGr.weight );
       rGr.enabled = true;
       rGr.expanded = false;
@@ -306,6 +308,16 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
       return { x: cy.width()/2, y: cy.height()/2 };
     };
 
+    var copy = function(o){
+      return $.extend({}, o);
+    };
+
+    var getNodePos = function( id ){
+      var oldEle = oldElesById[ id ];
+
+      return pos[ id ] ? pos[ id ] : oldEle ? copy( oldEle.position() ) : initNodePos();
+    };
+
     // gene nodes
     for( var i = 0; i < self.resultGenes.length; i++ ){
       var rGene = self.resultGenes[i];
@@ -321,7 +333,7 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
 
       eles.push( ele = {
         group: 'nodes',
-        position: pos[ gene.id ] ? pos[ gene.id ] : oldEle ? oldEle.position() : initNodePos(),
+        position: getNodePos( gene.id ),
         //locked: !!oldEle,
         data: {
           oldEle: !!oldEle,
@@ -356,11 +368,12 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
         var attr = rAttr.attribute;
         var attrEle = id2AttrEle[ attr.id ];
         var attrEdge;
+        var oldEle = oldElesById[ attr.id ];
 
         if( !attrEle ){
           eles.push( attrEle = {
             group: 'nodes',
-            position: initNodePos,
+            position: getNodePos( attr.id ),
             data: {
               id: '' + attr.id,
               idInt: attr.id,
@@ -378,7 +391,8 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
             target: '' + attr.id,
             group: 'attr',
             attr: true,
-            attributeGroupId: self.resultAttributesById[ rAttr.attribute.id ].resultAttributeGroup.attributeGroup.id
+            attributeGroupId: self.resultAttributesById[ rAttr.attribute.id ].resultAttributeGroup.attributeGroup.id,
+            attributeId: attr.id
           }
         } );
       }
@@ -480,6 +494,24 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
       var score = n.data('score');
 
       n.data( 'normScore', Math.min(score/maxScore, 1) );
+    }
+
+    // get average connected scores for query nodes
+    var qNodes = nodes.filter('[?query]');
+
+    for( var i = 0; i < qNodes.length; i++ ){
+      var node = qNodes[i];
+      var avgConndScore = 0;
+
+      var edges = node.connectedEdges().forEach(function( edge ){
+        var otherNode = edge.connectedNodes().not( node );
+
+        avgConndScore += otherNode.data('score') * edge.data('weight');
+      });
+
+      avgConndScore /= edges.length;
+
+      node.data('avgConndScore', avgConndScore);
     }
 
     // instant result if all nodes have the default position

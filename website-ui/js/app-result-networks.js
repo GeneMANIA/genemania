@@ -35,9 +35,10 @@ function( util ){ return function( Result ){
   // toggling the individual nets
 
   rfn.toggleNetwork = function( rNet ){
-    var netEnabled = this.getFilterNetworksCache()[ rNet.network.id ] = rNet.enabled = !rNet.enabled;
-    var rGr = rNet.resultNetworkGroup;
-    var rNets = rGr.resultNetworks;
+    var id = rNet.network ? rNet.network.id : rNet.attribute.id;
+    var netEnabled = this.getFilterNetworksCache()[ id ] = rNet.enabled = !rNet.enabled;
+    var rGr = rNet.resultNetworkGroup || rNet.resultAttributeGroup;
+    var rNets = rGr.resultNetworks || rGr.resultAttributes;
     var anyEnabled = netEnabled;
     var allEnabled = netEnabled;
 
@@ -68,11 +69,12 @@ function( util ){ return function( Result ){
 
     rGr.enabled = en;
 
-    var rNets = rGr.resultNetworks;
+    var rNets = rGr.resultNetworks || rGr.resultAttributes;
     for( var i = 0; i < rNets.length; i++ ){
       var rNet = rNets[i];
+      var id = rNet.network ? rNet.network.id : rNet.attribute.id;
 
-      this.getFilterNetworksCache()[ rNet.network.id ] = rNet.enabled = rGr.enabled;
+      this.getFilterNetworksCache()[ id ] = rNet.enabled = rGr.enabled;
     }
 
     this.filterNetworksFromEnables();
@@ -93,14 +95,14 @@ function( util ){ return function( Result ){
   rfn.updateFilterNetworksCache = function(){
     var netEnabled = this.netEnabled = {};
 
-    var rGrs = this.resultNetworkGroups;
+    var rGrs = this.resultAllGroups;
     for( var i = 0; i < rGrs.length; i++ ){
       var rGr = rGrs[i];
-      var rNets = rGr.resultNetworks;
+      var rNets = rGr.resultNetworks || rGr.resultAttributes;
 
       for( var j = 0; j < rNets.length; j++ ){
         var rNet = rNets[j];
-        var id = rNet.network.id;
+        var id = rNet.network ? rNet.network.id : rNet.attribute.id;
         var strId = '' + id;
 
         netEnabled[ strId ] = rNet.enabled;
@@ -122,15 +124,26 @@ function( util ){ return function( Result ){
 
     var edges = cy.edges();
     var nonfilteredEdges = edges.stdFilter(function( edge ){
-      var strId = '' + edge.data('networkId');
+      var strId = '' + ( edge.data('attr') ? edge.data('attributeId') : edge.data('networkId') );
 
       return netEnabled[ strId ];
     });
     var filteredEdges = edges.not( nonfilteredEdges );
 
+    var attrNodes = cy.nodes('[?attr]');
+    var nonfilteredNodes = attrNodes.stdFilter(function( node ){
+      var strId = '' + node.id();
+
+      return netEnabled[ strId ];
+    });
+    var filteredNodes = attrNodes.not( nonfilteredNodes );
+
     cy.batch(function(){
       edges.removeClass('filtered');
       filteredEdges.addClass('filtered');
+
+      attrNodes.removeClass('filtered');
+      filteredNodes.addClass('filtered');
     });
 
     PubSub.publish('result.filterNetworksFromEnables', {

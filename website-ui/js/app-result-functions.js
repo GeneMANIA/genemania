@@ -76,7 +76,7 @@ function( util ){ return function( Result ){
 
             css['pie_'+p+'_background_size'] = 100/cfns.length;
             css['pie_'+p+'_background_color'] = cfn.color;
-            css['pie_'+p+'_background_opacity'] = node.hasClass(cls) ? 0.4 : 0;
+            css['pie_'+p+'_background_opacity'] = node.hasClass(cls) ? 0.55 : 0;
           } else {
             css['pie_'+p+'_background_size'] = 0;
             css['pie_'+p+'_background_color'] = '#000';

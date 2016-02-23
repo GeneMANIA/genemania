@@ -124,6 +124,10 @@ function( util ){ return function( Result ){
 
     }
 
+    if( opts.all ){
+      this.clearAllHighlights();
+    }
+
     if( opts.genes ){
       removeFromIdList( opts.genes, 'genes' );
     }
@@ -159,6 +163,17 @@ function( util ){ return function( Result ){
     }
 
     this.updateHighlights();
+  };
+
+  rfn.clearAllHighlights = function(){
+    this.highlights = {
+      genes: [],
+      interactions: [],
+      attrs: [],
+      attributeGroups: [],
+      networkGroups: [],
+      networks: []
+    };
   };
 
   rfn.getHighlights = function(){

@@ -1,0 +1,5 @@
+// A debug.js file can be used to debug GeneMANIA locally
+// You can copy this file to `debug/debug.js` if you like
+
+DEBUG = true; // to enable debug-only features etc.
+DEBUG_URL = 'http://localhost:8080/genemania/json/'; // your local genemania instance service URL base

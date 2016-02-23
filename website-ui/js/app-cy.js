@@ -127,7 +127,37 @@ function( cyStylesheet ){
 
           hoverEle = null;
         })
+
+        .on('free', 'node', function(){
+          clearTimeout( hoverTimeout );
+
+          this.trigger('hoverout');
+
+          hoverEle = null;
+        })
       ;
+
+      var unhighlightAll = function(e){
+        if( e.cyTarget && e.cyTarget !== cy ){ return; }
+
+        if( typeof result === 'undefined' ){ return; }
+
+        if( hoverEle ){
+          if( hoverEle.grabbed() ){ return; }
+
+          hoverEle.trigger('hoverout');
+        }
+
+        clearTimeout( hoverTimeout );
+
+        hoverEle = null;
+
+        result.rateLimitedUnhighlight({ all: true });
+      };
+
+      cy.on('mouseout', unhighlightAll);
+
+      window.addEventListener('blur', unhighlightAll);
 
       var menuCommands = function( opts ){
         opts = opts || {};
