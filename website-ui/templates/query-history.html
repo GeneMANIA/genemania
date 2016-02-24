@@ -1,6 +1,6 @@
 <div ng-controller="QueryHistoryCtrl">
 
-  <div class="query-history-expander activatable query-history-expanded-{{query.historyExpanded ? true : false}}" on-tap="query.toggleHistoryExpansion()">
+  <div class="query-history-expander activatable query-ready-{{query.ready ? true : false}} query-history-expanded-{{query.historyExpanded ? true : false}}" on-tap="query.toggleHistoryExpansion()">
     <span class="query-history-expander-icon fa fa-history"></span>
     <span class="query-history-expander-arrow fa fa-angle-up" ng-show="!query.historyExpanded"></span>
     <span class="query-history-expander-arrow fa fa-angle-down" ng-show="query.historyExpanded"></span>

@@ -7,7 +7,11 @@ function( util ){ return function( Result ){
   var r = Result;
   var rfn = r.prototype;
 
+  var defaultDuration = 750;
+
   var defaultPadding = 50;
+
+  var defaultEasing = 'spring(500, 37)';
 
   var getLayoutEles = function(){
     return cy.elements();
@@ -118,7 +122,8 @@ function( util ){ return function( Result ){
     var l = getLayoutEles().makeLayout({
       name: 'concentric',
       animate: options.animate,
-      animationDuration: 500,
+      animationDuration: defaultDuration,
+      animationEasing: defaultEasing,
       concentric: function(){
         var isQuery = this.data('query');
         var isAttr = this.data('attr');
@@ -271,7 +276,8 @@ function( util ){ return function( Result ){
           positions: id2pos,
           fit: options.fit,
           animate: true,
-          animationDuration: 500,
+          animationEasing: defaultEasing,
+          animationDuration: defaultDuration,
           padding: defaultPadding
         });
 
@@ -310,7 +316,8 @@ function( util ){ return function( Result ){
       avoidOverlapPadding: 2,
       condense: true,
       animate: options.animate,
-      animationDuration: 500,
+      animationEasing: defaultEasing,
+      animationDuration: defaultDuration,
       cols: hasAttrs ? 3 : 2,
       position: function(n){
         if( !hasAttrs ){
@@ -349,7 +356,8 @@ function( util ){ return function( Result ){
     var l = getLayoutEles().makeLayout({
       name: 'preset',
       animate: options.animate,
-      animationDuration: 500,
+      animationDuration: defaultDuration,
+      animationEasing: defaultEasing,
       positions: this.prelayoutPosns,
       padding: defaultPadding
     });
@@ -369,7 +377,7 @@ function( util ){ return function( Result ){
 
   rfn.fitGraph = function(options){
     options = $.extend({
-      duration: 500,
+      duration: defaultDuration,
       resizeCy: true
     }, options);
 
@@ -393,8 +401,8 @@ function( util ){ return function( Result ){
         fit: {
           eles: cy.elements(),
           padding: defaultPadding
-        }
-      }, {
+        },
+        easing: options.duration > 0 ? defaultEasing : 'linear',
         duration: options.duration,
         complete: function(){
           var cl = container.classList;
