@@ -278,6 +278,14 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
       rAttrs.sort( sortByWeight );
     }
 
+    // process the interactions
+    var intnMaxAbsW = _.max( rInteractions.map(function( rIntn ){ return rIntn.absoluteWeight; }) );
+    for( var i = 0; i < rInteractions.length; i++ ){
+      var rIntn = rInteractions[i];
+
+      rIntn.absoluteWeightPercent = rIntn.absoluteWeight / intnMaxAbsW;
+    }
+
     rAllGrs.sort( sortByWeight );
   };
 
@@ -423,6 +431,8 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
               source: src,
               target: tgt,
               weight: rIntn.interaction.weight,
+              absoluteWeight: rIntn.absoluteWeight,
+              absoluteWeightPercent: rIntn.absoluteWeightPercent,
               group: gr.code,
               networkId: rNet.network.id,
               networkGroupId: rGr.networkGroup.id,

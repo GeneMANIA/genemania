@@ -100,7 +100,7 @@ function(){
           'haystack-radius': 0.5,
           'opacity': 0.4,
           'line-color': '#bbb',
-          'width': 'mapData(weight, 0, 1, 1, 8)',
+          'width': 'mapData(absoluteWeightPercent, 0, 1, 1.5, 16)',
           'overlay-padding': 3
         }
       },

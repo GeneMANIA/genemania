@@ -24,7 +24,7 @@ function( $http, util, $$user ){
         var oReq = $$search.request = new XMLHttpRequest();
         var tStart = Date.now();
         var t100;
-        var t100Val = 2; // percent (normalised on 0-100) of time it takes to do the initial upload
+        var t100Val = 1.5; // percent (normalised on 0-100) of time it takes to do the initial upload
         var deltaT = 50;
 
         // handle progress

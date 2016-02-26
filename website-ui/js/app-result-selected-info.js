@@ -31,6 +31,12 @@ function( util, ngCy ){ return function( Result ){
     this.selectedResultGene = opts.rGene;
     this.selectedResultAttribute = opts.rAttr;
     this.selectedResultInteraction = opts.rIntn;
+    this.selectedResultInteractions = opts.rIntns ? opts.rIntns.sort(function( a, b ){
+      return b.absoluteWeight - a.absoluteWeight;
+    }) : null;
+    this.selectedInteractionIds = ( opts.rIntns || [] ).map(function( rIntn ){
+      return rIntn.id;
+    });
     this.selectedInfoOpen = true;
 
     if( opts.publish ){
@@ -55,10 +61,20 @@ function( util, ngCy ){ return function( Result ){
   };
 
   rfn.selectInteraction = function( idOrObj ){
-    var rIntn = typeof idOrObj === typeof {} ? idOrObj : this.resultInteractionsById[ idOrObj ];
+    var rIntn1 = typeof idOrObj === typeof {} ? idOrObj : this.resultInteractionsById[ idOrObj ];
+    var gid11 = rIntn1.fromGene.gene.id;
+    var gid12 = rIntn1.toGene.gene.id;
+
+    var rIntns = this.resultInteractions.filter(function( rIntn2 ){
+      var gid21 = rIntn2.fromGene.gene.id;
+      var gid22 = rIntn2.toGene.gene.id;
+
+      return ( gid11 === gid21 && gid12 === gid22 ) || ( gid11 === gid22 && gid12 === gid21 );
+    });
 
     this.openSelectedInfo({
-      rIntn: rIntn
+      rIntn: rIntn1,
+      rIntns: rIntns
     });
   };
 
@@ -74,14 +90,8 @@ function( $scope, updateScope, ngCy ){
     $scope.rGene = $scope.result.selectedResultGene;
     $scope.rAttr = $scope.result.selectedResultAttribute;
     $scope.rIntn = $scope.result.selectedResultInteraction;
-
-    if( $scope.rIntn ){
-      $scope.rNet = $scope.rIntn.resultNetwork;
-      $scope.net = $scope.rNet.network;
-    } else {
-      $scope.rNet = null;
-      $scope.net = null;
-    }
+    $scope.rIntns = $scope.result.selectedResultInteractions;
+    $scope.intnIds = $scope.result.selectedInteractionIds;
 
     updateScope();
   }

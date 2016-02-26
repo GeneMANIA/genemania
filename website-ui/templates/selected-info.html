@@ -37,13 +37,17 @@
       </div>
     </div>
 
-    <div ng-if="rIntn" on-hoverover="result.rateLimitedHighlight({ interactions: [ rIntn.id ] })" on-hoverout="result.rateLimitedUnhighlight({ interactions: [ rIntn.id ] })">
+    <div ng-if="rIntns" on-hoverover="result.rateLimitedHighlight({ interactions: intnIds })" on-hoverout="result.rateLimitedUnhighlight({ interactions: intnIds })">
       <div ng-include="'templates/selected-info-close.html'"></div>
       <div class="selected-info-title">
         {{rIntn.fromGene.name}} - {{rIntn.toGene.name}}
       </div>
       <div class="selected-info-details">
-        <div ng-include="'templates/interaction-details-dyn.html'"></div>
+        <div ng-repeat="rI in rIntns track by rI.id">
+          <div ng-init="rNet = rI.resultNetwork; net = rNet.network">
+            <div ng-include="'templates/interaction-details-dyn.html'"></div>
+          </div>
+        </div>
       </div>
     </div>
 
