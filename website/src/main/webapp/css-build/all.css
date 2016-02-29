@@ -6072,7 +6072,6 @@ a:active:after {
 .check,
 .radio {
   width: 1em;
-  color: #8bb0d0;
   display: inline-block;
   font-family: FontAwesome;
   font-style: normal;
@@ -6429,10 +6428,10 @@ sup {
   transition-duration: 250ms;
 }
 .query-searching-true .query-search-icon {
-  -webkit-animation: spin 1s infinite linear;
-  -moz-animation: spin 1s infinite linear;
-  -o-animation: spin 1s infinite linear;
-  animation: spin 1s infinite linear;
+  -webkit-animation: fa-spin 1s infinite linear;
+  -moz-animation: fa-spin 1s infinite linear;
+  -o-animation: fa-spin 1s infinite linear;
+  animation: fa-spin 1s infinite linear;
   -webkit-transform-origin: 48% 50%;
   -moz-transform-origin: 48% 50%;
   -o-transform-origin: 48% 50%;
@@ -7020,15 +7019,27 @@ sup {
   border-top-right-radius: 1em;
   text-align: center;
   cursor: pointer;
+  opacity: 1;
   -webkit-transform: translate3d(0, 12em, 0);
   -moz-transform: translate3d(0, 12em, 0);
   -o-transform: translate3d(0, 12em, 0);
   -ms-transform: translate3d(0, 12em, 0);
   transform: translate3d(0, 12em, 0);
-  -webkit-transition: -webkit-transform linear 150ms;
-  -moz-transition: -moz-transform linear 150ms;
-  -o-transition: -o-transform linear 150ms;
-  transition: -webkit-transform linear 150ms,-moz-transform linear 150ms,-o-transform linear 150ms,transform linear 150ms;
+  -webkit-transition-timing-function: ease;
+  -moz-transition-timing-function: ease;
+  -o-transition-timing-function: ease;
+  transition-timing-function: ease;
+  -webkit-transition-duration: 150ms;
+  -moz-transition-duration: 150ms;
+  -o-transition-duration: 150ms;
+  transition-duration: 150ms;
+  -webkit-transition-property: -webkit-transform, opacity;
+  -moz-transition-property: -moz-transform, opacity;
+  -o-transition-property: -o-transform, opacity;
+  transition-property: -webkit-transform,-moz-transform,-o-transform,transform, opacity;
+}
+.query-history-expander.query-ready-false {
+  opacity: 0;
 }
 .query-history-expander-icon {
   font-size: 1.25em;
@@ -7059,10 +7070,10 @@ sup {
   -o-transform: translate3d(0, 12em, 0);
   -ms-transform: translate3d(0, 12em, 0);
   transform: translate3d(0, 12em, 0);
-  -webkit-transition: -webkit-transform linear 150ms;
-  -moz-transition: -moz-transform linear 150ms;
-  -o-transition: -o-transform linear 150ms;
-  transition: -webkit-transform linear 150ms,-moz-transform linear 150ms,-o-transform linear 150ms,transform linear 150ms;
+  -webkit-transition: -webkit-transform ease 150ms;
+  -moz-transition: -moz-transform ease 150ms;
+  -o-transition: -o-transform ease 150ms;
+  transition: -webkit-transform ease 150ms,-moz-transform ease 150ms,-o-transform ease 150ms,transform ease 150ms;
 }
 .query-history-entry,
 .query-history-delete {
@@ -7113,18 +7124,6 @@ sup {
   background-position: 50% 50%;
   z-index: 10;
 }
-.query-history-delete-icon {
-  position: absolute;
-  display: inline-block;
-  width: 100%;
-  height: 1em;
-  left: 0;
-  text-align: center;
-  top: 50%;
-  margin-top: -0.5em;
-  font-size: 4em;
-  color: #fff;
-}
 .query-history-label,
 .query-history-delete-label {
   z-index: 100;
@@ -7162,14 +7161,25 @@ sup {
   left: 10em;
   top: 0;
   border: 1px solid rgba(255, 0, 0, 0.25);
-  box-sizing: border-box;
   background: #7f0000;
   margin-left: -1.666em;
   margin-top: -0.333em;
-  width: 2em;
-  height: 2em;
+  width: 1.8em;
+  height: 1.8em;
   border-radius: 999px;
   text-align: center;
+}
+.query-history-delete-icon {
+  position: absolute;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  text-align: center;
+  top: 50%;
+  margin-top: -0.5em;
+  font-size: 4em;
+  color: #fff;
 }
 .query-history-delete-entry-icon {
   margin-top: 0.4em;
@@ -7324,10 +7334,10 @@ sup {
   -o-transform: translate3d(0, 0, 0);
   -ms-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
-  -webkit-transition: -webkit-transform linear 200ms;
-  -moz-transition: -moz-transform linear 200ms;
-  -o-transition: -o-transform linear 200ms;
-  transition: -webkit-transform linear 200ms,-moz-transform linear 200ms,-o-transform linear 200ms,transform linear 200ms;
+  -webkit-transition: -webkit-transform ease 200ms;
+  -moz-transition: -moz-transform ease 200ms;
+  -o-transition: -o-transform ease 200ms;
+  transition: -webkit-transform ease 200ms,-moz-transform ease 200ms,-o-transform ease 200ms,transform ease 200ms;
 }
 .network-list-expanded-false {
   -webkit-transform: translate3d(15.75em, 0, 0);
@@ -7667,6 +7677,14 @@ sup {
 }
 .selected-info-details {
   font-size: 0.8em;
+  max-height: 20.5em;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  -o-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 .selected-info-open-true {
   opacity: 1;
@@ -7679,15 +7697,22 @@ sup {
   line-height: 1.3;
 }
 .selected-info-commands {
-  border-top: 1px solid #666;
   margin-top: 0.5em;
 }
 .selected-info-command {
   display: inline-block;
   position: relative;
   padding: 0.25em;
-  width: 2em;
+  width: 28%;
   text-align: center;
+  border: 1px solid #aaa;
+  border-radius: 0.25em;
+  margin: 0 0.05em;
+}
+.selected-info-description {
+  display: inline-block;
+  font-size: 0.8em;
+  position: relative;
 }
 .functions {
   position: absolute;
@@ -7764,4 +7789,16 @@ sup {
   opacity: 0.5;
   color: #fff;
   text-shadow: none;
+}
+.interaction-details {
+  position: relative;
+  padding: 0 0 0.333em 0.5em;
+  margin-top: 0.25em;
+  border-top: 1px solid #5a5a5a;
+}
+.interaction-details-selected {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 0.5em;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
 }

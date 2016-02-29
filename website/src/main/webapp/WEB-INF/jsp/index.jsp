@@ -6,8 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="format-detection" content="telephone=no">
-  <link rel="shortcut icon" href="img/favicon.ico" />
-  <link rel="icon" type="image/svg" href="img/spiral.svg" />
+  <link rel="shortcut icon" type="image/png" href="img/spiral.png" />
 
   <title>GeneMANIA</title>
 
