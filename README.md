@@ -39,7 +39,6 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
 
 **Targets:** `gulp <target1> <target2> ...`
  * `clean` : clean built java & ui files (resets ui to default unminified state)
- * `clean-all` : clean everything (including java)
  * `minify`/`build` : build the minified ui
  * `watch` (default) : autocompilation & livereload for dev
  * Building java website
@@ -49,6 +48,7 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
   * `javac-clean` : clean java website built files
   * `java-deploy` : deploy java website to tomcat
   * `java-deploy-clean` : clean java website in tomcat
+  * `website` : deploys the built ui to the tomcat app war dir
 
 
 ## Deployment instructions
