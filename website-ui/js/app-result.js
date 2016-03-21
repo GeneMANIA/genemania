@@ -512,14 +512,24 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
     for( var i = 0; i < qNodes.length; i++ ){
       var node = qNodes[i];
       var avgConndScore = 0;
+      var totalWeights = 0;
 
       var edges = node.connectedEdges().forEach(function( edge ){
         var otherNode = edge.connectedNodes().not( node );
 
+        if( otherNode.data('query') ){
+          return;
+        }
+
         avgConndScore += otherNode.data('score') * edge.data('weight');
+        totalWeights += edge.data('weight');
       });
 
-      avgConndScore /= edges.length;
+      avgConndScore /= totalWeights;
+
+      if( totalWeights === 0 ){
+        avgConndScore = 0;
+      }
 
       node.data('avgConndScore', avgConndScore);
     }
