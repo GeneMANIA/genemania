@@ -100,134 +100,136 @@ var config = {
 };
 
 (function(){
-  var wg = config.networks.weightings;
-
-  for( var i = 0; i < wg.length; i++ ){
-    wg[ wg[i].value ] = wg[i]; // allow access by value
-  }
-
-  config.networks.weightingGroups = [
-    { name: 'Query-dependent weighting', weightings: [ wg.AUTOMATIC_SELECT, wg.AUTOMATIC ] },
-    { name: 'Gene Ontology (GO) weighting', weightings: [ wg.BP, wg.MF, wg.CC ] },
-    { name: 'Equal weighting', weightings: [ wg.AVERAGE, wg.AVERAGE_CATEGORY ] }
-  ];
-
-  config.networks.defaultWeighting = wg.AUTOMATIC_SELECT;
-})();
-
-(function(){
   var strcmp = function( str1, str2 ){
     return ( ( str1 == str2 ) ? 0 : ( ( str1 > str2 ) ? 1 : -1 ) );
   };
 
-  config.networks.sorters = [
-    {
-      name: 'first author',
-      sorter: function(a, b){
-        var aAuth = a.metadata.firstAuthor.toLowerCase();
-        var bAuth = b.metadata.firstAuthor.toLowerCase();
+  (function(){
+    var wg = config.networks.weightings;
 
-        return strcmp(aAuth, bAuth);
-      }
-    },
-
-    {
-      name: 'last author',
-      sorter: function(a, b){
-        var aAuth = a.metadata.lastAuthor.toLowerCase();
-        var bAuth = b.metadata.lastAuthor.toLowerCase();
-
-        return strcmp(aAuth, bAuth);
-      }
-    },
-
-    {
-      name: 'size',
-      sorter: function(a, b){
-        var aSize = a.metadata.interactionCount;
-        var bSize = b.metadata.interactionCount;
-
-        return bSize - aSize; // bigger first
-      }
-    },
-
-    {
-      name: 'date',
-      sorter: function(a, b){
-        var aYr = parseInt( a.metadata.yearPublished, 10 );
-        var bYr = parseInt( b.metadata.yearPublished, 10 );
-
-        return bYr - aYr; // newer first
-      }
-    }
-  ];
-
-  var colorsByCode = config.networks.colorsByCode = {};
-  var colors = config.networks.colors;
-  for( var i = 0; i < colors.length; i++ ){
-    var spec = colors[i];
-    var color = spec.color;
-    var code = spec.code;
-
-    colorsByCode[ code ] = color;
-  }
-})();
-
-
-(function(){
-  config.networks.postprocess = function( net ){
-    var meta = net.metadata;
-    var authors = meta.authors.split(/\s*,\s*/);
-    var sAuthors;
-
-    if( authors.length === 0 ){
-      sAuthors = '';
-    } else if( authors.length < 2 ){
-      sAuthors = authors[0];
-    } else {
-      sAuthors = authors[0] + ' et al';
+    for( var i = 0; i < wg.length; i++ ){
+      wg[ wg[i].value ] = wg[i]; // allow access by value
     }
 
-    meta.shortAuthors = sAuthors;
-    meta.firstAuthor = authors[0];
-    meta.lastAuthor = authors[ authors.length - 1 ];
+    config.networks.weightingGroups = [
+      { name: 'Query-dependent weighting', weightings: [ wg.AUTOMATIC_SELECT, wg.AUTOMATIC ] },
+      { name: 'Gene Ontology (GO) weighting', weightings: [ wg.BP, wg.MF, wg.CC ] },
+      { name: 'Equal weighting', weightings: [ wg.AVERAGE, wg.AVERAGE_CATEGORY ] }
+    ];
 
-    meta.networkType = meta.networkType[0].toUpperCase() + meta.networkType.substr(1);
+    config.networks.defaultWeighting = wg.AUTOMATIC_SELECT;
+  })();
 
-    var mappedSourceName = config.networks.sourceName[ meta.source ];
+  (function(){
+    config.networks.sorters = [
+      {
+        name: 'first author',
+        sorter: function(a, b){
+          var aAuth = a.metadata.firstAuthor.toLowerCase();
+          var bAuth = b.metadata.firstAuthor.toLowerCase();
 
-    if( meta.networkType === 'Uploaded' ){
-      mappedSourceName = 'a file';
+          return strcmp(aAuth, bAuth);
+        }
+      },
 
-      net.uploaded = true;
+      {
+        name: 'last author',
+        sorter: function(a, b){
+          var aAuth = a.metadata.lastAuthor.toLowerCase();
+          var bAuth = b.metadata.lastAuthor.toLowerCase();
+
+          return strcmp(aAuth, bAuth);
+        }
+      },
+
+      {
+        name: 'size',
+        sorter: function(a, b){
+          var aSize = a.metadata.interactionCount;
+          var bSize = b.metadata.interactionCount;
+
+          return bSize - aSize; // bigger first
+        }
+      },
+
+      {
+        name: 'date',
+        sorter: function(a, b){
+          var aYr = parseInt( a.metadata.yearPublished, 10 );
+          var bYr = parseInt( b.metadata.yearPublished, 10 );
+
+          return bYr - aYr; // newer first
+        }
+      }
+    ];
+
+    var colorsByCode = config.networks.colorsByCode = {};
+    var colors = config.networks.colors;
+    for( var i = 0; i < colors.length; i++ ){
+      var spec = colors[i];
+      var color = spec.color;
+      var code = spec.code;
+
+      colorsByCode[ code ] = color;
+    }
+  })();
+
+
+  (function(){
+    config.networks.postprocess = function( net ){
+      var meta = net.metadata;
+      var authors = meta.authors.split(/\s*,\s*/);
+      var sAuthors;
+
+      if( authors.length === 0 ){
+        sAuthors = '';
+      } else if( authors.length < 2 ){
+        sAuthors = authors[0];
+      } else {
+        sAuthors = authors[0] + ' et al';
+      }
+
+      meta.shortAuthors = sAuthors;
+      meta.firstAuthor = authors[0];
+      meta.lastAuthor = authors[ authors.length - 1 ];
+
+      meta.networkType = meta.networkType[0].toUpperCase() + meta.networkType.substr(1);
+
+      var mappedSourceName = config.networks.sourceName[ meta.source ];
+
+      if( meta.networkType === 'Uploaded' ){
+        mappedSourceName = 'a file';
+
+        net.uploaded = true;
+      }
+
+      meta.sourceName = mappedSourceName ? mappedSourceName : 'unknown';
+
+      meta.interactionCountFormatted = numeral( meta.interactionCount ).format('0,0');
+
+      var tags = net.tags;
+      for( var i = 0; i < tags.length; i++ ){
+        var tag = tags[i];
+
+        tag.nameFormatted = tag.name.toLowerCase();
+      }
+
+      tags.sort(function(a, b){
+        var aName = a.nameFormatted;
+        var bName = b.nameFormatted;
+
+        return strcmp( aName, bName );
+      });
+    };
+
+    if( config.debug ){
+      Promise.longStackTraces(); // enable long stack traces in bluebird for debugging
     }
 
-    meta.sourceName = mappedSourceName ? mappedSourceName : 'unknown';
-
-    meta.interactionCountFormatted = numeral( meta.interactionCount ).format('0,0');
-
-    var tags = net.tags;
-    for( var i = 0; i < tags.length; i++ ){
-      var tag = tags[i];
-
-      tag.nameFormatted = tag.name.toLowerCase();
+    if( !config.debug ){
+      config.service.baseUrl = config.service.baseUrlProd;
     }
 
-    tags.sort(function(a, b){
-      var aName = a.nameFormatted;
-      var bName = b.nameFormatted;
-
-      return strcmp( aName, bName );
-    });
-  };
-
-  if( config.debug ){
-    Promise.longStackTraces(); // enable long stack traces in bluebird for debugging
-  }
-
-  if( !config.debug ){
-    config.service.baseUrl = config.service.baseUrlProd;
-  }
-
-  console.log('Init app with debug=' + config.debug);
+    console.log('Init app with debug=' + config.debug);
+  })();
 })();
