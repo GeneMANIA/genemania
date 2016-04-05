@@ -7,37 +7,23 @@
 
 -->
 <urlrewrite>
-	
-	<rule>
-		<note>Upgrade IE</note>
-		<condition name="user-agent" operator="equal">MSIE [1-8]</condition>
-		<from>^/$</from>
-		<to>/public-html/ie</to>
-	</rule>
-	<rule>
-		<note>Upgrade IE</note>
-		<condition name="user-agent" operator="equal">MSIE [1-8]</condition>
-		<from>^/([a-zA-Z0-9]+)/?$</from>
-		<to>/public-html/ie</to>
-	</rule>
-	<rule>
-		<note>Upgrade IE</note>
-		<condition name="user-agent" operator="equal">MSIE [1-8]</condition>
-		<from>^/(((?:(?!json)[a-zA-Z0-9_]+))(/[a-zA-Z0-9_]+)+)/?$</from>
-		<to>/public-html/ie</to>
-	</rule>
-	
-	
-	
-	
-	<rule>
+
+		<rule>
         <note>
             Redirect to default page
         </note>
         <from>^/$</from>
         <to>/public-html/search</to>
     </rule>
-   
+
+		<rule>
+        <note>
+            Redirect old data download URL to data.genemania.org
+        </note>
+        <from>/data</from>
+        <to type="redirect">http://data.genemania.org</to>
+    </rule>
+
     <rule>
         <note>
             Append file name to generic dynamic file
@@ -45,7 +31,7 @@
         <from>^/file/(.+)$</from>
         <to>/public-html/file</to>
     </rule>
-   
+
    <rule>
         <note>
             Append file name to exports
@@ -53,7 +39,7 @@
         <from>^/export/([a-z_]+)/(.+)$</from>
         <to>/public-html/export/$1</to>
     </rule>
-   
+
     <rule>
         <note>
             Redirect link to search/{organism}/{gene_names}
@@ -61,7 +47,7 @@
         <from>^/search/([a-z_]+)/(.+)$</from>
         <to>/public-html/link?o=$1&amp;g=$2</to>
     </rule>
-    
+
     <rule>
         <note>
             Redirect link to search/{organism} (error)
@@ -69,32 +55,32 @@
         <from>^/search/([a-z_]+)/?$</from>
         <to>/public-html/link?o=$1</to>
     </rule>
-   
+
    <rule>
    		<note>Top level URLs</note>
         <from>^/([a-zA-Z0-9]+)/?$</from>
         <to>/public-html/$1</to>
     </rule>
-   
+
    	<rule>
    		<note>
    			Levels lower than one
-   			
+
    			e.g. /foo/bar
    			     foo/bar/
    			     foo/bar/baz
-   			
+
    			NOTE: It's important that there's the !json bit.  Otherwise, it won't be picked up
    			as a JSON controller.
    		</note>
         <from>^/(((?:(?!json)[a-zA-Z0-9_]+))(/[a-zA-Z0-9_]+)+)/?$</from>
         <to>/public-html/$1</to>
     </rule>
-	
-	<!-- 
-	
+
+	<!--
+
 	EXAMPLE RULES
-	
+
     <rule>
         <note>
             The rule means that requests to /test/status/ will be redirected to /rewrite-status
@@ -180,4 +166,3 @@
     -->
 
 </urlrewrite>
-
