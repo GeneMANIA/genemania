@@ -153,7 +153,7 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
     for( var i = 0; i < self.resultGenes.length; i++ ){
       var rg = self.resultGenes[i];
 
-      rg.name = rg.gene.name = rg.typedName || rg.gene.symbol;
+      rg.name = rg.gene.name = rg.gene.symbol;
 
       m[ '' + rg.gene.id ] = rg;
     }
