@@ -253,15 +253,20 @@ app.directive('ngRangeslider', [function() {
             var updateOn = attrs.ngRangesliderUpdateOn;
             var updated = false;
 
+            var update = _.debounce( function(){
+              if( updated ){ return; }
+
+              updated = true;
+              $e.rangeslider('update', true);
+            }, 20 );
+
             if( updateOn ){
               scope.$parent.$watch(updateOn, function(val){
-                if( !updated && val ){
-                  updated = true;
+                if( updated || !val ){ return; }
 
-                  setTimeout(function(){
-                    $e.rangeslider('update', true);
-                  }, 0);
-                }
+                $e.css('opacity', 0.01);
+                // $e.fadeIn(100);
+                update();
               });
             }
 
