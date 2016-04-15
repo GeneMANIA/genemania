@@ -39,6 +39,8 @@ app.factory('io', [ function(){
 
         resolve( json );
       } );
+    }).catch(function(){ // reads can fail in private mode
+      return self.json = {};
     });
   };
 
@@ -50,7 +52,8 @@ app.factory('io', [ function(){
 
       if( json !== undefined ){
         localforage.setItem( self.ns, JSON.stringify( json ), function( err ){
-          if( err ){ reject(err); return; }
+          // if( err ){ reject(err); return; }
+          // don't reject because writes can fail in private mode
 
           resolve( json );
         } );
@@ -72,6 +75,8 @@ app.factory('io', [ function(){
 
         resolve();
       } );
+    }).catch(function(){ // deletes can fail in private mode
+      return self.json = {};
     });
   };
 
