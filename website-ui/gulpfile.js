@@ -170,7 +170,7 @@ gulp.task('clean-all', ['javac-clean', 'java-deploy-clean', 'clean'], function( 
 });
 
 // convenient shortcut
-gulp.task('java-debug', function(){
+gulp.task('java-debug', function( next ){
   return runSequence( 'javac-wdeps', 'java-deploy', next );
 });
 
