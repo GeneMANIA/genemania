@@ -31,7 +31,8 @@ var config = {
       { code: 'spd_attr', color: '#D0D0D0' },
       { code: 'reg', color: '#D0D0D0' },
       { code: 'reg_attr', color: '#D0D0D0' },
-      { code: 'user', color: '#f0ec86' }
+      { code: 'user', color: '#f0ec86' },
+      { code: 'other', color: '#bbbbbb' }
     ],
 
     sourceName: {
