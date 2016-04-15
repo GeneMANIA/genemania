@@ -15,8 +15,8 @@ app.directive('qtip', function(){
       var $posTarget = attrs.qtipPosTarget ? $('#' + attrs.qtipPosTarget) : undefined;
       var $vpTarget = attrs.qtipViewportTarget ? $('#' + attrs.qtipViewportTarget) : undefined;
       var $posCtr = attrs.qtipContainer ? $('#' + attrs.qtipContainer) : undefined;
-      var showEvent = attrs.showEvent || 'click';
-      var hideEvent = attrs.hideEvent || 'unfocus click';
+      var showEvent = attrs.qtipShowEvent || 'click';
+      var hideEvent = attrs.qtipHideEvent || 'unfocus click';
       var adjustMethod = attrs.qtipAdjustMethod || 'shift flipinvert flip';
       var adjustResize = attrs.qtipAdjustResize === 'true' ? true : false;
       var title = attrs.title;
