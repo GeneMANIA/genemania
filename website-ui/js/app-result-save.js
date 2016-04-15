@@ -7,25 +7,46 @@ function( util ){ return function( Result ){
   var r = Result;
   var rfn = r.prototype;
 
+  function base64ToBlob(base64Data, contentType) {
+    contentType = contentType || base64Data.substr(0, 100).match(/data:(.+?);/)[1];
+    var sliceSize = 1024;
+    var byteCharacters = atob(base64Data);
+    var bytesLength = byteCharacters.length;
+    var slicesCount = Math.ceil(bytesLength / sliceSize);
+    var byteArrays = new Array(slicesCount);
+
+    for (var sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+      var begin = sliceIndex * sliceSize;
+      var end = Math.min(begin + sliceSize, bytesLength);
+      var bytes = new Array(end - begin);
+
+      for (var offset = begin, i = 0 ; offset < end; ++i, ++offset) {
+        bytes[i] = byteCharacters[offset].charCodeAt(0);
+      }
+
+      byteArrays[sliceIndex] = new Uint8Array(bytes);
+    }
+
+    return new Blob(byteArrays, { type: contentType });
+  }
+
   function download( filename, content, plain ){
-    var pom = document.createElement('a');
+    var blob;
 
     if( plain ){
-      content = 'data:text/plain;charset=utf-8,' + encodeURIComponent(content);
-      //content = 'data:text/plain;charset=utf-8;base64,' + btoa(content);
-    }
-
-    pom.setAttribute('href', content);
-    pom.setAttribute('download', filename);
-    pom.setAttribute('target', '_blank');
-
-    if( document.createEvent ){
-      var event = document.createEvent('MouseEvents');
-      event.initEvent('click', true, true);
-      pom.dispatchEvent(event);
+      blob = new Blob([content] , {type:'text/plain'});
     } else {
-      pom.click();
+      var pt1 = 'data:';
+      var pt2 = ';';
+      var pt3 = 'base64,';
+
+      var contentType = content.substring( pt1.length, content.indexOf(pt2) );
+      var base64 = content.substring( content.indexOf(pt3) + pt3.length );
+
+      blob = base64ToBlob( base64, contentType );
     }
+
+    saveAs( blob, filename );
   }
 
   rfn.saveImage = function( opts ){
