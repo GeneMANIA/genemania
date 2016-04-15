@@ -56,6 +56,8 @@ function( util, Result, io, ngCy ){ return function( Query ){
   qfn.succeed = function( historyEntry ){
     var hEnt = historyEntry;
 
+    var sameDataVer = this.version.dbVersion === historyEntry.version.dbVersion;
+
     var newQuery = Query.current = new Query({
       params: hEnt.params,
       version: hEnt.version
@@ -63,7 +65,7 @@ function( util, Result, io, ngCy ){ return function( Query ){
 
     var result = newQuery.result = new Result({
       query: newQuery,
-      positions: hEnt.positions,
+      positions: sameDataVer ? hEnt.positions : undefined,
       store: false
     });
 
