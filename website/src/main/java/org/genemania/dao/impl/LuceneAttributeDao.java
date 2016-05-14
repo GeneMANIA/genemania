@@ -15,13 +15,13 @@ public class LuceneAttributeDao implements AttributeDao {
     }
 
     @Override
-    @Cacheable(cacheName = "attributeCache")
+    // @Cacheable(cacheName = "attributeCache")
     public Attribute findAttribute(long organismId, long attributeId) throws DataStoreException {
         return connector.findAttribute(organismId, attributeId);
     }
 
     @Override
-    @Cacheable(cacheName = "attributeIsValidCache")
+    // @Cacheable(cacheName = "attributeIsValidCache")
     public boolean isValidAttribute(long organismId, long attributeId)
             throws DataStoreException {
         return connector.isValidAttribute(organismId, attributeId);

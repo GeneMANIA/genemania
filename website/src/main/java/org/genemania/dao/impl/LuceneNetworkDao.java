@@ -38,7 +38,7 @@ public class LuceneNetworkDao implements NetworkDao {
     }
 
     // __[interface implementation]____________________________________________
-    @Cacheable(cacheName = "networkCache")
+    // @Cacheable(cacheName = "networkCache")
     public InteractionNetwork findNetwork(long networkId)
             throws DataStoreException {
         return connector.findNetworkById(networkId);
@@ -47,7 +47,7 @@ public class LuceneNetworkDao implements NetworkDao {
     // need to use a string as a key, since ehcache doesn't hash two long params
     // correctly (we get collisions for the same networks for different
     // organisms)
-    @Cacheable(cacheName = "networkIsValidCache", keyGenerator = @KeyGenerator(name = "StringCacheKeyGenerator"))
+    // @Cacheable(cacheName = "networkIsValidCache", keyGenerator = @KeyGenerator(name = "StringCacheKeyGenerator"))
     public boolean isValidNetwork(long organismId, long networkId)
             throws DataStoreException {
         return connector.isValidNetwork(organismId, networkId);

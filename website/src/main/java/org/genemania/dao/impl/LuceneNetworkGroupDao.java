@@ -44,7 +44,7 @@ public class LuceneNetworkGroupDao implements NetworkGroupDao {
 	}
 
 	// __[interface implementation]____________________________________________
-	@Cacheable(cacheName = "networkGroupsByOrganismCache")
+	// @Cacheable(cacheName = "networkGroupsByOrganismCache")
 	public List<InteractionNetworkGroup> findNetworkGroupsByOrganism(
 			long organismId) throws DataStoreException {
 		return connector.findNetworkGroupsByOrganism(organismId);
@@ -52,7 +52,7 @@ public class LuceneNetworkGroupDao implements NetworkGroupDao {
 	}
 
 	// TODO revise when attributes are implemented fully in the engine
-	@Cacheable(cacheName = "networkGroupsByNameCache")
+	// @Cacheable(cacheName = "networkGroupsByNameCache")
 	public InteractionNetworkGroup findNetworkGroupByName(long organismId,
 			String name) throws DataStoreException {
 		return connector.getNetworkGroupByName(

@@ -14,7 +14,7 @@ public class LuceneAttributeGroupDao implements AttributeGroupDao {
 	}
 
 	@Override
-	@Cacheable(cacheName = "attributeGroupsByOrganismCache")
+	// @Cacheable(cacheName = "attributeGroupsByOrganismCache")
 	public List<AttributeGroup> findAttributeGroupsByOrganism(long organismId) {
 	    return connector.findAttributeGroupsByOrganism(organismId);
 	}

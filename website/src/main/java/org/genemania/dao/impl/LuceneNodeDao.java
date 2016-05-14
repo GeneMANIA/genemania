@@ -42,7 +42,7 @@ public class LuceneNodeDao implements NodeDao {
 	}
 
 	// __[interface implementation]____________________________________________
-	@Cacheable(cacheName="nodeCache")
+	// @Cacheable(cacheName="nodeCache")
 	public Node findNode(long organismId, long nodeId) throws DataStoreException {
 		return connector.findNodeById(nodeId, organismId);
 	}

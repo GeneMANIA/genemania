@@ -42,7 +42,7 @@ public class LuceneStatsDao implements StatsDao {
 	}
 
 	// __[interface implementation]____________________________________________
-	@Cacheable(cacheName="latestStatisticsCache")
+	// @Cacheable(cacheName="latestStatisticsCache")
 	public Statistics getLatestStatistics() throws DataStoreException {
 		return connector.getLatestStatistics();
 	}

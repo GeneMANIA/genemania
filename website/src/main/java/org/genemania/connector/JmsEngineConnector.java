@@ -51,7 +51,7 @@ public class JmsEngineConnector implements EngineConnector  {
     public JmsEngineConnector() {}
 
     @Override
-    @Cacheable(cacheName="searchResultsCache", keyGenerator=@KeyGenerator(name="StringCacheKeyGenerator"))
+    // @Cacheable(cacheName="searchResultsCache", keyGenerator=@KeyGenerator(name="StringCacheKeyGenerator"))
     public RelatedGenesWebResponseDto getRelatedGenes(RelatedGenesWebRequestDto dto) throws ApplicationException {
         LOG.info("getRelatedGenes request");
 
