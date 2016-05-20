@@ -11,8 +11,8 @@
     </parent>
     
 
-    <groupId>org.genemania</groupId>
     <artifactId>plugin-parent</artifactId>
+    <version>3.4.1</version>
     <packaging>pom</packaging>
     <name>GeneMANIA Cytoscape App Parent</name>
 
@@ -189,12 +189,12 @@
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>genemania-common</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>genemania-engine</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0</version>
         </dependency>
         
         <dependency>

@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.genemania</groupId>
         <artifactId>plugin-parent</artifactId>
-        <version>3.4.0</version>
+        <version>3.4.1</version>
         <relativePath>..</relativePath>
     </parent>
     
@@ -16,7 +16,7 @@
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>plugin-core</artifactId>
-            <version>${project.version}</version>
+            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
