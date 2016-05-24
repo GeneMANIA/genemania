@@ -9,7 +9,7 @@
     <properties>
 		<bundle.symbolicName>org.genemania.plugin-impl</bundle.symbolicName>
 		<bundle.namespace>org.genemania.plugin.cytoscape3</bundle.namespace>
-		<cy3.version>3.2.0</cy3.version>
+		<cy3.version>3.3.0</cy3.version>
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<maven-pax-plugin.version>1.5</maven-pax-plugin.version>
 		<maven-bundle-plugin.version>2.3.4</maven-bundle-plugin.version>
@@ -111,8 +111,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
 			<plugin>

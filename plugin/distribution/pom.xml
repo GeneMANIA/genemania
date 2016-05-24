@@ -10,7 +10,6 @@
     
     <artifactId>plugin-distribution</artifactId>
     <packaging>jar</packaging>
-    <version>${project.parent.version}</version>
     <name>${project.groupId}:${project.artifactId}</name>
 
     <dependencies>
@@ -19,11 +18,11 @@
             <artifactId>plugin-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>plugin-cy2</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency> -->
     </dependencies>
     
     <build>
