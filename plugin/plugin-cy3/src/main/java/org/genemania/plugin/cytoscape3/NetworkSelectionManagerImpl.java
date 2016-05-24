@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
@@ -42,6 +44,8 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 	
 	private TaskDispatcher taskDispatcher;
 	private CyProperty<Properties> properties;
+	
+	private ExecutorService sessionLoadExecutor = Executors.newSingleThreadExecutor();
 
 	public NetworkSelectionManagerImpl(
 			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils,
@@ -84,27 +88,35 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 	
 	@Override
 	public void handleEvent(SessionLoadedEvent event) {
-		String path = (String) properties.getProperties().get(GeneMania.DATA_SOURCE_PATH_PROPERTY);
-		final File dataSourcePath;
-		if (path == null) {
-			String version = findVersion(event.getLoadedSession().getNetworks());
-			dataSourcePath = new File("gmdata-" + version);
-		} else {
-			dataSourcePath = new File(path);
-		}
-		
-		GeneManiaTask task = new GeneManiaTask(Strings.sessionChangeListener_title) {
+		// Don't want this to run on the same thread as the session load progress dialog 
+		// because there is risk of a UI deadlock between modal dialogs.
+		Runnable runnable = new Runnable() {
 			@Override
-			protected void runTask() throws Throwable {
-				SessionChangeDelegate<CyNetwork, CyNode, CyEdge> delegate = 
-						new SessionChangeDelegate<CyNetwork, CyNode, CyEdge>(dataSourcePath, plugin, progress, cytoscapeUtils);
-				delegate.invoke();
+			public void run() {
+				String path = (String) properties.getProperties().get(GeneMania.DATA_SOURCE_PATH_PROPERTY);
+				final File dataSourcePath;
+				if (path == null) {
+					String version = findVersion(event.getLoadedSession().getNetworks());
+					dataSourcePath = new File("gmdata-" + version);
+				} else {
+					dataSourcePath = new File(path);
+				}
 				
-				CyNetwork currentNetwork = cytoscapeUtils.getCurrentNetwork();
-				handleNetworkChanged(currentNetwork);
+				GeneManiaTask task = new GeneManiaTask(Strings.sessionChangeListener_title) {
+					@Override
+					protected void runTask() throws Throwable {
+						SessionChangeDelegate<CyNetwork, CyNode, CyEdge> delegate = 
+								new SessionChangeDelegate<CyNetwork, CyNode, CyEdge>(dataSourcePath, plugin, progress, cytoscapeUtils);
+						delegate.invoke();
+						
+						CyNetwork currentNetwork = cytoscapeUtils.getCurrentNetwork();
+						handleNetworkChanged(currentNetwork);
+					}
+				};
+				taskDispatcher.executeTask(task, cytoscapeUtils.getFrame(), true, true);
 			}
 		};
-		taskDispatcher.executeTask(task, cytoscapeUtils.getFrame(), true, true);
+		sessionLoadExecutor.submit(runnable);
 	}
 	
 	@Override
