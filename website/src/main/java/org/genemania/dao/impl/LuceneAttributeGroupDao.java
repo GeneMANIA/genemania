@@ -4,7 +4,7 @@ import java.util.List;
 import org.genemania.connector.LuceneConnector;
 import org.genemania.dao.AttributeGroupDao;
 import org.genemania.domain.AttributeGroup;
-import com.googlecode.ehcache.annotations.Cacheable;
+import org.springframework.cache.annotation.Cacheable;
 
 public class LuceneAttributeGroupDao implements AttributeGroupDao {
 	private LuceneConnector connector;
@@ -14,7 +14,7 @@ public class LuceneAttributeGroupDao implements AttributeGroupDao {
 	}
 
 	@Override
-	// @Cacheable(cacheName = "attributeGroupsByOrganismCache")
+	@Cacheable("attributeGroupsByOrganismCache")
 	public List<AttributeGroup> findAttributeGroupsByOrganism(long organismId) {
 	    return connector.findAttributeGroupsByOrganism(organismId);
 	}

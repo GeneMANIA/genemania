@@ -110,6 +110,16 @@ public class RelatedGenesWebRequestDto implements Serializable {
 				+ weightingToken + sizeToken + attrSizeToken;
 	}
 
+	@Override
+	public int hashCode() {
+		return this.toString().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return this.toString().equals(obj.toString());
+	}
+
 	public long getOrganismId() {
 		return organismId;
 	}

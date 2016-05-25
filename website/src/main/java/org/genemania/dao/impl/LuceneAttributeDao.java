@@ -4,27 +4,25 @@ import org.genemania.connector.LuceneConnector;
 import org.genemania.dao.AttributeDao;
 import org.genemania.domain.Attribute;
 import org.genemania.exception.DataStoreException;
-
-import com.googlecode.ehcache.annotations.Cacheable;
+import org.springframework.cache.annotation.Cacheable;
 
 public class LuceneAttributeDao implements AttributeDao {
-    private LuceneConnector connector;
+	private LuceneConnector connector;
 
-    public LuceneAttributeDao() {
-        connector = LuceneConnector.getInstance();
-    }
+	public LuceneAttributeDao() {
+		connector = LuceneConnector.getInstance();
+	}
 
-    @Override
-    // @Cacheable(cacheName = "attributeCache")
-    public Attribute findAttribute(long organismId, long attributeId) throws DataStoreException {
-        return connector.findAttribute(organismId, attributeId);
-    }
+	@Override
+	@Cacheable("attributeCache")
+	public Attribute findAttribute(long organismId, long attributeId) throws DataStoreException {
+		return connector.findAttribute(organismId, attributeId);
+	}
 
-    @Override
-    // @Cacheable(cacheName = "attributeIsValidCache")
-    public boolean isValidAttribute(long organismId, long attributeId)
-            throws DataStoreException {
-        return connector.isValidAttribute(organismId, attributeId);
-    }
- 
+	@Override
+	@Cacheable("attributeIsValidCache")
+	public boolean isValidAttribute(long organismId, long attributeId) throws DataStoreException {
+		return connector.isValidAttribute(organismId, attributeId);
+	}
+
 }

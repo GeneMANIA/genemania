@@ -32,8 +32,7 @@ import org.genemania.domain.Gene;
 import org.genemania.domain.InteractionNetwork;
 import org.genemania.domain.Organism;
 import org.genemania.exception.DataStoreException;
-
-import com.googlecode.ehcache.annotations.Cacheable;
+import org.springframework.cache.annotation.Cacheable;
 
 public class LuceneOrganismDao implements OrganismDao {
 
@@ -46,22 +45,22 @@ public class LuceneOrganismDao implements OrganismDao {
 	}
 
 	// __[interface implementation]____________________________________________
-	// @Cacheable(cacheName="allOrganismsCache")
+	@Cacheable("allOrganismsCache")
 	public List<Organism> getAllOrganisms() throws DataStoreException {
 		return connector.retrieveAllOrganisms();
 	}
 
-	// @Cacheable(cacheName="organismCache")
+	@Cacheable("organismCache")
 	public Organism findOrganism(long organismId) throws DataStoreException {
 		return connector.findOrganismById(organismId);
 	}
 
-	// @Cacheable(cacheName="defaultGenesCache")
+	@Cacheable("defaultGenesCache")
 	public List<Gene> getDefaultGenes(long organismId) throws DataStoreException {
 		return connector.retrieveDefaultGenesFor(organismId);
 	}
 
-	// @Cacheable(cacheName="defaultNetworksCache")
+	@Cacheable("defaultNetworksCache")
 	public List<InteractionNetwork> getDefaultNetworks(long organismId) throws DataStoreException {
 		return connector.retrieveDefaultNetworksFor(organismId);
 	}

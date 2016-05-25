@@ -28,21 +28,20 @@ import org.genemania.connector.LuceneConnector;
 import org.genemania.dao.StatsDao;
 import org.genemania.domain.Statistics;
 import org.genemania.exception.DataStoreException;
-
-import com.googlecode.ehcache.annotations.Cacheable;
+import org.springframework.cache.annotation.Cacheable;
 
 public class LuceneStatsDao implements StatsDao {
 
 	// __[attributes]__________________________________________________________
 	private LuceneConnector connector;
-	
+
 	// __[constructors]________________________________________________________
 	public LuceneStatsDao() {
 		connector = LuceneConnector.getInstance();
 	}
 
 	// __[interface implementation]____________________________________________
-	// @Cacheable(cacheName="latestStatisticsCache")
+	@Cacheable("latestStatisticsCache")
 	public Statistics getLatestStatistics() throws DataStoreException {
 		return connector.getLatestStatistics();
 	}

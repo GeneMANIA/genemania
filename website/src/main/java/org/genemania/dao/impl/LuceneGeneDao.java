@@ -33,8 +33,8 @@ import org.genemania.domain.Gene;
 import org.genemania.domain.GeneNamingSource;
 import org.genemania.domain.Node;
 import org.genemania.exception.DataStoreException;
+import org.springframework.cache.annotation.Cacheable;
 
-import com.googlecode.ehcache.annotations.Cacheable;
 
 public class LuceneGeneDao implements GeneDao {
 
@@ -47,23 +47,22 @@ public class LuceneGeneDao implements GeneDao {
 	}
 
 	// __[interface implementation]____________________________________________
-	// @Cacheable(cacheName = "genesForSymbolsCache")
-	public List<Gene> getGenesForSymbols(long organismId,
-			List<String> geneSymbols) throws DataStoreException {
+	@Cacheable("genesForSymbolsCache")
+	public List<Gene> getGenesForSymbols(long organismId, List<String> geneSymbols) throws DataStoreException {
 		return connector.findGenesBySymbol(organismId, geneSymbols);
 	}
 
-	// @Cacheable(cacheName = "geneIsValidCache")
+	@Cacheable("geneIsValidCache")
 	public boolean isValid(long organismId, String nextSymbol) {
 		return connector.isValid(organismId, nextSymbol);
 	}
 
-	// @Cacheable(cacheName = "nodeIdCache")
+	@Cacheable("nodeIdCache")
 	public Long getNodeId(long organismId, String symbol) {
 		return connector.getNodeId(organismId, symbol);
 	}
 
-	// @Cacheable(cacheName = "geneForIdCache")
+	@Cacheable("geneForIdCache")
 	public Gene findGeneForId(long organismId, long id) {
 		Node node = connector.findNodeById(id, organismId);
 		Gene ret = null;

@@ -30,8 +30,7 @@ import org.genemania.connector.LuceneConnector;
 import org.genemania.dao.NetworkGroupDao;
 import org.genemania.domain.InteractionNetworkGroup;
 import org.genemania.exception.DataStoreException;
-
-import com.googlecode.ehcache.annotations.Cacheable;
+import org.springframework.cache.annotation.Cacheable;
 
 public class LuceneNetworkGroupDao implements NetworkGroupDao {
 
@@ -44,7 +43,7 @@ public class LuceneNetworkGroupDao implements NetworkGroupDao {
 	}
 
 	// __[interface implementation]____________________________________________
-	// @Cacheable(cacheName = "networkGroupsByOrganismCache")
+	 @Cacheable("networkGroupsByOrganismCache")
 	public List<InteractionNetworkGroup> findNetworkGroupsByOrganism(
 			long organismId) throws DataStoreException {
 		return connector.findNetworkGroupsByOrganism(organismId);
@@ -52,7 +51,7 @@ public class LuceneNetworkGroupDao implements NetworkGroupDao {
 	}
 
 	// TODO revise when attributes are implemented fully in the engine
-	// @Cacheable(cacheName = "networkGroupsByNameCache")
+	 @Cacheable("networkGroupsByNameCache")
 	public InteractionNetworkGroup findNetworkGroupByName(long organismId,
 			String name) throws DataStoreException {
 		return connector.getNetworkGroupByName(

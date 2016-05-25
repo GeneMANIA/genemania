@@ -23,34 +23,30 @@ import org.genemania.connector.LuceneConnector;
 import org.genemania.dao.NetworkDao;
 import org.genemania.domain.InteractionNetwork;
 import org.genemania.exception.DataStoreException;
-
-import com.googlecode.ehcache.annotations.Cacheable;
-import com.googlecode.ehcache.annotations.KeyGenerator;
+import org.springframework.cache.annotation.Cacheable;
 
 public class LuceneNetworkDao implements NetworkDao {
 
-    // __[attributes]__________________________________________________________
-    private LuceneConnector connector;
+	// __[attributes]__________________________________________________________
+	private LuceneConnector connector;
 
-    // __[constructors]________________________________________________________
-    public LuceneNetworkDao() {
-        connector = LuceneConnector.getInstance();
-    }
+	// __[constructors]________________________________________________________
+	public LuceneNetworkDao() {
+		connector = LuceneConnector.getInstance();
+	}
 
-    // __[interface implementation]____________________________________________
-    // @Cacheable(cacheName = "networkCache")
-    public InteractionNetwork findNetwork(long networkId)
-            throws DataStoreException {
-        return connector.findNetworkById(networkId);
-    }
+	// __[interface implementation]____________________________________________
+	@Cacheable("networkCache")
+	public InteractionNetwork findNetwork(long networkId) throws DataStoreException {
+		return connector.findNetworkById(networkId);
+	}
 
-    // need to use a string as a key, since ehcache doesn't hash two long params
-    // correctly (we get collisions for the same networks for different
-    // organisms)
-    // @Cacheable(cacheName = "networkIsValidCache", keyGenerator = @KeyGenerator(name = "StringCacheKeyGenerator"))
-    public boolean isValidNetwork(long organismId, long networkId)
-            throws DataStoreException {
-        return connector.isValidNetwork(organismId, networkId);
-    }
+	// need to use a string as a key, since ehcache doesn't hash two long params
+	// correctly (we get collisions for the same networks for different
+	// organisms)
+	@Cacheable("networkIsValidCache")
+	public boolean isValidNetwork(long organismId, long networkId) throws DataStoreException {
+		return connector.isValidNetwork(organismId, networkId);
+	}
 
 }

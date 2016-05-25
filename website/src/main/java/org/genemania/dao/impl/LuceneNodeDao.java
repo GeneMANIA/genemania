@@ -28,21 +28,20 @@ import org.genemania.connector.LuceneConnector;
 import org.genemania.dao.NodeDao;
 import org.genemania.domain.Node;
 import org.genemania.exception.DataStoreException;
-
-import com.googlecode.ehcache.annotations.Cacheable;
+import org.springframework.cache.annotation.Cacheable;
 
 public class LuceneNodeDao implements NodeDao {
 
 	// __[attributes]__________________________________________________________
 	private LuceneConnector connector;
-	
+
 	// __[constructors]________________________________________________________
 	public LuceneNodeDao() {
 		connector = LuceneConnector.getInstance();
 	}
 
 	// __[interface implementation]____________________________________________
-	// @Cacheable(cacheName="nodeCache")
+	@Cacheable("nodeCache")
 	public Node findNode(long organismId, long nodeId) throws DataStoreException {
 		return connector.findNodeById(nodeId, organismId);
 	}

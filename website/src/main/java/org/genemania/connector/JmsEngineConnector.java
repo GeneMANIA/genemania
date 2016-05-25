@@ -22,11 +22,10 @@ import org.genemania.util.BrokerUtils;
 import org.genemania.exception.ApplicationException;
 
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jms.JmsException;
 
 import org.springframework.stereotype.Component;
-import com.googlecode.ehcache.annotations.Cacheable;
-import com.googlecode.ehcache.annotations.KeyGenerator;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -51,7 +50,7 @@ public class JmsEngineConnector implements EngineConnector  {
     public JmsEngineConnector() {}
 
     @Override
-    // @Cacheable(cacheName="searchResultsCache", keyGenerator=@KeyGenerator(name="StringCacheKeyGenerator"))
+    @Cacheable("searchResultsCache")
     public RelatedGenesWebResponseDto getRelatedGenes(RelatedGenesWebRequestDto dto) throws ApplicationException {
         LOG.info("getRelatedGenes request");
 
