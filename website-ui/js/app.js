@@ -1,5 +1,38 @@
 'use strict';
 
+var log = window.log = {
+  ga: function( category, action, label ){
+    if( DEBUG ){
+      console.log('Log (`' + category + '`, `' + action + '`' + ( label != null ? ', `' + label + '`' : '' ) + ')');
+    }
+
+    var evt = {
+      eventCategory: category,
+      eventAction: action
+    };
+
+    if( _.isNumber( label ) && Math.round( label ) === label ){
+      evt.eventValue = label;
+    } else {
+      evt.eventLabel = label;
+    }
+
+    setTimeout(function(){
+      try {
+        ga('send', 'event', evt);
+      } catch( err ){}
+    }, 0);
+  },
+
+  action: function( name, value ){
+    this.ga( 'User actions', name, value );
+  },
+
+  query: function( name, value ){
+    this.ga( 'Query parameters', name, value );
+  }
+};
+
 // if templates not built, then define a dummy module
 (function(){
   var templates;

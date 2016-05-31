@@ -75,6 +75,10 @@ function( util, Result, io, ngCy ){ return function( Query ){
 
     PubSub.publish('query.succeed', newQuery);
     PubSub.publish('query.search', newQuery);
+
+    log.action('query.fromHistory');
+
+    newQuery.logSearch();
   };
 
   qfn.clearHistory = function(){
@@ -120,6 +124,38 @@ function( util, Result, io, ngCy ){ return function( Query ){
     if( true || initSplash ){ // always collapse for now
       this.collapseHistory();
     }
+
+    query.logSearch();
+  };
+
+  qfn.logSearch = function(){
+    var query = this;
+
+    log.action('query.search');
+
+    log.query('organism', query.organism.alias);
+
+    var genes = query.genesText.toLowerCase().split(/\s*\n\s*/);
+    log.query('genesCount', genes.length);
+    genes.slice( 0, 10 ).forEach(function( g ){ log.query('gene', g); });
+
+    log.query('uploadedNetworksCount', query.networks.reduce(function( total, net ){
+      return total + ( net.uploaded && net.selected ? 1 : 0 );
+    }, 0));
+
+    log.query('networksCount', query.networks.reduce(function( total, net ){
+      return total + ( net.selected ? 1 : 0 );
+    }, 0));
+
+    log.query('defaultNetworks', query.networks.every(function( net ){
+      return !net.defaultSelected || net.selected;
+    }));
+
+    log.query('resultGenesCount', query.maxGenes);
+
+    log.query('resultAttributesCount', query.maxAttrs);
+
+    log.query('weighting', query.weighting.name);
   };
 
   qfn.searchOrCancel = function(){
