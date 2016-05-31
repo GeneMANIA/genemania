@@ -4,7 +4,7 @@
   "description": "The GeneMANIA website UI",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "website": "npm install && gulp website"
+    "website": "gulp website"
   },
   "devDependencies": {
     "cordova": "^4.1.2",
