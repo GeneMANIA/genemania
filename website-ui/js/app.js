@@ -2,7 +2,7 @@
 
 var log = window.log = {
   ga: function( category, action, label ){
-    if( DEBUG ){
+    if( window.DEBUG ){
       console.log('Log (`' + category + '`, `' + action + '`' + ( label != null ? ', `' + label + '`' : '' ) + ')');
     }
 
