@@ -246,7 +246,7 @@ gulp.task('website-clean', function(){
   return gulp.src( [
     'css-build/**',
     'fonts/**',
-    'img/**',
+    'img/!(logo)',
     'js-build/**',
     'WEB-INF/jsp/index.jsp'
   ].map(function( f ){ return '../website/src/main/webapp/' + f; }) ).pipe( clean({ force: true }) );
