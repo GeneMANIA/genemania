@@ -68,7 +68,7 @@ Follow these instructions to deploy your own external instance of GeneMANIA:
  1. TODO
 
 **Deploying the website:**
- 1. Build the UI: `cd website-ui && npm i && npm run website && cd ..`
+ 1. Build the UI: `cd website-ui && npm run website && cd ..`
  1. Build the website: `mvn package -pl website -am -P local`
  1. Deploy the produced `.war` file to Tomcat
 
