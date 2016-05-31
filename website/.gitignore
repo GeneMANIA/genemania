@@ -3,3 +3,4 @@ src/main/webapp/js-build/**
 src/main/webapp/css-build/**
 src/main/webapp/WEB-INF/jsp/index.jsp
 src/main/webapp/img/*
+src/main/webapp/fonts/**
