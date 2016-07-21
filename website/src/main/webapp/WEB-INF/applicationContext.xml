@@ -189,7 +189,7 @@
 	-->
 	
 	<!-- new, integrated worker config -->
-	<bean id="engineConnector" class="org.genemania.connector.SyncWebWorkerConnector">
+	<bean id="engineConnector" class="org.genemania.connector.SyncWorkerConnector">
 		<property name="organismDao" ref="organismDao" />
 		<property name="nodeDao" ref="nodeDao" />
 		<property name="networkDao" ref="networkDao" />

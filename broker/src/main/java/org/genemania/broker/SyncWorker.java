@@ -19,40 +19,28 @@
 
 package org.genemania.broker;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.genemania.dto.EnrichmentEngineRequestDto;
 import org.genemania.dto.EnrichmentEngineResponseDto;
-import org.genemania.dto.NetworkDto;
-import org.genemania.dto.OntologyCategoryDto;
 import org.genemania.dto.RelatedGenesEngineRequestDto;
 import org.genemania.dto.RelatedGenesEngineResponseDto;
 import org.genemania.dto.RelatedGenesWebRequestDto;
-import org.genemania.dto.RelatedGenesWebResponseDto;
 import org.genemania.dto.UploadNetworkEngineRequestDto;
 import org.genemania.dto.UploadNetworkEngineResponseDto;
 import org.genemania.dto.UploadNetworkWebRequestDto;
-import org.genemania.dto.UploadNetworkWebResponseDto;
 import org.genemania.engine.IMania;
 import org.genemania.engine.Mania2;
 import org.genemania.engine.cache.DataCache;
 import org.genemania.engine.cache.FileSerializedObjectCache;
 import org.genemania.engine.cache.MemObjectCache;
 import org.genemania.exception.ApplicationException;
-import org.genemania.message.RelatedGenesRequestMessage;
-import org.genemania.message.RelatedGenesResponseMessage;
-import org.genemania.message.UploadNetworkRequestMessage;
-import org.genemania.message.UploadNetworkResponseMessage;
 import org.genemania.util.ApplicationConfig;
 import org.genemania.util.BrokerUtils;
 
-public class SyncWebWorker {
+public class SyncWorker {
 
-	private static Logger LOG = Logger.getLogger(SyncWebWorker.class);
+	private static Logger LOG = Logger.getLogger(SyncWorker.class);
 
 	private String appVer;
 
@@ -74,7 +62,7 @@ public class SyncWebWorker {
 		public UploadNetworkEngineResponseDto response;
 	}
 
-	public SyncWebWorker() {
+	public SyncWorker() {
 		config();
 
 		if (StringUtils.isEmpty(cacheDir)) {

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.genemania.broker.SyncWebWorker;
+import org.genemania.broker.SyncWorker;
 import org.genemania.dao.NetworkDao;
 import org.genemania.dao.NodeDao;
 import org.genemania.dao.OrganismDao;
@@ -29,22 +29,22 @@ import org.genemania.exception.ApplicationException;
 import org.genemania.exception.DataStoreException;
 import org.genemania.util.BrokerUtils;
 
-public class SyncWebWorkerConnector implements EngineConnector {
+public class SyncWorkerConnector implements EngineConnector {
 
-	private static final Logger LOG = Logger.getLogger(SyncWebWorkerConnector.class);
+	private static final Logger LOG = Logger.getLogger(SyncWorkerConnector.class);
 
-	private SyncWebWorker worker;
+	private SyncWorker worker;
 	private NetworkDao networkDao;
 	private NodeDao nodeDao;
 	private OrganismDao organismDao;
 
-	public SyncWebWorkerConnector() {
-		worker = new SyncWebWorker();
+	public SyncWorkerConnector() {
+		worker = new SyncWorker();
 	}
 
 	@Override
 	public RelatedGenesWebResponseDto getRelatedGenes(RelatedGenesWebRequestDto req) throws ApplicationException {
-		SyncWebWorker.SearchResult res = worker.getRelatedGenes(req);
+		SyncWorker.SearchResult res = worker.getRelatedGenes(req);
 		RelatedGenesWebResponseDto ret = new RelatedGenesWebResponseDto();
 
 		// networks
@@ -158,7 +158,7 @@ public class SyncWebWorkerConnector implements EngineConnector {
 
         UploadNetworkWebResponseDto ret = new UploadNetworkWebResponseDto();
 
-        SyncWebWorker.UploadResult res = worker.uploadNetwork(req);
+        SyncWorker.UploadResult res = worker.uploadNetwork(req);
 
         ret.setInteractionCount(res.response.getNumInteractions());
         
