@@ -174,6 +174,8 @@
         <property name="connectionFactory" ref="pooledConnectionFactory" />
     </bean>
 
+	<!-- old, separate worker config -->
+	<!--
  	<bean id="engineConnector" class="org.genemania.connector.JmsEngineConnector">
 		<property name="jmsTemplate" ref="jmsTemplate" />
         <property name="requestQueueName" value="${genemaniaMqRequests}" />
@@ -183,6 +185,14 @@
 		<property name="networkDao" ref="networkDao" />
         <property name="timeoutMillis" value="${engineTimeoutMillis}" />
         <property name="messageExpirationMillis" value="${messageExpirationMillis}" />
+	</bean>
+	-->
+	
+	<!-- new, integrated worker config -->
+	<bean id="engineConnector" class="org.genemania.connector.SyncWebWorkerConnector">
+		<property name="organismDao" ref="organismDao" />
+		<property name="nodeDao" ref="nodeDao" />
+		<property name="networkDao" ref="networkDao" />
 	</bean>
 
 	<!-- caching -->

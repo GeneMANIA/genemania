@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -76,35 +77,35 @@ public class BrokerUtils {
 	public static RelatedGenesEngineRequestDto msg2dto(RelatedGenesRequestMessage msg) {
 		// init & validate
 		RelatedGenesEngineRequestDto ret = new RelatedGenesEngineRequestDto();
-		if(msg == null) {
+		if (msg == null) {
 			LOG.warn("empty RelatedGenesRequestMessage");
 		}
-        // build the groups
+		// build the groups
 		Collection<Collection<Long>> interactionNetworks = new ArrayList<Collection<Long>>();
-        Map<String, Collection<Long>> groupsMap = new Hashtable<String, Collection<Long>>();
-		for(NetworkDto network: msg.getNetworks()) {
+		Map<String, Collection<Long>> groupsMap = new Hashtable<String, Collection<Long>>();
+		for (NetworkDto network : msg.getNetworks()) {
 			String type = "_";
-			if(network.getId() < 0) {
+			if (network.getId() < 0) {
 				type = "user";
 			} else {
-				if(StringUtils.isNotEmpty(network.getType())) {
+				if (StringUtils.isNotEmpty(network.getType())) {
 					type = network.getType().toLowerCase();
 				}
 			}
 			Collection<Long> groupNetworks = groupsMap.get(type);
-			if(groupNetworks == null) {
+			if (groupNetworks == null) {
 				groupNetworks = new ArrayList<Long>();
 				groupsMap.put(type, groupNetworks);
 			}
 			groupNetworks.add(network.getId());
 		}
 		LOG.debug("network collections: " + groupsMap);
-		// add the network collections to the dto 
+		// add the network collections to the dto
 		Iterator<String> iterator = groupsMap.keySet().iterator();
-		while(iterator.hasNext()) {
+		while (iterator.hasNext()) {
 			String nextGroup = iterator.next();
 			Collection<Long> networks = groupsMap.get(nextGroup);
-			if((networks != null) && (networks.size() > 0)) {
+			if ((networks != null) && (networks.size() > 0)) {
 				interactionNetworks.add(networks);
 			}
 		}
@@ -114,19 +115,85 @@ public class BrokerUtils {
 		ret.setLimitResults(msg.getResultSize());
 		ret.setOrganismId(msg.getOrganismId());
 		ret.setPositiveNodes(msg.getPositiveNodes());
-		ret.setScoringMethod(ScoringMethod.DISCRIMINANT); // TODO: this should be a config prop
+		ret.setScoringMethod(ScoringMethod.DISCRIMINANT); // TODO: this should
+															// be a config prop
 		ret.setNamespace(msg.getUserDefinedNetworkNamespace());
-        ret.setAttributeGroups(msg.getAttributeGroups());
-        ret.setAttributesLimit(msg.getAttributesLimit());
+		ret.setAttributeGroups(msg.getAttributeGroups());
+		ret.setAttributesLimit(msg.getAttributesLimit());
 		ret.setProgressReporter(NullProgressReporter.instance());
 		// done
+		return ret;
+	}
+
+	public static RelatedGenesEngineRequestDto dto2dto(RelatedGenesWebRequestDto req) {
+		// init & validate
+		RelatedGenesEngineRequestDto ret = new RelatedGenesEngineRequestDto();
+
+		if (req == null) {
+			LOG.warn("empty RelatedGenesWebRequestDto");
+		}
+
+		// build the groups
+		Collection<Collection<Long>> interactionNetworks = new ArrayList<Collection<Long>>();
+		Map<String, Collection<Long>> groupsMap = new Hashtable<String, Collection<Long>>();
+		for (InteractionNetwork network : req.getInputNetworks()) {
+			String type = "_";
+			if (network.getId() < 0) {
+				type = "user";
+			} else {
+				type = "data";
+			}
+			Collection<Long> groupNetworks = groupsMap.get(type);
+			if (groupNetworks == null) {
+				groupNetworks = new ArrayList<Long>();
+				groupsMap.put(type, groupNetworks);
+			}
+			groupNetworks.add(network.getId());
+		}
+
+		// add the network collections to the dto
+		Iterator<String> iterator = groupsMap.keySet().iterator();
+		while (iterator.hasNext()) {
+			String nextGroup = iterator.next();
+			Collection<Long> networks = groupsMap.get(nextGroup);
+			if ((networks != null) && (networks.size() > 0)) {
+				interactionNetworks.add(networks);
+			}
+		}
+
+		ret.setInteractionNetworks(interactionNetworks);
+
+		// build the rest of the dto
+
+		ret.setCombiningMethod(req.getCombiningMethod());
+
+		ret.setLimitResults(req.getResultSize());
+
+		ret.setOrganismId(req.getOrganismId());
+
+		Collection<Long> positiveNodes = new Vector<Long>();
+		for (Gene gene : req.getInputGenes()) {
+			positiveNodes.add(gene.getNode().getId());
+		}
+		ret.setPositiveNodes(positiveNodes);
+
+		ret.setScoringMethod(ScoringMethod.DISCRIMINANT); // TODO: this should
+															// be a config prop
+		ret.setNamespace(req.getUserDefinedNetworkNamespace());
+		
+		ret.setAttributeGroups(req.getAttributeGroups());
+		
+		ret.setAttributesLimit(req.getAttributesLimit());
+		
+		ret.setProgressReporter(NullProgressReporter.instance());
+		
 		return ret;
 	}
 
 	public static UploadNetworkEngineRequestDto msg2dto(UploadNetworkRequestMessage msg) {
 		// init & validate
 		UploadNetworkEngineRequestDto ret = new UploadNetworkEngineRequestDto();
-		if(msg == null) {
+		if (msg == null) {
 			LOG.error("empty UploadNetworkRequestMessage");
 		} else {
 			// populate the request dto
@@ -143,8 +210,30 @@ public class BrokerUtils {
 		return ret;
 	}
 	
+	public static UploadNetworkEngineRequestDto dto2dto(UploadNetworkWebRequestDto req) {
+		// init & validate
+		UploadNetworkEngineRequestDto ret = new UploadNetworkEngineRequestDto();
+		if (req == null) {
+			LOG.error("empty UploadNetworkWebRequestDto");
+		} else {
+			// populate the request dto
+			ret.setData(new StringReader(req.getData()));
+			ret.setLayout(req.getDataLayout());
+			ret.setMethod(req.getProcessingMethod());
+			ret.setNamespace(req.getNamespace());
+			ret.setNetworkId(req.getNetworkId());
+			ret.setOrganismId(req.getOrganismId());
+			ret.setProgressReporter(NullProgressReporter.instance());
+			ret.setSparsification(req.getSparsification());
+		}
+		// done
+		return ret;
+	}
+
 	/**
-	 * @deprecated Use RelatedGenesResponseMessage dto2msg(RelatedGenesEngineResponseDto dto, EnrichmentEngineResponseDto eResponseDto) instead
+	 * @deprecated Use RelatedGenesResponseMessage
+	 *             dto2msg(RelatedGenesEngineResponseDto dto,
+	 *             EnrichmentEngineResponseDto eResponseDto) instead
 	 */
 	public static RelatedGenesResponseMessage dto2msg(RelatedGenesEngineResponseDto dto) {
 		RelatedGenesResponseMessage ret = new RelatedGenesResponseMessage();
@@ -152,7 +241,8 @@ public class BrokerUtils {
 		return ret;
 	}
 
-	public static RelatedGenesResponseMessage dto2msg(RelatedGenesEngineResponseDto rgdto, EnrichmentEngineResponseDto edto) {
+	public static RelatedGenesResponseMessage dto2msg(RelatedGenesEngineResponseDto rgdto,
+			EnrichmentEngineResponseDto edto) {
 		RelatedGenesResponseMessage ret = new RelatedGenesResponseMessage();
 		ret.setNetworks(rgdto.getNetworks());
 		ret.setAnnotations(edto.getAnnotations());
@@ -166,13 +256,13 @@ public class BrokerUtils {
 		ret.setInteractionCount(dto.getNumInteractions());
 		return ret;
 	}
-	
+
 	public static RelatedGenesRequestMessage dto2msg(RelatedGenesWebRequestDto dto) {
 		RelatedGenesRequestMessage ret = new RelatedGenesRequestMessage();
 		if (dto == null) {
 			LOG.error("empty RelatedGenesWebRequestDto");
 		}
-		if(dto.getCombiningMethod() != null) {
+		if (dto.getCombiningMethod() != null) {
 			ret.setCombiningMethod(dto.getCombiningMethod().getCode());
 		} else {
 			LOG.error("unknown combining method");
@@ -183,9 +273,9 @@ public class BrokerUtils {
 		ret.setResultSize(dto.getResultSize());
 		ret.setAttributesLimit(dto.getAttributesLimit());
 		Collection<Long> positives = new ArrayList<Long>();
-		for(Gene gene: dto.getInputGenes()) {
-			if(gene != null) {
-				if(gene.getNode() != null) {
+		for (Gene gene : dto.getInputGenes()) {
+			if (gene != null) {
+				if (gene.getNode() != null) {
 					positives.add(gene.getNode().getId());
 				} else {
 					LOG.error("no node for gene " + gene.getId() + "-" + gene.getSymbol());
@@ -196,10 +286,10 @@ public class BrokerUtils {
 		}
 		ret.setPositiveNodes(positives);
 		Collection<NetworkDto> networks = new ArrayList<NetworkDto>();
-		for(InteractionNetwork in: dto.getInputNetworks()) {
+		for (InteractionNetwork in : dto.getInputNetworks()) {
 			NetworkDto network = new NetworkDto();
 			network.setId(in.getId());
-			if(in.getMetadata() != null) {
+			if (in.getMetadata() != null) {
 				network.setType(in.getMetadata().getNetworkType());
 			}
 			networks.add(network);
@@ -210,7 +300,7 @@ public class BrokerUtils {
 
 		return ret;
 	}
-	
+
 	public static UploadNetworkRequestMessage dto2msg(UploadNetworkWebRequestDto dto) {
 		UploadNetworkRequestMessage ret = new UploadNetworkRequestMessage();
 		// populate the request message
@@ -223,24 +313,24 @@ public class BrokerUtils {
 		ret.setLayout(dto.getDataLayout().getCode());
 		// done
 		return ret;
-	}	
+	}
 
 	// return a hollow dto
 	public static RelatedGenesWebResponseDto msg2dto(RelatedGenesResponseMessage msg) throws ApplicationException {
-		//init
+		// init
 		RelatedGenesWebResponseDto ret = new RelatedGenesWebResponseDto();
-		if(msg.getErrorCode() != 0) {
+		if (msg.getErrorCode() != 0) {
 			throw new ApplicationException(msg.getErrorMessage(), msg.getErrorCode());
 		}
-		//networks
+		// networks
 		List<InteractionNetwork> networks = new ArrayList<InteractionNetwork>();
 		Map<Long, Double> networkWeightsMap = new Hashtable<Long, Double>();
-		for(NetworkDto nvo: msg.getNetworks()) {
+		for (NetworkDto nvo : msg.getNetworks()) {
 			networkWeightsMap.put(nvo.getId(), nvo.getWeight());
 			InteractionNetwork network = new InteractionNetwork();
 			network.setId(nvo.getId());
 			Collection<Interaction> interactions = new ArrayList<Interaction>();
-			for(InteractionDto ivo: nvo.getInteractions()) {
+			for (InteractionDto ivo : nvo.getInteractions()) {
 				Interaction interaction = new Interaction();
 				Node fromNode = new Node();
 				fromNode.setId(ivo.getNodeVO1().getId());
@@ -248,7 +338,10 @@ public class BrokerUtils {
 				Node toNode = new Node();
 				toNode.setId(ivo.getNodeVO2().getId());
 				interaction.setToNode(toNode);
-				interaction.setWeight((float)ivo.getWeight());//TODO: switch interaction hbm weight to double
+				interaction.setWeight((float) ivo.getWeight());// TODO: switch
+																// interaction
+																// hbm weight to
+																// double
 				interactions.add(interaction);
 			}
 			network.setInteractions(interactions);
@@ -262,13 +355,13 @@ public class BrokerUtils {
 		Map<Long, Collection<OntologyCategory>> annotations = new Hashtable<Long, Collection<OntologyCategory>>();
 		Map<Long, Collection<OntologyCategoryDto>> enrichedCategoriesMap = msg.getAnnotations();
 		Iterator<Long> nodesIterator = enrichedCategoriesMap.keySet().iterator();
-		while(nodesIterator.hasNext()) {
+		while (nodesIterator.hasNext()) {
 			long nodeId = nodesIterator.next();
 			Collection<OntologyCategoryDto> categoryVOs = enrichedCategoriesMap.get(nodeId);
 			Collection<OntologyCategory> categories = new ArrayList<OntologyCategory>();
-			for(OntologyCategoryDto category: categoryVOs) {
+			for (OntologyCategoryDto category : categoryVOs) {
 				OntologyCategory cat = new OntologyCategory();
-                cat.setId(category.getId());
+				cat.setId(category.getId());
 				cat.setName("TODO: get from db");
 				categories.add(cat);
 				ontologyCategories.put(cat.getId(), category);
@@ -279,39 +372,42 @@ public class BrokerUtils {
 		ret.setOntologyCategories(ontologyCategories);
 		ret.setOrganismId(msg.getOrganismId());
 		ret.setCombiningMethod(CombiningMethod.fromCode(msg.getCombiningMethod()));
-		ret.setAttributes(msg.getAttributes()); // this ok or need to take a copy??
+		ret.setAttributes(msg.getAttributes()); // this ok or need to take a
+												// copy??
 		return ret;
 	}
-	
-	// helper to stuff bits of node object into map Node ID -> Score
-	private static Map<Long, Double> buildNodeScoresMap(
-            Collection<NodeDto> nodes) {
-	    
-	    Map<Long, Double> nodeScoresMap = new Hashtable<Long, Double>();
-	    for (NodeDto node: nodes) {
-	        nodeScoresMap.put(node.getId(), node.getScore());
-	    }
-	    
-	    return nodeScoresMap;
-    }
 
-    public static UploadNetworkWebResponseDto msg2dto(UploadNetworkResponseMessage msg) throws ApplicationException {
+	// helper to stuff bits of node object into map Node ID -> Score
+	public static Map<Long, Double> buildNodeScoresMap(Collection<NodeDto> nodes) {
+
+		Map<Long, Double> nodeScoresMap = new Hashtable<Long, Double>();
+		for (NodeDto node : nodes) {
+			nodeScoresMap.put(node.getId(), node.getScore());
+		}
+
+		return nodeScoresMap;
+	}
+
+	public static UploadNetworkWebResponseDto msg2dto(UploadNetworkResponseMessage msg) throws ApplicationException {
 		UploadNetworkWebResponseDto ret = new UploadNetworkWebResponseDto();
-		if(msg.getErrorCode() != 0) {
+		if (msg.getErrorCode() != 0) {
 			throw new ApplicationException(msg.getErrorMessage(), msg.getErrorCode());
 		}
 		ret.setInteractionCount(msg.getInteractionCount());
 		return ret;
-	}	
+	}
 
-	public static EnrichmentEngineRequestDto buildEnrichmentRequestFrom(RelatedGenesEngineRequestDto rgRequestDto, RelatedGenesEngineResponseDto rgResponseDto, long ontologyId) throws ApplicationException {
+	public static EnrichmentEngineRequestDto buildEnrichmentRequestFrom(RelatedGenesEngineRequestDto rgRequestDto,
+			RelatedGenesEngineResponseDto rgResponseDto, long ontologyId) throws ApplicationException {
 		LOG.debug("building enrichment request");
-		//init
+		// init
 		EnrichmentEngineRequestDto ret = new EnrichmentEngineRequestDto();
 		try {
-			//read config data
-			int minCategories = Integer.parseInt(ApplicationConfig.getInstance().getProperty(Constants.CONFIG_PROPERTIES.ENRICHMENT_MIN_CATEGORIES));
-			double qValueThreshold = Double.parseDouble(ApplicationConfig.getInstance().getProperty(Constants.CONFIG_PROPERTIES.ENRICHMENT_Q_VAL_THRESHOLD));
+			// read config data
+			int minCategories = Integer.parseInt(
+					ApplicationConfig.getInstance().getProperty(Constants.CONFIG_PROPERTIES.ENRICHMENT_MIN_CATEGORIES));
+			double qValueThreshold = Double.parseDouble(ApplicationConfig.getInstance()
+					.getProperty(Constants.CONFIG_PROPERTIES.ENRICHMENT_Q_VAL_THRESHOLD));
 			// read input DTO data
 			Set<Long> uniqueInputNodes = new HashSet<Long>();
 			Collection<Long> inputNodes = rgRequestDto.getPositiveNodes();
@@ -319,18 +415,19 @@ public class BrokerUtils {
 			LOG.debug("added " + uniqueInputNodes.size() + "/" + inputNodes.size() + " input nodes");
 			List<NetworkDto> outputNetworks = rgResponseDto.getNetworks();
 			int outputNodeCounter = 0;
-			for(NetworkDto network: outputNetworks) {
+			for (NetworkDto network : outputNetworks) {
 				Collection<InteractionDto> interactions = network.getInteractions();
-				for(InteractionDto interaction: interactions) {
+				for (InteractionDto interaction : interactions) {
 					uniqueInputNodes.add(interaction.getNodeVO1().getId());
 					uniqueInputNodes.add(interaction.getNodeVO2().getId());
 					outputNodeCounter += 2;
 				}
 			}
-			LOG.debug("added " + (uniqueInputNodes.size() - inputNodes.size()) + "/" + outputNodeCounter + " input nodes");
+			LOG.debug("added " + (uniqueInputNodes.size() - inputNodes.size()) + "/" + outputNodeCounter
+					+ " input nodes");
 			Collection<Long> nodes = new ArrayList<Long>();
 			Iterator<Long> uniqueNodesIterator = uniqueInputNodes.iterator();
-			while(uniqueNodesIterator.hasNext()) {
+			while (uniqueNodesIterator.hasNext()) {
 				nodes.add(uniqueNodesIterator.next());
 			}
 			long organismId = rgRequestDto.getOrganismId();
@@ -344,10 +441,11 @@ public class BrokerUtils {
 			ret.setProgressReporter(NullProgressReporter.instance());
 			ret.setqValueThreshold(qValueThreshold);
 		} catch (NumberFormatException e) {
-			throw new ApplicationException(e);			
+			throw new ApplicationException(e);
 		} catch (ValidationException e) {
-			throw new ApplicationException(e);			
+			throw new ApplicationException(e);
 		}
 		return ret;
 	}
+
 }

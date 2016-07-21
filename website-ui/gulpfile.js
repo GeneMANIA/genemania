@@ -176,12 +176,12 @@ gulp.task('java-debug', function( next ){
 
 // compile java projects for debugging (incl. dependent projects)
 gulp.task( 'javac-wdeps', shell.task([
-  'export PRIVATE_REPO=' + path.resolve( process.cwd(), '../../genemania-private' ) + ' && mvn clean install -e -pl website -am -P dev-debug'
+  'export PRIVATE_REPO=' + path.resolve( process.cwd(), '../../genemania-private' ) + ' && mvn -Dmaven.test.skip=true clean install -e -pl website -am -P dev-debug'
 ], { cwd: '..' }) );
 
 // compile java projects for debugging
 gulp.task( 'javac', shell.task([
-  'export PRIVATE_REPO=' + path.resolve( process.cwd(), '../../genemania-private' ) + ' && mvn clean install -e -pl website -P dev-debug'
+  'export PRIVATE_REPO=' + path.resolve( process.cwd(), '../../genemania-private' ) + ' && mvn -Dmaven.test.skip=true clean install -e -pl website -P dev-debug'
 ], { cwd: '..' }) );
 
 // fix dir refs w/ `~` in springmvc confs

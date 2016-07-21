@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.genemania</groupId>
         <artifactId>parent</artifactId>
-        <version>3.4.0</version>
+        <version>3.5.0</version>
         <relativePath>..</relativePath>
     </parent>
 

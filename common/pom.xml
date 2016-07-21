@@ -4,22 +4,22 @@
     <parent>
         <groupId>org.genemania</groupId>
         <artifactId>parent</artifactId>
-        <version>3.4.0</version>
+        <version>3.5.0</version>
         <relativePath>..</relativePath>
     </parent>
-    
+
     <groupId>org.genemania</groupId>
     <artifactId>genemania-common</artifactId>
     <packaging>jar</packaging>
     <name>GeneMANIA Common</name>
     <url>genemania.org</url>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>4.0.6.RELEASE</spring.version>
 		<jackson.version>1.9.13</jackson.version>
     </properties>
-    
+
     <repositories>
         <repository>
             <id>genemania_maven_repo</id>
@@ -123,7 +123,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>                
+                <version>2.3.2</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
@@ -138,7 +138,7 @@
                 				<!-- by default hibernate will use the cfg in src/main/resources, but we want
                                                 to use the version that has the property filtering applied from our selected
                                                 profile, so use the config from target instead
-						<configurationfile>/src/main/resources/hibernate.cfg.xml</configurationfile> 
+						<configurationfile>/src/main/resources/hibernate.cfg.xml</configurationfile>
 						-->
                         <configurationfile>/target/classes/hibernate.cfg.xml</configurationfile>
                         <outputfilename>schema.sql</outputfilename>
@@ -223,7 +223,7 @@
             <plugin>
                 <groupId>com.mycila.maven-license-plugin</groupId>
                 <artifactId>maven-license-plugin</artifactId>
-                <version>1.9.0</version>                
+                <version>1.9.0</version>
                 <configuration>
                     <header>src/etc/header.txt</header>
                     <strictCheck>true</strictCheck>

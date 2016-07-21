@@ -25,8 +25,16 @@
 package org.genemania.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
 
+import org.apache.commons.lang.StringUtils;
+import org.genemania.domain.Gene;
+import org.genemania.domain.InteractionNetwork;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
 import org.genemania.util.ProgressReporter;
@@ -48,16 +56,16 @@ public class RelatedGenesEngineRequestDto implements Serializable {
 
 	public RelatedGenesEngineRequestDto() {
 	}
-	
+
 	public Collection<Long> getAttributeGroups() {
-        return attributeGroups;
-    }
+		return attributeGroups;
+	}
 
-    public void setAttributeGroups(Collection<Long> attributeGroups) {
-        this.attributeGroups = attributeGroups;
-    }
+	public void setAttributeGroups(Collection<Long> attributeGroups) {
+		this.attributeGroups = attributeGroups;
+	}
 
-    public CombiningMethod getCombiningMethod() {
+	public CombiningMethod getCombiningMethod() {
 		return combiningMethod;
 	}
 
@@ -76,11 +84,11 @@ public class RelatedGenesEngineRequestDto implements Serializable {
 	public int getAttributesLimit() {
 		return attributesLimit;
 	}
-		
+
 	public void setAttributesLimit(int attributesLimit) {
-	    this.attributesLimit = attributesLimit;
+		this.attributesLimit = attributesLimit;
 	}
-	
+
 	public String getNamespace() {
 		return namespace;
 	}
