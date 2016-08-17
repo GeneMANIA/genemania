@@ -21,6 +21,8 @@ var shell = require('gulp-shell');
 var gulpif = require('gulp-if');
 var combine = require('stream-combiner');
 var replace = require('gulp-replace');
+var server = require('http-server');
+var util = require('gulp-util');
 
 var $cordova = path.resolve( process.cwd(), 'node_modules/cordova/bin/cordova' );
 var $crosswalkCreate = path.resolve( process.cwd(), 'crosswalk/bin/create' );
@@ -286,7 +288,9 @@ gulp.task('htmlminrefs', ['templates', 'js', 'css'], function(){
       addRootSlash: false,
       transform: function( filepath ){
         if( filepath.match('.js') ){
-          return '<script src="' + filepath + '" async defer></script>';
+          return '<script>document.write(\'<script src="\' + tomcatContextPath() + \'' + filepath + '" async defer></\'+\'script>\');</'+'script>';
+        } else if( filepath.match('.css') ){
+          return '<script>document.write(\'<link rel="stylesheet" href="\' + tomcatContextPath() + \'' + filepath + '" />\');</'+'script>';
         }
 
         // Use the default transform as fallback:
@@ -364,6 +368,14 @@ gulp.task('prewatch', function( next ){
 // auto less compilation & livereload
 gulp.task('watch', ['prewatch'], function(){
   livereload.listen();
+
+  server.createServer({
+    root: './',
+    cache: -1,
+    cors: true
+  }).listen( '9999', '0.0.0.0' );
+
+  util.log( util.colors.green('GeneMANIA UI hosted on local HTTP server at http://localhost:9999') );
 
   // reload all when page or js changed
   gulp.watch( ['index.html', 'templates/*.html'].concat(paths.js) )

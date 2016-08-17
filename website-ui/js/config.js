@@ -5,7 +5,7 @@ var config = {
 
   service: {
     baseUrl: window.DEBUG_URL || 'http://server4.baderlab.med.utoronto.ca:8080/genemania/json/',
-    baseUrlProd: tomcatContextPath() + '/json/' // assuming that the ui is deployed in tomcat
+    baseUrlProd: tomcatContextPath() + 'json/' // assuming that the ui is deployed in tomcat
   },
 
   query: {

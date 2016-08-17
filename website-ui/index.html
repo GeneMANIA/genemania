@@ -11,8 +11,21 @@
   <title>GeneMANIA</title>
 
   <script>
+    // this page can be loaded from multiple urls
+    //  - http://some.server/genemania => tomcat url (get from spring), won't work w/ debug
+    //  - http://some.server => tomcat prod server (get from spring) or debug (relative)
+    //  - http://some.server/search/human/p53 => search url on tomcat prod (get from spring), won't work w/ debug
+    //  - http://some.server/#/search/human/p53 => works with either relative or spring
+    //  - http://some.server/?o=4&g=p53 => works with either relative or spring
     function tomcatContextPath(){
-      return window.location.origin + '/' + '${pageContext.request.contextPath}';
+      var cxtPath = '${pageContext.request.contextPath}';
+      var nonTomcat = cxtPath === '$' + '{' + 'pageContext.request.contextPath' + '}';
+
+      if( nonTomcat ){
+        return '';
+      }
+
+      return window.location.origin + '${pageContext.request.contextPath}/';
     }
   </script>
 
