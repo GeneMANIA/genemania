@@ -237,8 +237,12 @@
         <i class="fa fa-warning"></i>
       </div>
 
-      <div class="query-overlay-notification-text">
-        Your search could not be completed as specified.  Please revise your search and try again.
+      <div class="query-overlay-notification-text" ng-if="!query.genesText">
+        Please specify the names of your genes of interest in order to carry out your search.
+      </div>
+
+      <div class="query-overlay-notification-text" ng-if="query.genesText">
+        Please specify a set of valid gene names and try again.
       </div>
     </div>
 
