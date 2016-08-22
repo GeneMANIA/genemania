@@ -48,7 +48,6 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
 
     console.log('Query ready');
     PubSub.publish('query.ready', q.current);
-    log.action('query.ready');
   });
 
   PubSub.subscribe('ready', function(){
@@ -313,7 +312,7 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
           self.setMaxGenes( parseInt( vars.r ) );
         }
 
-        log.action('query.fromLink');
+        PubSub.publish('query.fromLink', self);
 
         self.search();
       } else if( pathname.match(/\/search\//) || hash.match(/\/search\//) ){
@@ -339,7 +338,7 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
           self.setGenes( genes );
         }
 
-        log.action('query.fromLink');
+        PubSub.publish('query.fromLink', self);
 
         self.search();
       }

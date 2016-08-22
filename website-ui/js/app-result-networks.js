@@ -58,10 +58,14 @@ function( util ){ return function( Result ){
     }
 
     this.filterNetworksFromEnables();
-    PubSub.publish('result.toggleNetwork', {
+
+    var pub  = {
       result: this,
       network: rNet
-    });
+    };
+
+    PubSub.publish('result.toggleNetwork', pub);
+    PubSub.publish(netEnabled ? 'result.enableNetwork' : 'result.disableNetwork', pub);
   };
 
   rfn.toggleNetworkGroup = function( rGr ){
@@ -78,10 +82,14 @@ function( util ){ return function( Result ){
     }
 
     this.filterNetworksFromEnables();
-    PubSub.publish('result.toggleNetworkGroup', {
+
+    var pub = {
       result: this,
       networkGroup: rGr
-    });
+    };
+
+    PubSub.publish('result.toggleNetworkGroup', pub);
+    PubSub.publish(en ? 'result.enableNetworkGroup' : 'result.disableNetworkGroup', pub);
   };
 
   rfn.getFilterNetworksCache = function(){
@@ -152,21 +160,27 @@ function( util ){ return function( Result ){
   };
 
   rfn.toggleNetworkGroupExpansion = function( rGr ){
-    rGr.expanded = !rGr.expanded;
+    var en = rGr.expanded = !rGr.expanded;
 
-    PubSub.publish('result.toggleNetworkGroupExpansion', {
+    var pub = {
       result: this,
       networkGroup: rGr
-    });
+    };
+
+    PubSub.publish('result.toggleNetworkGroupExpansion', pub);
+    PubSub.publish(en ? 'result.expandNetworkGroup' : 'result.collapseNetworkGroup', pub);
   };
 
   rfn.toggleNetworkExpansion = function( rNet ){
-    rNet.expanded = !rNet.expanded;
+    var en = rNet.expanded = !rNet.expanded;
 
-    PubSub.publish('result.toggleNetworkGroupExpansion', {
+    var pub = {
       result: this,
       network: rNet
-    });
+    };
+
+    PubSub.publish('result.toggleNetworkExpansion', pub);
+    PubSub.publish(en ? 'result.expandNetwork' : 'result.collapseNetwork', pub);
   };
 
   rfn.toggleNetworkListEnables = function(){

@@ -119,6 +119,8 @@ function( util ){ return function( Result ){
       resizeCy: true
     }, options);
 
+    PubSub.publish('result.layout', 'circle');
+
     var l = getLayoutEles().makeLayout({
       name: 'concentric',
       animate: options.animate,
@@ -162,6 +164,8 @@ function( util ){ return function( Result ){
       padding: defaultPadding,
       resizeCy: true
     }, options);
+
+    PubSub.publish('result.layout', 'force');
 
     var layoutEles = cy.elements().stdFilter(function( ele ){
       return ele.isNode() || !ele.hasClass('filtered');
@@ -295,6 +299,8 @@ function( util ){ return function( Result ){
       animate: true,
       resizeCy: true
     }, options);
+
+    PubSub.publish('result.layout', 'linear');
 
     var nodeSortVal = function( n ){
       if( n.data('query') ){

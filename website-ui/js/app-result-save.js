@@ -66,6 +66,8 @@ function( util ){ return function( Result ){
     }
 
     download( 'genemania-network.jpg', png );
+
+    PubSub.publish('result.saveImage', opts);
   };
 
   rfn.saveText = function(){
@@ -113,6 +115,8 @@ function( util ){ return function( Result ){
     });
 
     download( 'genemania-network.txt', txt, true );
+
+    PubSub.publish('result.saveText');
   };
 
   rfn.saveNetworks = function(){
@@ -148,6 +152,8 @@ function( util ){ return function( Result ){
     }).join('\n');
 
     download( 'genemania-networks.txt', txt, true );
+
+    PubSub.publish('result.saveNetworks');
   };
 
   rfn.saveAttributes = function(){
@@ -172,6 +178,8 @@ function( util ){ return function( Result ){
     }).join('\n');
 
     download( 'genemania-attributes.txt', txt, true );
+
+    PubSub.publish('result.saveAttributes');
   };
 
   rfn.saveGenes = function(){
@@ -201,6 +209,8 @@ function( util ){ return function( Result ){
     }).join('\n');
 
     download( 'genemania-genes.txt', txt, true );
+
+    PubSub.publish('result.saveGenes');
   };
 
   rfn.saveFunctions = function(){
@@ -226,6 +236,8 @@ function( util ){ return function( Result ){
     }).join('\n');
 
     download( 'genemania-functions.txt', txt, true );
+
+    PubSub.publish('result.saveFunctions');
   };
 
   rfn.saveInteractions = function(){
@@ -259,6 +271,8 @@ function( util ){ return function( Result ){
     }).join('');
 
     download( 'genemania-interactions.txt', txt, true );
+
+    PubSub.publish('result.saveInteractions');
   };
 
   rfn.saveParamsText = function(){
@@ -295,6 +309,8 @@ function( util ){ return function( Result ){
     txt += 'Version\t' + qu.version.dbVersion + '\n\n';
 
     download( 'genemania-parameters.txt', txt, true );
+
+    PubSub.publish('result.saveParamsText');
   };
 
   rfn.saveParamsJson = function(){
@@ -332,6 +348,8 @@ function( util ){ return function( Result ){
     obj.numberOfResultAttributes = qu.maxAttrs;
 
     download( 'genemania-parameters.json', JSON.stringify(obj, null, 2), true );
+
+    PubSub.publish('result.saveParamsJson');
   };
 
 

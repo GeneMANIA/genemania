@@ -13,16 +13,20 @@ function( util ){ return function( Query ){
   qfn.addGenes = function( genes ){
     var self = this;
 
+    genes = _.isArray( genes ) ? genes : [ genes ];
+
     self.settingGenes = true;
 
-    self.genesText += '\n' + (_.isArray( genes ) ? genes.join('\n') : genes);
+    self.genesText += '\n' + genes.join('\n');
 
     PubSub.publish('query.setGenes', self);
+    PubSub.publish('query.addGenes', genes);
     self.validateGenesFromText();
   };
 
   qfn.removeGenes = function( genes ){
     var self = this;
+    
     genes = _.isArray(genes) ? genes : [genes];
 
     self.settingGenes = true;
@@ -53,6 +57,7 @@ function( util ){ return function( Query ){
     self.genesText = lines.join('\n');
 
     PubSub.publish('query.setGenes', self);
+    PubSub.publish('query.removeGenes', genes);
     self.validateGenesFromText();
   };
 

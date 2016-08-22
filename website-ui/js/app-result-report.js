@@ -404,6 +404,8 @@ function( util ){ return function( Result ){
 
     pdfMake.createPdf( docDefinition ).open();
 
+    PubSub.publish('result.report');
+
   };
 
 
