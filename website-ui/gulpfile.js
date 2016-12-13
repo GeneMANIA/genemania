@@ -254,6 +254,10 @@ gulp.task('website-clean', function(){
   ].map(function( f ){ return '../website/src/main/webapp/' + f; }) ).pipe( clean({ force: true }) );
 });
 
+gulp.task('website-unmin', function(next){
+  return runSequence('htmlunminrefs', 'website-clean', 'deploy-website-res', 'deploy-website-index');
+});
+
 // build minified ui
 gulp.task('minify', ['htmlminrefs'], function(next){
   next();
@@ -280,22 +284,37 @@ gulp.task('htmltemplatesref', ['templates', 'css-unmin'], function(next){
   return runSequence( 'htmlrefs', next );
 });
 
+var websiteTransform = function( filepath ){
+  if( filepath.match('.js') ){
+    return '<script>document.write(\'<script src="\' + tomcatContextPath() + \'' + filepath + '" async defer></\'+\'script>\');</'+'script>';
+  } else if( filepath.match('.css') ){
+    return '<script>document.write(\'<link rel="stylesheet" href="\' + tomcatContextPath() + \'' + filepath + '" />\');</'+'script>';
+  }
+
+  // Use the default transform as fallback:
+  return inject.transform.apply(inject.transform, arguments);
+};
+
 // update path refs with minified files
 gulp.task('htmlminrefs', ['templates', 'js', 'css'], function(){
 
   return gulp.src( './index.html' )
     .pipe(inject( gulp.src(['./js-build/all.min.js', './css-build/all.min.css'], { read: false }), {
       addRootSlash: false,
-      transform: function( filepath ){
-        if( filepath.match('.js') ){
-          return '<script>document.write(\'<script src="\' + tomcatContextPath() + \'' + filepath + '" async defer></\'+\'script>\');</'+'script>';
-        } else if( filepath.match('.css') ){
-          return '<script>document.write(\'<link rel="stylesheet" href="\' + tomcatContextPath() + \'' + filepath + '" />\');</'+'script>';
-        }
+      transform: websiteTransform
+    } ))
 
-        // Use the default transform as fallback:
-        return inject.transform.apply(inject.transform, arguments);
-      }
+    .pipe( gulp.dest('.') )
+  ;
+
+});
+
+gulp.task('htmlunminrefs', ['templates', 'js-unmin', 'css-unmin'], function(){
+
+  return gulp.src( './index.html' )
+    .pipe(inject( gulp.src(['./js-build/all.js', './css-build/all.css'], { read: false }), {
+      addRootSlash: false,
+      transform: websiteTransform
     } ))
 
     .pipe( gulp.dest('.') )
@@ -328,6 +347,16 @@ gulp.task('js', ['templates'], function(){
     .pipe( concat('all.min.js', { newLine: ';\n' }) )
 
     .pipe( uglify() )
+
+    .pipe( gulp.dest('./js-build') )
+  ;
+
+});
+
+gulp.task('js-unmin', ['templates'], function(){
+
+  return gulp.src( paths.js )
+    .pipe( concat('all.js', { newLine: ';\n' }) )
 
     .pipe( gulp.dest('./js-build') )
   ;
