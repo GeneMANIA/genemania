@@ -39,7 +39,7 @@
 
     {
       name: 'query.search',
-      handler: function(){
+      handler: function( query ){
         log.action('query.search');
 
         log.query('organism', query.organism.alias);
@@ -163,20 +163,24 @@
 
   _.each( events, function( e ){
     PubSub.subscribe( e.name, function(){
-      var args = Array.prototype.slice.call( arguments, 1 );
+      try {
+        var args = Array.prototype.slice.call( arguments, 1 );
 
-      if( e.handler ){
-        e.handler.apply( null, args );
-        return;
+        if( e.handler ){
+          e.handler.apply( null, args );
+          return;
+        }
+
+        var value;
+
+        if( e.value ){
+          value = e.value.apply( null, args );
+        }
+
+        log.action( e.name, value );
+      } catch( err ){
+        // if there is a problem in logging, don't propagate the err
       }
-
-      var value;
-
-      if( e.value ){
-        value = e.value.apply( null, args );
-      }
-
-      log.action( e.name, value );
     } );
   } );
 
