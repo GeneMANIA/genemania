@@ -268,15 +268,17 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
   // LINKS
   qfn.checkLink = function(){
     var self = this;
-    var pathname = window.location.pathname;
-    var hash = window.location.hash;
+    var pathname = decodeURIComponent( window.location.pathname );
+    var hash = decodeURIComponent( window.location.hash );
+    var search = decodeURIComponent( window.location.search );
+
 
     try {
 
       if( pathname.match(/link$/) ){
         var vars = {};
 
-        window.location.search.substring(1).split('&').forEach(function( nameVal ){
+        search.substring(1).split('&').forEach(function( nameVal ){
           nameVal = nameVal.split('=');
 
           vars[ nameVal[0] ] = nameVal[1];
@@ -332,7 +334,7 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
           self.setOrganism( org );
         }
 
-        var genes = match[2].replace(/\|/g, '\n').replace(/\%7C/g, '\n').replace(/\//g, '\n');
+        var genes = match[2].replace(/\|/g, '\n').replace(/\//g, '\n');
 
         if( genes ){
           self.setGenes( genes );
