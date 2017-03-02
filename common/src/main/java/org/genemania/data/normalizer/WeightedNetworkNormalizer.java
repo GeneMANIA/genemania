@@ -34,7 +34,7 @@ public class WeightedNetworkNormalizer extends BaseNormalizer {
 	protected void handleBeforeNormalize(ParsingContext context) throws IOException {
 		List<Integer> idColumns = context.idColumns;
 		if (idColumns.size() < 2) {
-			throw new IOException();
+			throw new IOException("idColumns size lower than 2");
 		}
 		
 		// Assume first two identifier columns are the interacting pair.
