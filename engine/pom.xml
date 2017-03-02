@@ -7,8 +7,7 @@
         <version>3.5.0</version>
         <relativePath>..</relativePath>
     </parent>
-
-    <groupId>org.genemania</groupId>
+    
     <artifactId>genemania-engine</artifactId>
     <packaging>jar</packaging>
     <name>GeneMANIA Engine</name>
@@ -47,18 +46,18 @@
             <artifactId>genemania-common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- if we want to use the bundled apps against a derby db, need
-            these dependencies <dependency> <groupId>org.genemania</groupId> <artifactId>genemania-hibernate-support</artifactId>
-            <version>0.1</version> </dependency> <dependency> <groupId>org.apache.derby</groupId>
+        <!-- if we want to use the bundled apps against a derby db, need 
+            these dependencies <dependency> <groupId>org.genemania</groupId> <artifactId>genemania-hibernate-support</artifactId> 
+            <version>0.1</version> </dependency> <dependency> <groupId>org.apache.derby</groupId> 
             <artifactId>derby</artifactId> <version>10.4.2.0</version> </dependency> -->
-        <!-- experimenting with avro for serialization <dependency> <groupId>org.apache.hadoop</groupId>
+        <!-- experimenting with avro for serialization <dependency> <groupId>org.apache.hadoop</groupId> 
             <artifactId>avro</artifactId> <version>1.3.2</version> </dependency> -->
-        <dependency>
-            <groupId>com.googlecode.matrix-toolkits-java</groupId>
-            <artifactId>mtj</artifactId>
-            <version>0.9.14d</version>
-        </dependency>
-
+        <dependency> 
+            <groupId>com.googlecode.matrix-toolkits-java</groupId> 
+            <artifactId>mtj</artifactId> 
+            <version>1.0.2</version> 
+        </dependency>     
+        
         <dependency>
             <artifactId>opencsv</artifactId>
             <groupId>net.sf.opencsv</groupId>

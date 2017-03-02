@@ -8,7 +8,6 @@
         <relativePath>..</relativePath>
     </parent>
 
-	<groupId>org.genemania</groupId>
 	<artifactId>genemania-broker</artifactId>
 	<packaging>jar</packaging>
 	<name>GeneMANIA Broker</name>
