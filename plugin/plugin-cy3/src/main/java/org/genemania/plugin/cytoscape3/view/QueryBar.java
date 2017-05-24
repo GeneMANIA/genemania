@@ -4,16 +4,20 @@ import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
 import static javax.swing.GroupLayout.Alignment.CENTER;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -23,6 +27,8 @@ import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -52,7 +58,9 @@ public class QueryBar extends JPanel {
 	private static final int ICON_SIZE = 32;
 	
 	private JButton organismButton;
-	private JTextField searchTextField;
+	private JTextField queryTextField;
+	private JTextArea queryTextArea;
+	private JScrollPane queryScroll;
 	
 	private Vector<ModelElement<Organism>> organisms = new Vector<>();
 	private ModelElement<Organism> selectedOrganism;
@@ -80,7 +88,7 @@ public class QueryBar extends JPanel {
 
 	public Set<String> getQuery() {
 		Set<String> query = new HashSet<>();
-		String text = getSearchTextField().getText();
+		String text = getQueryTextArea().getText();
 		String[] split = text.split("\n");
 		
 		for (String s : split) {
@@ -131,12 +139,12 @@ public class QueryBar extends JPanel {
 		
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addComponent(getOrganismButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
-				.addComponent(getSearchTextField(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getQueryTextField(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 		);
 		layout.setVerticalGroup(layout.createParallelGroup(CENTER, true)
 				.addGap(0, 0, Short.MAX_VALUE)
 				.addComponent(getOrganismButton(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
-				.addComponent(getSearchTextField(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(getQueryTextField(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 				.addGap(0, 0, Short.MAX_VALUE)
 		);
 	}
@@ -151,7 +159,7 @@ public class QueryBar extends JPanel {
 						BorderFactory.createMatteBorder(0, 0, 0, 1, UIManager.getColor("Separator.foreground"))
 			));
 			
-			Dimension d = new Dimension(ICON_SIZE, Math.max(ICON_SIZE, getSearchTextField().getPreferredSize().height));
+			Dimension d = new Dimension(ICON_SIZE, Math.max(ICON_SIZE, getQueryTextField().getPreferredSize().height));
 			organismButton.setMinimumSize(d);
 			organismButton.setPreferredSize(d);
 			organismButton.addActionListener(evt -> showOrganismPopup());
@@ -160,13 +168,13 @@ public class QueryBar extends JPanel {
 		return organismButton;
 	}
 	
-	private JTextField getSearchTextField() {
-		if (searchTextField == null) {
+	private JTextField getQueryTextField() {
+		if (queryTextField == null) {
 			final Color msgColor = UIManager.getColor("Label.disabledForeground");
 			final int vgap = 1;
 			final int hgap = 5;
 			
-			searchTextField = new JTextField() {
+			queryTextField = new JTextField() {
 				@Override
 				public void paint(Graphics g) {
 					super.paint(g);
@@ -192,16 +200,23 @@ public class QueryBar extends JPanel {
 				}
 			};
 			
-			searchTextField.setEditable(false);
-			searchTextField.setMinimumSize(searchTextField.getPreferredSize());
-			searchTextField.setBorder(BorderFactory.createEmptyBorder(vgap, hgap, vgap, hgap));
-			searchTextField.setFont(searchTextField.getFont().deriveFont(LookAndFeelUtil.getSmallFontSize()));
+			queryTextField.setEditable(false);
+			queryTextField.setMinimumSize(queryTextField.getPreferredSize());
+			queryTextField.setBorder(BorderFactory.createEmptyBorder(vgap, hgap, vgap, hgap));
+			queryTextField.setFont(queryTextField.getFont().deriveFont(LookAndFeelUtil.getSmallFontSize()));
+			
+			queryTextField.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mousePressed(MouseEvent e) {
+					showQueryPopup();
+				}
+			});
 			
 			// Since we provide our own search component, it should let Cytoscape know
 			// when it has been updated by the user, so Cytoscape can give a better
 			// feedback to the user of whether or not the whole search component is ready
 			// (e.g. Cytoscape may enable or disable the search button)
-			searchTextField.getDocument().addDocumentListener(new DocumentListener() {
+			queryTextField.getDocument().addDocumentListener(new DocumentListener() {
 				@Override
 				public void removeUpdate(DocumentEvent e) {
 					fireQueryChanged();
@@ -217,7 +232,27 @@ public class QueryBar extends JPanel {
 			});
 		}
 		
-		return searchTextField;
+		return queryTextField;
+	}
+	
+	private JTextArea getQueryTextArea() {
+		if (queryTextArea == null) {
+			queryTextArea = new JTextArea();
+			LookAndFeelUtil.makeSmall(queryTextArea);
+		}
+		
+		return queryTextArea;
+	}
+	
+	private JScrollPane getQueryScroll() {
+		if (queryScroll == null) {
+			queryScroll = new JScrollPane(getQueryTextArea());
+			queryScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+			queryScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+			LookAndFeelUtil.makeSmall(queryScroll);
+		}
+		
+		return queryScroll;
 	}
 	
 	private void setDataSet(final DataSet data) {
@@ -262,6 +297,31 @@ public class QueryBar extends JPanel {
 		
 		popup.show(getOrganismButton(), 0, getOrganismButton().getHeight());
 		popup.requestFocus();
+	}
+	
+	private void showQueryPopup() {
+		JPopupMenu popup = new JPopupMenu();
+		popup.setBackground(getBackground());
+		popup.setLayout(new BorderLayout());
+		popup.add(getQueryScroll(), BorderLayout.CENTER);
+		
+		popup.addPropertyChangeListener("visible", evt -> {
+			if (evt.getNewValue() == Boolean.FALSE)
+				updateQueryTextField();
+		});
+		
+		getQueryScroll().setPreferredSize(new Dimension(getQueryTextField().getSize().width, 200));
+		popup.setPreferredSize(getQueryScroll().getPreferredSize());
+		
+		popup.show(getQueryTextField(), 0, 0);
+		popup.requestFocus();
+		getQueryTextArea().requestFocusInWindow();
+	}
+	
+	private void updateQueryTextField() {
+		Set<String> query = getQuery();
+		String text = query.stream().collect(Collectors.joining(" "));
+		getQueryTextField().setText(text);
 	}
 
 	private Icon getIcon(ModelElement<Organism> org) {

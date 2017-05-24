@@ -1,5 +1,7 @@
 package org.genemania.plugin.cytoscape3.task;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -23,13 +25,13 @@ import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
 import org.genemania.plugin.cytoscape3.view.QueryBar;
 
-public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory {
+public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, ActionListener {
 
 	@Tunable(description = "Max Resultant Genes:")
 	public int maxResGenes = 20;
 	
 	@Tunable(description="Advanced Search...")
-	public UserAction advancedSearchAction = new UserAction(null);
+	public UserAction advancedSearchAction = new UserAction(this);
 	
 	private static final String ID = "ca.utoronto.GeneMANIA";
 	private static final String NAME = "GeneMANIA";
@@ -43,6 +45,7 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory {
 	
 	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
 	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
+	private final RetrieveRelatedGenesAction retrieveRelatedGenesAction;
 	private final CyServiceRegistrar serviceRegistrar;
 
 	public SimpleSearchTaskFactory(
@@ -53,18 +56,13 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory {
 	) {
 		this.plugin = plugin;
 		this.controller = controller;
+		this.retrieveRelatedGenesAction = retrieveRelatedGenesAction;
 		this.serviceRegistrar = serviceRegistrar;
 		icon = new ImageIcon(getClass().getClassLoader().getResource("/img/logo_squared.png"));
 		
 		try {
 			website = new URL(WEBSITE_URL);
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			advancedSearchAction.setActionListener(evt -> retrieveRelatedGenesAction.getDelegate().invoke());
-		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -127,5 +125,10 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory {
 	@Override
 	public boolean isReady() {
 		return ((QueryBar) getQueryComponent()).isReady();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		retrieveRelatedGenesAction.getDelegate().invoke();
 	}
 }
