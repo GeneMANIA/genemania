@@ -4,10 +4,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 
 import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
 import org.cytoscape.model.CyEdge;
@@ -20,15 +23,25 @@ import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.swing.util.UserAction;
+import org.genemania.domain.InteractionNetworkGroup;
+import org.genemania.domain.Organism;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
+import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
 import org.genemania.plugin.cytoscape3.view.QueryBar;
+import org.genemania.plugin.model.Group;
+import org.genemania.plugin.model.ViewState;
+import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
+import org.genemania.plugin.parsers.Query;
+import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.type.CombiningMethod;
+import org.genemania.type.ScoringMethod;
 
 public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, ActionListener {
 
 	@Tunable(description = "Max Resultant Genes:")
-	public int maxResGenes = 20;
+	public int geneLimit = 20;
 	
 	@Tunable(description="Advanced Search...")
 	public UserAction advancedSearchAction = new UserAction(this);
@@ -46,16 +59,19 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
 	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
 	private final RetrieveRelatedGenesAction retrieveRelatedGenesAction;
+	private final CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
 
 	public SimpleSearchTaskFactory(
 			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
 			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller,
+			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, 
 			RetrieveRelatedGenesAction retrieveRelatedGenesAction, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
 		this.controller = controller;
+		this.cytoscapeUtils = cytoscapeUtils;
 		this.retrieveRelatedGenesAction = retrieveRelatedGenesAction;
 		this.serviceRegistrar = serviceRegistrar;
 		icon = new ImageIcon(getClass().getClassLoader().getResource("/img/logo_squared.png"));
@@ -86,12 +102,28 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		return new TaskIterator(new AbstractTask() {
 			@Override
 			public void run(TaskMonitor tm) throws Exception {
-				System.out.println(
-						"- Network Search [" + getName() + "]: " + ((QueryBar) getQueryComponent()).getQuery());
+				Query query = getQuery();
+				
+				if (query.getOrganism() == null)
+					throw new RuntimeException("Please select an organism.");
+				if (query.getGenes().isEmpty())
+					throw new RuntimeException("Please enter one or more genes.");
+				
+				List<Group<?, ?>> groups = getGroups(query.getOrganism());
+				CyNetwork network = controller.runMania(SwingUtilities.getWindowAncestor(queryBar), query, groups);
+
+				cytoscapeUtils.handleNetworkPostProcessing(network);
+				cytoscapeUtils.performLayout(network);
+				cytoscapeUtils.maximize(network);
+				
+				NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
+				ViewState options = selManager.getNetworkConfiguration(network);
+				plugin.applyOptions(options);
+				plugin.showResults();
 			}
 		});
 	}
-
+	
 	@Override
 	public String getId() {
 		return ID;
@@ -130,5 +162,27 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		retrieveRelatedGenesAction.getDelegate().invoke();
+	}
+	
+	private Query getQuery() {
+		final Query query = new Query();
+		query.setOrganism(queryBar.getSelectedOrganism());
+		query.setGenes(new ArrayList<>(queryBar.getQueryGenes()));
+		query.setGeneLimit(geneLimit);
+		query.setAttributeLimit(0);
+		query.setCombiningMethod(CombiningMethod.AUTOMATIC_SELECT);
+		query.setScoringMethod(ScoringMethod.DISCRIMINANT);
+		
+		return query;
+	}
+	
+	private List<Group<?, ?>> getGroups(Organism organism) {
+		List<Group<?, ?>> groups = new ArrayList<Group<?, ?>>();
+		
+		// TODO get only default or selected groups
+		for (InteractionNetworkGroup group : organism.getInteractionNetworkGroups())
+			groups.add(new InteractionNetworkGroupImpl(group));
+		
+		return groups;
 	}
 }

@@ -86,7 +86,7 @@ public class QueryBar extends JPanel {
 		dataSetManager.addDataSetChangeListener((dataSet, progress) -> setDataSet(dataSet));
 	}
 
-	public Set<String> getQuery() {
+	public Set<String> getQueryGenes() {
 		Set<String> query = new HashSet<>();
 		String text = getQueryTextArea().getText();
 		String[] split = text.split("\n");
@@ -101,8 +101,12 @@ public class QueryBar extends JPanel {
 		return query;
 	}
 	
+	public Organism getSelectedOrganism() {
+		return selectedOrganism != null ? selectedOrganism.getItem() : null;
+	}
+	
 	public boolean isReady() {
-		return selectedOrganism != null && !getQuery().isEmpty();
+		return selectedOrganism != null && !getQueryGenes().isEmpty();
 	}
 	
 	@Override
@@ -319,7 +323,7 @@ public class QueryBar extends JPanel {
 	}
 	
 	private void updateQueryTextField() {
-		Set<String> query = getQuery();
+		Set<String> query = getQueryGenes();
 		String text = query.stream().collect(Collectors.joining(" "));
 		getQueryTextField().setText(text);
 	}

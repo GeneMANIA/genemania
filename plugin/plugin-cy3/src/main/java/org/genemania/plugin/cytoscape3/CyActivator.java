@@ -192,8 +192,8 @@ public class CyActivator extends AbstractCyActivator {
 		{
 			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller =
 					new RetrieveRelatedGenesController<>(geneMania, cytoscapeUtils, networkUtils, taskDispatcher);
-			SimpleSearchTaskFactory taskFactory =
-					new SimpleSearchTaskFactory(geneMania, controller, retrieveRelatedGenesAction, serviceRegistrar);
+			SimpleSearchTaskFactory taskFactory = new SimpleSearchTaskFactory(geneMania, controller, cytoscapeUtils,
+					retrieveRelatedGenesAction, serviceRegistrar);
 			registerService(bc, taskFactory, NetworkSearchTaskFactory.class);
 		}
 	}
