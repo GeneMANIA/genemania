@@ -16,9 +16,6 @@
 
     <modules>
         <module>plugin-core</module>
-        <!-- <module>plugin-cy2-support</module>
-        <module>plugin-cy26-support</module>
-        <module>plugin-cy2</module> -->
         <module>plugin-cy3</module>
         <module>distribution</module>
     </modules>
@@ -30,9 +27,6 @@
         <!-- Cytoscape metadata -->
         <cytoscapeVersion>3.5.0</cytoscapeVersion>
         <releaseVersion></releaseVersion> <!-- No longed used -->
-        
-        <!-- Cytoscape 2.X-specific metadata -->
-        <releaseDate>November 9, 2012</releaseDate>
     </properties>
     
     <repositories>
