@@ -33,6 +33,7 @@ import org.cytoscape.application.swing.CyAction;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanel;
 import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.model.CyEdge;
@@ -57,12 +58,14 @@ import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.undo.UndoSupport;
 import org.genemania.plugin.FileUtils;
 import org.genemania.plugin.NetworkUtils;
+import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape3.actions.AboutAction;
 import org.genemania.plugin.cytoscape3.actions.CheckForUpdatesAction;
 import org.genemania.plugin.cytoscape3.actions.DownloadDataSetAction;
 import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
 import org.genemania.plugin.cytoscape3.actions.SwitchDataSetAction;
 import org.genemania.plugin.cytoscape3.layout.GeneManiaFDLayout;
+import org.genemania.plugin.cytoscape3.task.SimpleSearchTaskFactory;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.data.IDataSetFactory;
 import org.genemania.plugin.view.util.UiUtils;
@@ -70,32 +73,28 @@ import org.osgi.framework.BundleContext;
 
 public class CyActivator extends AbstractCyActivator {
 	
-	private CySwingApplication cySwingApplicationRef;
-	private CyServiceRegistrar cyServiceRegistrarRef;
+	private CySwingApplication swingApplication;
+	private CyServiceRegistrar serviceRegistrar;
 	private RetrieveRelatedGenesAction retrieveRelatedGenesAction;
 	
-	public CyActivator() {
-		super();
-	}
-
 	@Override
 	public void start(BundleContext bc) {
-		cyServiceRegistrarRef = getService(bc, CyServiceRegistrar.class);
-		cySwingApplicationRef = getService(bc, CySwingApplication.class);
-		CyApplicationManager cyApplicationManagerRef = getService(bc, CyApplicationManager.class);
-		CyNetworkManager cyNetworkManagerRef = getService(bc, CyNetworkManager.class);
-		CyNetworkFactory cyNetworkFactoryRef = getService(bc, CyNetworkFactory.class);
-		CyNetworkViewManager cyNetworkViewManagerRef = getService(bc, CyNetworkViewManager.class);
-		CyNetworkViewFactory cyNetworkViewFactoryRef = getService(bc, CyNetworkViewFactory.class);
-		VisualMappingManager visualMappingManagerRef = getService(bc, VisualMappingManager.class);
-		VisualStyleFactory visualStyleFactoryRef = getService(bc, VisualStyleFactory.class);
-		VisualMappingFunctionFactory discreteMappingFunctionFactoryRef = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=discrete)");
-		VisualMappingFunctionFactory passthroughMappingFunctionFactoryRef = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=passthrough)");
-		VisualMappingFunctionFactory continuousMappingFunctionFactoryRef = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
-		TaskManager<?, ?> taskManagerRef = getService(bc, TaskManager.class);
+		serviceRegistrar = getService(bc, CyServiceRegistrar.class);
+		swingApplication = getService(bc, CySwingApplication.class);
+		CyApplicationManager applicationManager = getService(bc, CyApplicationManager.class);
+		CyNetworkManager networkManager = getService(bc, CyNetworkManager.class);
+		CyNetworkFactory networkFactory = getService(bc, CyNetworkFactory.class);
+		CyNetworkViewManager networkViewManager = getService(bc, CyNetworkViewManager.class);
+		CyNetworkViewFactory networkViewFactory = getService(bc, CyNetworkViewFactory.class);
+		VisualMappingManager visualMappingManager = getService(bc, VisualMappingManager.class);
+		VisualStyleFactory visualStyleFactory = getService(bc, VisualStyleFactory.class);
+		VisualMappingFunctionFactory discreteMappingFactory = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=discrete)");
+		VisualMappingFunctionFactory passthroughMappingFactory = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=passthrough)");
+		VisualMappingFunctionFactory continuousMappingFactory = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
+		TaskManager<?, ?> taskManager = getService(bc, TaskManager.class);
 		ApplyPreferredLayoutTaskFactory applyPreferredLayoutTaskFactory = getService(bc, ApplyPreferredLayoutTaskFactory.class);
-		CyEventHelper cyEventHelperRef = getService(bc, CyEventHelper.class);
-		UndoSupport undoSupportRef = getService(bc, UndoSupport.class);
+		CyEventHelper eventHelper = getService(bc, CyEventHelper.class);
+		UndoSupport undoSupport = getService(bc, UndoSupport.class);
 		RenderingEngineManager renderingEngineManager = getService(bc, RenderingEngineManager.class);
 		StreamUtil streamUtil = getService(bc, StreamUtil.class);
 
@@ -105,87 +104,98 @@ public class CyActivator extends AbstractCyActivator {
 		FileUtils fileUtils = new CyFileUtils(streamUtil);
 		NetworkUtils networkUtils = new NetworkUtils();
 		CytoscapeUtilsImpl cytoscapeUtils = new CytoscapeUtilsImpl(
-				networkUtils, cySwingApplicationRef, cyApplicationManagerRef,
-				cyNetworkManagerRef, cyNetworkViewManagerRef,
-				cyNetworkFactoryRef, cyNetworkViewFactoryRef,
-				visualStyleFactoryRef, visualMappingManagerRef,
-				discreteMappingFunctionFactoryRef,
-				passthroughMappingFunctionFactoryRef,
-				continuousMappingFunctionFactoryRef,
-				taskManagerRef, cyEventHelperRef, applyPreferredLayoutTaskFactory, renderingEngineManager,
-				cyServiceRegistrarRef);
+				networkUtils, swingApplication, applicationManager,
+				networkManager, networkViewManager,
+				networkFactory, networkViewFactory,
+				visualStyleFactory, visualMappingManager,
+				discreteMappingFactory,
+				passthroughMappingFactory,
+				continuousMappingFactory,
+				taskManager, eventHelper,
+				applyPreferredLayoutTaskFactory, renderingEngineManager,
+				serviceRegistrar);
 		DataSetManager dataSetManager = new DataSetManager();
 		OsgiTaskDispatcher taskDispatcher = new OsgiTaskDispatcher(uiUtils);
-		DefaultDataSetFactory<CyNetwork, CyNode, CyEdge> luceneDataSetFactory = new DefaultDataSetFactory<CyNetwork, CyNode, CyEdge>(
-				dataSetManager, uiUtils, fileUtils, cytoscapeUtils,
-				taskDispatcher);
+		DefaultDataSetFactory<CyNetwork, CyNode, CyEdge> luceneDataSetFactory = new DefaultDataSetFactory<>(
+				dataSetManager, uiUtils, fileUtils, cytoscapeUtils, taskDispatcher);
 		
-		SimpleCyProperty<Properties> properties = new SimpleCyProperty<Properties>("org.genemania", new Properties(), Properties.class, CyProperty.SavePolicy.SESSION_FILE);
-		registerService(bc, properties, CyProperty.class, new Properties());
+		SimpleCyProperty<Properties> properties = new SimpleCyProperty<>("org.genemania", new Properties(),
+				Properties.class, CyProperty.SavePolicy.SESSION_FILE);
+		registerService(bc, properties, CyProperty.class);
 		
-		NetworkSelectionManagerImpl selectionManager = new NetworkSelectionManagerImpl(cytoscapeUtils, taskDispatcher, properties);
-		GeneManiaImpl geneMania = new GeneManiaImpl(dataSetManager,
-				cytoscapeUtils, uiUtils, fileUtils, networkUtils,
-				taskDispatcher, cySwingApplicationRef, cyServiceRegistrarRef,
-				selectionManager, properties);
+		NetworkSelectionManagerImpl selectionManager = new NetworkSelectionManagerImpl(cytoscapeUtils, taskDispatcher,
+				properties);
+		GeneManiaImpl geneMania = new GeneManiaImpl(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils,
+				taskDispatcher, swingApplication, serviceRegistrar, selectionManager, properties);
 		selectionManager.setGeneMania(geneMania);
-		registerAllServices(bc, selectionManager, new Properties());
+		registerAllServices(bc, selectionManager);
 		geneMania.startUp();
 		
-		GeneManiaFDLayout fdLayout = new GeneManiaFDLayout(undoSupportRef);
+		GeneManiaFDLayout fdLayout = new GeneManiaFDLayout(undoSupport);
 		registerLayoutAlgorithms(bc, fdLayout);
 
-		Map<String, String> serviceProperties;
+		Map<String, String> props;
+		{
+			props = new HashMap<>();
+			props.put("inMenuBar", "true");
+			props.put("preferredMenu", "Apps.GeneMANIA");
+			props.put(MENU_GRAVITY, "1.0");
+			props.put(INSERT_SEPARATOR_AFTER, "true");
+			retrieveRelatedGenesAction = new RetrieveRelatedGenesAction(props, applicationManager, geneMania,
+					cytoscapeUtils, networkUtils, uiUtils, fileUtils, taskDispatcher, networkViewManager);
+			registerService(bc, retrieveRelatedGenesAction, CyAction.class);
+		}
+		{
+			props = new HashMap<>();
+			props.put("inMenuBar", "true");
+			props.put("preferredMenu", "Apps.GeneMANIA");
+			props.put(MENU_GRAVITY, "2.0");
+			DownloadDataSetAction action = new DownloadDataSetAction(props, applicationManager, geneMania,
+					networkViewManager);
+			registerService(bc, action, CyAction.class);
+		}
+		{
+			props = new HashMap<>();
+			props.put("inMenuBar", "true");
+			props.put("preferredMenu", "Apps.GeneMANIA");
+			props.put(MENU_GRAVITY, "3.0");
+			SwitchDataSetAction action = new SwitchDataSetAction(props, applicationManager, geneMania,
+					networkViewManager);
+			registerService(bc, action, CyAction.class);
+		}
+		{
+			props = new HashMap<>();
+			props.put("inMenuBar", "true");
+			props.put("preferredMenu", "Apps.GeneMANIA");
+			props.put(MENU_GRAVITY, "4.0");
+			CheckForUpdatesAction action = new CheckForUpdatesAction(props, applicationManager, geneMania,
+					networkViewManager);
+			registerService(bc, action, CyAction.class);
+		}
+		{
+			props = new HashMap<>();
+			props.put("inMenuBar", "true");
+			props.put("preferredMenu", "Apps.GeneMANIA");
+			props.put(MENU_GRAVITY, "5.0");
+			props.put(INSERT_SEPARATOR_BEFORE, "true");
+			AboutAction action = new AboutAction(props, applicationManager, swingApplication, uiUtils,
+					networkViewManager);
+			registerService(bc, action, CyAction.class);
+		}
 		
-		serviceProperties = new HashMap<String, String>();
-		serviceProperties.put("inMenuBar", "true");
-		serviceProperties.put("preferredMenu", "Apps.GeneMANIA");
-		serviceProperties.put(MENU_GRAVITY, "1.0");
-		serviceProperties.put(INSERT_SEPARATOR_AFTER, "true");
-		retrieveRelatedGenesAction = new RetrieveRelatedGenesAction(
-				serviceProperties, cyApplicationManagerRef, geneMania,
-				cytoscapeUtils, networkUtils, uiUtils, fileUtils,
-				taskDispatcher, cyNetworkViewManagerRef);
+		registerService(bc, cytoscapeUtils, RowsSetListener.class);
+		registerService(bc, luceneDataSetFactory, IDataSetFactory.class);
 
-		serviceProperties = new HashMap<String, String>();
-		serviceProperties.put("inMenuBar", "true");
-		serviceProperties.put("preferredMenu", "Apps.GeneMANIA");
-		serviceProperties.put(MENU_GRAVITY, "2.0");
-		DownloadDataSetAction downloadDataSetAction = new DownloadDataSetAction(
-				serviceProperties, cyApplicationManagerRef, geneMania, cyNetworkViewManagerRef);
-
-		serviceProperties = new HashMap<String, String>();
-		serviceProperties.put("inMenuBar", "true");
-		serviceProperties.put("preferredMenu", "Apps.GeneMANIA");
-		serviceProperties.put(MENU_GRAVITY, "3.0");
-		SwitchDataSetAction switchDataSetAction = new SwitchDataSetAction(
-				serviceProperties, cyApplicationManagerRef, geneMania, cyNetworkViewManagerRef);
-
-		serviceProperties = new HashMap<String, String>();
-		serviceProperties.put("inMenuBar", "true");
-		serviceProperties.put("preferredMenu", "Apps.GeneMANIA");
-		serviceProperties.put(MENU_GRAVITY, "4.0");
-		CheckForUpdatesAction checkForUpdatesAction = new CheckForUpdatesAction(
-				serviceProperties, cyApplicationManagerRef, geneMania, cyNetworkViewManagerRef);
-
-
-		serviceProperties = new HashMap<String, String>();
-		serviceProperties.put("inMenuBar", "true");
-		serviceProperties.put("preferredMenu", "Apps.GeneMANIA");
-		serviceProperties.put(MENU_GRAVITY, "5.0");
-		serviceProperties.put(INSERT_SEPARATOR_BEFORE, "true");
-		AboutAction aboutAction = new AboutAction(serviceProperties,
-				cyApplicationManagerRef, cySwingApplicationRef, uiUtils, cyNetworkViewManagerRef);
+		registerServiceListener(bc, dataSetManager::addDataSetFactory, dataSetManager::removeDataSetFactory,
+				IDataSetFactory.class);
 		
-		registerService(bc, retrieveRelatedGenesAction, CyAction.class, new Properties());
-		registerService(bc, downloadDataSetAction, CyAction.class, new Properties());
-		registerService(bc, switchDataSetAction, CyAction.class, new Properties());
-		registerService(bc, checkForUpdatesAction, CyAction.class, new Properties());
-		registerService(bc, cytoscapeUtils, RowsSetListener.class, new Properties());
-		registerService(bc, luceneDataSetFactory, IDataSetFactory.class, new Properties());
-		registerService(bc, aboutAction, CyAction.class, new Properties());
-
-		registerServiceListener(bc, dataSetManager, "addDataSetFactory", "removeDataSetFactory", IDataSetFactory.class);
+		{
+			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller =
+					new RetrieveRelatedGenesController<>(geneMania, cytoscapeUtils, networkUtils, taskDispatcher);
+			SimpleSearchTaskFactory taskFactory =
+					new SimpleSearchTaskFactory(geneMania, controller, retrieveRelatedGenesAction, serviceRegistrar);
+			registerService(bc, taskFactory, NetworkSearchTaskFactory.class);
+		}
 	}
 	
 	@Override
@@ -212,7 +222,7 @@ public class CyActivator extends AbstractCyActivator {
 	
 	private void closeAppPanels() {
 		// First, unregister result panels...
-		final CytoPanel resPanel = cySwingApplicationRef.getCytoPanel(CytoPanelName.EAST);
+		final CytoPanel resPanel = swingApplication.getCytoPanel(CytoPanelName.EAST);
 		
 		if (resPanel != null) {
 			int count = resPanel.getCytoPanelComponentCount();
@@ -223,7 +233,7 @@ public class CyActivator extends AbstractCyActivator {
 					
 					// Compare the class names to also get panels that may have been left by old versions of GeneMANIA
 					if (comp.getClass().getName().equals(ManiaResultsCytoPanelComponent.class.getName()))
-						cyServiceRegistrarRef.unregisterAllServices(comp);
+						serviceRegistrar.unregisterAllServices(comp);
 				}
 			} catch (Exception e) {
 			}

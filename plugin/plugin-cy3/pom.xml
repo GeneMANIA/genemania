@@ -9,7 +9,7 @@
     <properties>
 		<bundle.symbolicName>org.genemania.plugin-impl</bundle.symbolicName>
 		<bundle.namespace>org.genemania.plugin.cytoscape3</bundle.namespace>
-		<cy3.version>3.3.0</cy3.version>
+		<cy3.version>3.6.0-SNAPSHOT</cy3.version>
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<maven-pax-plugin.version>1.5</maven-pax-plugin.version>
 		<maven-bundle-plugin.version>3.0.0</maven-bundle-plugin.version>
@@ -75,6 +75,11 @@
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>swing-application-api</artifactId>
+            <version>${cy3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>swing-util-api</artifactId>
             <version>${cy3.version}</version>
         </dependency>
         <dependency>
