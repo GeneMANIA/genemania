@@ -54,6 +54,7 @@ import org.genemania.plugin.model.ModelElement;
 @SuppressWarnings("serial")
 public class QueryBar extends JPanel {
 
+	private static final String ORGANISM_TOOLTIP = "Organism";
 	private static final String DEF_SEARCH_TEXT = "Enter one gene per line...";
 	private static final int ICON_SIZE = 32;
 	
@@ -156,7 +157,7 @@ public class QueryBar extends JPanel {
 	private JButton getOrganismButton() {
 		if (organismButton == null) {
 			organismButton = new JButton();
-			organismButton.setToolTipText("Organism");
+			organismButton.setToolTipText(ORGANISM_TOOLTIP);
 			organismButton.setContentAreaFilled(false);
 			organismButton.setBorder(BorderFactory.createCompoundBorder(
 						BorderFactory.createEmptyBorder(1, 1, 1, 0),
@@ -276,6 +277,10 @@ public class QueryBar extends JPanel {
 		selectedOrganism = newValue;
 		
 		if (changed) {
+			getOrganismButton().setToolTipText(
+					selectedOrganism != null ? 
+					ORGANISM_TOOLTIP + " (" + selectedOrganism.getItem().getName() + ")" : ORGANISM_TOOLTIP
+			);
 			getOrganismButton().setIcon(selectedOrganism != null ? getIcon(selectedOrganism) : null);
 			fireQueryChanged();
 		}
@@ -336,6 +341,9 @@ public class QueryBar extends JPanel {
 		
 		description = description.replace(" ", "_").replaceAll("'", "");
 		URL resource = getClass().getClassLoader().getResource("/img/organism/" + description + "-32.png");
+		
+		if (resource == null)
+			resource = getClass().getClassLoader().getResource("/img/organism/missing-32.png");
 		
 		return resource != null ? new ImageIcon(resource) : null;
 	}
