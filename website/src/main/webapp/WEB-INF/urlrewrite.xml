@@ -44,7 +44,7 @@
         <note>
             Redirect link to search/{organism}/{gene_names}
         </note>
-        <from>^/search/([a-z_]+)/(.+)$</from>
+        <from>^/search/([-_.a-z0-9]+)/(.+)$</from>
         <to>/public-html/link?o=$1&amp;g=$2</to>
     </rule>
 
@@ -52,7 +52,7 @@
         <note>
             Redirect link to search/{organism} (error)
         </note>
-        <from>^/search/([a-z_]+)/?$</from>
+        <from>^/search/([-_.a-z0-9]+)/?$</from>
         <to>/public-html/link?o=$1</to>
     </rule>
 
