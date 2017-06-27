@@ -23,6 +23,7 @@ import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.swing.util.UserAction;
+import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.InteractionNetworkGroup;
 import org.genemania.domain.Organism;
 import org.genemania.plugin.GeneMania;
@@ -30,6 +31,7 @@ import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
 import org.genemania.plugin.cytoscape3.view.QueryBar;
+import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
@@ -102,12 +104,20 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		return new TaskIterator(new AbstractTask() {
 			@Override
 			public void run(TaskMonitor tm) throws Exception {
+				tm.setTitle("GeneMANIA");
+				tm.setStatusMessage("Validating search...");
+				tm.setProgress(-1);
+				
 				Query query = getQuery();
 				
 				if (query.getOrganism() == null)
 					throw new RuntimeException("Please select an organism.");
 				if (query.getGenes().isEmpty())
 					throw new RuntimeException("Please enter one or more genes.");
+				if (!hasValidGenes(query.getOrganism(), query.getGenes()))
+					throw new RuntimeException("Please specify a set of valid gene names and try again.");
+					
+				tm.setStatusMessage("Searching...");
 				
 				List<Group<?, ?>> groups = getGroups(query.getOrganism());
 				CyNetwork network = controller.runMania(SwingUtilities.getWindowAncestor(queryBar), query, groups);
@@ -184,5 +194,17 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 			groups.add(new InteractionNetworkGroupImpl(group));
 		
 		return groups;
+	}
+	
+	private boolean hasValidGenes(Organism organism, List<String> geneList) {
+		DataSetManager dataSetManager = plugin.getDataSetManager();
+		GeneCompletionProvider2 provider = dataSetManager.getDataSet().getCompletionProvider(organism);
+		
+		for (String gene : geneList) {
+			if (provider.isValid(gene))
+				return true;
+		}
+		
+		return false;
 	}
 }
