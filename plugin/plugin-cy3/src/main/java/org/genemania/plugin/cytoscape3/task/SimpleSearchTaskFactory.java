@@ -120,16 +120,19 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 				tm.setStatusMessage("Searching...");
 				
 				List<Group<?, ?>> groups = getGroups(query.getOrganism());
-				CyNetwork network = controller.runMania(SwingUtilities.getWindowAncestor(queryBar), query, groups);
-
-				cytoscapeUtils.handleNetworkPostProcessing(network);
-				cytoscapeUtils.performLayout(network);
-				cytoscapeUtils.maximize(network);
 				
-				NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
-				ViewState options = selManager.getNetworkConfiguration(network);
-				plugin.applyOptions(options);
-				plugin.showResults();
+				new Thread(() -> {
+					CyNetwork network = controller.runMania(SwingUtilities.getWindowAncestor(queryBar), query, groups);
+	
+					cytoscapeUtils.handleNetworkPostProcessing(network);
+					cytoscapeUtils.performLayout(network);
+					cytoscapeUtils.maximize(network);
+					
+					NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
+					ViewState options = selManager.getNetworkConfiguration(network);
+					plugin.applyOptions(options);
+					plugin.showResults();
+				}).start();
 			}
 		});
 	}
@@ -187,7 +190,7 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 	}
 	
 	private List<Group<?, ?>> getGroups(Organism organism) {
-		List<Group<?, ?>> groups = new ArrayList<Group<?, ?>>();
+		List<Group<?, ?>> groups = new ArrayList<>();
 		
 		// TODO get only default or selected groups
 		for (InteractionNetworkGroup group : organism.getInteractionNetworkGroups())
