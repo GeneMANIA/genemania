@@ -18,6 +18,9 @@
  */
 package org.genemania.plugin.cytoscape3;
 
+import static org.cytoscape.work.ServiceProperties.COMMAND;
+import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
+import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
 import static org.cytoscape.work.ServiceProperties.INSERT_SEPARATOR_AFTER;
 import static org.cytoscape.work.ServiceProperties.INSERT_SEPARATOR_BEFORE;
 import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
@@ -54,6 +57,7 @@ import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
+import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.undo.UndoSupport;
 import org.genemania.plugin.FileUtils;
@@ -65,6 +69,7 @@ import org.genemania.plugin.cytoscape3.actions.DownloadDataSetAction;
 import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
 import org.genemania.plugin.cytoscape3.actions.SwitchDataSetAction;
 import org.genemania.plugin.cytoscape3.layout.GeneManiaFDLayout;
+import org.genemania.plugin.cytoscape3.task.SearchCommandTaskFactory;
 import org.genemania.plugin.cytoscape3.task.SimpleSearchTaskFactory;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.data.IDataSetFactory;
@@ -133,6 +138,9 @@ public class CyActivator extends AbstractCyActivator {
 		
 		GeneManiaFDLayout fdLayout = new GeneManiaFDLayout(undoSupport);
 		registerLayoutAlgorithms(bc, fdLayout);
+		
+		RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller =
+				new RetrieveRelatedGenesController<>(geneMania, cytoscapeUtils, networkUtils, taskDispatcher);
 
 		Map<String, String> props;
 		{
@@ -190,11 +198,18 @@ public class CyActivator extends AbstractCyActivator {
 				IDataSetFactory.class);
 		
 		{
-			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller =
-					new RetrieveRelatedGenesController<>(geneMania, cytoscapeUtils, networkUtils, taskDispatcher);
-			SimpleSearchTaskFactory taskFactory = new SimpleSearchTaskFactory(geneMania, controller, cytoscapeUtils,
+			SimpleSearchTaskFactory factory = new SimpleSearchTaskFactory(geneMania, controller, cytoscapeUtils,
 					retrieveRelatedGenesAction, serviceRegistrar);
-			registerService(bc, taskFactory, NetworkSearchTaskFactory.class);
+			registerService(bc, factory, NetworkSearchTaskFactory.class);
+		}
+		{
+			SearchCommandTaskFactory factory = new SearchCommandTaskFactory(geneMania, controller, cytoscapeUtils,
+					retrieveRelatedGenesAction, serviceRegistrar);
+			Properties p = new Properties();
+			p.put(COMMAND, "search");
+			p.put(COMMAND_NAMESPACE, "genemania");
+			p.put(COMMAND_DESCRIPTION, "Search GeneMANIA");
+			registerService(bc, factory, TaskFactory.class, p);
 		}
 	}
 	

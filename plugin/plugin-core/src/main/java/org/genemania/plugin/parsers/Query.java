@@ -35,6 +35,7 @@ import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
 
 public final class Query {
+	
 	private Organism fOrganism;
 	private List<String> fGenes;
 	private Collection<Group<?, ?>> fNetworks;

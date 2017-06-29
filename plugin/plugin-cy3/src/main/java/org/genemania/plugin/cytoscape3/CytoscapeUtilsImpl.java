@@ -128,8 +128,10 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 			VisualMappingManager mappingManager,
 			VisualMappingFunctionFactory discreteFactory,
 			VisualMappingFunctionFactory passthroughFactory,
-			VisualMappingFunctionFactory continuousFactory, TaskManager<?, ?> taskManager,
-			CyEventHelper eventHelper, ApplyPreferredLayoutTaskFactory applyPreferredLayoutTaskFactory,
+			VisualMappingFunctionFactory continuousFactory,
+			TaskManager<?, ?> taskManager,
+			CyEventHelper eventHelper,
+			ApplyPreferredLayoutTaskFactory applyPreferredLayoutTaskFactory,
 			RenderingEngineManager renderingEngineManager,
 			CyServiceRegistrar serviceRegistrar
 	) {
@@ -153,12 +155,12 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		this.renderingEngineManager = renderingEngineManager;
 		this.serviceRegistrar = serviceRegistrar;
 		
-		nodes = new WeakHashMap<CyNetwork, Map<String, Reference<CyNode>>>();
-		edges = new WeakHashMap<CyNetwork, Map<String, Reference<CyEdge>>>();
-		networkViews = new WeakHashMap<CyNetwork, Reference<CyNetworkView>>();
-		networksByNodeTable = new WeakHashMap<CyTable, Reference<CyNetwork>>();
-		networksByEdgeTable = new WeakHashMap<CyTable, Reference<CyNetwork>>();
-		visualStyles = new WeakHashMap<CyNetwork, VisualStyle>();
+		nodes = new WeakHashMap<>();
+		edges = new WeakHashMap<>();
+		networkViews = new WeakHashMap<>();
+		networksByNodeTable = new WeakHashMap<>();
+		networksByEdgeTable = new WeakHashMap<>();
+		visualStyles = new WeakHashMap<>();
 	}
 	
 	@Override

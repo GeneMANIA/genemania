@@ -114,7 +114,7 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 					throw new RuntimeException("Please select an organism.");
 				if (query.getGenes().isEmpty())
 					throw new RuntimeException("Please enter one or more genes.");
-				if (!hasValidGenes(query.getOrganism(), query.getGenes()))
+				if (!hasValidGenes(query.getOrganism(), query.getGenes(), plugin))
 					throw new RuntimeException("Please specify a set of valid gene names and try again.");
 					
 				tm.setStatusMessage("Searching...");
@@ -177,6 +177,29 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		retrieveRelatedGenesAction.getDelegate().invoke();
 	}
 	
+	protected static boolean hasValidGenes(Organism organism, List<String> geneList,
+			GeneMania<CyNetwork, CyNode, CyEdge> plugin) {
+		DataSetManager dataSetManager = plugin.getDataSetManager();
+		GeneCompletionProvider2 provider = dataSetManager.getDataSet().getCompletionProvider(organism);
+		
+		for (String gene : geneList) {
+			if (provider.isValid(gene))
+				return true;
+		}
+		
+		return false;
+	}
+	
+	protected static List<Group<?, ?>> getGroups(Organism organism) {
+		List<Group<?, ?>> groups = new ArrayList<>();
+		
+		// TODO get only default or selected groups
+		for (InteractionNetworkGroup group : organism.getInteractionNetworkGroups())
+			groups.add(new InteractionNetworkGroupImpl(group));
+		
+		return groups;
+	}
+	
 	private Query getQuery() {
 		final Query query = new Query();
 		query.setOrganism(queryBar.getSelectedOrganism());
@@ -187,27 +210,5 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		query.setScoringMethod(ScoringMethod.DISCRIMINANT);
 		
 		return query;
-	}
-	
-	private List<Group<?, ?>> getGroups(Organism organism) {
-		List<Group<?, ?>> groups = new ArrayList<>();
-		
-		// TODO get only default or selected groups
-		for (InteractionNetworkGroup group : organism.getInteractionNetworkGroups())
-			groups.add(new InteractionNetworkGroupImpl(group));
-		
-		return groups;
-	}
-	
-	private boolean hasValidGenes(Organism organism, List<String> geneList) {
-		DataSetManager dataSetManager = plugin.getDataSetManager();
-		GeneCompletionProvider2 provider = dataSetManager.getDataSet().getCompletionProvider(organism);
-		
-		for (String gene : geneList) {
-			if (provider.isValid(gene))
-				return true;
-		}
-		
-		return false;
 	}
 }
