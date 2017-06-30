@@ -110,6 +110,16 @@ function( util ){ return function( Result ){
         cl.remove('cy-layouting-shift');
         cl.remove('cy-layouting-shift-history');
       }
+    }).then(function(){
+      return new Promise(function( resolve ){
+        setTimeout(function(){
+          if( options.resizeCy ){
+            cy.resize();
+
+            resolve();
+          }
+        }, 0);
+      });
     }).cancellable();
   };
 
