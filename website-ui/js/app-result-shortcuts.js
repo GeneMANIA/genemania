@@ -36,7 +36,7 @@ function( util ){ return function( Result ){
   let zoomAmount = 0.05;
   let zoomMult = 4;
 
-  let zoomBy = mult => {
+  let zoomBy = function(mult){
     let z = cy.zoom();
     let w = cy.width() - (rfn.networksExpanded ? $('#network-list').width() : 0);
     let h = cy.height() - (rfn.historyExpanded ? $('#query-history').height() : 0);
