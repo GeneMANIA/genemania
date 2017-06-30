@@ -271,10 +271,10 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
     var pathname = decodeURIComponent( window.location.pathname );
     var hash = decodeURIComponent( window.location.hash );
     var search = decodeURIComponent( window.location.search );
-    
+
     try {
 
-      if( pathname.match(/link$/) ){
+      if( pathname.match(/link$/) || search !== "" ){
         var vars = {};
 
         search.substring(1).split('&').forEach(function( nameVal ){
