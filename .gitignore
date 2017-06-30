@@ -10,3 +10,4 @@ build.xml
 profiles.xml
 /bin/
 .tomcatplugin
+npm-debug.log
