@@ -1,6 +1,7 @@
 package org.genemania.plugin.cytoscape3.task;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -37,7 +38,7 @@ public class SearchCommandTask extends AbstractTask {
 	public ListSingleSelection<Organism> organism = new ListSingleSelection<>();
 	
 	@Tunable(description = "List of query genes", context = "nogui")
-	public List<String> genes;
+	public String genes;
 	
 	@Tunable(description = "Maximum number of resultant Genes", context = "nogui")
 	public int geneLimit = 20;
@@ -67,6 +68,9 @@ public class SearchCommandTask extends AbstractTask {
 		this.retrieveRelatedGenesAction = retrieveRelatedGenesAction;
 		this.serviceRegistrar = serviceRegistrar;
 		
+		combiningMethod.setSelectedValue(CombiningMethod.AUTOMATIC_SELECT);
+		scoringMethod.setSelectedValue(ScoringMethod.DISCRIMINANT);
+		
 		DataSetManager dataSetManager = plugin.getDataSetManager();
 		DataSet data = dataSetManager.getDataSet();
 		
@@ -92,8 +96,8 @@ public class SearchCommandTask extends AbstractTask {
 		Query query = getQuery();
 		
 		if (query.getOrganism() == null)
-			throw new RuntimeException("Please select an organism.");
-		if (query.getGenes().isEmpty())
+			throw new RuntimeException("Please specify an organism.");
+		if (query.getGenes() == null || query.getGenes().isEmpty())
 			throw new RuntimeException("Please enter one or more genes.");
 		if (!SimpleSearchTaskFactory.hasValidGenes(query.getOrganism(), query.getGenes(), plugin))
 			throw new RuntimeException("Please specify a set of valid gene names and try again.");
@@ -119,8 +123,13 @@ public class SearchCommandTask extends AbstractTask {
 	
 	private Query getQuery() {
 		final Query query = new Query();
+		
+		if (genes != null) {
+			String[] arr = genes.split("\\|");
+			query.setGenes(Arrays.asList(arr));
+		}
+		
 		query.setOrganism(organism.getSelectedValue());
-		query.setGenes(genes);
 		query.setGeneLimit(geneLimit);
 		query.setAttributeLimit(0);
 		query.setCombiningMethod(combiningMethod.getSelectedValue() != null ?
