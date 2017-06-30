@@ -38,8 +38,8 @@ function( util ){ return function( Result ){
 
   let zoomBy = mult => {
     let z = cy.zoom();
-    let w = cy.width();
-    let h = cy.height();
+    let w = cy.width() - (rfn.networksExpanded ? $('#network-list').width() : 0);
+    let h = cy.height() - (rfn.historyExpanded ? $('#query-history').height() : 0);
 
     cy.zoom({
       level: z * mult,
