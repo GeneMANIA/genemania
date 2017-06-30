@@ -352,6 +352,8 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
 
     } catch( err ){
       // just allow user to revise query
+      console.error('The permalink could not be parsed');
+      console.error( err );
     }
   };
 
@@ -375,6 +377,8 @@ function( $scope, updateScope, Query ){
 
     // $scope.$apply();
     updateScope();
+
+    responsive.restyle();
   }
 
   PubSub.subscribe('ready', init);

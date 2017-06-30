@@ -25,7 +25,7 @@
       if( defn.getMatchingEles == null || defn.getMatchingEles ){
         eles = defn.id ? [ document.getElementById( defn.id ) ] : document.querySelectorAll( defn.selector );
       }
-      
+
       var props;
 
       try{
@@ -33,6 +33,7 @@
       } catch(err){
         console.error('responsive.js detected an error in a style block definition');
         console.error( err );
+        console.error( defn );
       }
 
       var selector = defn.id ? ('#' + defn.id) : defn.selector;
@@ -45,7 +46,7 @@
           eles[j].setAttribute('style', propsStr);
         }
       } else { // use stylesheet
-        css += selector + ' { ' + propsStr + ' } \n'; 
+        css += selector + ' { ' + propsStr + ' } \n';
       }
 
       if( defn.after ){
@@ -69,8 +70,10 @@
   // when responsiveness should be applied
   window.addEventListener( 'resize', handleDefns );
   window.addEventListener( 'orientationchanged', handleDefns );
-  window.addEventListener( 'load', handleDefns );
-  window.addEventListener( 'DOMContentLoaded', handleDefns );
+
+  // these cause issues on edge/ie
+  //window.addEventListener( 'load', handleDefns );
+  //window.addEventListener( 'DOMContentLoaded', handleDefns );
 
   var responsive = window.responsive = {
     define: function( d ){
