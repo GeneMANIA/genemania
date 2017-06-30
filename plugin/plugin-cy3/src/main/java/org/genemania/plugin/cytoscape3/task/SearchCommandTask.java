@@ -1,7 +1,6 @@
 package org.genemania.plugin.cytoscape3.task;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -11,10 +10,13 @@ import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
+import org.cytoscape.work.json.JSONResult;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.genemania.domain.Organism;
 import org.genemania.exception.DataStoreException;
@@ -32,7 +34,7 @@ import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
 
-public class SearchCommandTask extends AbstractTask {
+public class SearchCommandTask extends AbstractTask implements ObservableTask {
 
 	@Tunable(description = "Organism", context = "nogui")
 	public ListSingleSelection<Organism> organism = new ListSingleSelection<>();
@@ -48,6 +50,8 @@ public class SearchCommandTask extends AbstractTask {
 	
 	@Tunable(description = "Scoring method", context = "nogui")
 	public ListSingleSelection<ScoringMethod> scoringMethod = new ListSingleSelection<>(ScoringMethod.values());
+	
+	private CyNetwork network;
 	
 	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
 	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
@@ -106,29 +110,55 @@ public class SearchCommandTask extends AbstractTask {
 		
 		List<Group<?, ?>> groups = SimpleSearchTaskFactory.getGroups(query.getOrganism());
 		
-		new Thread(() -> {
-			JFrame parent = serviceRegistrar.getService(CySwingApplication.class).getJFrame();
-			CyNetwork network = controller.runMania(parent, query, groups);
+		JFrame parent = serviceRegistrar.getService(CySwingApplication.class).getJFrame();
+		network = controller.runMania(parent, query, groups);
 
-			cytoscapeUtils.handleNetworkPostProcessing(network);
-			cytoscapeUtils.performLayout(network);
-			cytoscapeUtils.maximize(network);
+		cytoscapeUtils.handleNetworkPostProcessing(network);
+		cytoscapeUtils.performLayout(network);
+		cytoscapeUtils.maximize(network);
+		
+		NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
+		ViewState options = selManager.getNetworkConfiguration(network);
+		plugin.applyOptions(options);
+		plugin.showResults();
+	}
+	
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Object getResults(Class type) {
+		if (type == CyNetwork.class || type == CySubNetwork.class)
+			return network;
+		
+		if (type == String.class)
+			return network == null ? 
+					"Search returned no results." :
+					String.format("Created network '%s' (SUID=%d)", 
+							network.getRow(network).get(CyNetwork.NAME, String.class), network.getSUID());
+		
+		if (type == JSONResult.class) {
+			JSONResult res = () -> { return network != null ? "" + network.getSUID() : null; };
+			return res;
+		}
 			
-			NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
-			ViewState options = selManager.getNetworkConfiguration(network);
-			plugin.applyOptions(options);
-			plugin.showResults();
-		}).start();
+		return null;
 	}
 	
 	private Query getQuery() {
-		final Query query = new Query();
+		List<String> geneList = new ArrayList<>();
 		
 		if (genes != null) {
 			String[] arr = genes.split("\\|");
-			query.setGenes(Arrays.asList(arr));
+			
+			for (String s : arr) {
+				s = s.trim();
+				
+				if (!s.isEmpty())
+					geneList.add(s);
+			}
 		}
 		
+		final Query query = new Query();
+		query.setGenes(geneList);
 		query.setOrganism(organism.getSelectedValue());
 		query.setGeneLimit(geneLimit);
 		query.setAttributeLimit(0);
