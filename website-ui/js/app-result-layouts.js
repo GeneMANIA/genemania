@@ -115,9 +115,9 @@ function( util ){ return function( Result ){
         setTimeout(function(){
           if( options.resizeCy ){
             cy.resize();
-
-            resolve();
           }
+
+          resolve();
         }, 0);
       });
     }).cancellable();
