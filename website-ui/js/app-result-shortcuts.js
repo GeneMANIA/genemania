@@ -18,8 +18,8 @@ function( util ){ return function( Result ){
 
   // pan
 
-  let panAmount = 5;
-  let panMult = 4;
+  var panAmount = 5;
+  var panMult = 4;
 
   on('down', function(){ cy.panBy({ y: -panAmount * panMult }) });
   on('up', function(){ cy.panBy({ y: panAmount * panMult }) });
@@ -33,13 +33,13 @@ function( util ){ return function( Result ){
 
   // zoom
 
-  let zoomAmount = 0.05;
-  let zoomMult = 4;
+  var zoomAmount = 0.05;
+  var zoomMult = 4;
 
-  let zoomBy = function(mult){
-    let z = cy.zoom();
-    let w = cy.width() - (rfn.networksExpanded ? $('#network-list').width() : 0);
-    let h = cy.height() - (rfn.historyExpanded ? $('#query-history').height() : 0);
+  var zoomBy = function(mult){
+    var z = cy.zoom();
+    var w = cy.width() - (rfn.networksExpanded ? $('#network-list').width() : 0);
+    var h = cy.height() - (rfn.historyExpanded ? $('#query-history').height() : 0);
 
     cy.zoom({
       level: z * mult,
