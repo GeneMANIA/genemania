@@ -22,17 +22,13 @@ package org.genemania.plugin.view;
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
@@ -50,6 +46,8 @@ import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.plugin.selection.SelectionListener;
+import org.genemania.plugin.view.components.BaseInfoPanel;
+import org.genemania.plugin.view.util.IconManager;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
@@ -78,7 +76,7 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 	private final NetworkUtils networkUtils;
 
 	private final UiUtils uiUtils;
-
+	
 	public ManiaResultsPanel(
 			ManiaResultsController<NETWORK, NODE, EDGE> controller,
 			GeneMania<NETWORK, NODE, EDGE> plugin,
@@ -98,25 +96,81 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 	
 	private void addComponents() {
 		organismLabel = new JLabel();
-		organismLabel.setHorizontalAlignment(JLabel.CENTER);
 		
-		final JButton exportButton = new JButton(Strings.maniaResultsPanelExportButton_label);
-		exportButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				handleExportButton();
-			}
-		});
-		exportButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
+		final JButton optionsButton = uiUtils.createIconButton(IconManager.ICON_BARS, 12.0f);
+		optionsButton.setToolTipText("Options...");
 		
-		final JButton attributesButton = new JButton(Strings.maniaResultsAttributesButton_label);
-		attributesButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				handleAttributesButton();
+		optionsButton.addActionListener(evt -> {
+			JPopupMenu menu = new JPopupMenu();
+			String tabTitle = getTabPane().getTitleAt(getTabPane().getSelectedIndex());
+			
+			final BaseInfoPanel<?, ?> infoPanel;
+			
+			if (Strings.maniaResultsPanelNetworkTab_label.equals(tabTitle))
+				infoPanel = networkPanel;
+			else if (Strings.maniaResultsPanelGeneTab_label.equals(tabTitle))
+				infoPanel = genePanel;
+			else
+				infoPanel = null;
+			
+			if (infoPanel != null) {
+				{
+					JMenuItem mi = new JMenuItem("Expand All");
+					mi.addActionListener(ae -> infoPanel.showDetails(true, -1));
+					menu.add(mi);
+				}
+				if (infoPanel == networkPanel) {
+					JMenuItem mi = new JMenuItem("Expand Top-Level");
+					mi.addActionListener(ae -> {
+						infoPanel.showDetails(false, -1);
+						infoPanel.showDetails(true, 0);
+					});
+					menu.add(mi);
+				}
+				{
+					JMenuItem mi = new JMenuItem("Expand None");
+					mi.addActionListener(ae -> infoPanel.showDetails(false, -1));
+					menu.add(mi);
+				}
+				menu.addSeparator();
+				String enableOrSelect = infoPanel == networkPanel ? "Enable " : "Select ";
+				{
+					JMenuItem mi = new JMenuItem(enableOrSelect + "All");
+					mi.addActionListener(ae -> infoPanel.setAllEnabled(true));
+					menu.add(mi);
+				}
+				{
+					JMenuItem mi = new JMenuItem(enableOrSelect + "None");
+					mi.addActionListener(ae -> infoPanel.setAllEnabled(false));
+					menu.add(mi);
+				}
+				menu.addSeparator();
+				{
+					JMenuItem mi = new JMenuItem("Sort by 'name'");
+					mi.addActionListener(ae -> infoPanel.sort(0, null));
+					menu.add(mi);
+				}
+				{
+					String colName = infoPanel == networkPanel ? "'per cent weight'" : "'score'";
+					JMenuItem mi = new JMenuItem("Sort by " + colName);
+					mi.addActionListener(ae -> infoPanel.sort(1, null));
+					menu.add(mi);
+				}
+				menu.addSeparator();
 			}
+			{
+				JMenuItem mi = new JMenuItem(Strings.maniaResultsAttributesButton_label);
+				mi.addActionListener(ae -> handleAttributesButton());
+				menu.add(mi);
+			}
+			{
+				JMenuItem mi = new JMenuItem(Strings.maniaResultsPanelExportButton_label);
+				mi.addActionListener(ae -> handleExportButton());
+				menu.add(mi);
+			}
+			
+			menu.show(optionsButton, 0, optionsButton.getHeight());
 		});
-		attributesButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
 		
 		final GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
@@ -124,20 +178,20 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 		layout.setAutoCreateContainerGaps(false);
 		
 		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)
-				.addComponent(organismLabel)
-				.addComponent(getTabPane(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 				.addGroup(layout.createSequentialGroup()
-					.addComponent(exportButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
-					.addComponent(attributesButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+						.addContainerGap()
+						.addComponent(organismLabel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(optionsButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+						.addContainerGap()
 				)
+				.addComponent(getTabPane(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 		);
 		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addComponent(organismLabel)
-				.addComponent(getTabPane(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
-					.addComponent(exportButton)
-					.addComponent(attributesButton)
+						.addComponent(organismLabel)
+						.addComponent(optionsButton, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
 				)
+				.addComponent(getTabPane(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 		);
 	}
 	
@@ -156,17 +210,15 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 
 	public void applyOptions(ViewState options) {
 		// Remove old listeners
-		if (geneListener != null) {
+		if (geneListener != null)
 			genePanel.removeSelectionListener(geneListener);
-		}
-		if (networkListener != null) {
+		if (networkListener != null)
 			networkPanel.removeSelectionListener(networkListener);
-		}
 		
 		this.options = options;
 		SearchResult result = options.getSearchResult();
 		Organism organism = result.getOrganism();
-		organismLabel.setText(String.format(Strings.maniaResultsPanelOrganism_label, organism.getName()));
+		organismLabel.setText("<html><i>" + organism.getAlias() + "</i> (" + organism.getDescription() + ")</html>");
 		
 		NetworkSelectionManager<NETWORK, NODE, EDGE> selectionManager = plugin.getNetworkSelectionManager();
 		geneListener = selectionManager.createGeneListSelectionListener(genePanel, options);
@@ -194,39 +246,18 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 	
 	private JTabbedPane getTabPane() {
 		if (tabPane == null) {
-			tabPane = new JTabbedPane();
+			tabPane = new JTabbedPane(JTabbedPane.BOTTOM);
 			
-			JPanel networkContents = uiUtils.createJPanel();
-			networkContents.setLayout(new GridBagLayout());
 			networkPanel = new NetworkGroupInfoPanel<NETWORK, NODE, EDGE>(plugin, cytoscapeUtils, networkUtils, uiUtils);
 			JScrollPane networkScrollPane = new JScrollPane(networkPanel);
-			
-			JPanel optionsPanel = networkPanel.createExpanderPanel(Strings.maniaResultsPanelNetworkOptions_label);
-			networkContents.add(optionsPanel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.PAGE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-			networkContents.add(networkScrollPane, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-			tabPane.add(networkContents);
-			tabPane.setTitleAt(0, Strings.maniaResultsPanelNetworkTab_label);
+			tabPane.addTab(Strings.maniaResultsPanelNetworkTab_label, networkScrollPane);
 
-			JPanel geneContents = uiUtils.createJPanel();
-			geneContents.setLayout(new GridBagLayout());
 			genePanel = new GeneInfoPanel(networkUtils, uiUtils);
 			JScrollPane geneScrollPane = new JScrollPane(genePanel);
-			
-			optionsPanel = genePanel.createExpanderPanel(Strings.maniaResultsPanelGeneOptions_label);
-			geneContents.add(optionsPanel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.PAGE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-			geneContents.add(geneScrollPane, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-			
-			tabPane.add(geneContents);
-			tabPane.setTitleAt(1, Strings.maniaResultsPanelGeneTab_label);
-			
-			JPanel functionContents = uiUtils.createJPanel();
-			functionContents.setLayout(new GridBagLayout());
+			tabPane.addTab(Strings.maniaResultsPanelGeneTab_label, geneScrollPane);
 			
 			functionPanel = new FunctionInfoPanel(uiUtils);
-			functionContents.add(functionPanel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-			
-			tabPane.add(functionContents);
-			tabPane.setTitleAt(2, Strings.maniaResultsPanelFunctionTab_label);
+			tabPane.addTab(Strings.maniaResultsPanelFunctionTab_label, functionPanel);
 		}
 		
 		return tabPane;

@@ -18,6 +18,15 @@
  */
 package org.genemania.plugin.cytoscape3;
 
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_STROKE_UNSELECTED_PAINT;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_TRANSPARENCY;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_WIDTH;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.NODE_FILL_COLOR;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.NODE_LABEL;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.NODE_SHAPE;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.NODE_SIZE;
+
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Paint;
@@ -59,7 +68,6 @@ import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.RenderingEngine;
 import org.cytoscape.view.presentation.RenderingEngineManager;
-import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
@@ -171,36 +179,37 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 			double[] extrema
 	) {
 		VisualStyle style = styleFactory.createVisualStyle(getVisualStyleName(network));
-		style.setDefaultValue(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ELLIPSE);
-		style.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, RESULT_COLOR);
+		style.setDefaultValue(NODE_SHAPE, NodeShapeVisualProperty.ELLIPSE);
+		style.setDefaultValue(NODE_FILL_COLOR, RESULT_COLOR);
+		style.setDefaultValue(EDGE_TRANSPARENCY, DEF_EDGE_TRANSPARENCY);
 
 		// Node mappings
-		style.addVisualMappingFunction(passthroughFactory.createVisualMappingFunction(GENE_NAME_ATTRIBUTE, String.class, BasicVisualLexicon.NODE_LABEL));
+		style.addVisualMappingFunction(passthroughFactory.createVisualMappingFunction(GENE_NAME_ATTRIBUTE, String.class, NODE_LABEL));
 
 		double[] values = networkUtils.sortScores(scores);
-		ContinuousMapping<Double, Double> mapping = (ContinuousMapping<Double, Double>) continuousFactory.createVisualMappingFunction(SCORE_ATTRIBUTE, Double.class, BasicVisualLexicon.NODE_SIZE);
-		mapping.addPoint(values[0], new BoundaryRangeValues<Double>(MINIMUM_NODE_SIZE, MINIMUM_NODE_SIZE, MINIMUM_NODE_SIZE));
-		mapping.addPoint(values[values.length - 1], new BoundaryRangeValues<Double>(MAXIMUM_NODE_SIZE, MAXIMUM_NODE_SIZE, MAXIMUM_NODE_SIZE));
+		ContinuousMapping<Double, Double> mapping = (ContinuousMapping<Double, Double>) continuousFactory.createVisualMappingFunction(SCORE_ATTRIBUTE, Double.class, NODE_SIZE);
+		mapping.addPoint(values[0], new BoundaryRangeValues<>(MINIMUM_NODE_SIZE, MINIMUM_NODE_SIZE, MINIMUM_NODE_SIZE));
+		mapping.addPoint(values[values.length - 1], new BoundaryRangeValues<>(MAXIMUM_NODE_SIZE, MAXIMUM_NODE_SIZE, MAXIMUM_NODE_SIZE));
 		style.addVisualMappingFunction(mapping);
 		
-		DiscreteMapping<String, Paint> nodeFillMapping = (DiscreteMapping<String, Paint>) discreteFactory.createVisualMappingFunction(NODE_TYPE_ATTRIBUTE, String.class, BasicVisualLexicon.NODE_FILL_COLOR);
+		DiscreteMapping<String, Paint> nodeFillMapping = (DiscreteMapping<String, Paint>) discreteFactory.createVisualMappingFunction(NODE_TYPE_ATTRIBUTE, String.class, NODE_FILL_COLOR);
 		nodeFillMapping.putMapValue(NODE_TYPE_QUERY, QUERY_COLOR);
 		nodeFillMapping.putMapValue(NODE_TYPE_RESULT, RESULT_COLOR);
 		nodeFillMapping.putMapValue(NODE_TYPE_ATTRIBUTE_NODE, RESULT_COLOR);
 		style.addVisualMappingFunction(nodeFillMapping);
 
-		DiscreteMapping<String, NodeShape> nodeShapeMapping = (DiscreteMapping<String, NodeShape>) discreteFactory.createVisualMappingFunction(NODE_TYPE_ATTRIBUTE, String.class, BasicVisualLexicon.NODE_SHAPE);
+		DiscreteMapping<String, NodeShape> nodeShapeMapping = (DiscreteMapping<String, NodeShape>) discreteFactory.createVisualMappingFunction(NODE_TYPE_ATTRIBUTE, String.class, NODE_SHAPE);
 		nodeShapeMapping.putMapValue(NODE_TYPE_ATTRIBUTE_NODE, NodeShapeVisualProperty.DIAMOND);
 		style.addVisualMappingFunction(nodeShapeMapping);
 
 		// Edge mappings
-		DiscreteMapping<String, Paint> edgeColorMapping = (DiscreteMapping<String, Paint>) discreteFactory.createVisualMappingFunction(NETWORK_GROUP_NAME_ATTRIBUTE, String.class, BasicVisualLexicon.EDGE_STROKE_UNSELECTED_PAINT);
+		DiscreteMapping<String, Paint> edgeColorMapping = (DiscreteMapping<String, Paint>) discreteFactory.createVisualMappingFunction(NETWORK_GROUP_NAME_ATTRIBUTE, String.class, EDGE_STROKE_UNSELECTED_PAINT);
 		edgeColorMapping.putAll(colors);
 		style.addVisualMappingFunction(edgeColorMapping);
 		
-		ContinuousMapping<Double, Double> edgeWidthMapping = (ContinuousMapping<Double, Double>) continuousFactory.createVisualMappingFunction(MAX_WEIGHT_ATTRIBUTE, Double.class, BasicVisualLexicon.EDGE_WIDTH);
-		edgeWidthMapping.addPoint(extrema[0], new BoundaryRangeValues<Double>(MINIMUM_EDGE_WIDTH, MINIMUM_EDGE_WIDTH, MINIMUM_EDGE_WIDTH));
-		edgeWidthMapping.addPoint(extrema[1], new BoundaryRangeValues<Double>(MAXIMUM_EDGE_WIDTH, MAXIMUM_EDGE_WIDTH, MAXIMUM_EDGE_WIDTH));
+		ContinuousMapping<Double, Double> edgeWidthMapping = (ContinuousMapping<Double, Double>) continuousFactory.createVisualMappingFunction(MAX_WEIGHT_ATTRIBUTE, Double.class, EDGE_WIDTH);
+		edgeWidthMapping.addPoint(extrema[0], new BoundaryRangeValues<>(MINIMUM_EDGE_WIDTH, MINIMUM_EDGE_WIDTH, MINIMUM_EDGE_WIDTH));
+		edgeWidthMapping.addPoint(extrema[1], new BoundaryRangeValues<>(MAXIMUM_EDGE_WIDTH, MAXIMUM_EDGE_WIDTH, MAXIMUM_EDGE_WIDTH));
 		style.addVisualMappingFunction(edgeWidthMapping);
 	
 		visualStyles.put(network, style);
@@ -222,7 +231,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 				final View<CyEdge> ev = nv.getEdgeView(edge);
 				
 				if (ev != null)
-					ev.setLockedValue(BasicVisualLexicon.EDGE_VISIBLE, visible);
+					ev.setLockedValue(EDGE_VISIBLE, visible);
 			}
 		}
 		
@@ -248,7 +257,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 				final View<CyEdge> ev = nv.getEdgeView(edge);
 				
 				if (ev != null)
-					ev.setLockedValue(BasicVisualLexicon.EDGE_VISIBLE, visible);
+					ev.setLockedValue(EDGE_VISIBLE, visible);
 			}
 		}
 		
@@ -326,7 +335,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 			Object context = gmLayout.createLayoutContext();
 			
 			for (CyNetworkView nv : views) {
-				Set<View<CyNode>> nodesToLayOut = new HashSet<View<CyNode>>(nv.getNodeViews());
+				Set<View<CyNode>> nodesToLayOut = new HashSet<>(nv.getNodeViews());
 				taskManager.execute(gmLayout.createTaskIterator(nv, context, nodesToLayOut, null));
 			}
 		} else {
@@ -339,9 +348,10 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	public void registerSelectionListener(
 			CyNetwork cyNetwork,
 			NetworkSelectionManager<CyNetwork, CyNode, CyEdge> manager,
-			GeneMania<CyNetwork, CyNode, CyEdge> plugin) {
-		networksByNodeTable.put(cyNetwork.getDefaultNodeTable(), new WeakReference<CyNetwork>(cyNetwork));
-		networksByEdgeTable.put(cyNetwork.getDefaultEdgeTable(), new WeakReference<CyNetwork>(cyNetwork));
+			GeneMania<CyNetwork, CyNode, CyEdge> plugin
+	) {
+		networksByNodeTable.put(cyNetwork.getDefaultNodeTable(), new WeakReference<>(cyNetwork));
+		networksByEdgeTable.put(cyNetwork.getDefaultEdgeTable(), new WeakReference<>(cyNetwork));
 		
 		synchronized (selectionMutex ) {
 			if (selectionHandler == null) {
@@ -427,7 +437,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	protected CyEdge getEdge(CyNode from, CyNode to, String type, String label, CyNetwork network) {
 		Map<String, Reference<CyEdge>> networkEdges = edges.get(network);
 		if (networkEdges == null) {
-			networkEdges = new HashMap<String, Reference<CyEdge>>();
+			networkEdges = new HashMap<>();
 			edges.put(network, networkEdges);
 		}
 		
@@ -442,7 +452,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		
 		CyEdge edge = network.addEdge(from, to, false);
 		network.getRow(edge).set(CyNetwork.NAME, key);
-		networkEdges.put(key, new WeakReference<CyEdge>(edge));
+		networkEdges.put(key, new WeakReference<>(edge));
 		return edge;
 	}
 	
@@ -466,10 +476,10 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		
 		Map<String, Reference<CyNode>> nodeMap = nodes.get(network);
 		if (nodeMap == null) {
-			nodeMap = new HashMap<String, Reference<CyNode>>();
+			nodeMap = new HashMap<>();
 			nodes.put(network, nodeMap);
 		}
-		nodeMap.put(id, new WeakReference<CyNode>(node));
+		nodeMap.put(id, new WeakReference<>(node));
 		return node;
 	}
 	
@@ -504,14 +514,14 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	}
 
 	private Map<String, Reference<CyEdge>> cacheEdges(CyNetwork network) {
-		HashMap<String, Reference<CyEdge>> edges = new HashMap<String, Reference<CyEdge>>();
+		HashMap<String, Reference<CyEdge>> edges = new HashMap<>();
 		for (CyEdge edge : network.getEdgeList()) {
 			CyRow row = network.getRow(edge);
 			if (row.get(MAX_WEIGHT_ATTRIBUTE, Double.class) == null) {
 				continue;
 			}
 			String name = row.get(CyNetwork.NAME, String.class);
-			edges.put(name, new WeakReference<CyEdge>(edge));
+			edges.put(name, new WeakReference<>(edge));
 		}
 		return edges;
 	}
@@ -525,7 +535,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		Reference<CyNetworkView> reference = networkViews.get(network);
 		if (reference == null) {
 			CyNetworkView view = viewFactory.createNetworkView(network);
-			networkViews.put(network, new WeakReference<CyNetworkView>(view));
+			networkViews.put(network, new WeakReference<>(view));
 			return view;
 		}
 		return reference.get();

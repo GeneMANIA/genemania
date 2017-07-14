@@ -137,7 +137,7 @@ public class NetworkGroupInfoPanel<NETWORK, NODE, EDGE> extends ToggleInfoPanel<
 	}
 
 	@Override
-	protected void setAllEnabled(boolean enabled) {
+	public void setAllEnabled(boolean enabled) {
 		for (NetworkGroupDetailPanel<NETWORK, NODE, EDGE> panel : dataModel) {
 			panel.setItemEnabled(enabled);
 		}

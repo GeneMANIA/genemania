@@ -93,7 +93,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 	private static Map<Long, Integer> sequenceNumbers;
 
 	static {
-		sequenceNumbers = new HashMap<Long, Integer>();
+		sequenceNumbers = new HashMap<>();
 	}
 
 	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
@@ -112,11 +112,11 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 	}
 	
 	public Vector<ModelElement<Organism>> createModel(final DataSet data) throws DataStoreException {
-		Vector<ModelElement<Organism>> organismChoices = new Vector<ModelElement<Organism>>();
+		Vector<ModelElement<Organism>> organismChoices = new Vector<>();
 		OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
 		Collection<Organism> organisms = mediator.getAllOrganisms(); 
 		for (Organism organism : organisms) {
-			organismChoices.add(new ModelElement<Organism>(organism, OrganismComparator.getInstance(), OrganismFormatter.getInstance()));
+			organismChoices.add(new ModelElement<>(organism, OrganismComparator.getInstance(), OrganismFormatter.getInstance()));
 		}
 		Collections.sort(organismChoices);
         return organismChoices;
@@ -165,7 +165,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 	}
 	
 	private Collection<Long> getAttributeGroups(Collection<Group<?, ?>> selected) {
-		Collection<Long> result = new ArrayList<Long>(selected.size());
+		Collection<Long> result = new ArrayList<>(selected.size());
 		
 		for (Group<?, ?> group : selected) {
 			Group<Object, AttributeGroup> adapted = group.adapt(Object.class, AttributeGroup.class);
@@ -199,7 +199,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		progress.setMaximumProgress(geneNames.size());
 		int geneCount = 0;
 		
-		Set<Long> queryNodes = new HashSet<Long>();
+		Set<Long> queryNodes = new HashSet<>();
 		GeneCompletionProvider2 geneProvider = data.getCompletionProvider(organism);
 		for (String name : geneNames) {
 			progress.setDescription(name);
@@ -214,7 +214,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 	}
 
 	private Collection<Collection<Long>> getInteractionNetworks(DataSet data, Collection<Group<?, ?>> selection, ProgressReporter progress) {
-		Map<Long, Collection<Long>> groups = new HashMap<Long, Collection<Long>>();
+		Map<Long, Collection<Long>> groups = new HashMap<>();
 		
 		progress.setMaximumProgress(selection.size());
 		int groupCount = 0;
@@ -225,7 +225,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 				continue;
 			}
 			
-			Collection<Long> resultNetworks = new HashSet<Long>();
+			Collection<Long> resultNetworks = new HashSet<>();
 			for (Network<InteractionNetwork> network : adapted.getNetworks()) {
 				InteractionNetwork model = network.getModel();
 				progress.setDescription(network.getName());
@@ -239,12 +239,12 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 			progress.setProgress(groupCount);
 		}
 		
-		List<Long> groupIds = new ArrayList<Long>(groups.keySet());
+		List<Long> groupIds = new ArrayList<>(groups.keySet());
 		Collections.sort(groupIds);
 		
-		Collection<Collection<Long>> result = new ArrayList<Collection<Long>>();
+		Collection<Collection<Long>> result = new ArrayList<>();
 		for (Long groupId : groupIds) {
-			List<Long> groupMembers = new ArrayList<Long>(groups.get(groupId));
+			List<Long> groupMembers = new ArrayList<>(groups.get(groupId));
 			Collections.sort(groupMembers);
 			result.add(groupMembers);
 		}
@@ -359,7 +359,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		request.setOrganismId(organism.getId());
 		request.setOntologyId(organism.getOntology().getId());
 		
-		Set<Long> nodes = new HashSet<Long>();
+		Set<Long> nodes = new HashSet<>();
 		for (NetworkDto network : response.getNetworks()) {
 			for (InteractionDto interaction : network.getInteractions()) {
 				nodes.add(interaction.getNodeVO1().getId());
@@ -380,7 +380,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 			maxScore = Math.max(maxScore, entry.getValue());
 		}
 		
-		Map<Long, Double> filtered = new HashMap<Long, Double>();
+		Map<Long, Double> filtered = new HashMap<>();
 		for (Entry<Long, Double> entry : scores.entrySet()) {
 			long nodeId = entry.getKey();
 			double score = entry.getValue();
@@ -406,7 +406,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 	}
 
 	private Map<Long, Double> computeGeneScores(RelatedGenesEngineResponseDto result) {
-		Map<Long, Double> scores = new HashMap<Long, Double>();
+		Map<Long, Double> scores = new HashMap<>();
 		for (NetworkDto network : result.getNetworks()) {
 			for (InteractionDto interaction : network.getInteractions()) {
 				NodeDto node1 = interaction.getNodeVO1();
@@ -419,7 +419,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 	}
 
 	private Map<String, Color> computeColors(DataSet data, Organism organism) {
-		Map<String, Color> colors = new HashMap<String, Color>();
+		Map<String, Color> colors = new HashMap<>();
 		Collection<InteractionNetworkGroup> groups = organism.getInteractionNetworkGroups();
 		for (InteractionNetworkGroup group : groups) {
 			Colour color = data.getColor(group.getCode());
@@ -433,7 +433,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 
 		return new EdgeAttributeProvider() {
 			public Map<String, Object> getAttributes(InteractionNetwork network) {
-				HashMap<String, Object> attributes = new HashMap<String, Object>();
+				HashMap<String, Object> attributes = new HashMap<>();
 				long id = network.getId();
 				InteractionNetworkGroup group = groupsByNetwork.get(id);
 				if (group != null) {
@@ -481,12 +481,12 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 	}
 
 	private void applyDefaultSelection(ViewState config, Collection<Group<?, ?>> selectedGroups) {
-		Set<String> targetGroups = new HashSet<String>();
+		Set<String> targetGroups = new HashSet<>();
 		//targetGroups.add("coloc"); //$NON-NLS-1$
 		//targetGroups.add("coexp"); //$NON-NLS-1$
 		
 		// By default, disable colocation/coexpression networks.
-		Set<String> retainedGroups = new HashSet<String>();
+		Set<String> retainedGroups = new HashSet<>();
 		for (Group<?, ?> group : selectedGroups) {
 			group = config.getGroup(group.getName());
 			if (group == null) {

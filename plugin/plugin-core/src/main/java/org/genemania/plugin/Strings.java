@@ -147,9 +147,7 @@ public class Strings extends AbstractStrings {
 	public static String geneDetailPanelDescription_label;
 	public static String geneDetailPanelDescription2_label;
 	public static String tableModelInvalidColumn_error;
-	public static String maniaResultsPanelNetworkOptions_label;
 	public static String maniaResultsPanelNetworkTab_label;
-	public static String maniaResultsPanelGeneOptions_label;
 	public static String maniaResultsPanelGeneTab_label;
 	public static String maniaResultsPanelFunctionTab_label;
 	public static String maniaResultsPanelMergeNetworksButton_label;

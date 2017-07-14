@@ -58,12 +58,15 @@ import org.genemania.plugin.proxies.NetworkProxy;
 import org.genemania.plugin.proxies.NodeProxy;
 
 public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements CytoscapeUtils<NETWORK, NODE, EDGE> {
+	
 	private static final String EDGE_TYPE_INTERACTION = "interaction"; //$NON-NLS-1$
 	
 	protected static final double MINIMUM_NODE_SIZE = 10;
 	protected static final double MAXIMUM_NODE_SIZE = 40;
 	protected static final double MINIMUM_EDGE_WIDTH = 1;
 	protected static final double MAXIMUM_EDGE_WIDTH = 6;
+	
+	protected static final int DEF_EDGE_TRANSPARENCY = 140;
 
 	private final Map<EDGE, EdgeProxy<EDGE, NODE>> edgeProxies;
 	private final Map<NODE, NodeProxy<NODE>> nodeProxies;
@@ -76,9 +79,9 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 	public AbstractCytoscapeUtils(NetworkUtils networkUtils) {
 		this.networkUtils = networkUtils;
 		
-		edgeProxies = new WeakHashMap<EDGE, EdgeProxy<EDGE, NODE>>();
-		nodeProxies = new WeakHashMap<NODE, NodeProxy<NODE>>();
-		networkProxies = new WeakHashMap<NETWORK, NetworkProxy<NETWORK, NODE, EDGE>>();
+		edgeProxies = new WeakHashMap<>();
+		nodeProxies = new WeakHashMap<>();
+		networkProxies = new WeakHashMap<>();
 	}
 	
 	@Override
@@ -139,7 +142,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 			List<String> networkNames = edgeProxy.getAttribute(NETWORK_NAMES_ATTRIBUTE, List.class);
 			
 			for (String attribute : attributes) {
-				List<Object> values = new ArrayList<Object>();
+				List<Object> values = new ArrayList<>();
 				AttributeHandler handler = attributeHandlerRegistry.get(attribute);
 				for (String networkName : networkNames) {
 					InteractionNetwork network = findNetwork(networkName, networks);
@@ -202,7 +205,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 	}
 	
 	private Map<String, AttributeHandler> createHandlerRegistry() {
-		Map<String, AttributeHandler> map = new HashMap<String, AttributeHandler>();
+		Map<String, AttributeHandler> map = new HashMap<>();
 		map.put(TAGS, new TagAttributeHandler());
 		for (String name : new String[] {
 			AUTHORS,
@@ -339,7 +342,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 		}
 		
 		// Create attributes
-		Map<Long, Network<Attribute>> attributesById = new HashMap<Long, Network<Attribute>>();
+		Map<Long, Network<Attribute>> attributesById = new HashMap<>();
 		for (Group<?, ?> group : builder.getAllGroups()) {
 			Group<AttributeGroup, Attribute> adapted = group.adapt(AttributeGroup.class, Attribute.class);
 			if (adapted == null) {
@@ -472,14 +475,14 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 			
 			List<String> networkNames = edgeProxy.getAttribute(NETWORK_NAMES_ATTRIBUTE, List.class);
 			if (networkNames == null) {
-				networkNames = new ArrayList<String>();
+				networkNames = new ArrayList<>();
 			}
 			networkNames.add(network.getName());
 			edgeProxy.setAttribute(NETWORK_NAMES_ATTRIBUTE, networkNames);
 			
 			List<Double> edgeWeights = edgeProxy.getAttribute(RAW_WEIGHTS_ATTRIBUTE, List.class);
 			if (edgeWeights == null) {
-				edgeWeights = new ArrayList<Double>();
+				edgeWeights = new ArrayList<>();
 			}
 			edgeWeights.add((double) interaction.getWeight());
 			edgeProxy.setAttribute(RAW_WEIGHTS_ATTRIBUTE, edgeWeights);
@@ -542,8 +545,8 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 			
 			Collection<AnnotationEntry> nodeAnnotations = options.getAnnotations(node.getId());
 			if (nodeAnnotations != null) {
-				List<String> annotationIds = new ArrayList<String>();
-				List<String> annotationNames = new ArrayList<String>();
+				List<String> annotationIds = new ArrayList<>();
+				List<String> annotationNames = new ArrayList<>();
 				for (AnnotationEntry annotation : nodeAnnotations) {
 					annotationIds.add(annotation.getName());
 					annotationNames.add(annotation.getDescription());

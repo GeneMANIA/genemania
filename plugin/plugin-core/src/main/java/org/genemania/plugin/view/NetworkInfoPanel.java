@@ -30,20 +30,19 @@ import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.SelectionEvent;
-import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 import org.genemania.plugin.view.components.ToggleInfoPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
 public class NetworkInfoPanel extends ToggleInfoPanel<Network<?>, NetworkDetailPanel> {
-	
+
 	private double weight;
 
-	public NetworkInfoPanel(DataSet data, Group<?, ?> group, final NetworkGroupInfoPanel<?, ?, ?> groupInfoPanel, NetworkUtils networkUtils, UiUtils uiUtils, final GeneMania<?, ?, ?> geneMania, final ViewState options) {
+	public NetworkInfoPanel(DataSet data, Group<?, ?> group, final NetworkGroupInfoPanel<?, ?, ?> groupInfoPanel,
+			NetworkUtils networkUtils, UiUtils uiUtils, final GeneMania<?, ?, ?> geneMania, final ViewState options) {
 		super(uiUtils);
-		
+
 		setBackground(BaseInfoPanel.defaultBackground);
 		int index = 0;
 		for (Network<?> network : group.getNetworks()) {
@@ -53,21 +52,18 @@ public class NetworkInfoPanel extends ToggleInfoPanel<Network<?>, NetworkDetailP
 			addDetailPanel(panel, index);
 			index++;
 		}
-		add(uiUtils.createFillerPanel(), new GridBagConstraints(0, index, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		add(uiUtils.createFillerPanel(), new GridBagConstraints(0, index, 1, 1, 1, 1,
+				GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 		invalidate();
-		
-		addSelectionListener(new SelectionListener<Network<?>>() {
-			@Override
-			public void selectionChanged(SelectionEvent<Network<?>> event) {
-				for (Network<?> network : event.items) {
-					options.setNetworkHighlighted(network, event.selected);
-				}
-				for (Group<?, ?> group : options.getAllGroups()) {
-					options.setGroupHighlighted(group, false);
-				}
-				
-				groupInfoPanel.updateSelection(options);
-			}
+
+		addSelectionListener((evt) -> {
+			for (Network<?> network : evt.items)
+				options.setNetworkHighlighted(network, evt.selected);
+			
+			for (Group<?, ?> gr : options.getAllGroups())
+				options.setGroupHighlighted(gr, false);
+
+			groupInfoPanel.updateSelection(options);
 		});
 	}
 
@@ -77,28 +73,28 @@ public class NetworkInfoPanel extends ToggleInfoPanel<Network<?>, NetworkDetailP
 
 	@Override
 	protected Comparator<NetworkDetailPanel> getComparator(final int column, Boolean descending) {
-		if (descending == null) {
+		if (descending == null)
 			isDescending = !isDescending;
-		} else {
+		else
 			isDescending = descending;
-		}
 
 		return new Comparator<NetworkDetailPanel>() {
+			@Override
 			public int compare(NetworkDetailPanel o1, NetworkDetailPanel o2) {
 				switch (column) {
-				case 0:
-					return o1.getSubject().getName().compareTo(o2.getSubject().getName()) * (isDescending ? -1 : 1);
-				case 1:
-					return Double.compare(o1.getWeight(), o2.getWeight()) * (isDescending ? -1 : 1);
-				default:
-					throw new RuntimeException(String.format(Strings.tableModelInvalidColumn_error, column));
+					case 0:
+						return o1.getSubject().getName().compareTo(o2.getSubject().getName()) * (isDescending ? -1 : 1);
+					case 1:
+						return Double.compare(o1.getWeight(), o2.getWeight()) * (isDescending ? -1 : 1);
+					default:
+						throw new RuntimeException(String.format(Strings.tableModelInvalidColumn_error, column));
 				}
 			}
 		};
 	}
 
 	@Override
-	protected void setAllEnabled(boolean enabled) {
+	public void setAllEnabled(boolean enabled) {
 	}
 
 	@Override

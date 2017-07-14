@@ -100,6 +100,8 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 		}
 		
 		expander = createToggleButton();
+		
+		uiUtils.makeSmall(nameLabel, scoreLabel, toggleBox, expander);
 
 		add(expander, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, EXPANDER_PADDING, 0, EXPANDER_PADDING), 0, 0));
 		add(toggleBox, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));

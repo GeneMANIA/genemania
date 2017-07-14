@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FileDialog;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Image;
@@ -38,6 +39,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout.ParallelGroup;
@@ -50,6 +52,8 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -94,12 +98,22 @@ public class UiUtils {
 	public static final float INFO_FONT_SIZE = 11.0f;
 	public static final float AQUA_TITLED_BORDER_FONT_SIZE = 11.0f;
 	
+	private final float AQUA_SMALL_FONT_SIZE;
+	
 	private final ImageCache images;
 	private final IconManager iconManager;
 	
 	public UiUtils() {
 		images = new ImageCache();
 		iconManager = new IconManager();
+		
+		if (isAquaLAF()) {
+			JLabel lbl = new JLabel();
+			lbl.putClientProperty("JComponent.sizeVariant", "small");
+			AQUA_SMALL_FONT_SIZE = lbl.getFont().getSize2D();
+		} else {
+			AQUA_SMALL_FONT_SIZE = 11.0f;
+		}
 	}
 	
 	public JEditorPane createLinkEnabledEditorPane(final Component parent, String text) {
@@ -180,9 +194,25 @@ public class UiUtils {
 	public JLabel createIconLabel(final String code, final float size, final Color color) {
 		final JLabel label = new JLabel(code);
 		label.setFont(iconManager.getIconFont(size));
-		label.setForeground(color);
+		
+		if (color != null)
+			label.setForeground(color);
 		
 		return label;
+	}
+	
+	public JButton createIconButton(final String code, final float size) {
+		return createIconButton(code, size, null);
+	}
+	
+	public JButton createIconButton(final String code, final float size, final Color color) {
+		final JButton button = new JButton(code);
+		button.setFont(iconManager.getIconFont(size));
+		
+		if (color != null)
+			button.setForeground(color);
+		
+		return button;
 	}
 	
 	private Icon getIcon(String id) {
@@ -551,6 +581,54 @@ public class UiUtils {
 		
 		if (currentSize.width < minSize.width)
 			currentSize.width = minSize.width;
+	}
+	
+	@SuppressWarnings("serial")
+	public void makeSmall(final JComponent... components) {
+		if (components == null || components.length == 0)
+			return;
+
+		for (JComponent c : components) {
+			if (isAquaLAF()) {
+				c.putClientProperty("JComponent.sizeVariant", "small");
+			} else {
+				if (c.getFont() != null)
+					c.setFont(c.getFont().deriveFont(getSmallFontSize()));
+			}
+
+			if (c instanceof JList) {
+				((JList<?>) c).setCellRenderer(new DefaultListCellRenderer() {
+					@Override
+					public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+							boolean isSelected, boolean cellHasFocus) {
+						super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+						setFont(getFont().deriveFont(getSmallFontSize()));
+
+						return this;
+					}
+				});
+			} else if (c instanceof JMenuItem) {
+				c.setFont(c.getFont().deriveFont(getSmallFontSize()));
+			}
+		}
+	}
+	
+	/**
+	 * @return The standard small font size for the current Look and feel.
+	 */
+	public float getSmallFontSize() {
+		// Aqua (Mac OS X):
+		if (isAquaLAF())
+			return AQUA_SMALL_FONT_SIZE;
+		
+		// Windows or Nimbus:
+		final Font font = UIManager.getFont("Label.font");
+		final float regular = font == null ? 13.0f : font.getSize2D();
+		float small = Math.round(regular * .84f);
+		small = Math.max(11.0f, small); // Must not be smaller than 11
+		small = Math.min(regular, small); // Must not  be larger than the regular font size
+		
+		return small;
 	}
 	
 	public boolean isMacOSX() {

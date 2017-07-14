@@ -29,8 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.genemania.domain.Gene;
 import org.genemania.plugin.Strings;
@@ -43,6 +41,7 @@ import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
 public class FunctionInfoPanel extends JPanel {
+	
 	private final JTable table;
 	private final DynamicTableModel<AnnotationEntry> model;
 	private ViewState options;
@@ -53,54 +52,54 @@ public class FunctionInfoPanel extends JPanel {
 		this.uiUtils = uiUtils;
 		
 		model = new DynamicTableModel<AnnotationEntry>() {
+			@Override
 			public Class<?> getColumnClass(int columnIndex) {
 				switch (columnIndex) {
-				case 0:
-					return String.class; 
-				case 1:
-					return String.class;
-				case 2:
-					return String.class;
+					case 0:
+						return String.class; 
+					case 1:
+						return String.class;
+					case 2:
+						return String.class;
 				}
 				return null;
 			}
-
+			@Override
 			public int getColumnCount() {
 				return 3;
 			}
-
+			@Override
 			public String getColumnName(int columnIndex) {
 				switch (columnIndex) {
-				case 0:
-					return Strings.functionInfoPanelQValue_label;
-				case 1:
-					return Strings.functionInfoPanelCoverage_label;
-				case 2:
-					return Strings.functionInfoPanelGoAnnotation_label; 
+					case 0:
+						return Strings.functionInfoPanelQValue_label;
+					case 1:
+						return Strings.functionInfoPanelCoverage_label;
+					case 2:
+						return Strings.functionInfoPanelGoAnnotation_label; 
 				}
 				return null;
 			}
-
+			@Override
 			public Object getValueAt(int rowIndex, int columnIndex) {
 				AnnotationEntry entry = get(rowIndex);
-				if (entry == null) {
-					return null;
-				}
-				switch (columnIndex) {
-				case 0:
-					return String.format("%.2g", entry.getQValue()); //$NON-NLS-1$
-				case 1:
-					return String.format("%d/%d", entry.getSampleOccurrences(), entry.getTotalOccurrences()); //$NON-NLS-1$
-				case 2:
-					return entry.getDescription(); 
+				if (entry != null) {
+					switch (columnIndex) {
+						case 0:
+							return String.format("%.2g", entry.getQValue()); //$NON-NLS-1$
+						case 1:
+							return String.format("%d/%d", entry.getSampleOccurrences(), entry.getTotalOccurrences()); //$NON-NLS-1$
+						case 2:
+							return entry.getDescription();
+					}
 				}
 				return null;
 			}
-
+			@Override
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
 				return false;
 			}
-
+			@Override
 			public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			}
 		};
@@ -111,50 +110,47 @@ public class FunctionInfoPanel extends JPanel {
 		
 		ListSelectionModel selectionModel = table.getSelectionModel();
 		selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		selectionModel.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if (e.getValueIsAdjusting()) {
-					return;
-				}
-				updateSelectedNodes();
+		selectionModel.addListSelectionListener(e -> {
+			if (e.getValueIsAdjusting()) {
+				return;
 			}
+			updateSelectedNodes();
 		});
 	}
 	
 	private void updateSelectedNodes() {
-		if (functionListener == null) {
+		if (functionListener == null)
 			return;
-		}
 		
 		int row = table.getSelectedRow();
-		if (row == -1) {
-			// Clear selection
+		
+		if (row == -1) // Clear selection
 			return;
-		}
 		
 		AnnotationEntry entry = model.get(row);
-		if (entry == null) {
+		
+		if (entry == null)
 			return;
-		}
 
 		Collection<Gene> genes = options.getSearchResult().getNodesByAnnotation(entry.getName());
-		SelectionEvent<Gene> event = new SelectionEvent<Gene>(new HashSet<Gene>(genes), true);
+		SelectionEvent<Gene> event = new SelectionEvent<>(new HashSet<>(genes), true);
 		functionListener.selectionChanged(event);
 	}
 
 	public void applyOptions(ViewState options) {
 		this.options = options;
 		model.clear();
+		
 		for (AnnotationEntry entry : options.getSearchResult().getEnrichmentSummary()) {
 			model.add(entry);
 		}
+		
 		uiUtils.packColumns(table);
 	}
 
 	public void updateSelection(ViewState options) {
-		if (options.getTotalHighlightedGenes() == 0) {
+		if (options.getTotalHighlightedGenes() == 0)
 			table.getSelectionModel().clearSelection();
-		}
 	}
 
 	public void setSelectionListener(SelectionListener<Gene> functionListener) {

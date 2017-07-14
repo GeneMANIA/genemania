@@ -38,6 +38,7 @@ import org.genemania.plugin.view.components.ToggleInfoPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class GeneInfoPanel extends ToggleInfoPanel<Gene, GeneDetailPanel> {
+	
 	private static final long serialVersionUID = 1L;
 	private final NetworkUtils networkUtils;
 	
@@ -54,6 +55,7 @@ public class GeneInfoPanel extends ToggleInfoPanel<Gene, GeneDetailPanel> {
 		Map<Gene, Double> scores = result.getScores();
 		List<Gene> sortedNodes = networkUtils.createSortedList(scores);
 		int index = 0;
+		
 		for (Gene gene : sortedNodes) {
 			double score = scores.get(gene);
 			Node node = gene.getNode();
@@ -64,6 +66,7 @@ public class GeneInfoPanel extends ToggleInfoPanel<Gene, GeneDetailPanel> {
 			addDetailPanel(panel, index);
 			index++;
 		}
+		
 		add(uiUtils.createFillerPanel(), new GridBagConstraints(0, index, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 		invalidate();
 	}
@@ -85,7 +88,7 @@ public class GeneInfoPanel extends ToggleInfoPanel<Gene, GeneDetailPanel> {
 	}
 
 	@Override
-	protected void setAllEnabled(boolean enabled) {
+	public void setAllEnabled(boolean enabled) {
 		Set<Gene> genes = new HashSet<Gene>();
 		for (GeneDetailPanel panel : dataModel) {
 			if (panel.getSelected() != enabled) {
