@@ -25,9 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.LazyLoader;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
@@ -38,6 +35,9 @@ import org.genemania.domain.Organism;
 import org.genemania.exception.DataStoreException;
 import org.genemania.mediator.NodeCursor;
 import org.genemania.mediator.OrganismMediator;
+
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.LazyLoader;
 
 public class LuceneOrganismMediator extends LuceneMediator implements OrganismMediator {
 

@@ -105,7 +105,26 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <version>${osgi.api.version}</version>
+            <scope>provided</scope>
         </dependency>
+        <!-- Rest + JSON -->
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>2.5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.0</version>
+		</dependency>
+		<!-- Unit Tests -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.10.19</version>
+			<scope>test</scope>
+		</dependency>
     </dependencies>
 
     <build>
@@ -141,7 +160,8 @@
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${cytoscapeVersion}</Bundle-Version>
 						<Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
-						<Embed-Dependency>plugin-distribution;inline=true</Embed-Dependency>
+						<Embed-Dependency>*;scope=!provided|test;groupId=!org.cytoscape</Embed-Dependency>
+						<Embed-Transitive>false</Embed-Transitive>
 						<Private-Package>${bundle.namespace}.*</Private-Package>
 						<Export-Package>!${bundle.namespace}.*;version="${cytoscapeVersion}"</Export-Package>
 						<Import-Package>*;resolution:=optional</Import-Package>

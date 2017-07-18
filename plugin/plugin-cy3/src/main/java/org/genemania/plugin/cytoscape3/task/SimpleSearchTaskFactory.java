@@ -1,3 +1,21 @@
+/**
+ * This file is part of GeneMANIA.
+ * Copyright (C) 2017 University of Toronto.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 package org.genemania.plugin.cytoscape3.task;
 
 import java.awt.event.ActionEvent;
@@ -30,6 +48,7 @@ import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
+import org.genemania.plugin.cytoscape3.model.OrganismManager;
 import org.genemania.plugin.cytoscape3.view.QueryBar;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.model.Group;
@@ -42,10 +61,22 @@ import org.genemania.type.ScoringMethod;
 
 public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, ActionListener {
 
-	@Tunable(description = "Max Resultant Genes:")
+	@Tunable(description = "Max Resultant Genes:", groups = { "_Default" }, gravity = 1.0)
 	public int geneLimit = 20;
 	
-	@Tunable(description="Advanced Search...")
+	public boolean offline;
+	@Tunable(description = "Offline Search:", groups = { "_Default" }, gravity = 1.1)
+	public boolean getOffline() {
+		return offline;
+	}
+	public void setOffline(boolean offline) {
+		if (this.offline != offline) {
+			this.offline = offline;
+			organismManager.setOffline(offline);
+		}
+	}
+	
+	@Tunable(description="Advanced Search...", gravity = 2.0)
 	public UserAction advancedSearchAction = new UserAction(this);
 	
 	private static final String ID = "ca.utoronto.GeneMANIA";
@@ -61,20 +92,23 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
 	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
 	private final RetrieveRelatedGenesAction retrieveRelatedGenesAction;
+	private final OrganismManager organismManager;
 	private final CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
 
 	public SimpleSearchTaskFactory(
 			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
 			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller,
-			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, 
 			RetrieveRelatedGenesAction retrieveRelatedGenesAction, 
+			OrganismManager organismManager, 
+			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
 		this.controller = controller;
-		this.cytoscapeUtils = cytoscapeUtils;
 		this.retrieveRelatedGenesAction = retrieveRelatedGenesAction;
+		this.organismManager = organismManager;
+		this.cytoscapeUtils = cytoscapeUtils;
 		this.serviceRegistrar = serviceRegistrar;
 		icon = new ImageIcon(getClass().getClassLoader().getResource("/img/logo_squared.png"));
 		
@@ -83,12 +117,15 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
+		
+		setOffline(organismManager.isOffline());
+		organismManager.addPropertyChangeListener("offline", evt -> setOffline(organismManager.isOffline()));
 	}
 	
 	@Override
 	public JComponent getQueryComponent() {
 		if (queryBar == null) {
-			queryBar = new QueryBar(plugin, controller, serviceRegistrar);
+			queryBar = new QueryBar(plugin, organismManager, serviceRegistrar);
 		}
 		
 		return queryBar;

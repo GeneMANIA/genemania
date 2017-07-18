@@ -1,3 +1,21 @@
+/**
+ * This file is part of GeneMANIA.
+ * Copyright (C) 2017 University of Toronto.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 package org.genemania.plugin.cytoscape3.view;
 
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
@@ -16,7 +34,6 @@ import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Vector;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
@@ -30,8 +47,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -43,13 +58,8 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.genemania.domain.Organism;
-import org.genemania.exception.DataStoreException;
 import org.genemania.plugin.GeneMania;
-import org.genemania.plugin.LogUtils;
-import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
-import org.genemania.plugin.data.DataSet;
-import org.genemania.plugin.data.DataSetManager;
-import org.genemania.plugin.model.ModelElement;
+import org.genemania.plugin.cytoscape3.model.OrganismManager;
 
 @SuppressWarnings("serial")
 public class QueryBar extends JPanel {
@@ -63,28 +73,26 @@ public class QueryBar extends JPanel {
 	private JTextArea queryTextArea;
 	private JScrollPane queryScroll;
 	
-	private Vector<ModelElement<Organism>> organisms = new Vector<>();
-	private ModelElement<Organism> selectedOrganism;
-	
-	private boolean dataInitialized;
+	private Organism selectedOrganism;
 	
 	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
-	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
+	private final OrganismManager organismManager;
 	private final CyServiceRegistrar serviceRegistrar;
 	
 	public QueryBar(
 			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
-			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller,
+			OrganismManager organismManager,
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
-		this.controller = controller;
+		this.organismManager = organismManager;
 		this.serviceRegistrar = serviceRegistrar;
 		
 		init();
+		updateOrganisms();
 		
-		DataSetManager dataSetManager = plugin.getDataSetManager();
-		dataSetManager.addDataSetChangeListener((dataSet, progress) -> setDataSet(dataSet));
+		organismManager.addPropertyChangeListener("organisms", evt -> updateOrganisms());
+		organismManager.addPropertyChangeListener("offline", evt -> updateOrganisms());
 	}
 
 	public Set<String> getQueryGenes() {
@@ -103,35 +111,11 @@ public class QueryBar extends JPanel {
 	}
 	
 	public Organism getSelectedOrganism() {
-		return selectedOrganism != null ? selectedOrganism.getItem() : null;
+		return selectedOrganism != null ? selectedOrganism : null;
 	}
 	
 	public boolean isReady() {
 		return selectedOrganism != null && !getQueryGenes().isEmpty();
-	}
-	
-	@Override
-	public void addNotify() {
-		super.addNotify();
-		
-		if (!dataInitialized && plugin.getDataSetManager().getDataSet() == null) {
-			SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-				@Override
-				protected Void doInBackground() throws Exception {
-					if (plugin.getDataSetManager().getDataSet() == null)
-						plugin.initializeData(SwingUtilities.getWindowAncestor(QueryBar.this), true);
-					
-					return null;
-				}
-				@Override
-				protected void done() {
-					setDataSet(plugin.getDataSetManager().getDataSet());
-				}
-			};
-			worker.execute();
-		}
-		
-		dataInitialized = true;
 	}
 	
 	private void init() {
@@ -260,18 +244,14 @@ public class QueryBar extends JPanel {
 		return queryScroll;
 	}
 	
-	private void setDataSet(final DataSet data) {
-    	try {
-    		organisms = data != null ? controller.createModel(data) : new Vector<>();
-    		
-    		if (selectedOrganism == null || !organisms.contains(selectedOrganism))
-    			setSelectedOrganism(organisms.isEmpty() ? null : organisms.get(0));
-		} catch (DataStoreException e) {
-			LogUtils.log(getClass(), e);
-		}
+	private void updateOrganisms() {
+		Set<Organism> organisms = organismManager.getOrganisms();
+		
+		if (selectedOrganism == null || !organisms.contains(selectedOrganism))
+			setSelectedOrganism(organisms.isEmpty() ? null : organisms.iterator().next());
     }
 	
-	private void setSelectedOrganism(ModelElement<Organism> newValue) {
+	private void setSelectedOrganism(Organism newValue) {
 		boolean changed = (newValue == null && selectedOrganism != null)
 				|| (newValue != null && !newValue.equals(selectedOrganism));
 		selectedOrganism = newValue;
@@ -279,7 +259,7 @@ public class QueryBar extends JPanel {
 		if (changed) {
 			getOrganismButton().setToolTipText(
 					selectedOrganism != null ? 
-					ORGANISM_TOOLTIP + " (" + selectedOrganism.getItem().getName() + ")" : ORGANISM_TOOLTIP
+					ORGANISM_TOOLTIP + " (" + selectedOrganism.getName() + ")" : ORGANISM_TOOLTIP
 			);
 			getOrganismButton().setIcon(selectedOrganism != null ? getIcon(selectedOrganism) : null);
 			fireQueryChanged();
@@ -287,15 +267,17 @@ public class QueryBar extends JPanel {
 	}
 	
 	private void showOrganismPopup() {
+		Set<Organism> organisms = organismManager.getOrganisms();
+		
 		if (organisms == null || organisms.isEmpty())
 			return;
 		
 		JPopupMenu popup = new JPopupMenu();
 		popup.setBackground(getBackground());
 		
-		for (ModelElement<Organism> org : organisms) {
-			String description = org.getItem().getDescription();
-			String name = org.getItem().getName() + " (" + description + ")";
+		for (Organism org : organisms) {
+			String description = org.getDescription();
+			String name = org.getName() + " (" + description + ")";
 			Icon icon = getIcon(org);
 			
 			JCheckBoxMenuItem mi = new JCheckBoxMenuItem(name , icon, org.equals(selectedOrganism));
@@ -333,8 +315,8 @@ public class QueryBar extends JPanel {
 		getQueryTextField().setText(text);
 	}
 
-	private Icon getIcon(ModelElement<Organism> org) {
-		String description = org != null ? org.getItem().getDescription() : null;
+	private Icon getIcon(Organism org) {
+		String description = org != null ? org.getDescription() : null;
 		
 		if (description == null)
 			return null;
