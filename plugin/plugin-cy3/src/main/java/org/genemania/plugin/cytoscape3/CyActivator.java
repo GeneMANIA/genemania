@@ -70,6 +70,7 @@ import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
 import org.genemania.plugin.cytoscape3.actions.SwitchDataSetAction;
 import org.genemania.plugin.cytoscape3.layout.GeneManiaFDLayout;
 import org.genemania.plugin.cytoscape3.model.OrganismManager;
+import org.genemania.plugin.cytoscape3.task.ListOrganismsCommandTaskFactory;
 import org.genemania.plugin.cytoscape3.task.SearchCommandTaskFactory;
 import org.genemania.plugin.cytoscape3.task.SimpleSearchTaskFactory;
 import org.genemania.plugin.data.DataSetManager;
@@ -212,6 +213,14 @@ public class CyActivator extends AbstractCyActivator {
 			p.put(COMMAND, "search");
 			p.put(COMMAND_NAMESPACE, "genemania");
 			p.put(COMMAND_DESCRIPTION, "Search GeneMANIA");
+			registerService(bc, factory, TaskFactory.class, p);
+		}
+		{
+			ListOrganismsCommandTaskFactory factory = new ListOrganismsCommandTaskFactory(organismManager);
+			Properties p = new Properties();
+			p.put(COMMAND, "list organisms");
+			p.put(COMMAND_NAMESPACE, "genemania");
+			p.put(COMMAND_DESCRIPTION, "List supported GeneMANIA organisms");
 			registerService(bc, factory, TaskFactory.class, p);
 		}
 	}
