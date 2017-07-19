@@ -41,7 +41,6 @@ import org.genemania.exception.DataStoreException;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
-import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.model.Group;
@@ -54,6 +53,9 @@ import org.genemania.type.ScoringMethod;
 
 public class SearchCommandTask extends AbstractTask implements ObservableTask {
 
+	@Tunable(description = "Offline search:", context = "nogui")
+	public boolean offline;
+	
 	@Tunable(description = "Organism", context = "nogui")
 	public ListSingleSelection<Organism> organism = new ListSingleSelection<>();
 	
@@ -73,7 +75,6 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 	
 	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
 	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
-	private final RetrieveRelatedGenesAction retrieveRelatedGenesAction;
 	private final CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
 
@@ -81,13 +82,11 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
 			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller,
 			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, 
-			RetrieveRelatedGenesAction retrieveRelatedGenesAction, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
 		this.controller = controller;
 		this.cytoscapeUtils = cytoscapeUtils;
-		this.retrieveRelatedGenesAction = retrieveRelatedGenesAction;
 		this.serviceRegistrar = serviceRegistrar;
 		
 		combiningMethod.setSelectedValue(CombiningMethod.AUTOMATIC_SELECT);
@@ -121,26 +120,17 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 			throw new RuntimeException("Please specify an organism.");
 		if (query.getGenes() == null || query.getGenes().isEmpty())
 			throw new RuntimeException("Please enter one or more genes.");
-		if (!SimpleSearchTaskFactory.hasValidGenes(query.getOrganism(), query.getGenes(), plugin))
+		if (offline && !SimpleSearchTaskFactory.hasValidGenes(query.getOrganism(), query.getGenes(), plugin))
 			throw new RuntimeException("Please specify a set of valid gene names and try again.");
 			
-		tm.setStatusMessage("Searching...");
+		tm.setStatusMessage("Searching " + (offline ? "installed data set" : "ONLINE") + "...");
 		
-		List<Group<?, ?>> groups = SimpleSearchTaskFactory.getGroups(query.getOrganism());
-		
-		JFrame parent = serviceRegistrar.getService(CySwingApplication.class).getJFrame();
-		network = controller.runMania(parent, query, groups);
-
-		cytoscapeUtils.handleNetworkPostProcessing(network);
-		cytoscapeUtils.performLayout(network);
-		cytoscapeUtils.maximize(network);
-		
-		NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
-		ViewState options = selManager.getNetworkConfiguration(network);
-		plugin.applyOptions(options);
-		plugin.showResults();
+		if (offline)
+			searchOffline(query, tm);
+		else
+			searchOnline(query, tm);
 	}
-	
+
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object getResults(Class type) {
@@ -159,6 +149,29 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 		}
 			
 		return null;
+	}
+	
+	private void searchOffline(Query query, TaskMonitor tm) {
+		List<Group<?, ?>> groups = SimpleSearchTaskFactory.getGroups(query.getOrganism());
+		
+		JFrame parent = serviceRegistrar.getService(CySwingApplication.class).getJFrame();
+		network = controller.runMania(parent, query, groups);
+
+		tm.setStatusMessage("Applying layout...");
+		
+		cytoscapeUtils.handleNetworkPostProcessing(network);
+		cytoscapeUtils.performLayout(network);
+		cytoscapeUtils.maximize(network);
+		
+		NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
+		ViewState options = selManager.getNetworkConfiguration(network);
+		plugin.applyOptions(options);
+		plugin.showResults();
+	}
+	
+	private void searchOnline(Query query, TaskMonitor tm) {
+		// TODO
+		tm.setStatusMessage("<html><b>ONLINE Search</b> not implemented yet!</html>");
 	}
 	
 	private Query getQuery() {

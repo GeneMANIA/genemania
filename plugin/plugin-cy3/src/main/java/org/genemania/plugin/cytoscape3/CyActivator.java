@@ -208,7 +208,7 @@ public class CyActivator extends AbstractCyActivator {
 		}
 		{
 			SearchCommandTaskFactory factory = new SearchCommandTaskFactory(geneMania, controller, cytoscapeUtils,
-					retrieveRelatedGenesAction, serviceRegistrar);
+					serviceRegistrar);
 			Properties p = new Properties();
 			p.put(COMMAND, "search");
 			p.put(COMMAND_NAMESPACE, "genemania");

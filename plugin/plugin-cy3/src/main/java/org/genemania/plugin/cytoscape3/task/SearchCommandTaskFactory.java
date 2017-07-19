@@ -27,13 +27,11 @@ import org.cytoscape.work.TaskIterator;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
-import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
 
 public class SearchCommandTaskFactory extends AbstractTaskFactory {
 
 	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
 	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
-	private final RetrieveRelatedGenesAction retrieveRelatedGenesAction;
 	private final CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
 
@@ -41,19 +39,16 @@ public class SearchCommandTaskFactory extends AbstractTaskFactory {
 			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
 			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller,
 			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, 
-			RetrieveRelatedGenesAction retrieveRelatedGenesAction, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
 		this.controller = controller;
 		this.cytoscapeUtils = cytoscapeUtils;
-		this.retrieveRelatedGenesAction = retrieveRelatedGenesAction;
 		this.serviceRegistrar = serviceRegistrar;
 	}
 	
 	@Override
 	public TaskIterator createTaskIterator() {
-		return new TaskIterator(
-				new SearchCommandTask(plugin, controller, cytoscapeUtils, retrieveRelatedGenesAction, serviceRegistrar));
+		return new TaskIterator(new SearchCommandTask(plugin, controller, cytoscapeUtils, serviceRegistrar));
 	}
 }

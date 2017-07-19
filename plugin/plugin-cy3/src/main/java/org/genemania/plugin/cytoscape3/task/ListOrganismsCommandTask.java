@@ -18,9 +18,14 @@
  */
 package org.genemania.plugin.cytoscape3.task;
 
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.cytoscape.work.AbstractTask;
@@ -50,7 +55,7 @@ public class ListOrganismsCommandTask extends AbstractTask implements Observable
 	public void run(TaskMonitor tm) throws Exception {
 		tm.setTitle("GeneMANIA");
 		tm.setStatusMessage("Retrieving organisms "
-				+ (offline ? "from installed data set" : "supported by the GeneMANIA server") + "...");
+				+ (offline ? "from installed data set (offline)" : "accepted in online searches") + "...");
 		tm.setProgress(-1);
 		
 		organisms = offline ? organismManager.getLocalOrganisms() : organismManager.getRemoteOrganisms();
@@ -62,10 +67,21 @@ public class ListOrganismsCommandTask extends AbstractTask implements Observable
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object getResults(Class type) {
-		if (Collection.class.isAssignableFrom(type))
-			return organisms;
+		if (Vector.class.isAssignableFrom(type))
+			return new Vector<>(organisms);
+		else if (Set.class.isAssignableFrom(type))
+			return new LinkedHashSet<>(organisms);
+		else if (List.class.isAssignableFrom(type))
+			return new ArrayList<>(organisms);
+		else if (Collection.class.isAssignableFrom(type))
+			return new LinkedHashSet<>(organisms);
 		
 		if (type == String.class) {
+			Color color = LookAndFeelUtil.getSuccessColor();
+			
+			if (color == null)
+				color = Color.DARK_GRAY;
+			
 			StringBuilder sb = new StringBuilder(String.format(
 					"<html><body><table style='font-family: monospace; color: %s;'>"
 					+ "<tr style='font-weight: bold; border-width: 0px 0px 1px 0px; border-style: dotted;'>"
@@ -74,7 +90,7 @@ public class ListOrganismsCommandTask extends AbstractTask implements Observable
 					+ "<th style='text-align: left;'>Description</th>"
 					+ "<th style='text-align: left;'>Taxonomy ID</th>"
 					+ "</tr>",
-					("#" + Integer.toHexString(LookAndFeelUtil.getSuccessColor().getRGB()).substring(2))
+					("#" + Integer.toHexString(color.getRGB()).substring(2))
 			));
 			
 			for (Organism org : organisms)
