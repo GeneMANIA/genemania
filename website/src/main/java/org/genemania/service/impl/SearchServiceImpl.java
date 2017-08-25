@@ -137,11 +137,23 @@ public class SearchServiceImpl implements SearchService {
 				attributeGroupIds.add(group.getId());
 			}
 		}
-
+		
+		CombiningMethod weighting = params.getWeighting();
+		
+		CombiningMethod fallbackWeighting = CombiningMethod.AVERAGE_CATEGORY;
+		
+		Collection<CombiningMethod> allowedMethods = new HashSet<CombiningMethod>();
+		allowedMethods.add(CombiningMethod.AVERAGE);
+		allowedMethods.add(CombiningMethod.AVERAGE_CATEGORY);
+		
+		if(!allowedMethods.contains(weighting)){
+			weighting = fallbackWeighting;
+		}
+		
 		// dto param object and search
 		RelatedGenesWebRequestDto requestDto = new RelatedGenesWebRequestDto();
 		requestDto.setOrganismId(params.getOrganism().getId());
-		requestDto.setCombiningMethod(params.getWeighting());
+		requestDto.setCombiningMethod(weighting);
 		requestDto.setResultSize(params.getResultsSize());
 		requestDto.setUserDefinedNetworkNamespace(params.getNamespace());
 		requestDto.setInputNetworks(networks);
