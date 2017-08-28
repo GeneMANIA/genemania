@@ -10,7 +10,9 @@
         <relativePath>..</relativePath>
     </parent>
     
+
     <artifactId>plugin-parent</artifactId>
+    <version>3.4.1</version>
     <packaging>pom</packaging>
     <name>GeneMANIA Cytoscape App Parent</name>
 
@@ -28,7 +30,7 @@
         <minDataVersion>2010-08-25</minDataVersion>
         
         <!-- Cytoscape metadata -->
-        <cytoscapeVersion>3.5.0</cytoscapeVersion>
+        <cytoscapeVersion>3.4.1</cytoscapeVersion>
         <releaseVersion></releaseVersion> <!-- No longed used -->
         
         <!-- Cytoscape 2.X-specific metadata -->
@@ -187,12 +189,12 @@
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>genemania-common</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>genemania-engine</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0</version>
         </dependency>
         
         <dependency>

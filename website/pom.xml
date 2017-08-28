@@ -8,6 +8,7 @@
         <relativePath>..</relativePath>
     </parent>
 
+	<groupId>org.genemania</groupId>
 	<artifactId>genemania-website</artifactId>
 	<packaging>war</packaging>
 	<name>GeneMANIA Website</name>

@@ -8,6 +8,7 @@
         <relativePath>..</relativePath>
     </parent>
 
+    <groupId>org.genemania</groupId>
     <artifactId>genemania-common</artifactId>
     <packaging>jar</packaging>
     <name>GeneMANIA Common</name>
