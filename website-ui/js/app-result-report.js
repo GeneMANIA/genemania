@@ -402,7 +402,7 @@ function( util ){ return function( Result ){
       }
     };
 
-    pdfMake.createPdf( docDefinition ).open();
+    pdfMake.createPdf( docDefinition ).download('genemania-report-' + uuid() + '.pdf');
 
     PubSub.publish('result.report');
 
