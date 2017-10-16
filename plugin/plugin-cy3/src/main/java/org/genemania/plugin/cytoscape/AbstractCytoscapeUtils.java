@@ -46,7 +46,6 @@ import org.genemania.domain.Tag;
 import org.genemania.plugin.LogUtils;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
-import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.model.AnnotationEntry;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
@@ -309,28 +308,33 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 	 * @return
 	 */
 	@Override
-	public NETWORK createNetwork(DataSet data, String name, SearchResult options, ViewStateBuilder builder, EdgeAttributeProvider attributeProvider) {
+	public NETWORK createNetwork(String name, String dataVersion, SearchResult options, ViewStateBuilder builder,
+			EdgeAttributeProvider attributeProvider) {
 		NETWORK currentNetwork = createNetwork(name);
 		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = getNetworkProxy(currentNetwork);
 		networkProxy.setAttribute(TYPE_ATTRIBUTE, GENEMANIA_NETWORK_TYPE);
-		networkProxy.setAttribute(DATA_VERSION_ATTRIBUTE, data.getVersion().toString());
 		networkProxy.setAttribute(ORGANISM_NAME_ATTRIBUTE, options.getOrganism().getName());
 		networkProxy.setAttribute(NETWORKS_ATTRIBUTE, serializeNetworks(options));
 		networkProxy.setAttribute(COMBINING_METHOD_ATTRIBUTE, options.getCombiningMethod().getCode());
 		networkProxy.setAttribute(GENE_SEARCH_LIMIT_ATTRIBUTE, options.getGeneSearchLimit());
 		networkProxy.setAttribute(ATTRIBUTE_SEARCH_LIMIT_ATTRIBUTE, options.getAttributeSearchLimit());
 		networkProxy.setAttribute(ANNOTATIONS_ATTRIBUTE, serializeAnnotations(options));
+		
+		if (dataVersion != null)
+			networkProxy.setAttribute(DATA_VERSION_ATTRIBUTE, dataVersion);
 
 		for (Group<?, ?> group : builder.getAllGroups()) {
 			Group<InteractionNetworkGroup, InteractionNetwork> adapted = group.adapt(InteractionNetworkGroup.class, InteractionNetwork.class);
-			if (adapted == null) {
+			
+			if (adapted == null)
 				continue;
-			}
+			
 			for (Network<InteractionNetwork> network : adapted.getNetworks()) {
 				Collection<Interaction> sourceInteractions = network.getModel().getInteractions();
-				if (sourceInteractions == null || sourceInteractions.size() == 0) {
+				
+				if (sourceInteractions == null || sourceInteractions.size() == 0)
 					continue;
-				}
+				
 				buildGraph(currentNetwork, sourceInteractions, network, attributeProvider, options, builder);
 			}
 		}
@@ -343,17 +347,20 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 		
 		// Create attributes
 		Map<Long, Network<Attribute>> attributesById = new HashMap<>();
+		
 		for (Group<?, ?> group : builder.getAllGroups()) {
 			Group<AttributeGroup, Attribute> adapted = group.adapt(AttributeGroup.class, Attribute.class);
-			if (adapted == null) {
+			
+			if (adapted == null)
 				continue;
-			}
+			
 			for (Network<Attribute> network : adapted.getNetworks()) {
 				attributesById.put(network.getModel().getId(), network);
 			}
 		}
 		
 		Map<Attribute, Double> weights = options.getAttributeWeights();
+		
 		for (Entry<Long, Collection<Attribute>> entry : options.getAttributesByNodeId().entrySet()) {
 			Gene gene = options.getGene(entry.getKey());
 			NODE to = getNode(currentNetwork, gene.getNode(), null);
@@ -363,6 +370,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 				Network<Attribute> network = attributesById.get(attribute.getId());
 				
 				NODE from = getNode(id, currentNetwork);
+				
 				if (from == null) {
 					from = createNode(id, currentNetwork);
 					NodeProxy<NODE> nodeProxy = getNodeProxy(from, currentNetwork);
@@ -388,6 +396,7 @@ public abstract class AbstractCytoscapeUtils<NETWORK, NODE, EDGE> implements Cyt
 		}
 
 		decorateNodes(currentNetwork, options);
+		
 		return currentNetwork;
 	}
 	

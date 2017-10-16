@@ -8,7 +8,7 @@
 	</parent>
     <properties>
 		<bundle.symbolicName>org.genemania.plugin-impl</bundle.symbolicName>
-		<bundle.namespace>org.genemania.plugin.cytoscape3</bundle.namespace>
+		<bundle.namespace>org.genemania.plugin</bundle.namespace>
 		<cy3.version>3.6.0-SNAPSHOT</cy3.version>
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<maven-pax-plugin.version>1.5</maven-pax-plugin.version>
@@ -107,7 +107,34 @@
             <version>${osgi.api.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Rest + JSON -->
+        <!-- Third Party -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
+            <version>2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>zip64file</groupId>
+            <artifactId>zip64file</artifactId>
+            <version>20091028</version>
+        </dependency>
+        <!-- JSON -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+        <!-- Rest -->
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-client</artifactId>
@@ -131,10 +158,27 @@
 			<version>1.4</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+            <groupId>uispec4j</groupId>
+            <artifactId>uispec4j</artifactId>
+            <version>2.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+        	<plugin>
+				<!-- To prevent maven from corrupting .TTF files -->
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<nonFilteredFileExtensions>
+						<nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
+				</configuration>
+			</plugin>
             <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -165,7 +209,7 @@
 					    <Bundle-Name>GeneMANIA</Bundle-Name>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${cytoscapeVersion}</Bundle-Version>
-						<Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
+						<Bundle-Activator>${bundle.namespace}.cytoscape3.CyActivator</Bundle-Activator>
 						<Embed-Dependency>*;scope=!provided|test;groupId=!org.cytoscape</Embed-Dependency>
 						<Embed-Transitive>false</Embed-Transitive>
 						<Private-Package>${bundle.namespace}.*</Private-Package>
@@ -177,8 +221,9 @@
 				</configuration>
 			</plugin>
             <plugin>
-                <groupId>com.mycila.maven-license-plugin</groupId>
-                <artifactId>maven-license-plugin</artifactId>
+                <groupId>com.mycila</groupId>
+		        <artifactId>license-maven-plugin</artifactId>
+		        <version>3.0</version>
                 <configuration>
                     <header>src/etc/header.txt</header>
                     <strictCheck>true</strictCheck>
@@ -243,6 +288,12 @@
         		</plugin>
         	</plugins>
         </pluginManagement>
+        <resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
     </build>
     <reporting>
         <plugins>

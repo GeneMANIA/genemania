@@ -28,7 +28,6 @@ import java.util.Set;
 
 import org.genemania.domain.Node;
 import org.genemania.plugin.GeneMania;
-import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
@@ -47,9 +46,8 @@ public class NullCytoscapeUtils<NETWORK, NODE, EDGE> implements CytoscapeUtils<N
 	}
 
 	@Override
-	public NETWORK createNetwork(DataSet data, String nextNetworkName,
-			SearchResult result, ViewStateBuilder options,
-			EdgeAttributeProvider provider) {
+	public NETWORK createNetwork(String nextNetworkName, String dataVersion, SearchResult result,
+			ViewStateBuilder options, EdgeAttributeProvider provider) {
 		return null;
 	}
 

@@ -58,16 +58,16 @@ public class ViewStateImpl implements ViewStateBuilder {
 	
 	public ViewStateImpl(SearchResult result) {
 		searchResult = result;
-		edgeCache = new HashMap<Group<?, ?>, Set<String>>();
-		nodeCache = new WeakHashMap<String, Long>();
-		enabledGroups = new HashSet<Group<?, ?>>();
-		highlightedGroups = new HashSet<Group<?, ?>>();
-		highlightedNetworks = new HashSet<Network<?>>();
-		highlightedNodes = new HashSet<String>();
-		networksByEdge = new HashMap<String, Set<Network<?>>>();
-		networksByNode = new HashMap<String, Set<Network<?>>>();
-		groupsByName = new HashMap<String, Group<?, ?>>();
-		groupsByNetwork = new HashMap<Network<?>, Group<?, ?>>();
+		edgeCache = new HashMap<>();
+		nodeCache = new WeakHashMap<>();
+		enabledGroups = new HashSet<>();
+		highlightedGroups = new HashSet<>();
+		highlightedNetworks = new HashSet<>();
+		highlightedNodes = new HashSet<>();
+		networksByEdge = new HashMap<>();
+		networksByNode = new HashMap<>();
+		groupsByName = new HashMap<>();
+		groupsByNetwork = new HashMap<>();
 		
 		addGroups(result);
 	}
@@ -76,7 +76,7 @@ public class ViewStateImpl implements ViewStateBuilder {
 		{
 			Map<InteractionNetwork, Double> weights = result.getNetworkWeights();
 			for (InteractionNetworkGroup model : result.getInteractionNetworkGroups().values()) {
-				Collection<Network<InteractionNetwork>> networks = new ArrayList<Network<InteractionNetwork>>();
+				Collection<Network<InteractionNetwork>> networks = new ArrayList<>();
 				for (InteractionNetwork network : model.getInteractionNetworks()) {
 					Double weight = weights.get(network);
 					if (weight == null) {
@@ -96,13 +96,13 @@ public class ViewStateImpl implements ViewStateBuilder {
 		{
 			Map<Attribute, Double> weights = result.getAttributeWeights();
 			if (weights != null) {
-				Map<AttributeGroup, Collection<Network<Attribute>>> networksByGroup = new HashMap<AttributeGroup, Collection<Network<Attribute>>>();
+				Map<AttributeGroup, Collection<Network<Attribute>>> networksByGroup = new HashMap<>();
 				for (Entry<Attribute, Double> entry : weights.entrySet()) {
 					Attribute attribute = entry.getKey();
 					AttributeGroup group = result.getAttributeGroup(attribute.getId());
 					Collection<Network<Attribute>> networks = networksByGroup.get(group);
 					if (networks == null) {
-						networks = new ArrayList<Network<Attribute>>();
+						networks = new ArrayList<>();
 						networksByGroup.put(group,  networks);
 					}
 					networks.add(new ResultAttributeNetworkImpl(attribute, entry.getValue()));
@@ -249,7 +249,7 @@ public class ViewStateImpl implements ViewStateBuilder {
 	public void addEdge(Group<?, ?> group, String edgeId) {
 		Set<String> edgeIds = edgeCache.get(group);
 		if (edgeIds == null) {
-			edgeIds = new HashSet<String>();
+			edgeIds = new HashSet<>();
 			edgeCache.put(group, edgeIds);
 		}
 		edgeIds.add(edgeId);
@@ -267,7 +267,7 @@ public class ViewStateImpl implements ViewStateBuilder {
 	public void addSourceNetworkForEdge(String edgeId, Network<?> network) {
 		Set<Network<?>> networks = networksByEdge.get(edgeId);
 		if (networks == null) {
-			networks = new HashSet<Network<?>>();
+			networks = new HashSet<>();
 			networksByEdge.put(edgeId, networks);
 		}
 		networks.add(network);
@@ -277,7 +277,7 @@ public class ViewStateImpl implements ViewStateBuilder {
 	public void addSourceNetworkForNode(String nodeId, Network<?> network) {
 		Set<Network<?>> networks = networksByNode.get(nodeId);
 		if (networks == null) {
-			networks = new HashSet<Network<?>>();
+			networks = new HashSet<>();
 			networksByNode.put(nodeId, networks);
 		}
 		networks.add(network);
@@ -295,6 +295,6 @@ public class ViewStateImpl implements ViewStateBuilder {
 	
 	@Override
 	public Set<Group<?, ?>> getAllGroups() {
-		return new HashSet<Group<?, ?>>(groupsByName.values());
+		return new HashSet<>(groupsByName.values());
 	}
 }

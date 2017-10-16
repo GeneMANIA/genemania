@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
@@ -45,6 +46,15 @@ import org.genemania.domain.NetworkMetadata;
 import org.genemania.domain.Node;
 import org.genemania.domain.OntologyCategory;
 import org.genemania.domain.Organism;
+import org.genemania.domain.ResultAttribute;
+import org.genemania.domain.ResultAttributeGroup;
+import org.genemania.domain.ResultGene;
+import org.genemania.domain.ResultInteraction;
+import org.genemania.domain.ResultInteractionNetwork;
+import org.genemania.domain.ResultInteractionNetworkGroup;
+import org.genemania.domain.ResultOntologyCategory;
+import org.genemania.domain.SearchParameters;
+import org.genemania.domain.SearchResults;
 import org.genemania.domain.Tag;
 import org.genemania.dto.AttributeDto;
 import org.genemania.dto.EnrichmentEngineResponseDto;
@@ -89,7 +99,7 @@ public class NetworkUtils {
 	public Map<Long, Gene> createQueryNodes(GeneMediator geneMediator, List<String> geneNames, Organism organism) {
 		try {
 			List<Gene> genes = geneMediator.getGenes(geneNames, organism.getId());
-			Map<Long, Gene> nodes = new HashMap<Long, Gene>();
+			Map<Long, Gene> nodes = new HashMap<>();
 			for (Gene gene : genes) {
 				Node node = gene.getNode();
 				nodes.put(node.getId(), gene);
@@ -101,7 +111,7 @@ public class NetworkUtils {
 	}
 
 	public Map<Long, Collection<Interaction>> createInteractionMap(Map<InteractionNetwork, Collection<Interaction>> sourceInteractions) {
-		Map<Long, Collection<Interaction>> networks = new HashMap<Long, Collection<Interaction>>();
+		Map<Long, Collection<Interaction>> networks = new HashMap<>();
 		for (Entry<InteractionNetwork, Collection<Interaction>> entry : sourceInteractions.entrySet()) {
 			InteractionNetwork network = entry.getKey();
 			networks.put(network.getId(), entry.getValue());
@@ -138,7 +148,7 @@ public class NetworkUtils {
 	}
 	
 	public <T> List<T> createSortedList(final Map<T,Double> scoredMap) {
-		ArrayList<T> list = new ArrayList<T>();
+		ArrayList<T> list = new ArrayList<>();
 		list.addAll(scoredMap.keySet());
 		Collections.sort(list, new Comparator<T>() {
 			public int compare(T o1,T o2) {
@@ -388,15 +398,19 @@ public class NetworkUtils {
 
 	public String getGeneLabel(Gene gene) {
 		Gene preferredGene = getPreferredGene(gene.getNode());
-		if (preferredGene.getId() == gene.getId()) {
+		
+		if (preferredGene == null)
+			return null;
+		
+		if (preferredGene.getId() == gene.getId())
 			return gene.getSymbol();
-		}
+		
 		return String.format("%s (%s)", preferredGene.getSymbol(), gene.getSymbol()); //$NON-NLS-1$
 	}
 
 	public Collection<Interaction> computeCombinedInteractions(Map<InteractionNetwork, Collection<Interaction>> source) {
-		List<Interaction> interactions = new ArrayList<Interaction>();
-		Map<Long, Set<Long>> seenNodes = new HashMap<Long, Set<Long>>();
+		List<Interaction> interactions = new ArrayList<>();
+		Map<Long, Set<Long>> seenNodes = new HashMap<>();
 		
 		for (Collection<Interaction> network : source.values()) {
 			for (Interaction interaction : network) {
@@ -412,7 +426,7 @@ public class NetworkUtils {
 				
 				Set<Long> toIds = seenNodes.get(fromId);
 				if (toIds == null) {
-					toIds = new HashSet<Long>();
+					toIds = new HashSet<>();
 					seenNodes.put(fromId, toIds);
 					toIds.add(toId);
 					interactions.add(interaction);
@@ -425,130 +439,273 @@ public class NetworkUtils {
 				}
 			}
 		}
+		
 		return interactions;
 	}
 
-	public void computeSourceInteractions(List<NetworkDto> networks, Map<Long, InteractionNetwork> canonicalNetworks, Organism organism, DataSet data) {
+	public void computeSourceInteractions(List<NetworkDto> networks, Map<Long, InteractionNetwork> canonicalNetworks,
+			Organism organism, DataSet data) {
 		IMediatorProvider mediatorProvider = data.getMediatorProvider();
 		NodeMediator nodeMediator = mediatorProvider.getNodeMediator();
 		
 		for (NetworkDto networkVo : networks) {
 			InteractionNetwork network = canonicalNetworks.get(networkVo.getId());
-			if (network == null) {
+			
+			if (network == null)
 				continue;
-			}
-			List<Interaction> interactions = new ArrayList<Interaction>();
+			
+			List<Interaction> interactions = new ArrayList<>();
+			
 			for (InteractionDto interactionVo : networkVo.getInteractions()) {
 				Node fromNode = nodeMediator.getNode(interactionVo.getNodeVO1().getId(), organism.getId());
 				Node toNode = nodeMediator.getNode(interactionVo.getNodeVO2().getId(), organism.getId());
 				Interaction interaction = new Interaction(fromNode, toNode, (float) interactionVo.getWeight(), null);
 				interactions.add(interaction);
 			}
+			
 			network.setInteractions(interactions);
 		}
 	}
-
-	public Map<Gene, Double> computeGeneScores(List<NodeDto> nodes, Map<Long, Gene> queryGenes, Organism organism, NodeMediator nodeMediator) {
-		// Figure out what the unique set of nodes is so we don't end up
-		// creating model objects unnecessarily.
-		Map<Long, NodeDto> uniqueNodes = new HashMap<Long, NodeDto>();
-		for (NodeDto nodeDto : nodes) {
-			uniqueNodes.put(nodeDto.getId(), nodeDto);
+	
+	public void computeSourceInteractions(Collection<ResultInteractionNetworkGroup> groups,
+			Map<Long, InteractionNetwork> canonicalNetworks) {
+		for (ResultInteractionNetworkGroup resGr : groups) {
+			for (ResultInteractionNetwork resNet : resGr.getResultNetworks()) {
+				InteractionNetwork network = canonicalNetworks.get(resNet.getNetwork().getId());
+				
+				if (network == null)
+					continue;
+				
+				List<Interaction> interactions = new ArrayList<>();
+				
+				for (ResultInteraction resInter : resNet.getResultInteractions()) {
+					Interaction interaction = resInter.getInteraction();
+	//				Node fromNode = nodeMediator.getNode(resInter.getNodeVO1().getId(), organism.getId());
+	//				Node toNode = nodeMediator.getNode(resInter.getNodeVO2().getId(), organism.getId());
+	//				Interaction interaction = new Interaction(fromNode, toNode, (float) resInter.getWeight(), null);
+					interactions.add(interaction);
+				}
+				
+				network.setInteractions(interactions);
+			}
 		}
+	}
+
+	public Map<Gene, Double> computeGeneScores(List<NodeDto> nodes, Map<Long, Gene> queryGenes, Organism organism,
+			NodeMediator nodeMediator) {
+		// Figure out what the unique set of nodes is so we don't end up creating model objects unnecessarily.
+		Map<Long, NodeDto> uniqueNodes = new HashMap<>();
+		
+		for (NodeDto nodeDto : nodes)
+			uniqueNodes.put(nodeDto.getId(), nodeDto);
 		
 		double maxScore = 0;
-		Map<Gene, Double> scores = new HashMap<Gene, Double>();
+		Map<Gene, Double> scores = new HashMap<>();
+		
 		for (Entry<Long, NodeDto> entry : uniqueNodes.entrySet()) {
 			long nodeId = entry.getKey();
 			Gene gene = queryGenes.get(nodeId);
+			
 			if (gene == null) {
 				Node node = nodeMediator.getNode(nodeId, organism.getId());
 				gene = getPreferredGene(node);
 			}
-			if (gene == null) {
+			
+			if (gene == null)
 				continue;
-			}
+			
 			double score = entry.getValue().getScore();
 			maxScore = Math.max(maxScore, score);
 			scores.put(gene, score);
 		}
 		
 		for (Gene gene : queryGenes.values()) {
-			if (!scores.containsKey(gene)) {
+			if (!scores.containsKey(gene))
 				scores.put(gene, maxScore);
-			}
+		}
+		
+		return scores;
+	}
+	
+	public Map<Gene, Double> computeGeneScores(Collection<ResultGene> resultGenes, Collection<Gene> queryGenes) {
+		double maxScore = 0;
+		Map<Gene, Double> scores = new HashMap<>();
+		
+		for (ResultGene resGene : resultGenes) {
+			Gene gene = resGene.getGene();
+			
+			if (gene == null)
+				continue;
+			
+			// Also set genes to each node, because this relationship is missing
+			// when the data comes from the web service
+			Node node = gene.getNode();
+			
+			
+			double score = resGene.getScore();
+			maxScore = Math.max(maxScore, score);
+			scores.put(gene, score);
+		}
+		
+		for (Gene gene : queryGenes) {
+			if (!scores.containsKey(gene))
+				scores.put(gene, maxScore);
 		}
 		
 		return scores;
 	}
 
-	public Map<InteractionNetwork, Double> computeNetworkWeights(List<NetworkDto> networks, Map<Long, InteractionNetwork> canonicalNetworks, Map<Attribute, Double> attributeWeights) {
+	public Map<InteractionNetwork, Double> computeNetworkWeights(List<NetworkDto> networks,
+			Map<Long, InteractionNetwork> canonicalNetworks, Map<Attribute, Double> attributeWeights) {
 		double totalAttributeWeight = 0;
-		if (attributeWeights != null) {
-			for (Double weight : attributeWeights.values()) {
-				totalAttributeWeight += weight;
-			}
-		}
-		double scaleFactor = 1 - totalAttributeWeight;
 		
-		Map<InteractionNetwork, Double> networkWeights = new HashMap<InteractionNetwork, Double>();
+		if (attributeWeights != null) {
+			for (Double weight : attributeWeights.values())
+				totalAttributeWeight += weight;
+		}
+		
+		double scaleFactor = 1 - totalAttributeWeight;
+		Map<InteractionNetwork, Double> networkWeights = new HashMap<>();
+		
 		for (NetworkDto networkVo : networks) {
 			InteractionNetwork network = canonicalNetworks.get(networkVo.getId());
+			
 			if (network == null) {
 				network = new InteractionNetwork();
 				network.setId(networkVo.getId());
 			}
+			
 			networkWeights.put(network, networkVo.getWeight() * scaleFactor);
 		}
+		
+		return networkWeights;
+	}
+	
+	public Map<InteractionNetwork, Double> computeNetworkWeights(Collection<ResultInteractionNetworkGroup> resNetGroups,
+			Map<Long, InteractionNetwork> canonicalNetworks, Map<Attribute, Double> attributeWeights) {
+		double totalAttributeWeight = 0;
+		
+		if (attributeWeights != null) {
+			for (Double weight : attributeWeights.values())
+				totalAttributeWeight += weight;
+		}
+		
+		double scaleFactor = 1 - totalAttributeWeight;
+		Map<InteractionNetwork, Double> networkWeights = new HashMap<>();
+		
+		for (ResultInteractionNetworkGroup resGr : resNetGroups) {
+			for (ResultInteractionNetwork resNet : resGr.getResultNetworks()) {
+				InteractionNetwork network = canonicalNetworks.get(resNet.getNetwork().getId());
+				
+				if (network == null) {
+					network = new InteractionNetwork();
+					network.setId(resNet.getNetwork().getId());
+				}
+				
+				networkWeights.put(network, resNet.getWeight() * scaleFactor);// TODO Is it necessary when results come from GeneMANIA webapp???
+			}
+		}
+		
 		return networkWeights;
 	}
 
 	public Map<Long, Gene> computeQueryGenes(List<String> geneSymbols, GeneCompletionProvider2 geneProvider) {
-		Map<Long, Gene> genesByNodeId = new HashMap<Long, Gene>();
+		Map<Long, Gene> genesByNodeId = new HashMap<>();
+		
 		for (String symbol : geneSymbols) {
 			Gene gene = geneProvider.getGene(symbol);
-			if (gene == null) {
+			
+			if (gene == null)
 				continue;
-			}
+			
 			genesByNodeId.put(gene.getNode().getId(), gene);
 		}
+		
 		return genesByNodeId;
 	}
 
 	public Map<Long, InteractionNetworkGroup> computeGroupsByNetwork(RelatedGenesEngineResponseDto response, DataSet data) {
-		Map<Long, InteractionNetworkGroup> groups = new HashMap<Long, InteractionNetworkGroup>();
-		Map<Long, InteractionNetworkGroup> groupsByNetwork = new HashMap<Long, InteractionNetworkGroup>();
+		Map<Long/*group-id*/, InteractionNetworkGroup> groups = new HashMap<>();
+		Map<Long/*network-id*/, InteractionNetworkGroup> groupsByNetwork = new HashMap<>();
 		List<NetworkDto> networks = response.getNetworks();
+		
 		for (NetworkDto network : networks) {
 			long networkId = network.getId();
 			
 			InteractionNetworkGroup group = data.getNetworkGroup(networkId);
-			if (group == null) {
+			
+			if (group == null)
 				continue;
-			}
 			
 			InteractionNetworkGroup canonicalGroup = groups.get(group.getId());
+			
 			if (canonicalGroup == null) {
 				groups.put(group.getId(), group);
 				canonicalGroup = group;
 			}
+			
 			groupsByNetwork.put(networkId, canonicalGroup);
 		}
+		// DELETEME======
+		System.out.println("\n\n====> " + groupsByNetwork.size() + " <====");
+		groupsByNetwork.forEach((gid, ing) -> {
+			System.out.println(". "+gid + " :: " + ing.getName());
+//			ing.getInteractionNetworks().forEach((in) -> {
+//				System.out.println("\t.. "+in.getId() + " :: " + in.getName());
+//			});
+		});//======
+		
 		return groupsByNetwork;
 	}
 	
-	public SearchResult createSearchOptions(Organism organism, RelatedGenesEngineRequestDto request, RelatedGenesEngineResponseDto response, EnrichmentEngineResponseDto enrichmentResponse, DataSet data, List<String> genes) {
+	public Map<Long, InteractionNetworkGroup> computeGroupsByNetwork(Collection<ResultInteractionNetworkGroup> list) {
+		Map<Long, InteractionNetworkGroup> groups = new HashMap<>();
+		Map<Long, InteractionNetworkGroup> groupsByNetwork = new HashMap<>();
+
+		// TODO
+		for (ResultInteractionNetworkGroup grRes : list) {
+			InteractionNetworkGroup group = grRes.getNetworkGroup();
+			
+			if (group == null)
+				continue;
+			
+			for (ResultInteractionNetwork network : grRes.getResultNetworks()) {
+				long networkId = network.getNetwork().getId();
+			
+				InteractionNetworkGroup canonicalGroup = groups.get(group.getId());
+				
+				if (canonicalGroup == null) {
+					groups.put(group.getId(), group);
+					canonicalGroup = group;
+				}
+			
+				groupsByNetwork.put(networkId, canonicalGroup);
+			}
+		}
+		System.out.println("\n\n----> " + groupsByNetwork.size() + " <----");
+		groupsByNetwork.forEach((gid, ing) -> {
+			System.out.println("* "+gid + " :: " + ing.getName());
+//			ing.getInteractionNetworks().forEach((in) -> {
+//				System.out.println("\t.. "+in.getId() + " :: " + in.getName());
+//			});
+		});//======
+		
+		return groupsByNetwork;
+	}
+	
+	public SearchResult createSearchOptions(Organism organism, RelatedGenesEngineRequestDto request,
+			RelatedGenesEngineResponseDto response, EnrichmentEngineResponseDto enrichmentResponse, DataSet data,
+			List<String> genes) {
 		SearchResultBuilder config = new SearchResultImpl();
 		
 		config.setOrganism(organism);
+		config.setCombiningMethod(request.getCombiningMethod());
+		config.setGeneSearchLimit(request.getLimitResults());
+		config.setAttributeSearchLimit(request.getAttributesLimit());
 		
 		GeneCompletionProvider2 geneProvider = data.getCompletionProvider(organism);
 		Map<Long, Gene> queryGenes = computeQueryGenes(genes, geneProvider);
 		config.setSearchQuery(queryGenes);
-		
-		config.setCombiningMethod(request.getCombiningMethod());
-		config.setGeneSearchLimit(request.getLimitResults());
-		config.setAttributeSearchLimit(request.getAttributesLimit());
 		
 		Map<Long, InteractionNetworkGroup> groupsByNetwork = computeGroupsByNetwork(response, data);
 		config.setGroups(groupsByNetwork);
@@ -566,42 +723,75 @@ public class NetworkUtils {
 		
 		config.setNetworkWeights(computeNetworkWeights(sourceNetworks, canonicalNetworks, config.getAttributeWeights()));
 		
-		if (enrichmentResponse != null) {
+		if (enrichmentResponse != null)
 			config.setEnrichment(processAnnotations(enrichmentResponse.getAnnotations(), data));
-		}
+		
+		return config.build();
+	}
+	
+	public SearchResult createSearchOptions(SearchResults res) {
+		SearchResultBuilder config = new SearchResultImpl();
+		
+		SearchParameters params = res.getParameters();
+		Organism organism = params.getOrganism();
+		
+		config.setOrganism(organism);
+		config.setCombiningMethod(params.getWeighting());
+		config.setGeneSearchLimit(params.getResultsSize());
+		config.setAttributeSearchLimit(params.getAttributeResultsSize());
+		config.setSearchQuery(params.getGenes().stream().collect(Collectors.toMap(g -> g.getNode().getId(), g -> g)));
+		
+		Collection<ResultInteractionNetworkGroup> resNetGroups = res.getResultNetworkGroups();
+		
+		// TODO TEST it!!!
+		Map<Long, InteractionNetworkGroup> groupsByNetwork = computeGroupsByNetwork(resNetGroups);
+		config.setGroups(groupsByNetwork);
+		
+		config.setGeneScores(computeGeneScores(res.getResultGenes(), params.getGenes()));
+		
+		Map<Long, InteractionNetwork> canonicalNetworks = computeCanonicalNetworks(groupsByNetwork);
+		computeSourceInteractions(resNetGroups, canonicalNetworks);
+		computeAttributes(config, res.getResultAttributeGroups(), null);
+		config.setNetworkWeights(computeNetworkWeights(resNetGroups, canonicalNetworks, config.getAttributeWeights()));
+		
+		if (res.getResultOntologyCategories() != null)
+			config.setEnrichment(processAnnotations(res.getResultOntologyCategories()));
+		
 		return config.build();
 	}
 
 	private Map<Long, InteractionNetwork> computeCanonicalNetworks(Map<Long, InteractionNetworkGroup> groupsByNetwork) {
-		Map<Long, InteractionNetwork> canonicalNetworks = new HashMap<Long, InteractionNetwork>();
+		Map<Long, InteractionNetwork> canonicalNetworks = new HashMap<>();
+		
 		for (InteractionNetworkGroup group : groupsByNetwork.values()) {
-			for (InteractionNetwork network : group.getInteractionNetworks()) {
+			for (InteractionNetwork network : group.getInteractionNetworks())
 				canonicalNetworks.put(network.getId(), network);
-			}
 		}
+		
 		return canonicalNetworks;
 	}
 
-	private void computeAttributes(SearchResultBuilder config, Organism organism, Collection<AttributeDto> source, Map<Long, Collection<AttributeDto>> nodeToAttributes, AttributeMediator mediator) {
-		if (source == null || nodeToAttributes == null) {
+	private void computeAttributes(SearchResultBuilder config, Organism organism, Collection<AttributeDto> source,
+			Map<Long, Collection<AttributeDto>> nodeToAttributes, AttributeMediator mediator) {
+		if (source == null || nodeToAttributes == null)
 			return;
-		}
 		
-		Map<Long, Attribute> attributes = new HashMap<Long, Attribute>();
-		Map<Long, AttributeGroup> groupsByAttribute = new HashMap<Long, AttributeGroup>();
-		Map<Long, AttributeGroup> groups = new HashMap<Long, AttributeGroup>();
-		Map<Long, Collection<Attribute>> attributesByNode = new HashMap<Long, Collection<Attribute>>();
-		Map<Attribute, Double> weights = new HashMap<Attribute, Double>();
+		Map<Long, Attribute> attributes = new HashMap<>();
+		Map<Long, AttributeGroup> groupsByAttribute = new HashMap<>();
+		Map<Long, AttributeGroup> groups = new HashMap<>();
+		Map<Long, Collection<Attribute>> attributesByNode = new HashMap<>();
+		Map<Attribute, Double> weights = new HashMap<>();
 		
 		long organismId = organism.getId();
+		
 		for (AttributeDto item : source) {
 			Attribute attribute = mediator.findAttribute(organismId, item.getId());
 			attributes.put(attribute.getId(), attribute);
 			
 			AttributeGroup group = groups.get(item.getGroupId());
-			if (group == null) {
+			
+			if (group == null)
 				group = mediator.findAttributeGroup(organismId, item.getGroupId()); 
-			}
 				
 			groupsByAttribute.put(item.getId(), group);
 			groups.put(item.getGroupId(), group);
@@ -610,13 +800,60 @@ public class NetworkUtils {
 
 		for (Entry<Long, Collection<AttributeDto>> entry : nodeToAttributes.entrySet()) {
 			Collection<AttributeDto> sourceAttributes = entry.getValue();
-			Collection<Attribute> nodeAttributes = new ArrayList<Attribute>(sourceAttributes.size());
+			Collection<Attribute> nodeAttributes = new ArrayList<>(sourceAttributes.size());
+			
 			for (AttributeDto item : sourceAttributes) {
 				Attribute attribute = attributes.get(item.getId());
 				nodeAttributes.add(attribute);
 			}
+			
 			attributesByNode.put(entry.getKey(), nodeAttributes);
 		}
+		
+		config.setAttributes(attributesByNode);
+		config.setAttributeWeights(weights);
+		config.setGroupsByAttribute(groupsByAttribute);
+	}
+	
+	private void computeAttributes(SearchResultBuilder config, Collection<ResultAttributeGroup> source,
+			Map<Long, Collection<AttributeDto>> nodeToAttributes) {
+		if (source == null || nodeToAttributes == null)
+			return;
+		
+		Map<Long, Attribute> attributes = new HashMap<>();
+		Map<Long, AttributeGroup> groupsByAttribute = new HashMap<>();
+		Map<Long, AttributeGroup> groups = new HashMap<>();
+		Map<Long, Collection<Attribute>> attributesByNode = new HashMap<>();
+		Map<Attribute, Double> weights = new HashMap<>();
+		
+		for (ResultAttributeGroup resGr : source) {
+			for (ResultAttribute resAttr : resGr.getResultAttributes()) {
+				Attribute attribute = resAttr.getAttribute();
+				attributes.put(attribute.getId(), attribute);
+				
+				AttributeGroup group = groups.get(resGr.getAttributeGroup().getId());
+				
+				if (group == null)
+					group = resGr.getAttributeGroup(); 
+				
+				groupsByAttribute.put(attribute.getId(), group);
+				groups.put(group.getId(), group);
+				weights.put(attribute, resGr.getWeight());
+			}
+		}
+// TODO		
+//		for (Entry<Long, Collection<AttributeDto>> entry : nodeToAttributes.entrySet()) {
+//			Collection<AttributeDto> sourceAttributes = entry.getValue();
+//			Collection<Attribute> nodeAttributes = new ArrayList<>(sourceAttributes.size());
+//			
+//			for (AttributeDto item : sourceAttributes) {
+//				Attribute attribute = attributes.get(item.getId());
+//				nodeAttributes.add(attribute);
+//			}
+//			
+//			attributesByNode.put(entry.getKey(), nodeAttributes);
+//		}
+		
 		config.setAttributes(attributesByNode);
 		config.setAttributeWeights(weights);
 		config.setGroupsByAttribute(groupsByAttribute);
@@ -624,16 +861,17 @@ public class NetworkUtils {
 
 	private Map<Long, Collection<AnnotationEntry>> processAnnotations(Map<Long, Collection<OntologyCategoryDto>> annotations, DataSet data) {
 		OntologyMediator mediator = data.getMediatorProvider().getOntologyMediator();
-		Map<Long, Collection<AnnotationEntry>> result = new HashMap<Long, Collection<AnnotationEntry>>();
-		Map<Long, AnnotationEntry> annotationCache = new HashMap<Long, AnnotationEntry>();
+		Map<Long, Collection<AnnotationEntry>> result = new HashMap<>();
+		Map<Long, AnnotationEntry> annotationCache = new HashMap<>();
 		
 		for (Entry<Long, Collection<OntologyCategoryDto>> entry : annotations.entrySet()) {
 			long nodeId = entry.getKey();
-			Set<AnnotationEntry> nodeAnnotations = new HashSet<AnnotationEntry>();
+			Set<AnnotationEntry> nodeAnnotations = new HashSet<>();
 			
 			for (OntologyCategoryDto categoryVo : entry.getValue()) {
 				long categoryId = categoryVo.getId();
 				AnnotationEntry annotation = annotationCache.get(categoryId);
+				
 				if (annotation == null) {
 					try {
 						OntologyCategory category = mediator.getCategory(categoryId);
@@ -645,12 +883,49 @@ public class NetworkUtils {
 						continue;
 					}
 				}
+				
 				nodeAnnotations.add(annotation);
 			}
-			if (nodeAnnotations.size() > 0) {
+			
+			if (nodeAnnotations.size() > 0)
 				result.put(nodeId, nodeAnnotations);
-			}
 		}
+		
+		return result;
+	}
+	
+	private Map<Long, Collection<AnnotationEntry>> processAnnotations(Collection<ResultOntologyCategory> collection) {
+		// TODO
+		Map<Long, Collection<AnnotationEntry>> result = new HashMap<>();
+		Map<Long, AnnotationEntry> annotationCache = new HashMap<>();
+//		
+//		for (Entry<Long, Collection<OntologyCategoryDto>> entry : collection.entrySet()) {
+//			long nodeId = entry.getKey();
+//			Set<AnnotationEntry> nodeAnnotations = new HashSet<>();
+//			
+//			for (OntologyCategoryDto categoryVo : entry.getValue()) {
+//				long categoryId = categoryVo.getId();
+//				AnnotationEntry annotation = annotationCache.get(categoryId);
+//				
+//				if (annotation == null) {
+//					try {
+//						OntologyCategory category = mediator.getCategory(categoryId);
+//						annotation = new AnnotationEntry(category, categoryVo);
+//						annotationCache.put(categoryId, annotation);
+//					} catch (DataStoreException e) {
+//						Logger logger = Logger.getLogger(NetworkUtils.class);
+//						logger.error(String.format("Can't find category: %d", categoryId), e); //$NON-NLS-1$
+//						continue;
+//					}
+//				}
+//				
+//				nodeAnnotations.add(annotation);
+//			}
+//			
+//			if (nodeAnnotations.size() > 0)
+//				result.put(nodeId, nodeAnnotations);
+//		}
+		
 		return result;
 	}
 

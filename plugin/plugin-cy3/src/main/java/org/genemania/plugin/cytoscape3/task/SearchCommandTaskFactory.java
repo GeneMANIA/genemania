@@ -25,6 +25,7 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
 import org.genemania.plugin.GeneMania;
+import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 
@@ -32,23 +33,27 @@ public class SearchCommandTaskFactory extends AbstractTaskFactory {
 
 	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
 	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
+	private final NetworkUtils networkUtils;
 	private final CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
 
 	public SearchCommandTaskFactory(
 			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
 			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller,
+			NetworkUtils networkUtils,
 			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
 		this.controller = controller;
+		this.networkUtils = networkUtils;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.serviceRegistrar = serviceRegistrar;
 	}
 	
 	@Override
 	public TaskIterator createTaskIterator() {
-		return new TaskIterator(new SearchCommandTask(plugin, controller, cytoscapeUtils, serviceRegistrar));
+		return new TaskIterator(
+				new SearchCommandTask(plugin, controller, networkUtils, cytoscapeUtils, serviceRegistrar));
 	}
 }

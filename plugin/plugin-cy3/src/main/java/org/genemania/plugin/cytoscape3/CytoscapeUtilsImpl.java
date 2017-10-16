@@ -216,9 +216,8 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 		
 		CytoPanel panel = application.getCytoPanel(CytoPanelName.EAST);
 		
-		if (panel.getState() == CytoPanelState.HIDE) {
+		if (panel.getState() == CytoPanelState.HIDE)
 			panel.setState(CytoPanelState.DOCK);
-		}
 	}
 	
 	@Override

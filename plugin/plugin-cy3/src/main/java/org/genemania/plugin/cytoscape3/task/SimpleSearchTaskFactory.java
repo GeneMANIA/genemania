@@ -151,7 +151,7 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 					throw new RuntimeException("Please select an organism.");
 				if (query.getGenes().isEmpty())
 					throw new RuntimeException("Please enter one or more genes.");
-				if (!hasValidGenes(query.getOrganism(), query.getGenes(), plugin))
+				if (offline && !hasValidGenes(query.getOrganism(), query.getGenes(), plugin))
 					throw new RuntimeException("Please specify a set of valid gene names and try again.");
 					
 				tm.setStatusMessage("Searching...");
@@ -159,8 +159,8 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 				List<Group<?, ?>> groups = getGroups(query.getOrganism());
 				
 				new Thread(() -> {
-					CyNetwork network = controller.runMania(SwingUtilities.getWindowAncestor(queryBar), query, groups);
-	
+					CyNetwork network = controller.runMania(SwingUtilities.getWindowAncestor(queryBar), query, groups,
+							offline);
 					cytoscapeUtils.handleNetworkPostProcessing(network);
 					cytoscapeUtils.performLayout(network);
 					cytoscapeUtils.maximize(network);

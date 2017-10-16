@@ -920,7 +920,7 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 	private void handleStartButton() {
 		Query query = getQuery();
 		Collection<Group<?, ?>> groups = selectionPanel.getSelectedGroups();
-		NETWORK cyNetwork = controller.runMania(this, query, groups);
+		NETWORK cyNetwork = controller.runMania(this, query, groups, true);
 
 		cytoscapeUtils.handleNetworkPostProcessing(cyNetwork);
 		cytoscapeUtils.performLayout(cyNetwork);

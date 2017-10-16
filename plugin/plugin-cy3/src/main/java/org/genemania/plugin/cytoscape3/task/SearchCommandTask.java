@@ -21,8 +21,10 @@ package org.genemania.plugin.cytoscape3.task;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
+import javax.ws.rs.core.Response;
 
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.model.CyEdge;
@@ -37,8 +39,10 @@ import org.cytoscape.work.Tunable;
 import org.cytoscape.work.json.JSONResult;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.genemania.domain.Organism;
+import org.genemania.domain.SearchRequest;
 import org.genemania.exception.DataStoreException;
 import org.genemania.plugin.GeneMania;
+import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.data.DataSet;
@@ -51,6 +55,8 @@ import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
 
+import com.google.gson.Gson;
+
 public class SearchCommandTask extends AbstractTask implements ObservableTask {
 
 	@Tunable(description = "Offline search:", context = "nogui")
@@ -62,12 +68,16 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 	@Tunable(description = "List of query genes", context = "nogui")
 	public String genes;
 	
-	@Tunable(description = "Maximum number of resultant Genes", context = "nogui")
+	@Tunable(description = "Maximum number of resultant genes", context = "nogui")
 	public int geneLimit = 20;
+	
+	@Tunable(description = "Maximum number of resultant attributes", context = "nogui")
+	public int attrLimit = 10;
 	
 	@Tunable(description = "Combining method", context = "nogui")
 	public ListSingleSelection<CombiningMethod> combiningMethod = new ListSingleSelection<>(CombiningMethod.values());
 	
+	// TODO not supported by ONLINE search!
 	@Tunable(description = "Scoring method", context = "nogui")
 	public ListSingleSelection<ScoringMethod> scoringMethod = new ListSingleSelection<>(ScoringMethod.values());
 	
@@ -75,17 +85,20 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 	
 	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
 	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
+	private final NetworkUtils networkUtils;
 	private final CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
 
 	public SearchCommandTask(
 			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
 			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller,
+			NetworkUtils networkUtils,
 			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
 		this.controller = controller;
+		this.networkUtils = networkUtils;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.serviceRegistrar = serviceRegistrar;
 		
@@ -125,10 +138,21 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 			
 		tm.setStatusMessage("Searching " + (offline ? "installed data set" : "ONLINE") + "...");
 		
-		if (offline)
-			searchOffline(query, tm);
-		else
-			searchOnline(query, tm);
+		List<Group<?, ?>> groups = SimpleSearchTaskFactory.getGroups(query.getOrganism());
+		
+		JFrame parent = serviceRegistrar.getService(CySwingApplication.class).getJFrame();
+		network = controller.runMania(parent, query, groups, offline);
+
+		tm.setStatusMessage("Applying layout...");
+		
+		cytoscapeUtils.handleNetworkPostProcessing(network);
+		cytoscapeUtils.performLayout(network);
+		cytoscapeUtils.maximize(network);
+		
+		NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
+		ViewState options = selManager.getNetworkConfiguration(network);
+		plugin.applyOptions(options);
+		plugin.showResults();
 	}
 
 	@Override
@@ -151,27 +175,97 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 		return null;
 	}
 	
-	private void searchOffline(Query query, TaskMonitor tm) {
-		List<Group<?, ?>> groups = SimpleSearchTaskFactory.getGroups(query.getOrganism());
-		
-		JFrame parent = serviceRegistrar.getService(CySwingApplication.class).getJFrame();
-		network = controller.runMania(parent, query, groups);
-
-		tm.setStatusMessage("Applying layout...");
-		
-		cytoscapeUtils.handleNetworkPostProcessing(network);
-		cytoscapeUtils.performLayout(network);
-		cytoscapeUtils.maximize(network);
-		
-		NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
-		ViewState options = selManager.getNetworkConfiguration(network);
-		plugin.applyOptions(options);
-		plugin.showResults();
-	}
+//	private void searchOffline(Query query, TaskMonitor tm) {
+//		List<Group<?, ?>> groups = SimpleSearchTaskFactory.getGroups(query.getOrganism());
+//		
+//		JFrame parent = serviceRegistrar.getService(CySwingApplication.class).getJFrame();
+//		network = controller.runMania(parent, query, groups, true);
+//
+//		tm.setStatusMessage("Applying layout...");
+//		
+//		cytoscapeUtils.handleNetworkPostProcessing(network);
+//		cytoscapeUtils.performLayout(network);
+//		cytoscapeUtils.maximize(network);
+//		
+//		NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
+//		ViewState options = selManager.getNetworkConfiguration(network);
+//		plugin.applyOptions(options);
+//		plugin.showResults();
+//	}
 	
 	private void searchOnline(Query query, TaskMonitor tm) {
+		SearchRequest req = new SearchRequest(
+				query.getOrganism().getId(),
+				query.getGenes().stream().collect(Collectors.joining("\n"))
+		);
+		req.setWeightingFromEnum(query.getCombiningMethod());
+		req.setGeneThreshold(query.getGeneLimit());
+		req.setAttrThreshold(query.getAttributeLimit());
 		// TODO
-		tm.setStatusMessage("<html><b>ONLINE Search</b> not implemented yet!</html>");
+//		req.setAttrGroups(new Long[] {});
+//		req.setNetworks(new Long[] {});
+		
+		Gson gson = new Gson();
+		String jsonReq = gson.toJson(req);
+		
+		Response res = null;
+		
+		try {
+//			Client client = ClientBuilder.newClient();
+//			WebTarget target = client.target(URL);
+//			res = target.request(MediaType.APPLICATION_JSON).post(Entity.json(jsonReq));
+//			
+//			if (res.getStatus() != 200)
+//				throw new RuntimeException(
+//						res.getStatusInfo().getStatusCode() + ": " + res.getStatusInfo().getReasonPhrase());
+//			
+//			String json = res.readEntity(String.class);
+//			SearchResults searchResults = gson.fromJson(json, SearchResults.class);
+//			System.out.println(searchResults);
+			
+//			RelatedGenesEngineRequestDto request,
+//			RelatedGenesEngineResponseDto response,
+//			EnrichmentEngineResponseDto enrichmentResponse,
+//			SearchResult options
+			
+			// TODO:
+			// A) ============
+//			DataSet data = plugin.getDataSetManager().getDataSet();
+//			List<Group<?, ?>> groups = SimpleSearchTaskFactory.getGroups(query.getOrganism());
+//			SearchResult options = networkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data, queryGenes);
+//			
+//			SearchResult options = new Searchres
+//			EdgeAttributeProvider provider = RetrieveRelatedGenesController.createEdgeAttributeProvider(data, options);
+//			
+////			progress.setStatus(Strings.retrieveRelatedGenes_status5);
+////			progress.setProgress(stage++);
+//			ViewStateBuilder builder = new ViewStateImpl(options);
+//			CyNetwork network = cytoscapeUtils.createNetwork(data, RetrieveRelatedGenesController.getNextNetworkName(query.getOrganism()), options, builder, provider);
+//
+//			// Set up edge cache
+////			progress.setStatus(Strings.retrieveRelatedGenes_status6);
+////			progress.setProgress(stage++);
+//			NetworkSelectionManager<CyNetwork, CyNode, CyEdge> manager = plugin.getNetworkSelectionManager();
+//			
+//			computeGraphCache(network, options, builder, selectedGroups);
+//			
+//			manager.addNetworkConfiguration(network, builder.build());
+//
+//			cytoscapeUtils.registerSelectionListener(network, manager, plugin);
+//			cytoscapeUtils.applyVisualization(network, filterGeneScores(scores, options), computeColors(data, organism), extrema);
+			
+			// B) ============
+//			cytoscapeUtils.handleNetworkPostProcessing(network);
+//			cytoscapeUtils.performLayout(network);
+//			cytoscapeUtils.maximize(network);
+//			
+//			ViewState viewState = manager.getNetworkConfiguration(network);
+//			plugin.applyOptions(viewState);
+//			plugin.showResults();
+		} finally {
+			if (res != null)
+				res.close();
+		}
 	}
 	
 	private Query getQuery() {

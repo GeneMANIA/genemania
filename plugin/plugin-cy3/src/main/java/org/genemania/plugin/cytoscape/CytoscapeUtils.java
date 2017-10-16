@@ -27,7 +27,6 @@ import java.util.Set;
 
 import org.genemania.domain.Node;
 import org.genemania.plugin.GeneMania;
-import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
@@ -95,7 +94,7 @@ public interface CytoscapeUtils<NETWORK, NODE, EDGE> {
 			Map<Long, Double> filterGeneScores,
 			Map<String, Color> computeColors, double[] extrema);
 
-	NETWORK createNetwork(DataSet data, String nextNetworkName, SearchResult result, ViewStateBuilder options,
+	NETWORK createNetwork(String nextNetworkName, String dataVersion, SearchResult result, ViewStateBuilder options,
 			EdgeAttributeProvider provider);
 
 	void setHighlight(ViewState config, Group<?, ?> group,

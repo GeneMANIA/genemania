@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.controllers;
 
 import java.awt.Color;
@@ -31,8 +30,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.AttributeGroup;
@@ -41,6 +47,12 @@ import org.genemania.domain.InteractionNetwork;
 import org.genemania.domain.InteractionNetworkGroup;
 import org.genemania.domain.Node;
 import org.genemania.domain.Organism;
+import org.genemania.domain.ResultGene;
+import org.genemania.domain.ResultInteraction;
+import org.genemania.domain.ResultInteractionNetwork;
+import org.genemania.domain.ResultInteractionNetworkGroup;
+import org.genemania.domain.SearchRequest;
+import org.genemania.domain.SearchResults;
 import org.genemania.dto.EnrichmentEngineRequestDto;
 import org.genemania.dto.EnrichmentEngineResponseDto;
 import org.genemania.dto.InteractionDto;
@@ -85,9 +97,13 @@ import org.genemania.util.ChildProgressReporter;
 import org.genemania.util.NullProgressReporter;
 import org.genemania.util.ProgressReporter;
 
-public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
-	private static final int MIN_CATEGORIES = 10;
+import com.google.gson.Gson;
 
+public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
+	
+	// TODO Make it a CyProperty?
+	private static final String SEARCH_URL = "http://genemania.org/json/search_results";
+	private static final int MIN_CATEGORIES = 10;
 	private static final double Q_VALUE_THRESHOLD = 0.1;
 
 	private static Map<Long, Integer> sequenceNumbers;
@@ -97,14 +113,16 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 	}
 
 	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
-
 	private final GeneMania<NETWORK, NODE, EDGE> plugin;
-
 	private final NetworkUtils networkUtils;
-
 	private final TaskDispatcher taskDispatcher;
 	
-	public RetrieveRelatedGenesController(GeneMania<NETWORK, NODE, EDGE> plugin, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, NetworkUtils networkUtils, TaskDispatcher taskDispatcher) {
+	public RetrieveRelatedGenesController(
+			GeneMania<NETWORK, NODE, EDGE> plugin,
+			CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			NetworkUtils networkUtils,
+			TaskDispatcher taskDispatcher
+	) {
 		this.plugin = plugin;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.networkUtils = networkUtils;
@@ -115,11 +133,14 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		Vector<ModelElement<Organism>> organismChoices = new Vector<>();
 		OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
 		Collection<Organism> organisms = mediator.getAllOrganisms(); 
-		for (Organism organism : organisms) {
-			organismChoices.add(new ModelElement<>(organism, OrganismComparator.getInstance(), OrganismFormatter.getInstance()));
-		}
+		
+		for (Organism organism : organisms)
+			organismChoices.add(new ModelElement<>(
+					organism, OrganismComparator.getInstance(), OrganismFormatter.getInstance()));
+		
 		Collections.sort(organismChoices);
-        return organismChoices;
+        
+		return organismChoices;
     }
 
 	private RelatedGenesEngineRequestDto createRequest(DataSet data, Query query, Collection<Group<?, ?>> groups, ProgressReporter progress) {
@@ -129,19 +150,18 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		RelatedGenesEngineRequestDto request = new RelatedGenesEngineRequestDto();
 		request.setNamespace(GeneMania.DEFAULT_NAMESPACE);
 		Organism organism = query.getOrganism();
-		long id = organism .getId();
+		long id = organism.getId();
 		request.setOrganismId(id);
 		
-
 		// Collect the selected networks
 		ChildProgressReporter childProgress = new ChildProgressReporter(progress);
 		childProgress.setStatus(Strings.retrieveRelatedGenes_status2);
 		request.setInteractionNetworks(getInteractionNetworks(data, groups, childProgress));
 		childProgress.close();
 		stage++;
-		if (childProgress.isCanceled()) {
+		
+		if (childProgress.isCanceled())
 			return null;
-		}
 		
 		// Collect attributes
 		request.setAttributeGroups(getAttributeGroups(groups));
@@ -153,14 +173,15 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		request.setPositiveNodes(getQueryNodes(data, organism, query.getGenes(), progress));
 		childProgress.close();
 		stage++;
-		if (progress.isCanceled()) {
+		
+		if (progress.isCanceled())
 			return null;
-		}
 		
 		request.setLimitResults(query.getGeneLimit());
 		request.setAttributesLimit(query.getAttributeLimit());
 		request.setCombiningMethod(computeCombiningMethod(query));
 		request.setScoringMethod(query.getScoringMethod());
+		
 		return request;
 	}
 	
@@ -169,13 +190,14 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		
 		for (Group<?, ?> group : selected) {
 			Group<Object, AttributeGroup> adapted = group.adapt(Object.class, AttributeGroup.class);
-			if (adapted == null) {
+			
+			if (adapted == null)
 				continue;
-			}
-			for (Network<AttributeGroup> network : adapted.getNetworks()) {
+			
+			for (Network<AttributeGroup> network : adapted.getNetworks())
 				result.add(network.getModel().getId());
-			}
 		}
+		
 		return result;
 	}
 
@@ -183,15 +205,14 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		Organism organism = query.getOrganism();
 		CombiningMethod method = query.getCombiningMethod();
 		
-		if (organism.getId() >= 0) {
+		if (organism.getId() >= 0)
 			return method;
-		}
 
 		// We have a user organism so we have to disable AUTOMATIC_SELECT
 		// or the engine might give us a branch-specific weighting method
-		if (method.equals(CombiningMethod.AUTOMATIC_SELECT)) {
+		if (method.equals(CombiningMethod.AUTOMATIC_SELECT))
 			return CombiningMethod.AUTOMATIC;
-		}
+		
 		return method;
 	}
 
@@ -201,38 +222,44 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		
 		Set<Long> queryNodes = new HashSet<>();
 		GeneCompletionProvider2 geneProvider = data.getCompletionProvider(organism);
+		
 		for (String name : geneNames) {
 			progress.setDescription(name);
 			Long nodeId = geneProvider.getNodeId(name);
-			if (nodeId != null) {
+			
+			if (nodeId != null)
 				queryNodes.add(nodeId);
-			}
+			
 			geneCount++;
 			progress.setProgress(geneCount);
 		}
+		
 		return queryNodes;
 	}
 
-	private Collection<Collection<Long>> getInteractionNetworks(DataSet data, Collection<Group<?, ?>> selection, ProgressReporter progress) {
+	private static Collection<Collection<Long>> getInteractionNetworks(DataSet data, Collection<Group<?, ?>> selection,
+			ProgressReporter progress) {
 		Map<Long, Collection<Long>> groups = new HashMap<>();
 		
 		progress.setMaximumProgress(selection.size());
 		int groupCount = 0;
 		
 		for (Group<?, ?> selectedGroup : selection) {
-			Group<InteractionNetworkGroup, InteractionNetwork> adapted = selectedGroup.adapt(InteractionNetworkGroup.class, InteractionNetwork.class);
-			if (adapted == null) {
+			Group<InteractionNetworkGroup, InteractionNetwork> adapted = selectedGroup
+					.adapt(InteractionNetworkGroup.class, InteractionNetwork.class);
+			
+			if (adapted == null)
 				continue;
-			}
 			
 			Collection<Long> resultNetworks = new HashSet<>();
+			
 			for (Network<InteractionNetwork> network : adapted.getNetworks()) {
 				InteractionNetwork model = network.getModel();
 				progress.setDescription(network.getName());
 				long id = model.getId();
 				resultNetworks.add(id);
-				
 			}
+			
 			groups.put(adapted.getModel().getId(), resultNetworks);
 			
 			groupCount++;
@@ -243,20 +270,26 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		Collections.sort(groupIds);
 		
 		Collection<Collection<Long>> result = new ArrayList<>();
+		
 		for (Long groupId : groupIds) {
 			List<Long> groupMembers = new ArrayList<>(groups.get(groupId));
 			Collections.sort(groupMembers);
 			result.add(groupMembers);
 		}
+		
 		return result;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public NETWORK runMania(Window parent, final Query query, final Collection<Group<?, ?>> groups) {
+	public NETWORK runMania(Window parent, final Query query, final Collection<Group<?, ?>> groups, boolean offline) {
 		final Object[] result = new Object[1];
+		// Create the WS client here, to avoid a thread/OSGI related issues;
+		final Client client = offline ? null : ClientBuilder.newClient();
+		
 		GeneManiaTask task = new GeneManiaTask(Strings.retrieveRelatedGenes_status) {
+			@Override
 			public void runTask() throws DataStoreException {
-				result[0] = createNetwork(query, groups, progress);
+				result[0] = createNetwork(query, groups, offline, client, progress);
 			}
 		};
 		taskDispatcher.executeTask(task, parent, true, true);
@@ -265,73 +298,155 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		return (NETWORK) result[0];
 	}
 	
-	private NETWORK createNetwork(Query query, Collection<Group<?, ?>> selectedGroups, ProgressReporter progress) throws DataStoreException {
+	private NETWORK createNetwork(Query query, Collection<Group<?, ?>> selectedGroups, boolean offline, Client client,
+			ProgressReporter progress) throws DataStoreException {
 		int stage = 0;
 		progress.setMaximumProgress(5);
-		
-		DataSet data = plugin.getDataSetManager().getDataSet();
-		
 		progress.setStatus(Strings.retrieveRelatedGenes_status4);
 		
 		ChildProgressReporter childProgress = new ChildProgressReporter(progress);
-		RelatedGenesEngineRequestDto request = createRequest(data, query, selectedGroups, childProgress);
 		childProgress.close();
 		stage++;
 
-		childProgress = new ChildProgressReporter(progress);
-		request.setProgressReporter(childProgress);
-		RelatedGenesEngineResponseDto response = runQuery(request, data);
-		request.setCombiningMethod(response.getCombiningMethodApplied());
-		childProgress.close();
-		stage++;
-		
-		if (progress.isCanceled()) {
-			return null;
-		}
-
-		Map<Long, Double> scores = computeGeneScores(response);
-		if (scores.size() == 0) {
-			WrappedOptionPane.showConfirmDialog(taskDispatcher.getTaskDialog(), Strings.retrieveRelatedGenesNoResults, Strings.default_title, JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, 40);
-			return null;
-		}
-		
-		double[] extrema = computeEdgeWeightExtrema(response);
-		
 		Organism organism = query.getOrganism();
-		EnrichmentEngineRequestDto enrichmentRequest = createEnrichmentRequest(organism, response, data);
-		EnrichmentEngineResponseDto enrichmentResponse = null;
-		if (enrichmentRequest != null) {
-			childProgress = new ChildProgressReporter(progress);
-			enrichmentRequest.setProgressReporter(childProgress);
-			enrichmentResponse = computeEnrichment(enrichmentRequest, data);
-			childProgress.close();
-		}
-		stage++;
-		if (progress.isCanceled()) {
-			return null;
-		}		
-		
 		List<String> queryGenes = query.getGenes();
-		SearchResult options = networkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data, queryGenes);
 		
-		EdgeAttributeProvider provider = createEdgeAttributeProvider(data, options);
+		SearchResult options = null;
+		String dataVersion = null; // TODO online?
+		double[] extrema =  null;
+		Map<String, Color> colors = null; // TODO online
+		Map<Long, Double> scores = null;
 		
-		progress.setStatus(Strings.retrieveRelatedGenes_status5);
-		progress.setProgress(stage++);
-		ViewStateBuilder builder = new ViewStateImpl(options);
-		NETWORK network = cytoscapeUtils.createNetwork(data, getNextNetworkName(organism), options, builder, provider);
-
-		// Set up edge cache
-		progress.setStatus(Strings.retrieveRelatedGenes_status6);
-		progress.setProgress(stage++);
-		NetworkSelectionManager<NETWORK, NODE, EDGE> manager = plugin.getNetworkSelectionManager();
+		if (offline) {
+			DataSet data = plugin.getDataSetManager().getDataSet();
+			dataVersion = data.getVersion().toString();
+			colors = computeColors(data, organism);
+			
+			childProgress = new ChildProgressReporter(progress);
+			RelatedGenesEngineRequestDto request = createRequest(data, query, selectedGroups, childProgress);
+			request.setProgressReporter(childProgress);
+			RelatedGenesEngineResponseDto response = runQuery(request, data);
+			request.setCombiningMethod(response.getCombiningMethodApplied());
+			childProgress.close();
+			stage++;
+			
+			if (progress.isCanceled())
+				return null;
+	
+			scores = computeGeneScores(response);
+			
+			if (scores.size() == 0) {
+				WrappedOptionPane.showConfirmDialog(
+						taskDispatcher.getTaskDialog(),
+						Strings.retrieveRelatedGenesNoResults,
+						Strings.default_title,
+						JOptionPane.DEFAULT_OPTION,
+						JOptionPane.WARNING_MESSAGE,
+						40
+				);
+				
+				return null;
+			}
+			
+			extrema = computeEdgeWeightExtrema(response);
+			
+			EnrichmentEngineRequestDto enrichmentRequest = createEnrichmentRequest(organism, response, data);
+			EnrichmentEngineResponseDto enrichmentResponse = null;
+			
+			if (enrichmentRequest != null) {
+				childProgress = new ChildProgressReporter(progress);
+				enrichmentRequest.setProgressReporter(childProgress);
+				enrichmentResponse = computeEnrichment(enrichmentRequest, data);
+				childProgress.close();
+			}
+			
+			stage++;
+			
+			if (progress.isCanceled())
+				return null;
+			
+			options = networkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data,
+					queryGenes);
+		} else {
+			SearchRequest req = new SearchRequest(
+					query.getOrganism().getId(),
+					query.getGenes().stream().collect(Collectors.joining("\n"))
+			);
+			req.setWeightingFromEnum(query.getCombiningMethod());
+			req.setGeneThreshold(query.getGeneLimit());
+			req.setAttrThreshold(query.getAttributeLimit());
+			// TODO
+//			req.setAttrGroups(new Long[] {});
+//			req.setNetworks(new Long[] {});
+			
+			Gson gson = new Gson();
+			String jsonReq = gson.toJson(req);
+			
+			Response res = null;
+			SearchResults searchResults = null;
+			
+			try {
+				WebTarget target = client.target(SEARCH_URL);
+				res = target.request(MediaType.APPLICATION_JSON).post(Entity.json(jsonReq));
+				
+				if (res.getStatus() != 200)
+					throw new RuntimeException(
+							res.getStatusInfo().getStatusCode() + ": " + res.getStatusInfo().getReasonPhrase());
+				
+				String json = res.readEntity(String.class);
+				searchResults = gson.fromJson(json, SearchResults.class);
+				System.out.println(searchResults);
+			} finally {
+				if (res != null)
+					res.close();
+			}
+			
+			if (progress.isCanceled())
+				return null;
+	
+			scores = computeGeneScores(searchResults.getResultGenes());
+			
+			if (scores.size() == 0) {
+				WrappedOptionPane.showConfirmDialog(
+						taskDispatcher.getTaskDialog(),
+						Strings.retrieveRelatedGenesNoResults,
+						Strings.default_title,
+						JOptionPane.DEFAULT_OPTION,
+						JOptionPane.WARNING_MESSAGE,
+						40
+				);
+				
+				return null;
+			}
+			
+			extrema = computeEdgeWeightExtrema(searchResults);
+			
+			options = networkUtils.createSearchOptions(searchResults);
+		}
 		
-		computeGraphCache(network, options, builder, selectedGroups);
+		NETWORK network = null;
 		
-		manager.addNetworkConfiguration(network, builder.build());
-
-		cytoscapeUtils.registerSelectionListener(network, manager, plugin);
-		cytoscapeUtils.applyVisualization(network, filterGeneScores(scores, options), computeColors(data, organism), extrema);
+		if (options != null) {
+			EdgeAttributeProvider provider = createEdgeAttributeProvider(options);
+			
+			progress.setStatus(Strings.retrieveRelatedGenes_status5);
+			progress.setProgress(stage++);
+			ViewStateBuilder builder = new ViewStateImpl(options);
+			String netName = getNextNetworkName(organism);
+			
+			network = cytoscapeUtils.createNetwork(netName, dataVersion, options, builder, provider);
+	
+			// Set up edge cache
+			progress.setStatus(Strings.retrieveRelatedGenes_status6);
+			progress.setProgress(stage++);
+			NetworkSelectionManager<NETWORK, NODE, EDGE> manager = plugin.getNetworkSelectionManager();
+			
+			computeGraphCache(network, options, builder, selectedGroups);
+			manager.addNetworkConfiguration(network, builder.build());
+	
+			cytoscapeUtils.registerSelectionListener(network, manager, plugin);
+			cytoscapeUtils.applyVisualization(network, filterGeneScores(scores, options), colors, extrema);
+		}
 		
 		return network;
 	}
@@ -348,9 +463,8 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 	}
 
 	private EnrichmentEngineRequestDto createEnrichmentRequest(Organism organism, RelatedGenesEngineResponseDto response, DataSet data) {
-		if (organism.getOntology() == null) {
+		if (organism.getOntology() == null)
 			return null;
-		}
 		
 		EnrichmentEngineRequestDto request = new EnrichmentEngineRequestDto();
 		request.setProgressReporter(NullProgressReporter.instance());
@@ -360,53 +474,80 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		request.setOntologyId(organism.getOntology().getId());
 		
 		Set<Long> nodes = new HashSet<>();
+		
 		for (NetworkDto network : response.getNetworks()) {
 			for (InteractionDto interaction : network.getInteractions()) {
 				nodes.add(interaction.getNodeVO1().getId());
 				nodes.add(interaction.getNodeVO2().getId());
 			}
 		}
+		
 		request.setNodes(nodes);		
+		
 		return request;
 	}
 
 	private Map<Long, Double> filterGeneScores(Map<Long, Double> scores, SearchResult options) {
 		Map<Long, Gene> queryGenes = options.getQueryGenes();
 		double maxScore = 0;
+		
 		for (Entry<Long, Double> entry : scores.entrySet()) {
-			if (queryGenes.containsKey(entry.getKey())) {
+			if (queryGenes.containsKey(entry.getKey()))
 				continue;
-			}
+			
 			maxScore = Math.max(maxScore, entry.getValue());
 		}
 		
 		Map<Long, Double> filtered = new HashMap<>();
+		
 		for (Entry<Long, Double> entry : scores.entrySet()) {
 			long nodeId = entry.getKey();
 			double score = entry.getValue();
 			filtered.put(entry.getKey(), queryGenes.containsKey(nodeId) ? maxScore : score);
 		}
+		
 		return filtered;
 	}
 
 	private double[] computeEdgeWeightExtrema(RelatedGenesEngineResponseDto response) {
 		double[] extrema = new double[] { 1, 0 };
+		
 		for (NetworkDto network : response.getNetworks()) {
 			for (InteractionDto interaction : network.getInteractions()) {
 				double weight = interaction.getWeight() * network.getWeight();
-				if (extrema[0] > weight) {
+				
+				if (extrema[0] > weight)
 					extrema[0] = weight;
-				}
-				if (extrema[1] < weight) {
+				if (extrema[1] < weight)
 					extrema[1] = weight;
+			}
+		}
+		
+		return extrema;
+	}
+	
+	private double[] computeEdgeWeightExtrema(SearchResults results) {
+		double[] extrema = new double[] { 1, 0 };
+		
+		for (ResultInteractionNetworkGroup resNetGr : results.getResultNetworkGroups()) {
+			for (ResultInteractionNetwork resNet : resNetGr.getResultNetworks()) {
+				for (ResultInteraction resInter : resNet.getResultInteractions()) {
+					double weight = resInter.getInteraction().getWeight();// * resNet.getWeight();// TODO review
+					
+					if (extrema[0] > weight)
+						extrema[0] = weight;
+					if (extrema[1] < weight)
+						extrema[1] = weight;
 				}
 			}
 		}
+		
 		return extrema;
 	}
 
 	private Map<Long, Double> computeGeneScores(RelatedGenesEngineResponseDto result) {
 		Map<Long, Double> scores = new HashMap<>();
+		
 		for (NetworkDto network : result.getNetworks()) {
 			for (InteractionDto interaction : network.getInteractions()) {
 				NodeDto node1 = interaction.getNodeVO1();
@@ -415,42 +556,60 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 				scores.put(node2.getId(), node2.getScore());
 			}
 		}
+		
+		return scores;
+	}
+	
+	private Map<Long, Double> computeGeneScores(Collection<ResultGene> genes) {
+		Map<Long, Double> scores = new HashMap<>();
+		
+		for (ResultGene resGene : genes) {
+			scores.put(resGene.getGene().getNode().getId(), resGene.getScore());
+		}
+		
 		return scores;
 	}
 
 	private Map<String, Color> computeColors(DataSet data, Organism organism) {
 		Map<String, Color> colors = new HashMap<>();
 		Collection<InteractionNetworkGroup> groups = organism.getInteractionNetworkGroups();
+		
 		for (InteractionNetworkGroup group : groups) {
 			Colour color = data.getColor(group.getCode());
 			colors.put(group.getName(), new Color(color.getRgb())); 
 		}
+		
 		return colors;
 	}
 
-	private EdgeAttributeProvider createEdgeAttributeProvider(DataSet data, SearchResult options) {
+	private static EdgeAttributeProvider createEdgeAttributeProvider(SearchResult options) {
 		final Map<Long, InteractionNetworkGroup> groupsByNetwork = options.getInteractionNetworkGroups();
 
 		return new EdgeAttributeProvider() {
+			@Override
 			public Map<String, Object> getAttributes(InteractionNetwork network) {
 				HashMap<String, Object> attributes = new HashMap<>();
 				long id = network.getId();
 				InteractionNetworkGroup group = groupsByNetwork.get(id);
-				if (group != null) {
+				
+				if (group != null)
 					attributes.put(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, group.getName());
-				}
+				
 				return attributes;
 			}
-
+			
+			@Override
 			public String getEdgeLabel(InteractionNetwork network) {
 				long id = network.getId();
+				
 				if (id == -1) {
 					return "combined"; //$NON-NLS-1$
 				} else {
 					InteractionNetworkGroup group = groupsByNetwork.get(id);
-					if (group != null) {
+					
+					if (group != null)
 						return group.getName();
-					}
+					
 					return "unknown"; //$NON-NLS-1$
 				}
 			}
@@ -460,6 +619,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 	void computeGraphCache(NETWORK currentNetwork, SearchResult result, ViewStateBuilder config, Collection<Group<?, ?>> selectedGroups) {
 		// Build edge cache
 		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(currentNetwork);
+		
 		for (EDGE edge : networkProxy.getEdges()) {
 			EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, currentNetwork);
 			String name = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
@@ -477,7 +637,6 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		
 		// Cache selected networks
 		applyDefaultSelection(config, selectedGroups);
-		
 	}
 
 	private void applyDefaultSelection(ViewState config, Collection<Group<?, ?>> selectedGroups) {
@@ -487,18 +646,19 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		
 		// By default, disable colocation/coexpression networks.
 		Set<String> retainedGroups = new HashSet<>();
+		
 		for (Group<?, ?> group : selectedGroups) {
 			group = config.getGroup(group.getName());
-			if (group == null) {
+			
+			if (group == null)
 				continue;
-			}
 			
 			String code = group.getCode();
 			boolean enabled = !targetGroups.remove(code);
 			
-			if (enabled) {
+			if (enabled)
 				retainedGroups.add(code);
-			}
+			
 			config.setEnabled(group, enabled);
 		}
 		
@@ -511,15 +671,11 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		}
 	}
 
-	private static String getNextNetworkName(Organism organism) {
+	public static String getNextNetworkName(Organism organism) {
 		long id = organism.getId();
-		int sequenceNumber;
-		if (sequenceNumbers.containsKey(id)) {
-			sequenceNumber = sequenceNumbers.get(id) + 1;
-		} else {
-			sequenceNumber = 1;
-		}
+		int sequenceNumber = sequenceNumbers.containsKey(id) ? sequenceNumbers.get(id) + 1 : 1;
 		sequenceNumbers.put(id, sequenceNumber);
+		
 		return String.format(Strings.retrieveRelatedGenesNetworkName_label, organism.getName(), sequenceNumber);
 	}
 
@@ -528,9 +684,11 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 			IMania mania = new Mania2(new DataCache(new MemObjectCache(data.getObjectCache(NullProgressReporter.instance(), false))));
 			RelatedGenesEngineResponseDto result = mania.findRelated(request);
 			networkUtils.normalizeNetworkWeights(result);
+			
 			return result;
 		} catch (ApplicationException e) {
 			LogUtils.log(getClass(), e);
+			
 			return null;
 		}
 	}
