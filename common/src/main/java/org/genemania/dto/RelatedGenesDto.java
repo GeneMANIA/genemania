@@ -43,8 +43,8 @@ public class RelatedGenesDto implements Serializable {
 	// __[attributes]__________________________________________________________
 	//in
 	private long organismId;
-	private List<Long> networkIds = new ArrayList<Long>();
-	private List<Long> postiveNodeIds = new ArrayList<Long>();
+	private List<Long> networkIds = new ArrayList<>();
+	private List<Long> postiveNodeIds = new ArrayList<>();
 	private CombiningMethod method = CombiningMethod.AUTOMATIC;
 	private int threshold;
 	// out
