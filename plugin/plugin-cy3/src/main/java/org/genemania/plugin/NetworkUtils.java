@@ -476,24 +476,27 @@ public class NetworkUtils {
 				if (network == null)
 					continue;
 				
-				List<Interaction> interactions = new ArrayList<>();
+				List<Interaction> interactionList = new ArrayList<>();
 				
 				for (ResultInteraction resInter : resNet.getResultInteractions()) {
 					Interaction interaction = resInter.getInteraction();
-	//				Node fromNode = nodeMediator.getNode(resInter.getNodeVO1().getId(), organism.getId());
-	//				Node toNode = nodeMediator.getNode(resInter.getNodeVO2().getId(), organism.getId());
-	//				Interaction interaction = new Interaction(fromNode, toNode, (float) resInter.getWeight(), null);
-					interactions.add(interaction);
+					interactionList.add(interaction);
+					// Fix the interaction Nodes: These Nodes (from ResultGene) have all attributes set,
+					// whereas the ones from interaction.getFromNode() don't!
+					Node fromNode = resInter.getFromGene().getGene().getNode();
+					Node toNode = resInter.getToGene().getGene().getNode();
+					interaction.setFromNode(fromNode);
+					interaction.setToNode(toNode);
 				}
 				
-				network.setInteractions(interactions);
+				network.setInteractions(interactionList);
 			}
 		}
 	}
 
 	public Map<Gene, Double> computeGeneScores(List<NodeDto> nodes, Map<Long, Gene> queryGenes, Organism organism,
 			NodeMediator nodeMediator) {
-		// Figure out what the unique set of nodes is so we don't end up creating model objects unnecessarily.
+		// Figure out what the unique set of nodes so we don't end up creating model objects unnecessarily.
 		Map<Long, NodeDto> uniqueNodes = new HashMap<>();
 		
 		for (NodeDto nodeDto : nodes)
@@ -531,16 +534,44 @@ public class NetworkUtils {
 		double maxScore = 0;
 		Map<Gene, Double> scores = new HashMap<>();
 		
+		// To get the unique set of nodes so we don't end up keeping duplicate objects unnecessarily.
+//		Map<Long, Node> uniqueNodes = new HashMap<>();
+//		Map<Long, Gene> uniqueGenes = new HashMap<>();
+		
 		for (ResultGene resGene : resultGenes) {
 			Gene gene = resGene.getGene();
 			
 			if (gene == null)
 				continue;
 			
-			// Also set genes to each node, because this relationship is missing
-			// when the data comes from the web service
-			Node node = gene.getNode();
-			
+//			gene = uniqueGenes.get(gene.getId());
+//			
+//			if (gene == null) {
+//				gene = resGene.getGene();
+//				uniqueGenes.put(gene.getId(), gene);
+//			} else {
+//				resGene.setGene(gene);
+//				System.out.println("\n>>>>>> DUPLICATE GENE: " + gene);
+//			}
+//			
+//			Node node = uniqueNodes.get(gene.getNode().getId());
+//			
+//			if (node == null) {
+//				node = gene.getNode();
+//				uniqueNodes.put(node.getId(), node);
+//			} else {
+//				gene.setNode(node);
+//				System.out.println("\n>>>>>> DUPLICATE NODE: " + node);
+//			}
+//			
+//			// Also set genes to each Node, because this relationship is missing
+//			// when the data comes from the web service
+//			Collection<Gene> geneList = node.getGenes();
+//			
+//			if (geneList == null)
+//				node.setGenes(geneList = new ArrayList<>());
+//			
+//			geneList.add(gene);
 			
 			double score = resGene.getScore();
 			maxScore = Math.max(maxScore, score);
