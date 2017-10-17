@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.selection;
 
 import java.util.HashMap;
@@ -25,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.genemania.domain.Attribute;
 import org.genemania.domain.Gene;
 import org.genemania.domain.Node;
@@ -43,16 +45,16 @@ import org.genemania.plugin.view.NetworkChangeListener;
 import org.genemania.plugin.view.NetworkGroupDetailPanel;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 
-public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> implements NetworkSelectionManager<NETWORK, NODE, EDGE> {
+public abstract class AbstractNetworkSelectionManager implements NetworkSelectionManager {
 	
 	protected final Map<Object, ViewState> networkOptions;
-	protected final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
-	protected GeneMania<NETWORK, NODE, EDGE> plugin;
+	protected final CytoscapeUtils cytoscapeUtils;
+	protected GeneMania plugin;
 
 	protected String selectedNetworkId;
 	protected boolean selectionListenerEnabled;
 
-	public AbstractNetworkSelectionManager(CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils) {
+	public AbstractNetworkSelectionManager(CytoscapeUtils cytoscapeUtils) {
 	    this.cytoscapeUtils = cytoscapeUtils;
 	    
 	    networkOptions = new HashMap<Object, ViewState>();
@@ -60,7 +62,7 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 	}
 
 	@Override
-	public void setGeneMania(GeneMania<NETWORK, NODE, EDGE> geneMania) {
+	public void setGeneMania(GeneMania geneMania) {
 		plugin = geneMania;
 	}
 	
@@ -75,26 +77,26 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 	}
 	
 	@Override
-	public void addNetworkConfiguration(NETWORK network, ViewState config) {
-		NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(network);
+	public void addNetworkConfiguration(CyNetwork network, ViewState config) {
+		NetworkProxy proxy = cytoscapeUtils.getNetworkProxy(network);
 		networkOptions.put(proxy.getIdentifier(), config);
 	}
 
 	@Override
-	public ViewState getNetworkConfiguration(NETWORK network) {
-		NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(network);
+	public ViewState getNetworkConfiguration(CyNetwork network) {
+		NetworkProxy proxy = cytoscapeUtils.getNetworkProxy(network);
 		return networkOptions.get(proxy.getIdentifier());
 	}
 	
 	@Override
-	public boolean isGeneManiaNetwork(NETWORK network) {
-		NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(network);
+	public boolean isGeneManiaNetwork(CyNetwork network) {
+		NetworkProxy proxy = cytoscapeUtils.getNetworkProxy(network);
 		return networkOptions.get(proxy.getIdentifier()) != null;
 	}
 	
 	@Override
-	public NetworkChangeListener<NETWORK, NODE, EDGE> createChangeListener(Group<?, ?> group) {
-		return new NetworkChangeListener<NETWORK, NODE, EDGE>(group, networkOptions, cytoscapeUtils);
+	public NetworkChangeListener createChangeListener(Group<?, ?> group) {
+		return new NetworkChangeListener(group, networkOptions, cytoscapeUtils);
 	}
 	
 	@Override
@@ -117,12 +119,13 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 				
 				boolean listenerState = selectionListenerEnabled;
 				selectionListenerEnabled = false;
-				NETWORK network = cytoscapeUtils.getCurrentNetwork();
-				NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(network);
+				CyNetwork network = cytoscapeUtils.getCurrentNetwork();
+				NetworkProxy proxy = cytoscapeUtils.getNetworkProxy(network);
+				
 				for (Gene gene : event.items) {
 					Node node = gene.getNode();
-					NODE cyNode = cytoscapeUtils.getNode(network, node, null);
-					NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(cyNode, network);
+					CyNode cyNode = cytoscapeUtils.getNode(network, node, null);
+					NodeProxy nodeProxy = cytoscapeUtils.getNodeProxy(cyNode, network);
 					options.setGeneHighlighted(nodeProxy.getIdentifier(), event.selected);
 					proxy.setSelectedNode(cyNode, event.selected);
 				}
@@ -133,14 +136,14 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 	}
 	
 	@Override
-	public boolean checkSelectionState(EDGE referenceEdge, Set<EDGE> selectedEdges, NETWORK network) {
-		EdgeProxy<EDGE, NODE> referenceEdgeProxy = cytoscapeUtils.getEdgeProxy(referenceEdge, network);
+	public boolean checkSelectionState(CyEdge referenceEdge, Set<CyEdge> selectedEdges, CyNetwork network) {
+		EdgeProxy referenceEdgeProxy = cytoscapeUtils.getEdgeProxy(referenceEdge, network);
 		String target = referenceEdgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
 		if (target == null) {
 			return false;
 		}
-		for (EDGE edge : selectedEdges) {
-			EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, network);
+		for (CyEdge edge : selectedEdges) {
+			EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, network);
 			String id = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
 			if (id == null) {
 				continue;
@@ -153,22 +156,22 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 	}
 
 	@Override
-	public SelectionListener<Group<?, ?>> createNetworkListSelectionListener(final BaseInfoPanel<Group<?, ?>, NetworkGroupDetailPanel<NETWORK, NODE, EDGE>> panel, final ViewState options) {
+	public SelectionListener<Group<?, ?>> createNetworkListSelectionListener(final BaseInfoPanel<Group<?, ?>, NetworkGroupDetailPanel> panel, final ViewState options) {
 		return new SelectionListener<Group<?, ?>>() {
 			@Override
 			public void selectionChanged(SelectionEvent<Group<?, ?>> event) {
 				if (!selectionListenerEnabled)
 					return;
 				
-				NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
-				NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
+				CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
+				NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
 				ViewState options = networkOptions.get(networkProxy.getIdentifier());
 				
 				if (options == null)
 					return;
 				
-				Set<EDGE> enabledEdges = new HashSet<EDGE>();
-				Set<EDGE> disabledEdges = new HashSet<EDGE>();
+				Set<CyEdge> enabledEdges = new HashSet<>();
+				Set<CyEdge> disabledEdges = new HashSet<>();
 				
 				Map<String, Boolean> selectionChanges = new HashMap<String, Boolean>();
 				
@@ -177,8 +180,8 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 					options.setGroupHighlighted(group, event.selected);
 				}
 				
-				for (EDGE edge : networkProxy.getEdges()) {
-					EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
+				for (CyEdge edge : networkProxy.getEdges()) {
+					EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
 					String name = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
 					Boolean selectionState = selectionChanges.get(name);
 					if (selectionState == null) {
@@ -207,8 +210,8 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 				selectionListenerEnabled = listenerState;
 
 				if (networkProxy.getSelectedEdges().size() == 0) {
-					for (EDGE edge : networkProxy.getEdges()) {
-						EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
+					for (CyEdge edge : networkProxy.getEdges()) {
+						EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
 						String name = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
 						Group<?, ?> group = options.getGroup(name);
 						if (options.isEnabled(group)) {
@@ -233,8 +236,8 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 				if (!selectionListenerEnabled)
 					return;
 				
-				NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
-				NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
+				CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
+				NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
 				ViewState options = networkOptions.get(networkProxy.getIdentifier());
 				
 				if (options == null)
@@ -255,10 +258,11 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 					}
 				}
 				
-				Set<EDGE> enabledEdges = new HashSet<EDGE>();
-				Set<EDGE> disabledEdges = new HashSet<EDGE>();
-				for (EDGE edge : networkProxy.getEdges()) {
-					EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
+				Set<CyEdge> enabledEdges = new HashSet<>();
+				Set<CyEdge> disabledEdges = new HashSet<>();
+				
+				for (CyEdge edge : networkProxy.getEdges()) {
+					EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
 					
 					@SuppressWarnings("unchecked")
 					List<String> names = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_NAMES_ATTRIBUTE, List.class);
@@ -292,11 +296,11 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 					edgeProxy.setAttribute(CytoscapeUtils.HIGHLIGHT_ATTRIBUTE, selectionState ? 1 : 0);
 				}
 				
-				Set<NODE> enabledNodes = new HashSet<NODE>();
-				Set<NODE> disabledNodes = new HashSet<NODE>();
+				Set<CyNode> enabledNodes = new HashSet<>();
+				Set<CyNode> disabledNodes = new HashSet<>();
 				
-				for (NODE node : networkProxy.getNodes()) {
-					NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
+				for (CyNode node : networkProxy.getNodes()) {
+					NodeProxy nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
 					String name = nodeProxy.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
 					
 					if (name == null)
@@ -329,8 +333,8 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 				selectionListenerEnabled = listenerState;
 
 				if (networkProxy.getSelectedEdges().size() == 0) {
-					for (EDGE edge : networkProxy.getEdges()) {
-						EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
+					for (CyEdge edge : networkProxy.getEdges()) {
+						EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
 						String name = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
 						Group<?, ?> group = options.getGroup(name);
 						
@@ -349,15 +353,16 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 	}
 
 	@Override
-	public SelectionListener<Gene> createFunctionListSelectionListener(FunctionInfoPanel functionPanel, SearchResult options) {
+	public SelectionListener<Gene> createFunctionListSelectionListener(FunctionInfoPanel functionPanel,
+			SearchResult options) {
 		return new SelectionListener<Gene>() {
 			@Override
 			public void selectionChanged(SelectionEvent<Gene> event) {
 				if (!selectionListenerEnabled)
 					return;
 				
-				NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
-				NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
+				CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
+				NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
 				ViewState options = networkOptions.get(networkProxy.getIdentifier());
 				
 				if (options == null)
@@ -375,8 +380,8 @@ public abstract class AbstractNetworkSelectionManager<NETWORK, NODE, EDGE> imple
 				networkProxy.unselectAllEdges();
 				networkProxy.unselectAllNodes();
 				
-				for (NODE node : networkProxy.getNodes()) {
-					NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
+				for (CyNode node : networkProxy.getNodes()) {
+					NodeProxy nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
 					Long nodeId = options.getNodeId(nodeProxy.getIdentifier());
 					
 					if (selectedNodes.contains(nodeId))

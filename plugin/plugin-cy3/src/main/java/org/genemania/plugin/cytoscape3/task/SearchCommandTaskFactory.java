@@ -18,9 +18,6 @@
  */
 package org.genemania.plugin.cytoscape3.task;
 
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
@@ -31,17 +28,17 @@ import org.genemania.plugin.cytoscape.CytoscapeUtils;
 
 public class SearchCommandTaskFactory extends AbstractTaskFactory {
 
-	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
-	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
+	private final GeneMania plugin;
+	private final RetrieveRelatedGenesController controller;
 	private final NetworkUtils networkUtils;
-	private final CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
 
 	public SearchCommandTaskFactory(
-			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
-			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller,
+			GeneMania plugin,
+			RetrieveRelatedGenesController controller,
 			NetworkUtils networkUtils,
-			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, 
+			CytoscapeUtils cytoscapeUtils, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;

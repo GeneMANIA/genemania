@@ -27,7 +27,8 @@ import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.util.ProgressReporter;
 
-public interface GeneMania<NETWORK, NODE, EDGE> {
+public interface GeneMania {
+	
 	public static final String SCHEMA_VERSION = "1.1"; //$NON-NLS-1$
 	public static final String DEFAULT_NAMESPACE = "user"; //$NON-NLS-1$
 
@@ -35,19 +36,27 @@ public interface GeneMania<NETWORK, NODE, EDGE> {
 	public static final String SETTINGS_PROPERTY = "genemania.plugin.settings"; //$NON-NLS-1$
 	
 	void showResults();
+
 	void hideResults();
 
-	NetworkSelectionManager<NETWORK, NODE, EDGE> getNetworkSelectionManager();
+	NetworkSelectionManager getNetworkSelectionManager();
+
 	DataSetManager getDataSetManager();
 
 	boolean initializeData(ProgressReporter progress, boolean reportErrors) throws ApplicationException;
+
 	void initializeData(Window parent, boolean reportErrors);
-	void loadDataSet(File path, ProgressReporter progress, boolean promptToUpdate, boolean reportErrors) throws ApplicationException;
+
+	void loadDataSet(File path, ProgressReporter progress, boolean promptToUpdate, boolean reportErrors)
+			throws ApplicationException;
 
 	void applyOptions(ViewState options);
+
 	void updateSelection(ViewState options);
-	
+
 	void handleCheck();
+
 	void handleDownload();
+
 	void handleSwitch();
 }

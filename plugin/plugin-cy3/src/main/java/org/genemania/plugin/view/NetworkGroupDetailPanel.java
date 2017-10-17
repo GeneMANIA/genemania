@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.view;
 
 import java.awt.Color;
@@ -45,7 +44,7 @@ import org.genemania.plugin.view.components.ToggleDetailPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
-public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPanel<Group<?, ?>> {
+public class NetworkGroupDetailPanel extends ToggleDetailPanel<Group<?, ?>> {
 	
 	private final Group<?, ?> group;
 	private final NetworkInfoPanel networksPanel;
@@ -60,8 +59,8 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 
 	public NetworkGroupDetailPanel(
 			final Group<?, ?> group,
-			final NetworkGroupInfoPanel<NETWORK, NODE, EDGE> groupInfoPanel,
-			final GeneMania<NETWORK, NODE, EDGE> plugin,
+			final NetworkGroupInfoPanel groupInfoPanel,
+			final GeneMania plugin,
 			final NetworkUtils networkUtils,
 			final UiUtils uiUtils,
 			final boolean enabledByDefault,
@@ -73,8 +72,8 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 		this.networkUtils = networkUtils;
 		this.data = plugin.getDataSetManager().getDataSet();
 
-		networksPanel = new NetworkInfoPanel(data, group, groupInfoPanel, networkUtils, uiUtils, plugin, options);
-		NetworkSelectionManager<NETWORK, NODE, EDGE> manager = plugin.getNetworkSelectionManager();
+		networksPanel = new NetworkInfoPanel(data, group, groupInfoPanel, networkUtils, uiUtils, options);
+		NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
 		networksPanel.addSelectionListener(manager.createNetworkSelectionListener());
 		
 		Color textColor = group.hasInteractions() ? SystemColor.textText : SystemColor.textInactiveText;
@@ -122,6 +121,7 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 		Color color = networkUtils.getNetworkColor(data, group);
 		g.setColor(color);
 		int width = (int) ((getWidth() - barXOffset) * getWeight() / 100d);
+		
 		for (int y = 0; y < 3; y++) {
 			int yOffset = barYOffset - y - 2;
 			g.drawLine(barXOffset, yOffset, width + barXOffset, yOffset);
@@ -156,12 +156,13 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 		}
 		
 		for (Component component : networksPanel.getComponents()) {
-			if (!(component instanceof NetworkDetailPanel)) {
+			if (!(component instanceof NetworkDetailPanel))
 				continue;
-			}
+			
 			NetworkDetailPanel panel = (NetworkDetailPanel) component;
 			panel.showDetails(show, depth - 1);
 		}
+		
 		invalidate();
 	}
 

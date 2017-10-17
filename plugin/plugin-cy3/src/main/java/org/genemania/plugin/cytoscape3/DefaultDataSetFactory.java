@@ -29,14 +29,15 @@ import org.genemania.plugin.view.util.UiUtils;
  * TODO: This class exists because Felix's classloader can't seem to create
  * a LuceneDataSetFactory as a bean within this bundle.
  */
-public class DefaultDataSetFactory<NETWORK, NODE, EDGE> extends
-		LuceneDataSetFactory<NETWORK, NODE, EDGE> {
+public class DefaultDataSetFactory extends LuceneDataSetFactory {
 
-	public DefaultDataSetFactory(DataSetManager dataSetManager,
-			UiUtils uiUtils, FileUtils fileUtils,
-			CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
-			TaskDispatcher taskDispatcher) {
+	public DefaultDataSetFactory(
+			DataSetManager dataSetManager,
+			UiUtils uiUtils,
+			FileUtils fileUtils,
+			CytoscapeUtils cytoscapeUtils,
+			TaskDispatcher taskDispatcher
+	) {
 		super(dataSetManager, uiUtils, fileUtils, cytoscapeUtils, taskDispatcher);
 	}
-
 }

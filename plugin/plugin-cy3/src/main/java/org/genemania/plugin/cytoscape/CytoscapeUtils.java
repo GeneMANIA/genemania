@@ -25,6 +25,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.genemania.domain.Node;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.model.Group;
@@ -36,7 +39,7 @@ import org.genemania.plugin.proxies.NetworkProxy;
 import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 
-public interface CytoscapeUtils<NETWORK, NODE, EDGE> {
+public interface CytoscapeUtils {
 	
 	static final String LOG_SCORE_ATTRIBUTE = "log score"; //$NON-NLS-1$
 	static final String SCORE_ATTRIBUTE = "score"; //$NON-NLS-1$
@@ -80,45 +83,44 @@ public interface CytoscapeUtils<NETWORK, NODE, EDGE> {
 	
 	static final Color QUERY_COLOR = new Color(0, 0, 0);
 	static final Color RESULT_COLOR = new Color(159, 159, 159);
-	
-	void expandAttributes(NETWORK cyNetwork, ViewState options,
-			List<String> attributes);
 
-	NODE getNode(NETWORK network, Node node, String preferredSymbol);
+	void expandAttributes(CyNetwork cyNetwork, ViewState options, List<String> attributes);
 
-	void registerSelectionListener(NETWORK cyNetwork, NetworkSelectionManager<NETWORK, NODE, EDGE> manager, GeneMania<NETWORK, NODE, EDGE> plugin);
+	CyNode getNode(CyNetwork network, Node node, String preferredSymbol);
 
-	void performLayout(NETWORK network);
+	void registerSelectionListener(CyNetwork cyNetwork, NetworkSelectionManager manager, GeneMania plugin);
 
-	void applyVisualization(NETWORK network,
-			Map<Long, Double> filterGeneScores,
-			Map<String, Color> computeColors, double[] extrema);
+	void performLayout(CyNetwork network);
 
-	NETWORK createNetwork(String nextNetworkName, String dataVersion, SearchResult result, ViewStateBuilder options,
+	void applyVisualization(CyNetwork network, Map<Long, Double> filterGeneScores, Map<String, Color> computeColors,
+			double[] extrema);
+
+	CyNetwork createNetwork(String nextNetworkName, String dataVersion, SearchResult result, ViewStateBuilder options,
 			EdgeAttributeProvider provider);
 
-	void setHighlight(ViewState config, Group<?, ?> group,
-			NETWORK network, boolean selected);
+	void setHighlight(ViewState config, Group<?, ?> group, CyNetwork network, boolean selected);
 
-	void setHighlighted(ViewState options, NETWORK cyNetwork, boolean highlighted);
-	
-	NETWORK getCurrentNetwork();
-	
+	void setHighlighted(ViewState options, CyNetwork network, boolean highlighted);
+
+	CyNetwork getCurrentNetwork();
+
 	void repaint();
 
-	void updateVisualStyles(NETWORK network);
-	
-	void maximize(NETWORK network);
+	void updateVisualStyles(CyNetwork network);
+
+	void maximize(CyNetwork network);
 
 	Frame getFrame();
 
-	Set<NETWORK> getNetworks();
-	
-	NetworkProxy<NETWORK, NODE, EDGE> getNetworkProxy(NETWORK network);
-	NodeProxy<NODE> getNodeProxy(NODE node, NETWORK network);
-	EdgeProxy<EDGE, NODE> getEdgeProxy(EDGE edge, NETWORK network);
-	
-	void handleNetworkPostProcessing(NETWORK network);
+	Set<CyNetwork> getNetworks();
+
+	NetworkProxy getNetworkProxy(CyNetwork network);
+
+	NodeProxy getNodeProxy(CyNode node, CyNetwork network);
+
+	EdgeProxy getEdgeProxy(CyEdge edge, CyNetwork network);
+
+	void handleNetworkPostProcessing(CyNetwork network);
 
 	Properties getGlobalProperties();
 }

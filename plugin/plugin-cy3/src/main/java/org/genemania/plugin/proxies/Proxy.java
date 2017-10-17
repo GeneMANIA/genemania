@@ -18,10 +18,16 @@
  */
 package org.genemania.plugin.proxies;
 
+@Deprecated
 public interface Proxy<T> {
+	
 	String getIdentifier();
+
 	T getProxied();
+
 	<U> void setAttribute(String name, U value);
+
 	<U> U getAttribute(String name, Class<U> type);
+
 	Class<?> getAttributeType(String name);
 }

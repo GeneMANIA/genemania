@@ -24,9 +24,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.cytoscape.application.swing.CySwingApplication;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.FinishStatus;
 import org.cytoscape.work.ObservableTask;
@@ -50,13 +47,13 @@ public class OrganismManager {
 	
 	private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 	
-	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
+	private final GeneMania plugin;
 	private final CyServiceRegistrar serviceRegistrar;
 	
 	private final Object lock = new Object();
 	public Object get;
 
-	public OrganismManager(GeneMania<CyNetwork, CyNode, CyEdge> plugin, CyServiceRegistrar serviceRegistrar) {
+	public OrganismManager(GeneMania plugin, CyServiceRegistrar serviceRegistrar) {
 		this.plugin = plugin;
 		this.serviceRegistrar = serviceRegistrar;
 		

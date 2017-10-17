@@ -83,17 +83,17 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 	
 	private CyNetwork network;
 	
-	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
-	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
+	private final GeneMania plugin;
+	private final RetrieveRelatedGenesController controller;
 	private final NetworkUtils networkUtils;
-	private final CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
 
 	public SearchCommandTask(
-			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
-			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller,
+			GeneMania plugin,
+			RetrieveRelatedGenesController controller,
 			NetworkUtils networkUtils,
-			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, 
+			CytoscapeUtils cytoscapeUtils, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
@@ -149,7 +149,7 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 		cytoscapeUtils.performLayout(network);
 		cytoscapeUtils.maximize(network);
 		
-		NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
+		NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
 		ViewState options = selManager.getNetworkConfiguration(network);
 		plugin.applyOptions(options);
 		plugin.showResults();
@@ -187,7 +187,7 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 //		cytoscapeUtils.performLayout(network);
 //		cytoscapeUtils.maximize(network);
 //		
-//		NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
+//		NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
 //		ViewState options = selManager.getNetworkConfiguration(network);
 //		plugin.applyOptions(options);
 //		plugin.showResults();
@@ -245,7 +245,7 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 //			// Set up edge cache
 ////			progress.setStatus(Strings.retrieveRelatedGenes_status6);
 ////			progress.setProgress(stage++);
-//			NetworkSelectionManager<CyNetwork, CyNode, CyEdge> manager = plugin.getNetworkSelectionManager();
+//			NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
 //			
 //			computeGraphCache(network, options, builder, selectedGroups);
 //			

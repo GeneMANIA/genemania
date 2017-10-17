@@ -94,7 +94,7 @@ import org.genemania.plugin.proxies.NetworkProxy;
 import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 
-public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode, CyEdge> implements CytoscapeUtils<CyNetwork, CyNode, CyEdge>, RowsSetListener {
+public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements CytoscapeUtils, RowsSetListener {
 
 	private final CySwingApplication application;
 	private final CyApplicationManager applicationManager;
@@ -222,7 +222,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	
 	@Override
 	public void setHighlighted(final ViewState config, final CyNetwork network, final boolean visible) {
-		final NetworkProxy<CyNetwork, CyNode, CyEdge> networkProxy = getNetworkProxy(network);
+		final NetworkProxy networkProxy = getNetworkProxy(network);
 		final Collection<CyNetworkView> netViews = viewManager.getNetworkViews(network);
 		
 		for (final CyEdge edge : networkProxy.getEdges()) {
@@ -346,8 +346,8 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	@Override
 	public void registerSelectionListener(
 			CyNetwork cyNetwork,
-			NetworkSelectionManager<CyNetwork, CyNode, CyEdge> manager,
-			GeneMania<CyNetwork, CyNode, CyEdge> plugin
+			NetworkSelectionManager manager,
+			GeneMania plugin
 	) {
 		networksByNodeTable.put(cyNetwork.getDefaultNodeTable(), new WeakReference<>(cyNetwork));
 		networksByEdgeTable.put(cyNetwork.getDefaultEdgeTable(), new WeakReference<>(cyNetwork));
@@ -418,17 +418,17 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	}
 	
 	@Override
-	protected NetworkProxy<CyNetwork, CyNode, CyEdge> createNetworkProxy(CyNetwork network) {
+	protected NetworkProxy createNetworkProxy(CyNetwork network) {
 		return new NetworkProxyImpl(network, eventHelper);
 	}
 	
 	@Override
-	protected NodeProxy<CyNode> createNodeProxy(CyNode node, CyNetwork network) {
+	protected NodeProxy createNodeProxy(CyNode node, CyNetwork network) {
 		return new NodeProxyImpl(node, network);
 	}
 	
 	@Override
-	protected EdgeProxy<CyEdge, CyNode> createEdgeProxy(CyEdge edge, CyNetwork network) {
+	protected EdgeProxy createEdgeProxy(CyEdge edge, CyNetwork network) {
 		return new EdgeProxyImpl(edge, network);
 	}
 	
@@ -498,30 +498,35 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 	@Override
 	protected CyEdge getEdge(String id, CyNetwork network) {
 		Map<String, Reference<CyEdge>> edgeMap = edges.get(network);
+		
 		if (edgeMap == null) {
-			if (!isGeneManiaNetwork(network)) {
+			if (!isGeneManiaNetwork(network))
 				return null;
-			}
+			
 			edgeMap = cacheEdges(network);
 			edges.put(network, edgeMap);
 		}
 		Reference<CyEdge> reference = edgeMap.get(id);
-		if (reference == null) {
+		
+		if (reference == null)
 			return null;
-		}
+		
 		return reference.get();
 	}
 
 	private Map<String, Reference<CyEdge>> cacheEdges(CyNetwork network) {
 		HashMap<String, Reference<CyEdge>> edges = new HashMap<>();
+		
 		for (CyEdge edge : network.getEdgeList()) {
 			CyRow row = network.getRow(edge);
-			if (row.get(MAX_WEIGHT_ATTRIBUTE, Double.class) == null) {
+			
+			if (row.get(MAX_WEIGHT_ATTRIBUTE, Double.class) == null)
 				continue;
-			}
+			
 			String name = row.get(CyNetwork.NAME, String.class);
 			edges.put(name, new WeakReference<>(edge));
 		}
+		
 		return edges;
 	}
 
@@ -532,21 +537,23 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 
 	CyNetworkView getView(CyNetwork network) {
 		Reference<CyNetworkView> reference = networkViews.get(network);
+		
 		if (reference == null) {
 			CyNetworkView view = viewFactory.createNetworkView(network);
 			networkViews.put(network, new WeakReference<>(view));
 			return view;
 		}
+		
 		return reference.get();
 	}
 	
-	public class SelectionHandler extends SelectionDelegate<CyNetwork, CyNode, CyEdge> {
+	public class SelectionHandler extends SelectionDelegate {
 
 		private RowsSetEvent event;
 		private Class<? extends CyIdentifiable> type;
 
-		public SelectionHandler(NetworkSelectionManager<CyNetwork, CyNode, CyEdge> manager,
-				GeneMania<CyNetwork, CyNode, CyEdge> plugin) {
+		public SelectionHandler(NetworkSelectionManager manager,
+				GeneMania plugin) {
 			super(true, null, manager, plugin, CytoscapeUtilsImpl.this);
 		}
 
@@ -573,27 +580,29 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 			
 			if (type.equals(CyNode.class)) {
 				for (RowSetRecord record : event.getPayloadCollection()) {
-					if (!record.getColumn().equals(CyNetwork.SELECTED)) {
+					if (!record.getColumn().equals(CyNetwork.SELECTED))
 						continue;
-					}
+					
 					boolean selected = (Boolean) record.getValue();
 					String id = record.getRow().get(CyNetwork.NAME, String.class);
 					CyNode node = getNode(id, network);
-					NodeProxy<CyNode> nodeProxy = getNodeProxy(node, network);
+					NodeProxy nodeProxy = getNodeProxy(node, network);
 					
 					String name = nodeProxy.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
 					options.setGeneHighlighted(name, selected);
 				}
 			} else if (type.equals(CyEdge.class)) {
-				NetworkProxy<CyNetwork, CyNode, CyEdge> networkProxy = getNetworkProxy(network);
+				NetworkProxy networkProxy = getNetworkProxy(network);
 				Set<CyEdge> previousSelection = networkProxy.getSelectedEdges();
+				
 				for (RowSetRecord record : event.getPayloadCollection()) {
-					if (!record.getColumn().equals(CyNetwork.SELECTED)) {
+					if (!record.getColumn().equals(CyNetwork.SELECTED))
 						continue;
-					}
+					
 					boolean selected = (Boolean) record.getValue();
 					String id = record.getRow().get(CyNetwork.NAME, String.class);
 					CyEdge edge = getEdge(id, network);
+					
 					if (selected || manager.checkSelectionState(edge, previousSelection, network)) {
 						String groupName = network.getRow(edge).get(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
 						Group<?, ?> group = options.getGroup(groupName);
@@ -603,7 +612,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils<CyNetwork, CyNode
 			}
 		}
 
-		public NetworkSelectionManager<CyNetwork, CyNode, CyEdge> getSelectionManager() {
+		public NetworkSelectionManager getSelectionManager() {
 			return manager;
 		}
 	}

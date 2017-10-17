@@ -39,7 +39,7 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.NetworkGroupDetailPanel;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 
-public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager<CyNetwork, CyNode, CyEdge>
+public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 										 implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener, SessionLoadedListener {
 	
 	private TaskDispatcher taskDispatcher;
@@ -48,7 +48,7 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 	private ExecutorService sessionLoadExecutor = Executors.newSingleThreadExecutor();
 
 	public NetworkSelectionManagerImpl(
-			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils,
+			CytoscapeUtils cytoscapeUtils,
 			TaskDispatcher taskDispatcher,
 			CyProperty<Properties> properties
 	) {
@@ -68,7 +68,7 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 		if (network == null) {
 			return;
 		}
-		NetworkProxy<CyNetwork, CyNode, CyEdge> networkProxy = cytoscapeUtils.getNetworkProxy(network);
+		NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(network);
 		String networkId =  networkProxy.getIdentifier();
 		handleNetworkChanged(networkId);
 	}
@@ -80,7 +80,7 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 			if (network == null) {
 				return;
 			}
-			NetworkProxy<CyNetwork, CyNode, CyEdge> networkProxy = cytoscapeUtils.getNetworkProxy(network);
+			NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(network);
 			String networkId =  networkProxy.getIdentifier();
 			handleNetworkDeleted(networkId);
 		}
@@ -105,8 +105,8 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 				GeneManiaTask task = new GeneManiaTask(Strings.sessionChangeListener_title) {
 					@Override
 					protected void runTask() throws Throwable {
-						SessionChangeDelegate<CyNetwork, CyNode, CyEdge> delegate = 
-								new SessionChangeDelegate<CyNetwork, CyNode, CyEdge>(dataSourcePath, plugin, progress, cytoscapeUtils);
+						SessionChangeDelegate delegate = 
+								new SessionChangeDelegate(dataSourcePath, plugin, progress, cytoscapeUtils);
 						delegate.invoke();
 						
 						CyNetwork currentNetwork = cytoscapeUtils.getCurrentNetwork();
@@ -121,7 +121,7 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 	
 	@Override
 	public SelectionListener<Group<?, ?>> createNetworkListSelectionListener(final BaseInfoPanel<Group<?, ?>,
-			NetworkGroupDetailPanel<CyNetwork, CyNode, CyEdge>> panel, final ViewState options) {
+			NetworkGroupDetailPanel> panel, final ViewState options) {
 		return new SelectionListener<Group<?, ?>>() {
 			@Override
 			public void selectionChanged(SelectionEvent<Group<?, ?>> event) {
@@ -129,7 +129,7 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 					return;
 				
 				CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
-				NetworkProxy<CyNetwork, CyNode, CyEdge> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
+				NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
 				ViewState options = networkOptions.get(networkProxy.getIdentifier());
 				
 				if (options == null)
@@ -146,7 +146,7 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 				}
 				
 				for (final CyEdge edge : networkProxy.getEdges()) {
-					final EdgeProxy<CyEdge, CyNode> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
+					final EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
 					final String name = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
 					final Boolean selectionState = selectionChanges.get(name);
 					
@@ -179,7 +179,7 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 					return;
 				
 				CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
-				NetworkProxy<CyNetwork, CyNode, CyEdge> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
+				NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
 				ViewState options = networkOptions.get(networkProxy.getIdentifier());
 				
 				if (options == null)
@@ -204,7 +204,7 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 				final Set<CyEdge> disabledEdges = new HashSet<CyEdge>();
 				
 				for (CyEdge edge : networkProxy.getEdges()) {
-					EdgeProxy<CyEdge, CyNode> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
+					EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
 					
 					@SuppressWarnings("unchecked")
 					List<String> names = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_NAMES_ATTRIBUTE, List.class);
@@ -239,7 +239,7 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 				Set<CyNode> disabledNodes = new HashSet<CyNode>();
 				
 				for (CyNode node : networkProxy.getNodes()) {
-					NodeProxy<CyNode> nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
+					NodeProxy nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
 					String name = nodeProxy.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
 					
 					if (name == null)

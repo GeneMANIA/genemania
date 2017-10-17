@@ -29,7 +29,9 @@ import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.genemania.plugin.proxies.Proxy;
 
+@Deprecated
 public abstract class ProxyImpl<T extends CyIdentifiable> implements Proxy<T> {
+	
 	private Reference<T> reference;
 	private Reference<CyNetwork> networkReference;
 	

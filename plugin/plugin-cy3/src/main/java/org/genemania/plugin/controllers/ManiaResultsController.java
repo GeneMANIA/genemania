@@ -30,6 +30,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.genemania.domain.GeneNamingSource;
 import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.LogUtils;
@@ -52,16 +55,16 @@ import org.genemania.plugin.view.AttributesDialog;
 import org.genemania.plugin.view.util.FileSelectionMode;
 import org.genemania.plugin.view.util.UiUtils;
 
-public class ManiaResultsController<NETWORK, NODE, EDGE> {
+public class ManiaResultsController {
 	
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 	private final DataSetManager dataSetManager;
 	private final NetworkUtils networkUtils;
 	private final UiUtils uiUtils;
 
 	public ManiaResultsController(
 			final DataSetManager dataSetManager,
-			final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			final CytoscapeUtils cytoscapeUtils,
 			final UiUtils uiUtils,
 			final NetworkUtils networkUtils
 	) {
@@ -71,7 +74,7 @@ public class ManiaResultsController<NETWORK, NODE, EDGE> {
 		this.networkUtils = networkUtils;
 	}
 	
-	public void showAttributesDialog(NETWORK cyNetwork, ViewState options) {		
+	public void showAttributesDialog(CyNetwork cyNetwork, ViewState options) {		
 		final AttributesDialog dialog =
 				new AttributesDialog(cytoscapeUtils.getFrame(), new AttributesController(), uiUtils);
 		dialog.setLocationRelativeTo(cytoscapeUtils.getFrame());
@@ -113,24 +116,25 @@ public class ManiaResultsController<NETWORK, NODE, EDGE> {
 	public void computeHighlightedNetworks(ViewState options) {
 		Set<Network<?>> highlightedNetworks = new HashSet<Network<?>>();
 		// Compute affected networks
-		NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
-		if (cyNetwork == null) {
-			return;
-		}
+		CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
 		
-		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-		Set<EDGE> selectedEdges = networkProxy.getSelectedEdges();
-		for (EDGE edge : selectedEdges) {
-			EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
+		if (cyNetwork == null)
+			return;
+		
+		NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
+		Set<CyEdge> selectedEdges = networkProxy.getSelectedEdges();
+		
+		for (CyEdge edge : selectedEdges) {
+			EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
 			Set<Network<?>> networks = options.getNetworksByEdge(edgeProxy.getIdentifier());
 			for (Network<?> network : networks) {
 				highlightedNetworks.add(network);
 			}
 		}
 
-		Set<NODE> selectedNodes = networkProxy.getSelectedNodes();
-		for (NODE node : selectedNodes) {
-			NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
+		Set<CyNode> selectedNodes = networkProxy.getSelectedNodes();
+		for (CyNode node : selectedNodes) {
+			NodeProxy nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
 			Set<Network<?>> networks = options.getNetworksByNode(nodeProxy.getIdentifier());
 			for (Network<?> network : networks) {
 				highlightedNetworks.add(network);

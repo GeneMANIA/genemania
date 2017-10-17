@@ -24,9 +24,6 @@ import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanel;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.property.CyProperty;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.genemania.plugin.AbstractGeneMania;
@@ -43,7 +40,7 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.util.ProgressReporter;
 
-public class GeneManiaImpl extends AbstractGeneMania<CyNetwork, CyNode, CyEdge> {
+public class GeneManiaImpl extends AbstractGeneMania {
 
 	private CyServiceRegistrar serviceRegistrar;
 	private CySwingApplication application;
@@ -54,14 +51,14 @@ public class GeneManiaImpl extends AbstractGeneMania<CyNetwork, CyNode, CyEdge> 
 
 	public GeneManiaImpl(
 			DataSetManager dataSetManager,
-			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils,
+			CytoscapeUtils cytoscapeUtils,
 			UiUtils uiUtils,
 			FileUtils fileUtils,
 			NetworkUtils networkUtils,
 			TaskDispatcher taskDispatcher,
 			CySwingApplication application,
 			CyServiceRegistrar serviceRegistrar,
-			NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selectionManager,
+			NetworkSelectionManager selectionManager,
 			final CyProperty<Properties> properties
 	) {
 		super(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils, taskDispatcher, selectionManager);

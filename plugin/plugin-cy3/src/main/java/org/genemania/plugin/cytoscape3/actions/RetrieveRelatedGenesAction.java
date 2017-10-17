@@ -23,9 +23,6 @@ import java.util.Map;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.genemania.plugin.FileUtils;
 import org.genemania.plugin.GeneMania;
@@ -39,13 +36,13 @@ import org.genemania.plugin.view.util.UiUtils;
 @SuppressWarnings("serial")
 public class RetrieveRelatedGenesAction extends AbstractCyAction {
 
-	private RetrieveRelatedGenesDelegate<CyNetwork, CyNode, CyEdge> delegate;
+	private RetrieveRelatedGenesDelegate delegate;
 
 	public RetrieveRelatedGenesAction(
 			Map<String, String> properties,
 			CyApplicationManager applicationManager,
-			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
-			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils,
+			GeneMania plugin,
+			CytoscapeUtils cytoscapeUtils,
 			NetworkUtils networkUtils,
 			UiUtils uiUtils,
 			FileUtils fileUtils,
@@ -54,11 +51,11 @@ public class RetrieveRelatedGenesAction extends AbstractCyAction {
 	) {
 		super(properties, applicationManager, viewManager);
 		putValue(NAME, Strings.retrieveRelatedGenes_menuLabel);
-		delegate = new RetrieveRelatedGenesDelegate<CyNetwork, CyNode, CyEdge>(
-				plugin, cytoscapeUtils, networkUtils, uiUtils, fileUtils, taskDispatcher);
+		delegate = new RetrieveRelatedGenesDelegate(plugin, cytoscapeUtils, networkUtils, uiUtils, fileUtils,
+				taskDispatcher);
 	}
 
-	public RetrieveRelatedGenesDelegate<CyNetwork, CyNode, CyEdge> getDelegate() {
+	public RetrieveRelatedGenesDelegate getDelegate() {
 		return delegate;
 	}
 	

@@ -21,6 +21,7 @@ package org.genemania.plugin.delegates;
 import java.io.File;
 import java.io.IOException;
 
+import org.cytoscape.model.CyNetwork;
 import org.genemania.exception.ApplicationException;
 import org.genemania.exception.DataStoreException;
 import org.genemania.plugin.GeneMania;
@@ -32,13 +33,14 @@ import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.util.ProgressReporter;
 
-public class SessionChangeDelegate<NETWORK, NODE, EDGE> implements Delegate {
+public class SessionChangeDelegate implements Delegate {
+	
 	private final File dataSetPath;
-	private final GeneMania<NETWORK, NODE, EDGE> plugin;
+	private final GeneMania plugin;
 	private final ProgressReporter progress;
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 
-	public SessionChangeDelegate(File dataSetPath, GeneMania<NETWORK, NODE, EDGE> plugin, ProgressReporter progress, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils) {
+	public SessionChangeDelegate(File dataSetPath, GeneMania plugin, ProgressReporter progress, CytoscapeUtils cytoscapeUtils) {
 		this.dataSetPath = dataSetPath;
 		this.plugin = plugin;
 		this.progress = progress;
@@ -55,10 +57,10 @@ public class SessionChangeDelegate<NETWORK, NODE, EDGE> implements Delegate {
 				plugin.initializeData(progress, true);
 				data = dataSetManager.getDataSet();
 			}
-			NetworkSelectionManager<NETWORK, NODE, EDGE> manager = plugin.getNetworkSelectionManager();
+			NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
 			// Reconstruct networks
-			for (NETWORK cyNetwork : cytoscapeUtils.getNetworks()) {
-				ResultReconstructor<NETWORK, NODE, EDGE> reconstructor = new ResultReconstructor<NETWORK, NODE, EDGE>(data, plugin, cytoscapeUtils);
+			for (CyNetwork cyNetwork : cytoscapeUtils.getNetworks()) {
+				ResultReconstructor reconstructor = new ResultReconstructor(data, plugin, cytoscapeUtils);
 				ViewState options = reconstructor.reconstructCache(cyNetwork, progress);
 				if (options == null) {
 					continue;

@@ -39,15 +39,15 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.RetrieveRelatedGenesDialog;
 import org.genemania.plugin.view.util.UiUtils;
 
-public class RetrieveRelatedGenesDelegate<NETWORK, NODE, EDGE> implements Delegate {
+public class RetrieveRelatedGenesDelegate implements Delegate {
 	
 	private static final long MIN_HEAP_SIZE = 900 * 1000000;
 
-	private RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> dialog;
+	private RetrieveRelatedGenesDialog dialog;
 
-	private final GeneMania<NETWORK, NODE, EDGE> plugin;
+	private final GeneMania plugin;
 	private final UiUtils uiUtils;
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 	private final NetworkUtils networkUtils;
 	private final  FileUtils fileUtils;
 	private final TaskDispatcher taskDispatcher;
@@ -56,8 +56,8 @@ public class RetrieveRelatedGenesDelegate<NETWORK, NODE, EDGE> implements Delega
 	private final Object lock = new Object();
 
 	public RetrieveRelatedGenesDelegate(
-			GeneMania<NETWORK, NODE, EDGE> plugin,
-			CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			GeneMania plugin,
+			CytoscapeUtils cytoscapeUtils,
 			NetworkUtils networkUtils,
 			UiUtils uiUtils,
 			FileUtils fileUtils,
@@ -73,13 +73,13 @@ public class RetrieveRelatedGenesDelegate<NETWORK, NODE, EDGE> implements Delega
 		dataSetManager = plugin.getDataSetManager();
     }
 	
-	public RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> getDialog() {
+	public RetrieveRelatedGenesDialog getDialog() {
 		synchronized(lock) {
 			if (dialog == null) {
-				dialog = new RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE>(
+				dialog = new RetrieveRelatedGenesDialog(
 						null,
 						false,
-						new RetrieveRelatedGenesController<NETWORK, NODE, EDGE>(plugin, cytoscapeUtils, networkUtils, taskDispatcher),
+						new RetrieveRelatedGenesController(plugin, cytoscapeUtils, networkUtils, taskDispatcher),
 						dataSetManager,
 						networkUtils,
 						uiUtils,

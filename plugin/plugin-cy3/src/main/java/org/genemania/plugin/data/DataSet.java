@@ -48,6 +48,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 public abstract class DataSet {
+	
 	public static final String USER = "user"; //$NON-NLS-1$
 	public static final String BASE = "base"; //$NON-NLS-1$
 	public static final String CACHE_PATH = "cache"; //$NON-NLS-1$
@@ -63,6 +64,7 @@ public abstract class DataSet {
 	
 	public DataSet(File path, Node root) throws SAXException {
 		this.path = path;
+		
 		try {
 			processConfiguration(root);
 		} catch (XPathExpressionException e) {

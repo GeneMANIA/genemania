@@ -31,8 +31,7 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
 import org.genemania.plugin.proxies.NetworkProxy;
 
-public class NetworkProxyImpl extends ProxyImpl<CyNetwork> implements
-		NetworkProxy<CyNetwork, CyNode, CyEdge> {
+public class NetworkProxyImpl extends ProxyImpl<CyNetwork> implements NetworkProxy {
 
 	private CyEventHelper eventHelper;
 	

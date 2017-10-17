@@ -52,9 +52,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.genemania.domain.Organism;
@@ -75,12 +72,12 @@ public class QueryBar extends JPanel {
 	
 	private Organism selectedOrganism;
 	
-	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
+	private final GeneMania plugin;
 	private final OrganismManager organismManager;
 	private final CyServiceRegistrar serviceRegistrar;
 	
 	public QueryBar(
-			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
+			GeneMania plugin,
 			OrganismManager organismManager,
 			CyServiceRegistrar serviceRegistrar
 	) {

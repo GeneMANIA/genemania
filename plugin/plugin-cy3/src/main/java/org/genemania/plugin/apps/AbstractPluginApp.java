@@ -33,6 +33,7 @@ import org.genemania.plugin.data.lucene.LuceneDataSetFactory;
 import org.genemania.plugin.parsers.TabDelimitedQueryParser;
 
 public abstract class AbstractPluginApp {
+	
 	protected void checkPath(String path) throws ApplicationException {
 		File file = new File(path);
 		if (!file.exists()) {
@@ -71,7 +72,7 @@ public abstract class AbstractPluginApp {
 
 	static DataSetManager createDataSetManager() {
 		DataSetManager dataSetManager = new DataSetManager();
-		dataSetManager.addDataSetFactory(new LuceneDataSetFactory<Object, Object, Object>(dataSetManager, null, new FileUtils(), new NullCytoscapeUtils<Object, Object, Object>(), null), Collections.emptyMap());
+		dataSetManager.addDataSetFactory(new LuceneDataSetFactory(dataSetManager, null, new FileUtils(), new NullCytoscapeUtils(), null), Collections.emptyMap());
 		return dataSetManager;
 	}
 }

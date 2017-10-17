@@ -18,5 +18,8 @@
  */
 package org.genemania.plugin.proxies;
 
-public interface NodeProxy<T> extends Proxy<T> {
+import org.cytoscape.model.CyNode;
+
+@Deprecated
+public interface NodeProxy extends Proxy<CyNode> {
 }

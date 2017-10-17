@@ -86,6 +86,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.text.NumberFormatter;
 
+import org.cytoscape.model.CyNetwork;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.AttributeGroup;
 import org.genemania.domain.InteractionNetwork;
@@ -134,7 +135,7 @@ import org.genemania.type.ScoringMethod;
 import org.genemania.util.ProgressReporter;
 
 @SuppressWarnings("serial")
-public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
+public class RetrieveRelatedGenesDialog extends JDialog {
 	
 	private JPanel dataPanel;
 	private JPanel basicPanel;
@@ -172,29 +173,29 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 	private JFormattedTextField attributeLimitTextField;
 
 	private Map<Long, List<String>> selectedGenes;
-	private RetrieveRelatedGenesController<NETWORK, NODE, EDGE> controller;
+	private RetrieveRelatedGenesController controller;
 	private DataSetManager dataSetManager;
 
 	private final NetworkUtils networkUtils;
 	private final UiUtils uiUtils;
 
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 
 	private final FileUtils fileUtils;
 	private final TaskDispatcher taskDispatcher;
-	private final GeneMania<NETWORK, NODE, EDGE> plugin;
+	private final GeneMania plugin;
 
 	public RetrieveRelatedGenesDialog(
 			Frame owner,
 			boolean modality,
-			RetrieveRelatedGenesController<NETWORK, NODE, EDGE> controller,
+			RetrieveRelatedGenesController controller,
 			DataSetManager dataSetManager,
 			NetworkUtils networkUtils,
 			UiUtils uiUtils,
-			CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			CytoscapeUtils cytoscapeUtils,
 			FileUtils fileUtils,
 			TaskDispatcher taskDispatcher,
-			GeneMania<NETWORK, NODE, EDGE> plugin
+			GeneMania plugin
 	) {
     	super(owner, Strings.default_title, modality);
     	this.controller = controller;
@@ -222,7 +223,7 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 		});
 
 		final JRootPane root = getRootPane();
-		final RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> dialog = this;
+		final RetrieveRelatedGenesDialog dialog = this;
 		final AbstractAction action = new AbstractAction("Close") { //$NON-NLS-1$
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -920,13 +921,13 @@ public class RetrieveRelatedGenesDialog<NETWORK, NODE, EDGE> extends JDialog {
 	private void handleStartButton() {
 		Query query = getQuery();
 		Collection<Group<?, ?>> groups = selectionPanel.getSelectedGroups();
-		NETWORK cyNetwork = controller.runMania(this, query, groups, true);
+		CyNetwork cyNetwork = controller.runMania(this, query, groups, true);
 
 		cytoscapeUtils.handleNetworkPostProcessing(cyNetwork);
 		cytoscapeUtils.performLayout(cyNetwork);
 		cytoscapeUtils.maximize(cyNetwork);
 		
-		NetworkSelectionManager<NETWORK, NODE, EDGE> manager = plugin.getNetworkSelectionManager();
+		NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
 		ViewState options = manager.getNetworkConfiguration(cyNetwork);
 		plugin.applyOptions(options);
 		plugin.showResults();

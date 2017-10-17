@@ -51,7 +51,8 @@ import org.genemania.util.ChildProgressReporter;
 import org.genemania.util.ProgressReporter;
 import org.xml.sax.SAXException;
 
-public abstract class AbstractGeneMania<NETWORK, NODE, EDGE> implements GeneMania<NETWORK, NODE, EDGE> {
+public abstract class AbstractGeneMania implements GeneMania {
+	
 	protected static final String SETTINGS_DIRECTORY = "genemania_plugin"; //$NON-NLS-1$
 
 	public static final String RELEASE_VERSION = "releaseVersion"; //$NON-NLS-1$
@@ -61,19 +62,19 @@ public abstract class AbstractGeneMania<NETWORK, NODE, EDGE> implements GeneMani
 	protected Component rootMenuItem;
 	protected JMenuItem showResultsMenu;
 
-	protected final NetworkSelectionManager<NETWORK, NODE, EDGE> selectionManager;
+	protected final NetworkSelectionManager selectionManager;
 	protected final Metadata metadata;
 	protected final UiUtils uiUtils;
 	protected final DataSetManager dataSetManager;
 	protected final FileUtils fileUtils;
-	protected final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	protected final CytoscapeUtils cytoscapeUtils;
 	protected final NetworkUtils networkUtils;
 	protected final TaskDispatcher taskDispatcher;
 	
 	protected abstract void startUp();
 	protected abstract void shutDown();
 	
-	public AbstractGeneMania(DataSetManager dataSetManager, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, UiUtils uiUtils, FileUtils fileUtils, NetworkUtils networkUtils, TaskDispatcher taskDispatcher, NetworkSelectionManager<NETWORK, NODE, EDGE> selectionManager) {
+	public AbstractGeneMania(DataSetManager dataSetManager, CytoscapeUtils cytoscapeUtils, UiUtils uiUtils, FileUtils fileUtils, NetworkUtils networkUtils, TaskDispatcher taskDispatcher, NetworkSelectionManager selectionManager) {
 		this.dataSetManager = dataSetManager;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.uiUtils = uiUtils;
@@ -209,7 +210,7 @@ public abstract class AbstractGeneMania<NETWORK, NODE, EDGE> implements GeneMani
 	}
 
 	protected void validateMenu() {
-		NetworkSelectionManager<NETWORK, NODE, EDGE> manager = getNetworkSelectionManager();
+		NetworkSelectionManager manager = getNetworkSelectionManager();
 		showResultsMenu.setEnabled(manager.isGeneManiaNetwork(cytoscapeUtils.getCurrentNetwork()));
 	}
 
@@ -361,7 +362,7 @@ public abstract class AbstractGeneMania<NETWORK, NODE, EDGE> implements GeneMani
 	}
 
 	@Override
-	public NetworkSelectionManager<NETWORK, NODE, EDGE> getNetworkSelectionManager() {
+	public NetworkSelectionManager getNetworkSelectionManager() {
 		return selectionManager;
 	}
 

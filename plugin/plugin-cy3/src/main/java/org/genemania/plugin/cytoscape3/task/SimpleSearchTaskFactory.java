@@ -31,9 +31,7 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
 import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
-import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
@@ -89,19 +87,19 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 	
 	private QueryBar queryBar;
 	
-	private final GeneMania<CyNetwork, CyNode, CyEdge> plugin;
-	private final RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller;
+	private final GeneMania plugin;
+	private final RetrieveRelatedGenesController controller;
 	private final RetrieveRelatedGenesAction retrieveRelatedGenesAction;
 	private final OrganismManager organismManager;
-	private final CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
 
 	public SimpleSearchTaskFactory(
-			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
-			RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller,
+			GeneMania plugin,
+			RetrieveRelatedGenesController controller,
 			RetrieveRelatedGenesAction retrieveRelatedGenesAction, 
 			OrganismManager organismManager, 
-			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils, 
+			CytoscapeUtils cytoscapeUtils, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
@@ -165,7 +163,7 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 					cytoscapeUtils.performLayout(network);
 					cytoscapeUtils.maximize(network);
 					
-					NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selManager = plugin.getNetworkSelectionManager();
+					NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
 					ViewState options = selManager.getNetworkConfiguration(network);
 					plugin.applyOptions(options);
 					plugin.showResults();
@@ -214,8 +212,7 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		retrieveRelatedGenesAction.getDelegate().invoke();
 	}
 	
-	protected static boolean hasValidGenes(Organism organism, List<String> geneList,
-			GeneMania<CyNetwork, CyNode, CyEdge> plugin) {
+	protected static boolean hasValidGenes(Organism organism, List<String> geneList, GeneMania plugin) {
 		DataSetManager dataSetManager = plugin.getDataSetManager();
 		GeneCompletionProvider2 provider = dataSetManager.getDataSet().getCompletionProvider(organism);
 		

@@ -32,6 +32,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
+import org.cytoscape.model.CyNetwork;
 import org.genemania.domain.Gene;
 import org.genemania.domain.Organism;
 import org.genemania.exception.ApplicationException;
@@ -50,7 +51,7 @@ import org.genemania.plugin.view.components.BaseInfoPanel;
 import org.genemania.plugin.view.util.IconManager;
 import org.genemania.plugin.view.util.UiUtils;
 
-public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
+public class ManiaResultsPanel extends JPanel {
 	
 	private static final long serialVersionUID = -2824736017091793317L;
 	
@@ -58,7 +59,7 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 	private JLabel organismLabel;
 	private ViewState options;
 	private GeneInfoPanel genePanel;
-	private NetworkGroupInfoPanel<NETWORK, NODE, EDGE> networkPanel;
+	private NetworkGroupInfoPanel networkPanel;
 	private FunctionInfoPanel functionPanel;
 
 	private SelectionListener<Gene> geneListener;
@@ -67,20 +68,20 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 
 	private SelectionListener<Gene> functionListener;
 
-	private final ManiaResultsController<NETWORK, NODE, EDGE> controller;
+	private final ManiaResultsController controller;
 
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 
-	private final GeneMania<NETWORK, NODE, EDGE> plugin;
+	private final GeneMania plugin;
 
 	private final NetworkUtils networkUtils;
 
 	private final UiUtils uiUtils;
 	
 	public ManiaResultsPanel(
-			ManiaResultsController<NETWORK, NODE, EDGE> controller,
-			GeneMania<NETWORK, NODE, EDGE> plugin,
-			CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			ManiaResultsController controller,
+			GeneMania plugin,
+			CytoscapeUtils cytoscapeUtils,
 			NetworkUtils networkUtils,
 			UiUtils uiUtils
 	) {
@@ -204,7 +205,7 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 	}
 
 	private void handleAttributesButton() {
-		NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
+		CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
 		controller.showAttributesDialog(cyNetwork, options);
 	}
 
@@ -220,7 +221,7 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 		Organism organism = result.getOrganism();
 		organismLabel.setText("<html><i>" + organism.getAlias() + "</i> (" + organism.getDescription() + ")</html>");
 		
-		NetworkSelectionManager<NETWORK, NODE, EDGE> selectionManager = plugin.getNetworkSelectionManager();
+		NetworkSelectionManager selectionManager = plugin.getNetworkSelectionManager();
 		geneListener = selectionManager.createGeneListSelectionListener(genePanel, options);
 		networkListener = selectionManager.createNetworkListSelectionListener(networkPanel, options);
 		functionListener = selectionManager.createFunctionListSelectionListener(functionPanel, result);
@@ -248,7 +249,7 @@ public class ManiaResultsPanel<NETWORK, NODE, EDGE> extends JPanel {
 		if (tabPane == null) {
 			tabPane = new JTabbedPane(JTabbedPane.BOTTOM);
 			
-			networkPanel = new NetworkGroupInfoPanel<NETWORK, NODE, EDGE>(plugin, cytoscapeUtils, networkUtils, uiUtils);
+			networkPanel = new NetworkGroupInfoPanel(plugin, cytoscapeUtils, networkUtils, uiUtils);
 			JScrollPane networkScrollPane = new JScrollPane(networkPanel);
 			tabPane.addTab(Strings.maniaResultsPanelNetworkTab_label, networkScrollPane);
 

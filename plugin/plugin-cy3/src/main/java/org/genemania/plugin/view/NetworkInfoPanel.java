@@ -16,14 +16,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.view;
 
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.util.Comparator;
 
-import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
 import org.genemania.plugin.data.DataSet;
@@ -39,8 +37,14 @@ public class NetworkInfoPanel extends ToggleInfoPanel<Network<?>, NetworkDetailP
 
 	private double weight;
 
-	public NetworkInfoPanel(DataSet data, Group<?, ?> group, final NetworkGroupInfoPanel<?, ?, ?> groupInfoPanel,
-			NetworkUtils networkUtils, UiUtils uiUtils, final GeneMania<?, ?, ?> geneMania, final ViewState options) {
+	public NetworkInfoPanel(
+			DataSet data,
+			Group<?, ?> group,
+			NetworkGroupInfoPanel groupInfoPanel,
+			NetworkUtils networkUtils,
+			UiUtils uiUtils, 
+			ViewState options
+	) {
 		super(uiUtils);
 
 		setBackground(BaseInfoPanel.defaultBackground);

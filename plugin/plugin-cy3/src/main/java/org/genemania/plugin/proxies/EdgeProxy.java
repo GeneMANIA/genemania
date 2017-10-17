@@ -18,7 +18,13 @@
  */
 package org.genemania.plugin.proxies;
 
-public interface EdgeProxy<T, NODE> extends Proxy<T> {
-	NODE getSource();
-	NODE getTarget();
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNode;
+
+@Deprecated
+public interface EdgeProxy extends Proxy<CyEdge> {
+	
+	CyNode getSource();
+
+	CyNode getTarget();
 }

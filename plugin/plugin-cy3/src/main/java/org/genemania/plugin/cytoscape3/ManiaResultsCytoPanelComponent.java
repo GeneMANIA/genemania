@@ -28,9 +28,6 @@ import javax.swing.JPanel;
 
 import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
@@ -44,20 +41,18 @@ public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelC
 
 	private static final long serialVersionUID = 1L;
 	
-	ManiaResultsPanel<CyNetwork, CyNode, CyEdge> panel;
+	ManiaResultsPanel panel;
 
 	public ManiaResultsCytoPanelComponent(
 			DataSetManager dataSetManager,
-			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
-			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils,
+			GeneMania plugin,
+			CytoscapeUtils cytoscapeUtils,
 			UiUtils uiUtils,
 			NetworkUtils networkUtils
 	) {
-		ManiaResultsController<CyNetwork, CyNode, CyEdge> controller = 
-				new ManiaResultsController<CyNetwork, CyNode, CyEdge>(dataSetManager, cytoscapeUtils, uiUtils,
-						networkUtils);
-		this.panel = new ManiaResultsPanel<CyNetwork, CyNode, CyEdge>(controller, plugin, cytoscapeUtils, networkUtils,
-				uiUtils);
+		ManiaResultsController controller = new ManiaResultsController(dataSetManager, cytoscapeUtils, uiUtils,
+				networkUtils);
+		this.panel = new ManiaResultsPanel(controller, plugin, cytoscapeUtils, networkUtils, uiUtils);
 		
 		setOpaque(!uiUtils.isAquaLAF());
 		
@@ -74,7 +69,7 @@ public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelC
 		);
 	}
 
-	public ManiaResultsPanel<CyNetwork, CyNode, CyEdge> getPanel() {
+	public ManiaResultsPanel getPanel() {
 		return panel;
 	}
 	

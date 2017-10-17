@@ -22,9 +22,6 @@ import java.awt.event.ActionEvent;
 import java.util.Map;
 
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.Strings;
@@ -35,7 +32,7 @@ public class DownloadDataSetAction extends GeneManiaAction {
 	public DownloadDataSetAction(
 			Map<String, String> properties,
 			CyApplicationManager applicationManager,
-			GeneMania<CyNetwork, CyNode, CyEdge> geneMania,
+			GeneMania geneMania,
 			CyNetworkViewManager viewManager
 	) {
 		super(properties, applicationManager, geneMania, viewManager);
@@ -46,5 +43,4 @@ public class DownloadDataSetAction extends GeneManiaAction {
 	public void actionPerformed(ActionEvent event) {
 		geneMania.handleDownload();
 	}
-
 }

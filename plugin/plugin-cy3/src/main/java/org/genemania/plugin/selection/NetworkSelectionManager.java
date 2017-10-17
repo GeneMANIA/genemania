@@ -2,6 +2,8 @@ package org.genemania.plugin.selection;
 
 import java.util.Set;
 
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
 import org.genemania.domain.Gene;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.model.Group;
@@ -14,46 +16,37 @@ import org.genemania.plugin.view.NetworkChangeListener;
 import org.genemania.plugin.view.NetworkGroupDetailPanel;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 
-public interface NetworkSelectionManager<NETWORK, NODE, EDGE> {
+public interface NetworkSelectionManager {
 
 	String getSelectedNetworkId();
 
 	int getTotalNetworks();
 
-	void addNetworkConfiguration(NETWORK network, ViewState config);
+	void addNetworkConfiguration(CyNetwork network, ViewState config);
 
-	ViewState getNetworkConfiguration(NETWORK network);
+	ViewState getNetworkConfiguration(CyNetwork network);
 
-	boolean isGeneManiaNetwork(NETWORK network);
+	boolean isGeneManiaNetwork(CyNetwork network);
 
-	NetworkChangeListener<NETWORK, NODE, EDGE> createChangeListener(
-			Group<?, ?> group);
+	NetworkChangeListener createChangeListener(Group<?, ?> group);
 
 	void setSelectionListenerEnabled(boolean enabled);
 
 	boolean isSelectionListenerEnabled();
 
-	SelectionListener<Gene> createGeneListSelectionListener(
-			GeneInfoPanel genePanel, ViewState options);
+	SelectionListener<Gene> createGeneListSelectionListener(GeneInfoPanel genePanel, ViewState options);
 
 	/**
-	 * Returns true if the referenceEdge belongs to a group which has an edge
-	 * that's already selected.
-	 * @param referenceEdge
-	 * @param selectedEdges
-	 * @return
+	 * Returns true if the referenceEdge belongs to a group which has an edge that's already selected.
 	 */
-	boolean checkSelectionState(EDGE referenceEdge, Set<EDGE> selectedEdges,
-			NETWORK network);
+	boolean checkSelectionState(CyEdge referenceEdge, Set<CyEdge> selectedEdges, CyNetwork network);
 
 	SelectionListener<Group<?, ?>> createNetworkListSelectionListener(
-			BaseInfoPanel<Group<?, ?>, NetworkGroupDetailPanel<NETWORK, NODE, EDGE>> panel,
-			ViewState options);
+			BaseInfoPanel<Group<?, ?>, NetworkGroupDetailPanel> panel, ViewState options);
 
 	SelectionListener<Network<?>> createNetworkSelectionListener();
 
-	SelectionListener<Gene> createFunctionListSelectionListener(
-			FunctionInfoPanel functionPanel, SearchResult options);
+	SelectionListener<Gene> createFunctionListSelectionListener(FunctionInfoPanel functionPanel, SearchResult options);
 
-	void setGeneMania(GeneMania<NETWORK, NODE, EDGE> geneMania);
+	void setGeneMania(GeneMania geneMania);
 }

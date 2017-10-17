@@ -54,7 +54,7 @@ import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.util.ChildProgressReporter;
 
 @SuppressWarnings("serial")
-public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
+public class NetManiaPanel extends JPanel {
 	
 	private JPanel availablePanel;
 	private JPanel installedPanel;
@@ -69,7 +69,6 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 	private final UiUtils uiUtils;
 	private final TaskDispatcher taskDispatcher;
 	
-	@SuppressWarnings("unchecked")
 	public NetManiaPanel(DataSetManager dataSetManager, UiUtils uiUtils, TaskDispatcher taskDispatcher) {
 		this.dataSetManager = dataSetManager;
 		this.uiUtils = uiUtils;
@@ -80,14 +79,13 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 		
 		addComponents();
 		
-		final LuceneDataSet<NETWORK, NODE, EDGE> data = (LuceneDataSet<NETWORK, NODE, EDGE>) dataSetManager.getDataSet();
+		final LuceneDataSet data = (LuceneDataSet) dataSetManager.getDataSet();
 		populate(data);
 		validateSettings();
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void doDelete() {
-		LuceneDataSet<NETWORK, NODE, EDGE> data = (LuceneDataSet) dataSetManager.getDataSet();
+		LuceneDataSet data = (LuceneDataSet) dataSetManager.getDataSet();
 		int[] selection = getInstalledList().getSelectedIndices();
 		
 		for (int i : selection) {
@@ -122,7 +120,7 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 				int[] selection = getAvailableList().getSelectedIndices();
 				ArrayList<Integer> installed = new ArrayList<Integer>();
 				progress.setMaximumProgress(selection.length);
-				LuceneDataSet<NETWORK, NODE, EDGE> data = (LuceneDataSet<NETWORK, NODE, EDGE>) dataSetManager.getDataSet();
+				LuceneDataSet data = (LuceneDataSet) dataSetManager.getDataSet();
 				
 				for (int index : selection) {
 					if (progress.isCanceled())
@@ -318,7 +316,7 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 	
 	@SuppressWarnings("unchecked")
 	private DataDescriptor getInstalledDataDescriptor(String id) {
-		LuceneDataSet<NETWORK, NODE, EDGE> data = (LuceneDataSet<NETWORK, NODE, EDGE>) dataSetManager.getDataSet();
+		LuceneDataSet data = (LuceneDataSet) dataSetManager.getDataSet();
 		List<DataDescriptor> installed = data.getInstalledDataDescriptors();
 		
 		for (DataDescriptor descriptor : installed) {
@@ -329,7 +327,7 @@ public class NetManiaPanel<NETWORK, NODE, EDGE> extends JPanel {
 		return null;
 	}
 	
-	private void populate(LuceneDataSet<NETWORK, NODE, EDGE> data) {
+	private void populate(LuceneDataSet data) {
 		List<DataDescriptor> installed = data.getInstalledDataDescriptors();
 		Collections.sort(installed);
 		installedModel = new DynamicListModel<DataDescriptor>(installed);

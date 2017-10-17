@@ -40,6 +40,9 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.AttributeGroup;
 import org.genemania.domain.Gene;
@@ -99,7 +102,7 @@ import org.genemania.util.ProgressReporter;
 
 import com.google.gson.Gson;
 
-public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
+public class RetrieveRelatedGenesController {
 	
 	// TODO Make it a CyProperty?
 	private static final String SEARCH_URL = "http://genemania.org/json/search_results";
@@ -112,14 +115,14 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		sequenceNumbers = new HashMap<>();
 	}
 
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
-	private final GeneMania<NETWORK, NODE, EDGE> plugin;
+	private final CytoscapeUtils cytoscapeUtils;
+	private final GeneMania plugin;
 	private final NetworkUtils networkUtils;
 	private final TaskDispatcher taskDispatcher;
 	
 	public RetrieveRelatedGenesController(
-			GeneMania<NETWORK, NODE, EDGE> plugin,
-			CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			GeneMania plugin,
+			CytoscapeUtils cytoscapeUtils,
 			NetworkUtils networkUtils,
 			TaskDispatcher taskDispatcher
 	) {
@@ -129,7 +132,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		this.taskDispatcher = taskDispatcher;
 	}
 	
-	public Vector<ModelElement<Organism>> createModel(final DataSet data) throws DataStoreException {
+	public Vector<ModelElement<Organism>> createModel(DataSet data) throws DataStoreException {
 		Vector<ModelElement<Organism>> organismChoices = new Vector<>();
 		OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
 		Collection<Organism> organisms = mediator.getAllOrganisms(); 
@@ -143,7 +146,8 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		return organismChoices;
     }
 
-	private RelatedGenesEngineRequestDto createRequest(DataSet data, Query query, Collection<Group<?, ?>> groups, ProgressReporter progress) {
+	private RelatedGenesEngineRequestDto createRequest(DataSet data, Query query, Collection<Group<?, ?>> groups,
+			ProgressReporter progress) {
 		int stage = 0;
 		progress.setMaximumProgress(2);
 		
@@ -156,7 +160,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		// Collect the selected networks
 		ChildProgressReporter childProgress = new ChildProgressReporter(progress);
 		childProgress.setStatus(Strings.retrieveRelatedGenes_status2);
-		request.setInteractionNetworks(getInteractionNetworks(data, groups, childProgress));
+		request.setInteractionNetworks(getInteractionNetworks(groups, childProgress));
 		childProgress.close();
 		stage++;
 		
@@ -237,7 +241,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		return queryNodes;
 	}
 
-	private static Collection<Collection<Long>> getInteractionNetworks(DataSet data, Collection<Group<?, ?>> selection,
+	private static Collection<Collection<Long>> getInteractionNetworks(Collection<Group<?, ?>> selection,
 			ProgressReporter progress) {
 		Map<Long, Collection<Long>> groups = new HashMap<>();
 		
@@ -280,8 +284,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		return result;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public NETWORK runMania(Window parent, final Query query, final Collection<Group<?, ?>> groups, boolean offline) {
+	public CyNetwork runMania(Window parent, final Query query, final Collection<Group<?, ?>> groups, boolean offline) {
 		final Object[] result = new Object[1];
 		// Create the WS client here, to avoid a thread/OSGI related issues;
 		final Client client = offline ? null : ClientBuilder.newClient();
@@ -295,10 +298,10 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		taskDispatcher.executeTask(task, parent, true, true);
 		LogUtils.log(getClass(), task.getLastError());
 		
-		return (NETWORK) result[0];
+		return (CyNetwork) result[0];
 	}
 	
-	private NETWORK createNetwork(Query query, Collection<Group<?, ?>> selectedGroups, boolean offline, Client client,
+	private CyNetwork createNetwork(Query query, Collection<Group<?, ?>> selectedGroups, boolean offline, Client client,
 			ProgressReporter progress) throws DataStoreException {
 		int stage = 0;
 		progress.setMaximumProgress(5);
@@ -350,7 +353,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 			
 			extrema = computeEdgeWeightExtrema(response);
 			
-			EnrichmentEngineRequestDto enrichmentRequest = createEnrichmentRequest(organism, response, data);
+			EnrichmentEngineRequestDto enrichmentRequest = createEnrichmentRequest(organism, response);
 			EnrichmentEngineResponseDto enrichmentResponse = null;
 			
 			if (enrichmentRequest != null) {
@@ -424,7 +427,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 			options = networkUtils.createSearchOptions(searchResults);
 		}
 		
-		NETWORK network = null;
+		CyNetwork network = null;
 		
 		if (options != null) {
 			EdgeAttributeProvider provider = createEdgeAttributeProvider(options);
@@ -439,7 +442,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 			// Set up edge cache
 			progress.setStatus(Strings.retrieveRelatedGenes_status6);
 			progress.setProgress(stage++);
-			NetworkSelectionManager<NETWORK, NODE, EDGE> manager = plugin.getNetworkSelectionManager();
+			NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
 			
 			computeGraphCache(network, options, builder, selectedGroups);
 			manager.addNetworkConfiguration(network, builder.build());
@@ -451,7 +454,8 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		return network;
 	}
 	
-	private EnrichmentEngineResponseDto computeEnrichment(EnrichmentEngineRequestDto request, DataSet data) throws DataStoreException {
+	private EnrichmentEngineResponseDto computeEnrichment(EnrichmentEngineRequestDto request, DataSet data)
+			throws DataStoreException {
 		try {
 			IMania mania = new Mania2(new DataCache(new MemObjectCache(data.getObjectCache(NullProgressReporter.instance(), false))));
 			EnrichmentEngineResponseDto result = mania.computeEnrichment(request);
@@ -462,7 +466,8 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		}
 	}
 
-	private EnrichmentEngineRequestDto createEnrichmentRequest(Organism organism, RelatedGenesEngineResponseDto response, DataSet data) {
+	private EnrichmentEngineRequestDto createEnrichmentRequest(Organism organism,
+			RelatedGenesEngineResponseDto response) {
 		if (organism.getOntology() == null)
 			return null;
 		
@@ -563,7 +568,7 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 	private Map<Long, Double> computeGeneScores(Collection<ResultGene> genes) {
 		Map<Long, Double> scores = new HashMap<>();
 		
-		for (ResultGene resGene : genes) {
+		for (ResultGene resGene : genes) {// TODO confirm ID is from Node and not Gene
 			scores.put(resGene.getGene().getNode().getId(), resGene.getScore());
 		}
 		
@@ -616,12 +621,12 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		};
 	}
 	
-	void computeGraphCache(NETWORK currentNetwork, SearchResult result, ViewStateBuilder config, Collection<Group<?, ?>> selectedGroups) {
+	void computeGraphCache(CyNetwork currentNetwork, SearchResult result, ViewStateBuilder config, Collection<Group<?, ?>> selectedGroups) {
 		// Build edge cache
-		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(currentNetwork);
+		NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(currentNetwork);
 		
-		for (EDGE edge : networkProxy.getEdges()) {
-			EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, currentNetwork);
+		for (CyEdge edge : networkProxy.getEdges()) {
+			EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, currentNetwork);
 			String name = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
 			Group<?, ?> group = config.getGroup(name);
 			config.addEdge(group, edgeProxy.getIdentifier());
@@ -630,8 +635,8 @@ public class RetrieveRelatedGenesController<NETWORK, NODE, EDGE> {
 		// Build node cache
 		for (Gene gene : result.getScores().keySet()) {
 			Node node = gene.getNode();
-			NODE cyNode = cytoscapeUtils.getNode(currentNetwork, node, null);
-			NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(cyNode, currentNetwork);
+			CyNode cyNode = cytoscapeUtils.getNode(currentNetwork, node, null);
+			NodeProxy nodeProxy = cytoscapeUtils.getNodeProxy(cyNode, currentNetwork);
 			config.addNode(node, nodeProxy.getIdentifier());
 		}
 		

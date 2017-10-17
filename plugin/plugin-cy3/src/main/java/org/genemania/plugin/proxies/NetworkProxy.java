@@ -21,19 +21,38 @@ package org.genemania.plugin.proxies;
 import java.util.Collection;
 import java.util.Set;
 
-public interface NetworkProxy<T, NODE, EDGE> extends Proxy<T> {
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
+
+@Deprecated
+public interface NetworkProxy extends Proxy<CyNetwork> {
+	
 	String getTitle();
-	Collection<NODE> getNodes();
-	Collection<EDGE> getEdges();
-	Set<NODE> getSelectedNodes();
-	Set<EDGE> getSelectedEdges();
-	void setSelectedNode(NODE node, boolean selected);
-	void setSelectedNodes(Collection<NODE> nodes, boolean selected);
-	void setSelectedEdge(EDGE edge, boolean selected);
-	void setSelectedEdges(Collection<EDGE> edges, boolean selected);
+
+	Collection<CyNode> getNodes();
+
+	Collection<CyEdge> getEdges();
+
+	Set<CyNode> getSelectedNodes();
+
+	Set<CyEdge> getSelectedEdges();
+
+	void setSelectedNode(CyNode node, boolean selected);
+
+	void setSelectedNodes(Collection<CyNode> nodes, boolean selected);
+
+	void setSelectedEdge(CyEdge edge, boolean selected);
+
+	void setSelectedEdges(Collection<CyEdge> edges, boolean selected);
+
 	void unselectAllEdges();
+
 	void unselectAllNodes();
+
 	Collection<String> getNodeAttributeNames();
+
 	Collection<String> getEdgeAttributeNames();
-	Collection<NODE> getNeighbours(NODE node);
+
+	Collection<CyNode> getNeighbours(CyNode node);
 }

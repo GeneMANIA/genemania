@@ -8,6 +8,7 @@ import org.cytoscape.io.util.StreamUtil;
 import org.genemania.plugin.FileUtils;
 
 public class CyFileUtils extends FileUtils {
+	
 	private StreamUtil streamUtil;
 
 	public CyFileUtils(StreamUtil streamUtil) {

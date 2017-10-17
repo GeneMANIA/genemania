@@ -22,21 +22,18 @@ import java.util.Map;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.genemania.plugin.GeneMania;
 
 @SuppressWarnings("serial")
 public abstract class GeneManiaAction extends AbstractCyAction {
 	
-	protected final GeneMania<CyNetwork, CyNode, CyEdge> geneMania;
+	protected final GeneMania geneMania;
 
 	public GeneManiaAction(
 			Map<String, String> properties,
 			CyApplicationManager applicationManager,
-			GeneMania<CyNetwork, CyNode, CyEdge> geneMania,
+			GeneMania geneMania,
 			CyNetworkViewManager viewManager
 	) {
 		super(properties, applicationManager, viewManager);

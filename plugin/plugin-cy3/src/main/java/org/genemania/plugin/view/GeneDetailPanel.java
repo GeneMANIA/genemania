@@ -38,6 +38,7 @@ import org.genemania.plugin.view.components.ToggleDetailPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
+	
 	private static final long serialVersionUID = 1L;
 
 	/**

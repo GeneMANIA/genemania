@@ -39,11 +39,8 @@ import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.io.util.StreamUtil;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.property.CyProperty;
 import org.cytoscape.property.SimpleCyProperty;
@@ -123,9 +120,9 @@ public class CyActivator extends AbstractCyActivator {
 				serviceRegistrar);
 		DataSetManager dataSetManager = new DataSetManager();
 		OsgiTaskDispatcher taskDispatcher = new OsgiTaskDispatcher(uiUtils);
-		DefaultDataSetFactory<CyNetwork, CyNode, CyEdge> luceneDataSetFactory = new DefaultDataSetFactory<>(
-				dataSetManager, uiUtils, fileUtils, cytoscapeUtils, taskDispatcher);
-		
+		DefaultDataSetFactory luceneDataSetFactory = new DefaultDataSetFactory(dataSetManager, uiUtils, fileUtils,
+				cytoscapeUtils, taskDispatcher);
+
 		SimpleCyProperty<Properties> properties = new SimpleCyProperty<>("org.genemania", new Properties(),
 				Properties.class, CyProperty.SavePolicy.SESSION_FILE);
 		registerService(bc, properties, CyProperty.class);
@@ -141,8 +138,8 @@ public class CyActivator extends AbstractCyActivator {
 		GeneManiaFDLayout fdLayout = new GeneManiaFDLayout(undoSupport);
 		registerLayoutAlgorithms(bc, fdLayout);
 		
-		RetrieveRelatedGenesController<CyNetwork, CyNode, CyEdge> controller =
-				new RetrieveRelatedGenesController<>(geneMania, cytoscapeUtils, networkUtils, taskDispatcher);
+		RetrieveRelatedGenesController controller =
+				new RetrieveRelatedGenesController(geneMania, cytoscapeUtils, networkUtils, taskDispatcher);
 
 		Map<String, String> props;
 		{

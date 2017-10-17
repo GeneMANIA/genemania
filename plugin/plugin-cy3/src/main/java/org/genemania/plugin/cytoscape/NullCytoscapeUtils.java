@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.genemania.domain.Node;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.model.Group;
@@ -37,99 +40,94 @@ import org.genemania.plugin.proxies.NetworkProxy;
 import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 
-public class NullCytoscapeUtils<NETWORK, NODE, EDGE> implements CytoscapeUtils<NETWORK, NODE, EDGE> {
+public class NullCytoscapeUtils implements CytoscapeUtils {
 
 	@Override
-	public void applyVisualization(NETWORK network,
+	public void applyVisualization(CyNetwork network,
 			Map<Long, Double> filterGeneScores,
 			Map<String, Color> computeColors, double[] extrema) {
 	}
 
 	@Override
-	public NETWORK createNetwork(String nextNetworkName, String dataVersion, SearchResult result,
+	public CyNetwork createNetwork(String nextNetworkName, String dataVersion, SearchResult result,
 			ViewStateBuilder options, EdgeAttributeProvider provider) {
 		return null;
 	}
 
 	@Override
-	public void expandAttributes(NETWORK cyNetwork, ViewState options,
-			List<String> attributes) {
+	public void expandAttributes(CyNetwork cyNetwork, ViewState options, List<String> attributes) {
 	}
-	
+
 	@Override
-	public NODE getNode(NETWORK network, Node node, String preferredSymbol) {
+	public CyNode getNode(CyNetwork network, Node node, String preferredSymbol) {
 		return null;
 	}
 
 	@Override
-	public void performLayout(NETWORK network) {
+	public void performLayout(CyNetwork network) {
 	}
 
 	@Override
-	public void registerSelectionListener(NETWORK cyNetwork,
-			NetworkSelectionManager<NETWORK, NODE, EDGE> manager, GeneMania<NETWORK, NODE, EDGE> plugin) {
+	public void registerSelectionListener(CyNetwork cyNetwork, NetworkSelectionManager manager, GeneMania plugin) {
 	}
 
 	@Override
-	public void setHighlight(ViewState config, Group<?, ?> group,
-			NETWORK network, boolean selected) {
+	public void setHighlight(ViewState config, Group<?, ?> group, CyNetwork network, boolean selected) {
 	}
-	
+
 	@Override
-	public void setHighlighted(ViewState options, NETWORK cyNetwork,
-			boolean highlighted) {
+	public void setHighlighted(ViewState options, CyNetwork cyNetwork, boolean highlighted) {
 	}
-	
+
 	@Override
-	public NETWORK getCurrentNetwork() {
+	public CyNetwork getCurrentNetwork() {
 		return null;
 	}
-	
+
 	@Override
 	public void repaint() {
 	}
-	
+
 	@Override
-	public void updateVisualStyles(NETWORK network) {
+	public void updateVisualStyles(CyNetwork network) {
 	}
-	
+
 	@Override
 	public Frame getFrame() {
 		return null;
 	}
-	
+
 	@Override
-	public Set<NETWORK> getNetworks() {
+	public Set<CyNetwork> getNetworks() {
 		return Collections.emptySet();
 	}
-	
+
 	@Override
-	public void maximize(NETWORK network) {
+	public void maximize(CyNetwork network) {
 	}
-	
+
 	@Override
-	public NetworkProxy<NETWORK, NODE, EDGE> getNetworkProxy(NETWORK network) {
+	public NetworkProxy getNetworkProxy(CyNetwork network) {
 		return null;
 	}
-	
+
 	@Override
-	public EdgeProxy<EDGE, NODE> getEdgeProxy(EDGE edge, NETWORK network) {
+	public EdgeProxy getEdgeProxy(CyEdge edge, CyNetwork network) {
 		return null;
 	}
-	
+
 	@Override
-	public NodeProxy<NODE> getNodeProxy(NODE node, NETWORK network) {
+	public NodeProxy getNodeProxy(CyNode node, CyNetwork network) {
 		return null;
 	}
-	
+
 	@Override
-	public void handleNetworkPostProcessing(
-			NETWORK network) {
+	public void handleNetworkPostProcessing(CyNetwork network) {
 	}
-	
+
 	@Override
 	public Properties getGlobalProperties() {
 		return null;
 	}
-	
+
 }

@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.data.lucene.view;
 
 import java.io.PrintWriter;
@@ -26,6 +25,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.genemania.data.normalizer.NormalizationResult;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.proxies.EdgeProxy;
@@ -33,30 +35,30 @@ import org.genemania.plugin.proxies.NetworkProxy;
 import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.util.ProgressReporter;
 
-public class CyNetworkImporter<NETWORK, NODE, EDGE> {
+public class CyNetworkImporter {
 	
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 
-	public CyNetworkImporter(CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils) {
+	public CyNetworkImporter(CytoscapeUtils cytoscapeUtils) {
 		this.cytoscapeUtils = cytoscapeUtils;
 	}
 	
-	public void process(NETWORK network, String idAttribute, String weightAttribute, Writer output, ProgressReporter progress) {
+	public void process(CyNetwork network, String idAttribute, String weightAttribute, Writer output, ProgressReporter progress) {
 		PrintWriter writer = new PrintWriter(output);
 		
 		try {
 			Context context = new Context();
-			NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(network);
-			Collection<EDGE> edges = networkProxy.getEdges();
+			NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(network);
+			Collection<CyEdge> edges = networkProxy.getEdges();
 			progress.setMaximumProgress(edges.size());
-			for (EDGE edge : edges) {
+			for (CyEdge edge : edges) {
 				if (progress.isCanceled()) {
 					return;
 				}
 				progress.setProgress(context.totalInteractions);
 				context.totalInteractions++;
 				
-				EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, network);
+				EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, network);
 				String sourceSymbol = getSymbol(cytoscapeUtils.getNodeProxy(edgeProxy.getSource(), network), idAttribute);
 				String targetSymbol = getSymbol(cytoscapeUtils.getNodeProxy(edgeProxy.getTarget(), network), idAttribute);
 				if (sourceSymbol == null || targetSymbol == null) {
@@ -92,7 +94,7 @@ public class CyNetworkImporter<NETWORK, NODE, EDGE> {
 		}
 	}
 	
-	public void process(NETWORK network, String idAttribute, List<String> expressionAttributes, Writer output, ProgressReporter progress) {
+	public void process(CyNetwork network, String idAttribute, List<String> expressionAttributes, Writer output, ProgressReporter progress) {
 		PrintWriter writer = new PrintWriter(output);
 		try {
 			writer.print("IDENTIFIER"); //$NON-NLS-1$
@@ -104,17 +106,17 @@ public class CyNetworkImporter<NETWORK, NODE, EDGE> {
 			
 			Context context = new Context();
 			
-			NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(network);
-			Collection<NODE> nodes = networkProxy.getNodes();
+			NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(network);
+			Collection<CyNode> nodes = networkProxy.getNodes();
 			progress.setMaximumProgress(nodes.size());
-			for (NODE node : nodes) {
+			for (CyNode node : nodes) {
 				if (progress.isCanceled()) {
 					return;
 				}
 				progress.setProgress(context.totalInteractions);
 				context.totalInteractions++;
 				
-				NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(node, network);
+				NodeProxy nodeProxy = cytoscapeUtils.getNodeProxy(node, network);
 				String symbol = getSymbol(nodeProxy, idAttribute);
 				if (symbol == null) {
 					context.droppedInteractions++;
@@ -146,7 +148,7 @@ public class CyNetworkImporter<NETWORK, NODE, EDGE> {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private String getSymbol(NodeProxy<NODE> nodeProxy, String idAttribute) {
+	private String getSymbol(NodeProxy nodeProxy, String idAttribute) {
 		Class<?> type = nodeProxy.getAttributeType(idAttribute);
 		Object value = nodeProxy.getAttribute(idAttribute, type);
 		if (value instanceof String) {
@@ -170,7 +172,8 @@ public class CyNetworkImporter<NETWORK, NODE, EDGE> {
 		return result;
 	}
 
-	public NormalizationResult normalize(NETWORK network, String idAttribute, List<String> expressionAttributes, Writer writer, ProgressReporter progress) {
+	public NormalizationResult normalize(CyNetwork network, String idAttribute, List<String> expressionAttributes,
+			Writer writer, ProgressReporter progress) {
 		Context context = new Context();
 		return createResult(context);
 	}

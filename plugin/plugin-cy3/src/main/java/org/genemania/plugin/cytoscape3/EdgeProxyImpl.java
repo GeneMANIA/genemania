@@ -23,8 +23,8 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.genemania.plugin.proxies.EdgeProxy;
 
-public class EdgeProxyImpl extends ProxyImpl<CyEdge> implements
-		EdgeProxy<CyEdge, CyNode> {
+@Deprecated
+public class EdgeProxyImpl extends ProxyImpl<CyEdge> implements EdgeProxy {
 
 	public EdgeProxyImpl(CyEdge edge, CyNetwork network) {
 		super(edge, network);
@@ -39,5 +39,4 @@ public class EdgeProxyImpl extends ProxyImpl<CyEdge> implements
 	public CyNode getTarget() {
 		return getProxied().getTarget();
 	}
-
 }

@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.data.lucene.view;
 
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
@@ -54,6 +53,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.apache.log4j.Logger;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.genemania.data.normalizer.DataFileType;
 import org.genemania.data.normalizer.DataImportSettings;
 import org.genemania.data.normalizer.OrganismClassifier;
@@ -88,7 +89,7 @@ import org.genemania.type.NetworkProcessingMethod;
 import org.genemania.util.ProgressReporter;
 
 @SuppressWarnings("serial")
-public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
+public class ImportCyNetworkPanel extends JPanel {
 	
 	private static final int CHECK_COLUMN = 0;
 	private static final int NAME_COLUMN = 1;
@@ -96,7 +97,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 	private final DataSetManager dataSetManager;
 	private final UiUtils uiUtils;
 	private final TaskDispatcher taskDispatcher;
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 	
 	private final JLabel helpLabel = new JLabel();
 	private final JLabel weightLabel = new JLabel(Strings.importCyNetworkWeight_label);
@@ -131,7 +132,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 	public ImportCyNetworkPanel(
 			final DataSetManager dataSetManager,
 			final UiUtils uiUtils,
-			final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			final CytoscapeUtils cytoscapeUtils,
 			final TaskDispatcher taskDispatcher
 	) {
 		this.dataSetManager = dataSetManager;
@@ -528,15 +529,17 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		if (idAttribute == null) {
 			return;
 		}
-		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = ((ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>) getNetworkCombo().getSelectedItem()).getItem();
-		NETWORK network = networkProxy.getProxied();
+		NetworkProxy networkProxy = ((ModelElement<NetworkProxy>) getNetworkCombo().getSelectedItem()).getItem();
+		CyNetwork network = networkProxy.getProxied();
 		
 		// Attempt to autodetect organism
 		DataSet data = dataSetManager.getDataSet();
 		OrganismClassifier classifier = new OrganismClassifier(data.getGeneClassifier());
-		for (NODE node : networkProxy.getNodes()) {
-			NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(node, network);
+		
+		for (CyNode node : networkProxy.getNodes()) {
+			NodeProxy nodeProxy = cytoscapeUtils.getNodeProxy(node, network);
 			Class<?> type = nodeProxy.getAttributeType(idAttribute);
+			
 			if (type.equals(String.class)) {
 				String symbol = nodeProxy.getAttribute(idAttribute, String.class);
 				try {
@@ -584,22 +587,22 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 
 	@SuppressWarnings("unchecked")
 	private void populateNetworks() {
-		ArrayList<ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>> networkIds = new ArrayList<ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>>();
-		Comparator<NetworkProxy<NETWORK, NODE, EDGE>> comparator = new Comparator<NetworkProxy<NETWORK, NODE, EDGE>>() {
-			public int compare(NetworkProxy<NETWORK, NODE, EDGE> o1, NetworkProxy<NETWORK, NODE, EDGE> o2) {
+		ArrayList<ModelElement<NetworkProxy>> networkIds = new ArrayList<ModelElement<NetworkProxy>>();
+		Comparator<NetworkProxy> comparator = new Comparator<NetworkProxy>() {
+			public int compare(NetworkProxy o1, NetworkProxy o2) {
 				return o1.getTitle().compareToIgnoreCase(o2.getTitle());
 			}
 		};
-		IObjectFormatter<NetworkProxy<NETWORK, NODE, EDGE>> formatter = new IObjectFormatter<NetworkProxy<NETWORK, NODE, EDGE>>() {
-			public String format(NetworkProxy<NETWORK, NODE, EDGE> object) {
+		IObjectFormatter<NetworkProxy> formatter = new IObjectFormatter<NetworkProxy>() {
+			public String format(NetworkProxy object) {
 				return object.getTitle();
 			}
 		};
-		for (NETWORK network : cytoscapeUtils.getNetworks()) {
-			NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(network);
-			networkIds.add(new ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>(networkProxy, comparator, formatter));
+		for (CyNetwork network : cytoscapeUtils.getNetworks()) {
+			NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(network);
+			networkIds.add(new ModelElement<NetworkProxy>(networkProxy, comparator, formatter));
 		}
-		ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>[] model = new ModelElement[networkIds.size()];
+		ModelElement<NetworkProxy>[] model = new ModelElement[networkIds.size()];
 		model = networkIds.toArray(model);
 		Arrays.sort(model);
 		getNetworkCombo().setModel(new DefaultComboBoxModel(model));
@@ -619,7 +622,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 
 	@SuppressWarnings("unchecked")
 	private void handleNetworkChange() {
-		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = ((ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>) getNetworkCombo().getSelectedItem()).getItem();
+		NetworkProxy networkProxy = ((ModelElement<NetworkProxy>) getNetworkCombo().getSelectedItem()).getItem();
 		populateAttributes(networkProxy);
 	}
 
@@ -642,7 +645,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		}
 	}
 
-	private void populateAttributes(NetworkProxy<NETWORK, NODE, EDGE> networkProxy) {
+	private void populateAttributes(NetworkProxy networkProxy) {
 		String[] nodeAttributes = sort(networkProxy.getNodeAttributeNames());
 		String[] edgeAttributes = sort(networkProxy.getEdgeAttributeNames());
 		
@@ -682,8 +685,8 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		ModelElement<Organism> element = (ModelElement<Organism>) getOrganismCombo().getSelectedItem();
 		final Organism organism = element.getItem();
 		
-		final NetworkProxy<NETWORK, NODE, EDGE> networkProxy = ((ModelElement<NetworkProxy<NETWORK, NODE, EDGE>>) getNetworkCombo().getSelectedItem()).getItem();
-		final NETWORK cyNetwork = networkProxy.getProxied();
+		final NetworkProxy networkProxy = ((ModelElement<NetworkProxy>) getNetworkCombo().getSelectedItem()).getItem();
+		final CyNetwork cyNetwork = networkProxy.getProxied();
 		
 		final String idAttribute = (String) getIdCombo().getSelectedItem();
 		final ModelElement<NetworkType> typeElement = (ModelElement<NetworkType>) getTypeCombo().getSelectedItem();
@@ -748,7 +751,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		taskDispatcher.executeTask(task, uiUtils.getFrame(this), true, true);
 	}
 	
-	protected void handleCoexpressionNetwork(DataImportSettings settings, NETWORK cyNetwork, String idAttribute, List<String> expressionAttributes, Writer writer, ProgressReporter progress) {
+	protected void handleCoexpressionNetwork(DataImportSettings settings, CyNetwork cyNetwork, String idAttribute, List<String> expressionAttributes, Writer writer, ProgressReporter progress) {
 		List<Integer> idColumns = new ArrayList<Integer>();
 		idColumns.add(0);
 		settings.setDataFormat(ImportedDataFormat.PROFILE_DATA_TAB_DELIMITED);
@@ -756,11 +759,11 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		settings.setDelimiter("\t"); //$NON-NLS-1$
 		settings.setIdColumns(idColumns);
 		settings.setProcessingMethod(NetworkProcessingMethod.PEARSON);
-		CyNetworkImporter<NETWORK, NODE, EDGE> importer = new CyNetworkImporter<NETWORK, NODE, EDGE>(cytoscapeUtils);
+		CyNetworkImporter importer = new CyNetworkImporter(cytoscapeUtils);
 		importer.process(cyNetwork, idAttribute, expressionAttributes, writer, progress);							
 	}
 
-	protected void handleWeightedNetwork(DataImportSettings settings, NETWORK cyNetwork, String idAttribute, String weightAttribute, Writer writer, ProgressReporter progress) {
+	protected void handleWeightedNetwork(DataImportSettings settings, CyNetwork cyNetwork, String idAttribute, String weightAttribute, Writer writer, ProgressReporter progress) {
 		List<Integer> idColumns = new ArrayList<Integer>();
 		idColumns.add(0);
 		idColumns.add(1);
@@ -769,11 +772,11 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		settings.setDelimiter("\t"); //$NON-NLS-1$
 		settings.setIdColumns(idColumns);
 		settings.setProcessingMethod(NetworkProcessingMethod.DIRECT);
-		CyNetworkImporter<NETWORK, NODE, EDGE> importer = new CyNetworkImporter<NETWORK, NODE, EDGE>(cytoscapeUtils);
+		CyNetworkImporter importer = new CyNetworkImporter(cytoscapeUtils);
 		importer.process(cyNetwork, idAttribute, weightAttribute, writer, progress);
 	}
 
-	private void handleUnweightedNetwork(DataImportSettings settings, NETWORK cyNetwork, String idAttribute, Writer writer, ProgressReporter progress) {
+	private void handleUnweightedNetwork(DataImportSettings settings, CyNetwork cyNetwork, String idAttribute, Writer writer, ProgressReporter progress) {
 		List<Integer> idColumns = new ArrayList<Integer>();
 		idColumns.add(0);
 		idColumns.add(1);
@@ -782,7 +785,7 @@ public class ImportCyNetworkPanel<NETWORK, NODE, EDGE> extends JPanel {
 		settings.setDelimiter("\t"); //$NON-NLS-1$
 		settings.setIdColumns(idColumns);
 		settings.setProcessingMethod(NetworkProcessingMethod.DIRECT);
-		CyNetworkImporter<NETWORK, NODE, EDGE> importer = new CyNetworkImporter<NETWORK, NODE, EDGE>(cytoscapeUtils);
+		CyNetworkImporter importer = new CyNetworkImporter(cytoscapeUtils);
 		importer.process(cyNetwork, idAttribute, (String) null, writer, progress);
 	}
 

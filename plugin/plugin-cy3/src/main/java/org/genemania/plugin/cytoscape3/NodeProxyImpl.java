@@ -22,7 +22,8 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.genemania.plugin.proxies.NodeProxy;
 
-public class NodeProxyImpl extends ProxyImpl<CyNode> implements NodeProxy<CyNode> {
+public class NodeProxyImpl extends ProxyImpl<CyNode> implements NodeProxy {
+	
 	public NodeProxyImpl(CyNode node, CyNetwork network) {
 		super(node, network);
 	}
