@@ -175,7 +175,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	public void applyVisualization(
 			CyNetwork network,
 			Map<Long, Double> scores,
-			Map<String, Color> colors,
+			Map<String, Color> netColors,
 			double[] extrema
 	) {
 		VisualStyle style = styleFactory.createVisualStyle(getVisualStyleName(network));
@@ -204,7 +204,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 
 		// Edge mappings
 		DiscreteMapping<String, Paint> edgeColorMapping = (DiscreteMapping<String, Paint>) discreteFactory.createVisualMappingFunction(NETWORK_GROUP_NAME_ATTRIBUTE, String.class, EDGE_STROKE_UNSELECTED_PAINT);
-		edgeColorMapping.putAll(colors);
+		edgeColorMapping.putAll(netColors);
 		style.addVisualMappingFunction(edgeColorMapping);
 		
 		ContinuousMapping<Double, Double> edgeWidthMapping = (ContinuousMapping<Double, Double>) continuousFactory.createVisualMappingFunction(MAX_WEIGHT_ATTRIBUTE, Double.class, EDGE_WIDTH);

@@ -109,11 +109,7 @@ public class RetrieveRelatedGenesController {
 	private static final int MIN_CATEGORIES = 10;
 	private static final double Q_VALUE_THRESHOLD = 0.1;
 
-	private static Map<Long, Integer> sequenceNumbers;
-
-	static {
-		sequenceNumbers = new HashMap<>();
-	}
+	private static Map<Long, Integer> sequenceNumbers = new HashMap<>();
 
 	private final CytoscapeUtils cytoscapeUtils;
 	private final GeneMania plugin;
@@ -317,13 +313,13 @@ public class RetrieveRelatedGenesController {
 		SearchResult options = null;
 		String dataVersion = null; // TODO online?
 		double[] extrema =  null;
-		Map<String, Color> colors = null; // TODO online
+		Map<String, Color> networkColors = CytoscapeUtils.NETWORK_COLORS;
 		Map<Long, Double> scores = null;
 		
 		if (offline) {
 			DataSet data = plugin.getDataSetManager().getDataSet();
 			dataVersion = data.getVersion().toString();
-			colors = computeColors(data, organism);
+			networkColors = computeNetworkColors(data, organism);
 			
 			childProgress = new ChildProgressReporter(progress);
 			RelatedGenesEngineRequestDto request = createRequest(data, query, selectedGroups, childProgress);
@@ -398,7 +394,6 @@ public class RetrieveRelatedGenesController {
 				
 				String json = res.readEntity(String.class);
 				searchResults = gson.fromJson(json, SearchResults.class);
-				System.out.println(searchResults);
 			} finally {
 				if (res != null)
 					res.close();
@@ -448,7 +443,7 @@ public class RetrieveRelatedGenesController {
 			manager.addNetworkConfiguration(network, builder.build());
 	
 			cytoscapeUtils.registerSelectionListener(network, manager, plugin);
-			cytoscapeUtils.applyVisualization(network, filterGeneScores(scores, options), colors, extrema);
+			cytoscapeUtils.applyVisualization(network, filterGeneScores(scores, options), networkColors, extrema);
 		}
 		
 		return network;
@@ -575,18 +570,18 @@ public class RetrieveRelatedGenesController {
 		return scores;
 	}
 
-	private Map<String, Color> computeColors(DataSet data, Organism organism) {
+	private Map<String, Color> computeNetworkColors(DataSet data, Organism organism) {
 		Map<String, Color> colors = new HashMap<>();
 		Collection<InteractionNetworkGroup> groups = organism.getInteractionNetworkGroups();
 		
 		for (InteractionNetworkGroup group : groups) {
 			Colour color = data.getColor(group.getCode());
-			colors.put(group.getName(), new Color(color.getRgb())); 
+			colors.put(group.getName(), new Color(color.getRgb()));
 		}
 		
 		return colors;
 	}
-
+	
 	private static EdgeAttributeProvider createEdgeAttributeProvider(SearchResult options) {
 		final Map<Long, InteractionNetworkGroup> groupsByNetwork = options.getInteractionNetworkGroups();
 

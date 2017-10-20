@@ -20,6 +20,7 @@ package org.genemania.plugin.cytoscape;
 
 import java.awt.Color;
 import java.awt.Frame;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -83,6 +84,17 @@ public interface CytoscapeUtils {
 	
 	static final Color QUERY_COLOR = new Color(0, 0, 0);
 	static final Color RESULT_COLOR = new Color(159, 159, 159);
+	
+	/** To be used by the online search, when offline data might not have been installed. */
+	@SuppressWarnings("serial")
+	static final Map<String, Color> NETWORK_COLORS = new HashMap<String, Color>() {{
+		put("Shared protein domains", new Color(218, 212, 162));
+		put("Predicted", new Color(246, 195, 132));
+		put("Genetic interactions", new Color(144, 225, 144));
+		put("Co-localization", new Color(160, 179, 220));
+		put("Co-expression", new Color(208, 183, 213));
+		put("Physical interactions", new Color(234, 162, 162));
+	}};
 
 	void expandAttributes(CyNetwork cyNetwork, ViewState options, List<String> attributes);
 
@@ -92,7 +104,7 @@ public interface CytoscapeUtils {
 
 	void performLayout(CyNetwork network);
 
-	void applyVisualization(CyNetwork network, Map<Long, Double> filterGeneScores, Map<String, Color> computeColors,
+	void applyVisualization(CyNetwork network, Map<Long, Double> filterGeneScores, Map<String, Color> netColors,
 			double[] extrema);
 
 	CyNetwork createNetwork(String nextNetworkName, String dataVersion, SearchResult result, ViewStateBuilder options,

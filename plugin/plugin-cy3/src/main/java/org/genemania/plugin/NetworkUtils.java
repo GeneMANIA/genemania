@@ -85,7 +85,10 @@ import org.genemania.util.GeneLinkoutGenerator;
  * objects to Cytoscape objects.
  */
 public class NetworkUtils {
+	
+	
 	public NetworkUtils() {
+		
 	}
 	
 	/**
@@ -152,6 +155,7 @@ public class NetworkUtils {
 		ArrayList<T> list = new ArrayList<>();
 		list.addAll(scoredMap.keySet());
 		Collections.sort(list, new Comparator<T>() {
+			@Override
 			public int compare(T o1,T o2) {
 				double score1 = scoredMap.get(o1);
 				double score2 = scoredMap.get(o2);
@@ -163,6 +167,7 @@ public class NetworkUtils {
 	
 	public Comparator<Group<?, ?>> getNetworkGroupComparator() {
 		return new Comparator<Group<?, ?>>() {
+			@Override
 			public int compare(Group<?, ?> group1, Group<?, ?> group2) {
 				return group1.getName().compareToIgnoreCase(group2.getName());
 			}
@@ -171,6 +176,7 @@ public class NetworkUtils {
 	
 	public Comparator<Network<?>> getNetworkComparator() {
 		return new Comparator<Network<?>>() {
+			@Override
 			public int compare(Network<?> network1, Network<?> network2) {
 				return network1.getName().compareToIgnoreCase(network2.getName());
 			}
@@ -444,8 +450,6 @@ public class NetworkUtils {
 		return interactions;
 	}
 	
-	
-
 	public Map<InteractionNetwork, Double> computeNetworkWeights(List<NetworkDto> networks,
 			Map<Long, InteractionNetwork> canonicalNetworks, Map<Attribute, Double> attributeWeights) {
 		double totalAttributeWeight = 0;
