@@ -575,9 +575,29 @@ public class NetworkUtils {
 		Map<Long, InteractionNetworkGroup> groupsByNetwork = computeGroupsByNetwork(resNetGroups);
 		config.setGroups(groupsByNetwork);
 		
-		// Collect the unique set of nodes and genes so we don't end up keeping duplicate objects unnecessarily.
-		Map<Long, Gene> uniqueGenes = new HashMap<>();
 		Map<Long, Node> uniqueNodes = new HashMap<>();
+		sanitize(res, uniqueNodes);
+		
+		Map<Gene, Double> geneScores = computeGeneScores(res.getResultGenes(), params.getGenes());
+		config.setGeneScores(geneScores);
+		
+		Map<Long, InteractionNetwork> canonicalNetworks = computeCanonicalNetworks(groupsByNetwork);
+		computeSourceInteractions(resNetGroups, canonicalNetworks, uniqueNodes);
+		computeAttributes(config, res);
+		config.setNetworkWeights(computeNetworkWeights(resNetGroups, canonicalNetworks, config.getAttributeWeights()));
+		
+		if (res.getResultOntologyCategories() != null)
+			config.setEnrichment(processAnnotations(res.getResultOntologyCategories()));
+		
+		return config.build();
+	}
+
+	/**
+	 * Fixes the search results by replacing duplicated nodes and genes with unique instances and
+	 * setting missing attributes as required by this Cytoscape app. 
+	 */
+	private void sanitize(SearchResults res, Map<Long, Node> uniqueNodes) {
+		Map<Long, Gene> uniqueGenes = new HashMap<>();
 		
 		for (ResultGene resGene : res.getResultGenes()) {
 			Gene gene = resGene.getGene();
@@ -590,6 +610,9 @@ public class NetworkUtils {
 					uniqueNodes.put(node.getId(), node);
 			}
 		}
+		
+		Collection<ResultInteractionNetworkGroup> resNetGroups = res.getResultNetworkGroups();
+		
 		for (ResultInteractionNetworkGroup resGr : resNetGroups) {
 			for (ResultInteractionNetwork resNet : resGr.getResultNetworks()) {
 				for (ResultInteraction resInter : resNet.getResultInteractions()) {
@@ -613,35 +636,31 @@ public class NetworkUtils {
 				}
 			}
 		}
-		for (Gene gene : uniqueGenes.values()) {
-			Node node = uniqueNodes.get(gene.getNode().getId());
+		
+		// Fixes resultGenes and Node's genes
+		for (ResultGene resGene : res.getResultGenes()) {
+			Gene gene = resGene.getGene();
 			
-			if (node != null) {
-				gene.setNode(node);
-			
-				// Also set genes to each Node, because this relationship is missing
-				// when the data comes from the web service
-				Collection<Gene> geneList = node.getGenes();
+			if (gene != null) {
+				gene = uniqueGenes.get(gene.getId());
+				gene.setOrganism(res.getParameters().getOrganism());
+				resGene.setGene(gene);
 				
-				if (geneList == null)
-					node.setGenes(geneList = new ArrayList<>());
+				Node node = uniqueNodes.get(gene.getNode().getId());
 				
-				geneList.add(gene);
+				if (node != null) {
+					gene.setNode(node);
+					// Also set genes to each Node, because this relationship is missing
+					// when the data comes from the web service
+					Collection<Gene> geneList = node.getGenes();
+					
+					if (geneList == null)
+						node.setGenes(geneList = new ArrayList<>());
+					
+					geneList.add(gene);
+				}
 			}
-		} 
-		
-		Map<Gene, Double> geneScores = computeGeneScores(res.getResultGenes(), params.getGenes(), uniqueGenes);
-		config.setGeneScores(geneScores);
-		
-		Map<Long, InteractionNetwork> canonicalNetworks = computeCanonicalNetworks(groupsByNetwork);
-		computeSourceInteractions(resNetGroups, canonicalNetworks, uniqueNodes);
-		computeAttributes(config, res);
-		config.setNetworkWeights(computeNetworkWeights(resNetGroups, canonicalNetworks, config.getAttributeWeights()));
-		
-		if (res.getResultOntologyCategories() != null)
-			config.setEnrichment(processAnnotations(res.getResultOntologyCategories()));
-		
-		return config.build();
+		}
 	}
 	
 	public Map<Long, InteractionNetworkGroup> computeGroupsByNetwork(RelatedGenesEngineResponseDto response, DataSet data) {
@@ -900,8 +919,7 @@ public class NetworkUtils {
 	/**
 	 * Online Search.
 	 */
-	private Map<Gene, Double> computeGeneScores(Collection<ResultGene> resultGenes, Collection<Gene> queryGenes,
-			Map<Long, Gene> uniqueGenes) {
+	private Map<Gene, Double> computeGeneScores(Collection<ResultGene> resultGenes, Collection<Gene> queryGenes) {
 		double maxScore = 0;
 		Map<Gene, Double> scores = new HashMap<>();
 		
@@ -909,7 +927,6 @@ public class NetworkUtils {
 			Gene gene = resGene.getGene();
 			
 			if (gene != null) {
-				gene = uniqueGenes.get(gene.getId());
 				double score = resGene.getScore();
 				maxScore = Math.max(maxScore, score);
 				scores.put(gene, score);
