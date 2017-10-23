@@ -39,10 +39,12 @@ import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.swing.util.UserAction;
+import org.cytoscape.work.util.ListSingleSelection;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.InteractionNetworkGroup;
 import org.genemania.domain.Organism;
 import org.genemania.plugin.GeneMania;
+import org.genemania.plugin.Strings;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
@@ -52,6 +54,7 @@ import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
+import org.genemania.plugin.model.impl.WeightingMethod;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.type.CombiningMethod;
@@ -62,8 +65,20 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 	@Tunable(description = "Max Resultant Genes:", groups = { "_Default" }, gravity = 1.0)
 	public int geneLimit = 20;
 	
+	@Tunable(description = "Max Resultant Attributes:", groups = { "_Default" }, gravity = 1.1)
+	public int attributeLimit = 10;
+	
+	public ListSingleSelection<WeightingMethod> weighting;
+	@Tunable(description = "Weighting:", groups = { "_Default" }, gravity = 1.2)
+	public ListSingleSelection<WeightingMethod> getWeighting() {
+		return weighting;
+	}
+	public void setWeighting(ListSingleSelection<WeightingMethod> weighting) {
+		this.weighting = weighting;
+	}
+	
 	public boolean offline;
-	@Tunable(description = "Offline Search:", groups = { "_Default" }, gravity = 1.1)
+	@Tunable(description = "Offline Search:", groups = { "_Default" }, gravity = 1.3)
 	public boolean getOffline() {
 		return offline;
 	}
@@ -115,6 +130,17 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
+		
+		List<WeightingMethod> weightingValues = new ArrayList<>();
+		weightingValues.add(new WeightingMethod(CombiningMethod.AUTOMATIC_SELECT, Strings.default_combining_method));
+		weightingValues.add(new WeightingMethod(CombiningMethod.AUTOMATIC, Strings.automatic));
+		weightingValues.add(new WeightingMethod(CombiningMethod.BP, Strings.bp));
+		weightingValues.add(new WeightingMethod(CombiningMethod.MF, Strings.mf));
+		weightingValues.add(new WeightingMethod(CombiningMethod.CC, Strings.cc));
+		weightingValues.add(new WeightingMethod(CombiningMethod.AVERAGE, Strings.average));
+		weightingValues.add(new WeightingMethod(CombiningMethod.AVERAGE_CATEGORY, Strings.average_category));
+		weighting = new ListSingleSelection<>(weightingValues);
+		weighting.setSelectedValue(weightingValues.get(0));
 		
 		setOffline(organismManager.isOffline());
 		organismManager.addPropertyChangeListener("offline", evt -> setOffline(organismManager.isOffline()));
@@ -239,8 +265,9 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		query.setOrganism(queryBar.getSelectedOrganism());
 		query.setGenes(new ArrayList<>(queryBar.getQueryGenes()));
 		query.setGeneLimit(geneLimit);
-		query.setAttributeLimit(0);
-		query.setCombiningMethod(CombiningMethod.AUTOMATIC_SELECT);
+		query.setAttributeLimit(attributeLimit);
+		query.setCombiningMethod(getWeighting().getSelectedValue() != null ?
+				getWeighting().getSelectedValue().getMethod() : CombiningMethod.AUTOMATIC_SELECT);
 		query.setScoringMethod(ScoringMethod.DISCRIMINANT);
 		
 		return query;

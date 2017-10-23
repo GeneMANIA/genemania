@@ -532,7 +532,7 @@ public class RetrieveRelatedGenesController {
 		for (ResultInteractionNetworkGroup resNetGr : results.getResultNetworkGroups()) {
 			for (ResultInteractionNetwork resNet : resNetGr.getResultNetworks()) {
 				for (ResultInteraction resInter : resNet.getResultInteractions()) {
-					double weight = resInter.getInteraction().getWeight();// * resNet.getWeight();// TODO review
+					double weight = resInter.getInteraction().getWeight() * resNet.getWeight();// TODO review
 					
 					if (extrema[0] > weight)
 						extrema[0] = weight;
@@ -563,9 +563,8 @@ public class RetrieveRelatedGenesController {
 	private Map<Long, Double> computeGeneScores(Collection<ResultGene> genes) {
 		Map<Long, Double> scores = new HashMap<>();
 		
-		for (ResultGene resGene : genes) {// TODO confirm ID is from Node and not Gene
+		for (ResultGene resGene : genes)
 			scores.put(resGene.getGene().getNode().getId(), resGene.getScore());
-		}
 		
 		return scores;
 	}

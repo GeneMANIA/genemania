@@ -117,6 +117,7 @@ import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.model.impl.QueryAttributeGroupImpl;
 import org.genemania.plugin.model.impl.QueryAttributeNetworkImpl;
+import org.genemania.plugin.model.impl.WeightingMethod;
 import org.genemania.plugin.parsers.IQueryParser;
 import org.genemania.plugin.parsers.JsonQueryParser;
 import org.genemania.plugin.parsers.Query;
@@ -154,9 +155,9 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	private JLabel networkMissingLabel;
 	
 	private Organism selectedOrganism;
-	private JComboBox organismComboBox;
+	private JComboBox<ModelElement<Organism>> organismComboBox;
 	private JTextField limitTextField;
-	private JComboBox weightingMethodComboBox;
+	private JComboBox<WeightingMethod> weightingMethodComboBox;
 	
 	private JLabel totalOrganismsLabel;
 	private JLabel totalNetworksLabel;
@@ -287,7 +288,7 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 			
 	    	try {
 	    		Vector<ModelElement<Organism>> model = controller.createModel(data);
-	    		getOrganismComboBox().setModel(new DefaultComboBoxModel(model));
+	    		getOrganismComboBox().setModel(new DefaultComboBoxModel<>(model));
 			} catch (DataStoreException e) {
 				throw new ApplicationException(e);
 			}
@@ -720,17 +721,11 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		return limitPanel;
 	}
 	
-	private JComboBox getOrganismComboBox() {
+	private JComboBox<ModelElement<Organism>> getOrganismComboBox() {
 		if (organismComboBox == null) {
-	        organismComboBox = new JComboBox();
+	        organismComboBox = new JComboBox<>();
 	        organismComboBox.setToolTipText(Strings.retrieveRelatedGenesOrganismComboBox_label);
-	        
-	        organismComboBox.addActionListener(new ActionListener() {
-	        	@Override
-				public void actionPerformed(ActionEvent event) {
-					handleOrganismSelected();
-				}
-	        });
+	        organismComboBox.addActionListener(evt -> handleOrganismSelected());
 		}
 		
 		return organismComboBox;
@@ -845,9 +840,9 @@ public class RetrieveRelatedGenesDialog extends JDialog {
  		return startButton;
 	}
 	
-	private JComboBox getWeightingMethodComboBox() {
+	private JComboBox<WeightingMethod> getWeightingMethodComboBox() {
 		if (weightingMethodComboBox == null) {
-			weightingMethodComboBox = new JComboBox();
+			weightingMethodComboBox = new JComboBox<>();
 		}
 		
 		return weightingMethodComboBox;
@@ -1073,7 +1068,7 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	}
 	
 	private void updateCombiningMethods(Organism organism) {
-		final JComboBox cmb = getWeightingMethodComboBox();
+		final JComboBox<WeightingMethod> cmb = getWeightingMethodComboBox();
 		cmb.removeAllItems();
 		
 		if (organism == null)
@@ -1081,21 +1076,21 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		
 		boolean hasAnnotations = organism.getOntology() != null;
 		
-        cmb.addItem(new WeightingMethodEntry(CombiningMethod.AUTOMATIC_SELECT, Strings.default_combining_method));
-        cmb.addItem(new WeightingMethodEntry(CombiningMethod.AUTOMATIC, Strings.automatic));
+        cmb.addItem(new WeightingMethod(CombiningMethod.AUTOMATIC_SELECT, Strings.default_combining_method));
+        cmb.addItem(new WeightingMethod(CombiningMethod.AUTOMATIC, Strings.automatic));
         
         if (hasAnnotations) {
-	        cmb.addItem(new WeightingMethodEntry(CombiningMethod.BP, Strings.bp));
-	        cmb.addItem(new WeightingMethodEntry(CombiningMethod.MF, Strings.mf));
-	        cmb.addItem(new WeightingMethodEntry(CombiningMethod.CC, Strings.cc));
+	        cmb.addItem(new WeightingMethod(CombiningMethod.BP, Strings.bp));
+	        cmb.addItem(new WeightingMethod(CombiningMethod.MF, Strings.mf));
+	        cmb.addItem(new WeightingMethod(CombiningMethod.CC, Strings.cc));
         }
         
-        cmb.addItem(new WeightingMethodEntry(CombiningMethod.AVERAGE, Strings.average));
-        cmb.addItem(new WeightingMethodEntry(CombiningMethod.AVERAGE_CATEGORY, Strings.average_category));
+        cmb.addItem(new WeightingMethod(CombiningMethod.AVERAGE, Strings.average));
+        cmb.addItem(new WeightingMethod(CombiningMethod.AVERAGE_CATEGORY, Strings.average_category));
 	}
 
 	CombiningMethod getCombiningMethod() {
-		return ((WeightingMethodEntry) getWeightingMethodComboBox().getSelectedItem()).getMethod();
+		return ((WeightingMethod) getWeightingMethodComboBox().getSelectedItem()).getMethod();
 	}
 	
 	ScoringMethod getScoringMethod() {
@@ -1173,10 +1168,9 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		taskDispatcher.executeTask(task, this, true, false);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void applyQuery(Query query) throws ApplicationException {
 		Organism organism = query.getOrganism();
-		ComboBoxModel model = getOrganismComboBox().getModel();		
+		ComboBoxModel<ModelElement<Organism>> model = getOrganismComboBox().getModel();		
 		
 		for (int i = 0; i < model.getSize(); i++) {
 			ModelElement<Organism> element = (ModelElement<Organism>) model.getElementAt(i);
@@ -1193,11 +1187,11 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		selectionPanel.setSelection(query);
 		getLimitTextField().setText(String.valueOf(query.getGeneLimit()));
 		
-		ComboBoxModel weightingMethodModel = getWeightingMethodComboBox().getModel();
+		ComboBoxModel<WeightingMethod> weightingMethodModel = getWeightingMethodComboBox().getModel();
 		CombiningMethod combiningMethod = query.getCombiningMethod();
 		
 		for (int i = 0; i < weightingMethodModel.getSize(); i++) {
-			WeightingMethodEntry entry = (WeightingMethodEntry) weightingMethodModel.getElementAt(i);
+			WeightingMethod entry = (WeightingMethod) weightingMethodModel.getElementAt(i);
 			
 			if (entry.getMethod().equals(combiningMethod)) {
 				weightingMethodModel.setSelectedItem(entry);
@@ -1232,25 +1226,6 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		int w = Math.max((size != null ? size.width : 0), prefSize.width);
 		int h = Math.max((size != null ? size.height : 0), prefSize.height);
 		this.setSize(new Dimension(w, h));
-	}
-	
-	static class WeightingMethodEntry {
-		CombiningMethod method;
-		String description;
-		
-		public WeightingMethodEntry(CombiningMethod method, String description) {
-			this.method = method;
-			this.description = description;
-		}
-		
-		public CombiningMethod getMethod() {
-			return method;
-		}
-
-		@Override
-		public String toString() {
-			return description;
-		}
 	}
 	
 	enum Status {
