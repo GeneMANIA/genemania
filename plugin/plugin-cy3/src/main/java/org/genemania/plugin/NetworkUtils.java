@@ -591,7 +591,7 @@ public class NetworkUtils {
 		config.setNetworkWeights(computeNetworkWeights(resNetGroups, canonicalNetworks, config.getAttributeWeights()));
 		
 		if (res.getResultOntologyCategories() != null)
-			config.setEnrichment(processAnnotations(res.getResultOntologyCategories()));
+			config.setEnrichment(processAnnotations(res));
 		
 		return config.build();
 	}
@@ -829,7 +829,7 @@ public class NetworkUtils {
 		Map<Long, Collection<Attribute>> attributesByNode = new HashMap<>();
 		Map<Attribute, Double> weights = new HashMap<>();
 		
-		// FIXME empty list!!!
+		// FIXME always returns empty list???
 		for (ResultAttributeGroup resGr : res.getResultAttributeGroups()) {
 			for (ResultAttribute resAttr : resGr.getResultAttributes()) {
 				Attribute attr = resAttr.getAttribute();
@@ -1011,18 +1011,18 @@ public class NetworkUtils {
 			long nodeId = entry.getKey();
 			Set<AnnotationEntry> nodeAnnotations = new HashSet<>();
 			
-			for (OntologyCategoryDto categoryVo : entry.getValue()) {
-				long categoryId = categoryVo.getId();
-				AnnotationEntry annotation = annotationCache.get(categoryId);
+			for (OntologyCategoryDto dto : entry.getValue()) {
+				long catId = dto.getId();
+				AnnotationEntry annotation = annotationCache.get(catId);
 				
 				if (annotation == null) {
 					try {
-						OntologyCategory category = mediator.getCategory(categoryId);
-						annotation = new AnnotationEntry(category, categoryVo);
-						annotationCache.put(categoryId, annotation);
+						OntologyCategory cat = mediator.getCategory(catId);
+						annotation = new AnnotationEntry(cat, dto);
+						annotationCache.put(catId, annotation);
 					} catch (DataStoreException e) {
 						Logger logger = Logger.getLogger(NetworkUtils.class);
-						logger.error(String.format("Can't find category: %d", categoryId), e); //$NON-NLS-1$
+						logger.error(String.format("Can't find category: %d", catId), e); //$NON-NLS-1$
 						continue;
 					}
 				}
@@ -1030,44 +1030,48 @@ public class NetworkUtils {
 				nodeAnnotations.add(annotation);
 			}
 			
-			if (nodeAnnotations.size() > 0)
+			if (!nodeAnnotations.isEmpty())
 				result.put(nodeId, nodeAnnotations);
 		}
 		
 		return result;
 	}
 	
-	private Map<Long, Collection<AnnotationEntry>> processAnnotations(Collection<ResultOntologyCategory> collection) {
-		// TODO
+	private Map<Long, Collection<AnnotationEntry>> processAnnotations(SearchResults res) {
 		Map<Long, Collection<AnnotationEntry>> result = new HashMap<>();
 		Map<Long, AnnotationEntry> annotationCache = new HashMap<>();
-//		
-//		for (Entry<Long, Collection<OntologyCategoryDto>> entry : collection.entrySet()) {
-//			long nodeId = entry.getKey();
-//			Set<AnnotationEntry> nodeAnnotations = new HashSet<>();
-//			
-//			for (OntologyCategoryDto categoryVo : entry.getValue()) {
-//				long categoryId = categoryVo.getId();
-//				AnnotationEntry annotation = annotationCache.get(categoryId);
-//				
-//				if (annotation == null) {
-//					try {
-//						OntologyCategory category = mediator.getCategory(categoryId);
-//						annotation = new AnnotationEntry(category, categoryVo);
-//						annotationCache.put(categoryId, annotation);
-//					} catch (DataStoreException e) {
-//						Logger logger = Logger.getLogger(NetworkUtils.class);
-//						logger.error(String.format("Can't find category: %d", categoryId), e); //$NON-NLS-1$
-//						continue;
-//					}
-//				}
-//				
-//				nodeAnnotations.add(annotation);
-//			}
-//			
-//			if (nodeAnnotations.size() > 0)
-//				result.put(nodeId, nodeAnnotations);
-//		}
+		
+		for (ResultGene resGene : res.getResultGenes()) {
+			long nodeId = resGene.getGene().getNode().getId();
+			Collection<ResultOntologyCategory> resultOntologyCategories = resGene.getResultOntologyCategories();
+			Set<AnnotationEntry> nodeAnnotations = new HashSet<>();
+			
+			if (resultOntologyCategories == null)
+				continue;
+			
+			for (ResultOntologyCategory resCat : resultOntologyCategories) {
+				OntologyCategory cat = resCat.getOntologyCategory();
+				long catId = cat.getId();
+				AnnotationEntry annotation = annotationCache.get(catId);
+					
+				if (annotation == null) {
+					OntologyCategoryDto dto = new OntologyCategoryDto();
+					dto.setId(catId);
+					dto.setNumAnnotatedInSample(resCat.getNumAnnotatedInSample());
+					dto.setNumAnnotatedInTotal(resCat.getNumAnnotatedInTotal());
+					dto.setpValue(resCat.getpValue());
+					dto.setqValue(resCat.getqValue());
+					
+					annotation = new AnnotationEntry(cat, dto);
+					annotationCache.put(catId, annotation);
+				}
+				
+				nodeAnnotations.add(annotation);
+			}
+				
+			if (!nodeAnnotations.isEmpty())
+				result.put(nodeId, nodeAnnotations);
+		}
 		
 		return result;
 	}
