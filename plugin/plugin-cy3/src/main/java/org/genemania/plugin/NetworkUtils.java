@@ -70,6 +70,8 @@ import org.genemania.mediator.AttributeMediator;
 import org.genemania.mediator.GeneMediator;
 import org.genemania.mediator.NodeMediator;
 import org.genemania.mediator.OntologyMediator;
+import org.genemania.plugin.cytoscape.CytoscapeUtils;
+import org.genemania.plugin.data.Colour;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.IMediatorProvider;
 import org.genemania.plugin.model.AnnotationEntry;
@@ -184,7 +186,10 @@ public class NetworkUtils {
 	}
 	
 	public Color getNetworkColor(DataSet data, Group<?, ?> group) {
-		return new Color(data.getColor(group.getCode()).getRgb());
+		Colour colour = data.getColor(group.getCode());
+		Color color = colour != null ? new Color(colour.getRgb()): CytoscapeUtils.NETWORK_COLORS.get(group.getName());
+		
+		return color != null ? color : CytoscapeUtils.DEFAULT_NETWORK_COLOUR;
 	}
 	
 	public String buildDescriptionHtml(Network<?> network, Group<?, ?> group) {

@@ -54,7 +54,13 @@ public class NetworkDetailPanel extends ToggleDetailPanel<Network<?>> {
 	private int barYOffset = -1;
 	private JLabel nameLabel;
 	
-	public NetworkDetailPanel(Network<?> network, Group<?, ?> group, NetworkUtils networkUtils, UiUtils uiUtils, DataSet data) {
+	public NetworkDetailPanel(
+			Network<?> network,
+			Group<?, ?> group,
+			NetworkUtils networkUtils,
+			UiUtils uiUtils,
+			DataSet data
+	) {
 		super(uiUtils);
 		this.networkUtils = networkUtils;
 		this.network = network;

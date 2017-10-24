@@ -76,7 +76,6 @@ import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape.EdgeAttributeProvider;
-import org.genemania.plugin.data.Colour;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.formatters.OrganismFormatter;
 import org.genemania.plugin.model.Group;
@@ -86,6 +85,7 @@ import org.genemania.plugin.model.OrganismComparator;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
+import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.model.impl.ViewStateImpl;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.proxies.EdgeProxy;
@@ -574,8 +574,8 @@ public class RetrieveRelatedGenesController {
 		Collection<InteractionNetworkGroup> groups = organism.getInteractionNetworkGroups();
 		
 		for (InteractionNetworkGroup group : groups) {
-			Colour color = data.getColor(group.getCode());
-			colors.put(group.getName(), new Color(color.getRgb()));
+			Color color = networkUtils.getNetworkColor(data, new InteractionNetworkGroupImpl(group));
+			colors.put(group.getName(), color);
 		}
 		
 		return colors;

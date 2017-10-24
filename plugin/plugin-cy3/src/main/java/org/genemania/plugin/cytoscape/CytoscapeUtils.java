@@ -84,16 +84,17 @@ public interface CytoscapeUtils {
 	
 	static final Color QUERY_COLOR = new Color(0, 0, 0);
 	static final Color RESULT_COLOR = new Color(159, 159, 159);
+	static final Color DEFAULT_NETWORK_COLOUR = new Color(0xd0d0d0);
 	
 	/** To be used by the online search, when offline data might not have been installed. */
 	@SuppressWarnings("serial")
 	static final Map<String, Color> NETWORK_COLORS = new HashMap<String, Color>() {{
 		put("Shared protein domains", new Color(218, 212, 162));
 		put("Predicted", new Color(246, 195, 132));
-		put("Genetic interactions", new Color(144, 225, 144));
+		put("Genetic Interactions", new Color(144, 225, 144));
 		put("Co-localization", new Color(160, 179, 220));
 		put("Co-expression", new Color(208, 183, 213));
-		put("Physical interactions", new Color(234, 162, 162));
+		put("Physical Interactions", new Color(234, 162, 162));
 	}};
 
 	void expandAttributes(CyNetwork cyNetwork, ViewState options, List<String> attributes);

@@ -123,7 +123,6 @@ public class LuceneDataSet extends DataSet {
 	
 	private static final String METADATA_SHORT_NAME = "short_name"; //$NON-NLS-1$
 	private static final String METADATA_COMMON_NAME = "common_name"; //$NON-NLS-1$
-	private static final Colour DEFAULT_COLOUR = new Colour(0xd0d0d0);
 	
 	private Searcher searcher;
 	
@@ -625,10 +624,8 @@ public class LuceneDataSet extends DataSet {
 	@Override
 	public Colour getColor(String code) {
 		String color = getFieldByValue(LuceneMediator.GROUP_CODE, code, LuceneMediator.GROUP_COLOUR);
-		if (color != null) {
-			return new Colour(Integer.parseInt(color, 16));
-		}
-		return DEFAULT_COLOUR;
+		
+		return color != null ? new Colour(Integer.parseInt(color, 16)) : null;
 	}
 
 	@Override
