@@ -418,8 +418,16 @@ public class RetrieveRelatedGenesController {
 			}
 			
 			extrema = computeEdgeWeightExtrema(searchResults);
-			
 			options = networkUtils.createSearchOptions(searchResults);
+			
+			// On online searches, the user cannot select network groups yet, so we need to get all groups
+			// returned with the response, otherwise all of them will be unchecked on the Networks panel by the default.
+			if (selectedGroups == null || selectedGroups.isEmpty()) {
+				selectedGroups = new HashSet<>();
+				
+				for (InteractionNetworkGroup group : options.getInteractionNetworkGroups().values())
+					selectedGroups.add(new InteractionNetworkGroupImpl(group));
+			}
 		}
 		
 		CyNetwork network = null;

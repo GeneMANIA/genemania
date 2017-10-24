@@ -167,9 +167,9 @@ public class NetworkGroupDetailPanel extends ToggleDetailPanel<Group<?, ?>> {
 	}
 
 	public void setItemEnabled(boolean enabled) {
-		if (!getEnabled() && enabled) {
+		if (!getEnabled() && enabled)
 			return;
-		}
+		
 		toggleBox.setSelected(enabled);
 	}
 
