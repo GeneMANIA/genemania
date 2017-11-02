@@ -20,16 +20,14 @@ package org.genemania.plugin.cytoscape3.task;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
 import javax.ws.rs.core.Response;
 
 import org.cytoscape.application.swing.CySwingApplication;
-import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
@@ -40,15 +38,12 @@ import org.cytoscape.work.json.JSONResult;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.genemania.domain.Organism;
 import org.genemania.domain.SearchRequest;
-import org.genemania.exception.DataStoreException;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
-import org.genemania.plugin.data.DataSet;
-import org.genemania.plugin.data.DataSetManager;
+import org.genemania.plugin.cytoscape3.model.OrganismManager;
 import org.genemania.plugin.model.Group;
-import org.genemania.plugin.model.ModelElement;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.NetworkSelectionManager;
@@ -63,7 +58,7 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 	public boolean offline;
 	
 	@Tunable(description = "Organism", context = "nogui")
-	public ListSingleSelection<Organism> organism = new ListSingleSelection<>();
+	public String organism;
 	
 	@Tunable(description = "List of query genes", context = "nogui")
 	public String genes;
@@ -85,6 +80,7 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 	
 	private final GeneMania plugin;
 	private final RetrieveRelatedGenesController controller;
+	private final OrganismManager organismManager;
 	private final NetworkUtils networkUtils;
 	private final CytoscapeUtils cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
@@ -92,45 +88,33 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 	public SearchCommandTask(
 			GeneMania plugin,
 			RetrieveRelatedGenesController controller,
+			OrganismManager organismManager,
 			NetworkUtils networkUtils,
 			CytoscapeUtils cytoscapeUtils, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
 		this.controller = controller;
+		this.organismManager = organismManager;
 		this.networkUtils = networkUtils;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.serviceRegistrar = serviceRegistrar;
 		
 		combiningMethod.setSelectedValue(CombiningMethod.AUTOMATIC_SELECT);
 		scoringMethod.setSelectedValue(ScoringMethod.DISCRIMINANT);
-		
-		DataSetManager dataSetManager = plugin.getDataSetManager();
-		DataSet data = dataSetManager.getDataSet();
-		
-		try {
-			Vector<ModelElement<Organism>> orgVector = data != null ? controller.createModel(data) : new Vector<>();
-			List<Organism> orgList = new ArrayList<>();
-			
-			for (ModelElement<Organism> me : orgVector)
-				orgList.add(me.getItem());
-			
-			organism.setPossibleValues(orgList);
-		} catch (DataStoreException e) {
-			throw new RuntimeException("Cannot retrieve available organisms", e);
-		}
 	}
 	
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
 		tm.setTitle("GeneMANIA");
+		
 		tm.setStatusMessage("Validating search...");
 		tm.setProgress(-1);
 		
 		Query query = getQuery();
 		
 		if (query.getOrganism() == null)
-			throw new RuntimeException("Please specify an organism.");
+			throw new RuntimeException("Please specify a valid organism.");
 		if (query.getGenes() == null || query.getGenes().isEmpty())
 			throw new RuntimeException("Please enter one or more genes.");
 		if (offline && !SimpleSearchTaskFactory.hasValidGenes(query.getOrganism(), query.getGenes(), plugin))
@@ -269,6 +253,7 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 	}
 	
 	private Query getQuery() {
+		// Create list of gene names
 		List<String> geneList = new ArrayList<>();
 		
 		if (genes != null) {
@@ -282,9 +267,17 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 			}
 		}
 		
+		// Retrieve Organism object
+		if (organism != null)
+			organism = organism.trim();
+		
+		Set<Organism> organismSet = offline ? organismManager.getLocalOrganisms()
+				: organismManager.getRemoteOrganisms();
+		
+		// Create Query object
 		final Query query = new Query();
+		query.setOrganism(findOrganism(organismSet));
 		query.setGenes(geneList);
-		query.setOrganism(organism.getSelectedValue());
 		query.setGeneLimit(geneLimit);
 		query.setAttributeLimit(0);
 		query.setCombiningMethod(combiningMethod.getSelectedValue() != null ?
@@ -293,5 +286,15 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 				scoringMethod.getSelectedValue() : ScoringMethod.DISCRIMINANT);
 		
 		return query;
+	}
+
+	private Organism findOrganism(Set<Organism> organismsList) {
+		for (Organism org : organismsList) {
+			if (org.getName().equalsIgnoreCase(organism) || org.getAlias().equalsIgnoreCase(organism)
+					|| String.valueOf(org.getTaxonomyId()).equals(organism))
+				return org;
+		}
+		
+		return null;
 	}
 }

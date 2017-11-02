@@ -25,11 +25,13 @@ import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
+import org.genemania.plugin.cytoscape3.model.OrganismManager;
 
 public class SearchCommandTaskFactory extends AbstractTaskFactory {
 
 	private final GeneMania plugin;
 	private final RetrieveRelatedGenesController controller;
+	private final OrganismManager organismManager;
 	private final NetworkUtils networkUtils;
 	private final CytoscapeUtils cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
@@ -37,12 +39,14 @@ public class SearchCommandTaskFactory extends AbstractTaskFactory {
 	public SearchCommandTaskFactory(
 			GeneMania plugin,
 			RetrieveRelatedGenesController controller,
+			OrganismManager organismManager,
 			NetworkUtils networkUtils,
 			CytoscapeUtils cytoscapeUtils, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
 		this.controller = controller;
+		this.organismManager = organismManager;
 		this.networkUtils = networkUtils;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.serviceRegistrar = serviceRegistrar;
@@ -51,6 +55,7 @@ public class SearchCommandTaskFactory extends AbstractTaskFactory {
 	@Override
 	public TaskIterator createTaskIterator() {
 		return new TaskIterator(
-				new SearchCommandTask(plugin, controller, networkUtils, cytoscapeUtils, serviceRegistrar));
+				new SearchCommandTask(plugin, controller, organismManager, networkUtils, cytoscapeUtils,
+						serviceRegistrar));
 	}
 }

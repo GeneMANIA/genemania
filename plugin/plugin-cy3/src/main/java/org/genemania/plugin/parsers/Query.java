@@ -36,98 +36,101 @@ import org.genemania.type.ScoringMethod;
 
 public final class Query {
 	
-	private Organism fOrganism;
-	private List<String> fGenes;
-	private Collection<Group<?, ?>> fNetworks;
-	private int fGeneLimit;
-	private CombiningMethod fCombiningMethod;
-	private ScoringMethod fScoringMethod;
-	private Collection<Long> fNodes;
-	private Collection<AttributeGroup> fAttributes;
-	private int fAttributeLimit;
+	private Organism organism;
+	private List<String> genes;
+	private Collection<Group<?, ?>> networks;
+	private int geneLimit;
+	private CombiningMethod combiningMethod;
+	private ScoringMethod scoringMethod;
+	private Collection<Long> nodes;
+	private Collection<AttributeGroup> attributes;
+	private int attributeLimit;
 	
 	public Organism getOrganism() {
-		return fOrganism;
+		return organism;
 	}
 	
 	public List<String> getGenes() {
-		return fGenes;
+		return genes;
 	}
 	
 	public Collection<Group<?, ?>> getNetworks() {
-		return fNetworks;
+		return networks;
 	}
 	
 	public Collection<AttributeGroup> getAttributes() {
-		return fAttributes;
+		return attributes;
 	}
 	
 	public int getGeneLimit() {
-		return fGeneLimit;
+		return geneLimit;
 	}
 	
 	public int getAttributeLimit() {
-		return fAttributeLimit;
+		return attributeLimit;
 	}
 	
 	public CombiningMethod getCombiningMethod() {
-		return fCombiningMethod;
+		return combiningMethod;
 	}
 	
 	public ScoringMethod getScoringMethod() {
-		return fScoringMethod;
+		return scoringMethod;
 	}
 	
 	public Collection<Long> getNodes() {
-		return fNodes;
+		return nodes;
 	}
 	
 	public void setOrganism(Organism organism) {
-		fOrganism = organism;
+		this.organism = organism;
 	}
 	
 	public void setGenes(List<String> genes) {
-		fGenes = genes;
+		this.genes = genes;
 	}
 	
 	public void setNetworks(Collection<Group<?, ?>> groups) {
-		fNetworks = groups;
+		this.networks = groups;
 	}
 	
 	public void setAttributes(Collection<AttributeGroup> attributes) {
-		fAttributes = attributes;
+		this.attributes = attributes;
 	}
 	
 	public void setGeneLimit(int limit) {
-		fGeneLimit = limit;
+		this.geneLimit = limit;
 	}
 	
 	public void setAttributeLimit(int limit) {
-		fAttributeLimit = limit;
+		this.attributeLimit = limit;
 	}
 	
 	public void setCombiningMethod(CombiningMethod method) {
-		fCombiningMethod = method;
+		this.combiningMethod = method;
 	}
 	
 	public void setScoringMethod(ScoringMethod method) {
-		fScoringMethod = method;
+		this.scoringMethod = method;
 	}
 	
 	public void setNodes(Collection<Long> nodes) {
-		fNodes = nodes;
+		this.nodes = nodes;
 	}
 	
 	public String toJson() throws IOException {
 		StringWriter writer = new StringWriter();
 		JsonFactory jsonFactory = new MappingJsonFactory();
+		
 		try {
 			JsonGenerator generator = jsonFactory.createJsonGenerator(writer);
 			generator.writeStartObject();
+			
 			try {
 			} finally {
 				generator.writeEndObject();
 			}
+			
 			return writer.toString();
 		} catch (JsonGenerationException e) {
 			throw new IOException(e.getMessage());
