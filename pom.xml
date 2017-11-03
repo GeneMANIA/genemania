@@ -7,7 +7,7 @@
     <groupId>org.genemania</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.5.0</version>
+    <version>3.6.0</version>
     <name>GeneMANIA Parent</name>
 
     <modules>
