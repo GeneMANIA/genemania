@@ -77,8 +77,9 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		this.weighting = weighting;
 	}
 	
-	public boolean offline;
-	@Tunable(description = "Offline Search:", groups = { "_Default" }, gravity = 1.3)
+	/** The simple search must be online only for now! */
+	private boolean offline;
+//	@Tunable(description = "Offline Search:", groups = { "_Default" }, gravity = 1.3)
 	public boolean getOffline() {
 		return offline;
 	}

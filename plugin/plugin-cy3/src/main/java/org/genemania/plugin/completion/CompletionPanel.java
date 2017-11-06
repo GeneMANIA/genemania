@@ -57,10 +57,13 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultEditorKit;
 
@@ -81,10 +84,9 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.util.ProgressReporter;
 
+@SuppressWarnings("serial")
 public class CompletionPanel extends JPanel {
 	
-	private static final long serialVersionUID = 1L;
-
 	private static final String GENE_HINT = Strings.completionPanelGeneHint_label;
 	private static final Color PROPOSAL_BG_COLOR = Color.WHITE;
 
@@ -120,7 +122,12 @@ public class CompletionPanel extends JPanel {
 
 	private final TaskDispatcher taskDispatcher;
 	
-	public CompletionPanel(int autoTriggerThreshold, NetworkUtils networkUtils, UiUtils uiUtils, TaskDispatcher taskDispatcher) {
+	public CompletionPanel(
+			int autoTriggerThreshold,
+			NetworkUtils networkUtils,
+			UiUtils uiUtils,
+			TaskDispatcher taskDispatcher
+	) {
 		this.networkUtils = networkUtils;
 		this.uiUtils = uiUtils;
 		this.taskDispatcher = taskDispatcher;
@@ -352,6 +359,21 @@ public class CompletionPanel extends JPanel {
 		if (resultTable == null) {
 			resultTable = createTable(resultModel);
 			resultTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			
+			final TableCellRenderer defHeaderRenderer = resultTable.getTableHeader().getDefaultRenderer();
+			
+			resultTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
+				@Override
+				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+						boolean hasFocus, int row, int column) {
+					Component c = defHeaderRenderer.getTableCellRendererComponent(table, value, isSelected,
+							hasFocus, row, column);
+					c.setForeground(table.isEnabled() ? 
+							this.getForeground() : UIManager.getColor("Label.disabledForeground"));
+					
+					return c;
+				}
+			});
 			
 			resultTable.addFocusListener(new FocusListener() {
 				@Override

@@ -34,7 +34,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.KeyAdapter;
@@ -53,6 +52,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -66,6 +66,7 @@ import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
@@ -87,6 +88,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.text.NumberFormatter;
 
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.AttributeGroup;
 import org.genemania.domain.InteractionNetwork;
@@ -130,6 +132,7 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.util.CollapsiblePanel;
 import org.genemania.plugin.view.util.CollapsiblePanel.CollapseListener;
 import org.genemania.plugin.view.util.FileSelectionMode;
+import org.genemania.plugin.view.util.IconManager;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
@@ -138,6 +141,9 @@ import org.genemania.util.ProgressReporter;
 @SuppressWarnings("serial")
 public class RetrieveRelatedGenesDialog extends JDialog {
 	
+	private final Font labelFont = new JLabel().getFont().deriveFont(UiUtils.INFO_FONT_SIZE);
+	
+	private JPanel warningPanel;
 	private JPanel dataPanel;
 	private JPanel basicPanel;
 	private CollapsiblePanel advancedPanel;
@@ -153,6 +159,8 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	private JLabel organismMissingLabel;
 	private JLabel geneMissingLabel;
 	private JLabel networkMissingLabel;
+	/** Contains all Data Panel components that should be displayed only if there is a data set installed.  */
+	private Set<JComponent> dataComponents = new HashSet<>();
 	
 	private Organism selectedOrganism;
 	private JComboBox<ModelElement<Organism>> organismComboBox;
@@ -198,7 +206,7 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 			TaskDispatcher taskDispatcher,
 			GeneMania plugin
 	) {
-    	super(owner, Strings.default_title, modality);
+    	super(owner, "GeneMANIA Advanced Search", modality);
     	this.controller = controller;
     	this.networkUtils = networkUtils;
     	this.uiUtils = uiUtils;
@@ -235,10 +243,10 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		root.getActionMap().put(key, action);
 		root.getInputMap(JRootPane.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), key);
 		
-        addComponents();
-        
-        try {
-        	setDataSet(dataSetManager.getDataSet());
+		addComponents();
+
+		try {
+			setDataSet(dataSetManager.getDataSet());
 		} catch (ApplicationException e) {
 			LogUtils.log(getClass(), e);
 		}
@@ -286,13 +294,13 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		} else {
 			dataVersionLabel.setText(data.getDescription());
 			
-	    	try {
-	    		Vector<ModelElement<Organism>> model = controller.createModel(data);
-	    		getOrganismComboBox().setModel(new DefaultComboBoxModel<>(model));
+			try {
+				Vector<ModelElement<Organism>> model = controller.createModel(data);
+				getOrganismComboBox().setModel(new DefaultComboBoxModel<>(model));
 			} catch (DataStoreException e) {
 				throw new ApplicationException(e);
 			}
-	    	
+
 			updateStatistics(data);
 			getDataConfigButton().setEnabled(data.getConfiguration().hasUi());
 		}
@@ -384,8 +392,6 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 			dataPanel = uiUtils.createJPanel();
 			dataPanel.setToolTipText(Strings.retrieveRelatedGenesStatistics_label);
 		    
-			Font labelFont = new JLabel().getFont().deriveFont(UiUtils.INFO_FONT_SIZE);
-			
 			totalOrganismsLabel = createLabel("0", labelFont); //$NON-NLS-1$
 			totalOrganismsLabel.setName(Strings.retrieveRelatedGenesStatisticsOrganisms_label);
 			
@@ -401,15 +407,28 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 			dataVersionLabel = createLabel(Strings.retrieveRelatedGenesStatisticsOrganisms_label, labelFont);
 			dataVersionLabel.setName(Strings.retrieveRelatedGenesStatisticsVersion_label);
 			
-			labelFont = labelFont.deriveFont(Font.BOLD);
+			Font valLabelFont = labelFont.deriveFont(Font.BOLD);
 			
-			final JLabel organismsLabel = createLabel(Strings.retrieveRelatedGenesStatisticsOrganisms_label, labelFont);
-			final JLabel networksLabel = createLabel(Strings.retrieveRelatedGenesStatisticsNetworks_label, labelFont);
-			final JLabel genesLabel = createLabel(Strings.retrieveRelatedGenesStatisticsGenes_label, labelFont);
-			final JLabel interactionsLabel = createLabel(Strings.retrieveRelatedGenesStatisticsInteractions_label, labelFont);
-			final JLabel versionLabel = createLabel(Strings.retrieveRelatedGenesStatisticsVersion_label, labelFont);
+			final JLabel organismsLabel = createLabel(Strings.retrieveRelatedGenesStatisticsOrganisms_label, valLabelFont);
+			final JLabel networksLabel = createLabel(Strings.retrieveRelatedGenesStatisticsNetworks_label, valLabelFont);
+			final JLabel genesLabel = createLabel(Strings.retrieveRelatedGenesStatisticsGenes_label, valLabelFont);
+			final JLabel interactionsLabel = createLabel(Strings.retrieveRelatedGenesStatisticsInteractions_label, valLabelFont);
+			final JLabel versionLabel = createLabel(Strings.retrieveRelatedGenesStatisticsVersion_label, valLabelFont);
 			
 			final JSeparator sep = new JSeparator(JSeparator.VERTICAL);
+			
+			dataComponents.add(totalOrganismsLabel);
+			dataComponents.add(totalNetworksLabel);
+			dataComponents.add(totalGenesLabel);
+			dataComponents.add(totalInteractionsLabel);
+			dataComponents.add(dataVersionLabel);
+			dataComponents.add(organismsLabel);
+			dataComponents.add(networksLabel);
+			dataComponents.add(genesLabel);
+			dataComponents.add(interactionsLabel);
+			dataComponents.add(versionLabel);
+			dataComponents.add(sep);
+			dataComponents.add(getLoadParamsButton());
 			
 			final GroupLayout layout = new GroupLayout(dataPanel);
 			dataPanel.setLayout(layout);
@@ -417,6 +436,7 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 			layout.setAutoCreateContainerGaps(true);
 			
 			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addComponent(getWarningPanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 					.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
 							.addComponent(organismsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
 							.addComponent(totalOrganismsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
@@ -449,6 +469,7 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 					.addComponent(getLoadParamsButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
 			);
 			layout.setVerticalGroup(layout.createParallelGroup(Alignment.CENTER, false)
+					.addComponent(getWarningPanel(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
 					.addGroup(layout.createSequentialGroup()
 							.addComponent(organismsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
 							.addComponent(totalOrganismsLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
@@ -476,6 +497,38 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		}
 		
 		return dataPanel;
+	}
+	
+	private JPanel getWarningPanel() {
+		if (warningPanel == null) {
+			warningPanel = uiUtils.createJPanel();
+			
+			final JLabel iconLabel = uiUtils.createIconLabel(IconManager.ICON_EXCLAMATION_TRIANGLE, 24.0f,
+					LookAndFeelUtil.getWarnColor());
+			
+			final JLabel msgLabel = createLabel(
+					"<html>The advanced search is performed offline, but You don't have any data installed."
+					+ "<br>Install at least one data set or use the online search bar on the Network panel.</html>",
+					labelFont
+			);
+			
+			final GroupLayout layout = new GroupLayout(warningPanel);
+			warningPanel.setLayout(layout);
+			layout.setAutoCreateGaps(false);
+			layout.setAutoCreateContainerGaps(true);
+			
+			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addComponent(iconLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(msgLabel, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+			);
+			layout.setVerticalGroup(layout.createParallelGroup(Alignment.CENTER, false)
+					.addComponent(iconLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+					.addComponent(msgLabel, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+			);
+		}
+		
+		return warningPanel;
 	}
 	
 	private JPanel getBasicPanel() {
@@ -609,18 +662,18 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 			final int maxWidth = Math.max(genePanel.getPreferredSize().width, getLimitPanel().getPreferredSize().width);
 			genePanel.setMinimumSize(new Dimension(maxWidth, genePanel.getMinimumSize().height));
 	        
-	        genePanel.addTableModelEventListener(new TableModelListener() {
-	        	@Override
-	        	public void tableChanged(TableModelEvent e) {
-	        		validateQuery();
-	        	}
-	        });
-	        genePanel.addListSelectionListener(new ListSelectionListener() {
-	        	@Override
-		        public void valueChanged(ListSelectionEvent e) {
-		        	validateQuery();
-		        }
-	        });
+			genePanel.addTableModelEventListener(new TableModelListener() {
+				@Override
+				public void tableChanged(TableModelEvent e) {
+					validateQuery();
+				}
+			});
+			genePanel.addListSelectionListener(new ListSelectionListener() {
+				@Override
+				public void valueChanged(ListSelectionEvent e) {
+					validateQuery();
+				}
+			});
 		}
 		
 		return genePanel;
@@ -629,8 +682,8 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	private JPanel getNetworkPanel() {
 		if (networkPanel == null) {
 	        final JEditorPane selectionLabel = uiUtils.createEditorPane(Strings.retrieveRelatedGenesNetworkPanelSelection_label);
-	        selectionLabel.addHyperlinkListener(new HyperlinkListener() {
-	        	@Override
+			selectionLabel.addHyperlinkListener(new HyperlinkListener() {
+				@Override
 				public void hyperlinkUpdate(HyperlinkEvent e) {
 					handleLink(e);
 				}
@@ -734,12 +787,9 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	private JButton getRemoveGenesButton() {
 		if (removeGenesButton == null) {
 			removeGenesButton = new JButton(Strings.retrieveRelatedGenesRemoveGeneButton_label);
-	        removeGenesButton.addActionListener(new ActionListener() {
-	        	@Override
-				public void actionPerformed(ActionEvent e) {
-					genePanel.removeSelection();
-					validateQuery();
-				}
+	        removeGenesButton.addActionListener(evt -> {
+				genePanel.removeSelection();
+				validateQuery();
 	        });
 	        removeGenesButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
 		}
@@ -750,12 +800,7 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	private JButton getClearGenesButton() {
 		if (clearGenesButton == null) {
 			clearGenesButton = new JButton(Strings.retrieveRelatedGenesClearGenesButton_label);
-	        clearGenesButton.addActionListener(new ActionListener() {
-	        	@Override
-				public void actionPerformed(ActionEvent e) {
-					handleClearButton();
-				}
-	        });
+	        clearGenesButton.addActionListener(evt -> handleClearButton());
 	        clearGenesButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
 		}
 		
@@ -766,13 +811,7 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		if (dataConfigButton == null) {
 			dataConfigButton = new JButton(Strings.dataSetConfigurationButton_label);
 			dataConfigButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
-			
-			dataConfigButton.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					handleConfigureButton();
-				}
-			});
+			dataConfigButton.addActionListener(evt -> handleConfigureButton());
 		}
 		
 		return dataConfigButton;
@@ -782,28 +821,22 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		if (loadParamsButton == null) {
 			loadParamsButton = new JButton(Strings.retrieveRelatedGenesLoadParametersButton_label);
 			loadParamsButton.putClientProperty("JComponent.sizeVariant", "small"); // Mac OS X only
-			
-			loadParamsButton.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					handleChooseFile();
-				}
-			});
+			loadParamsButton.addActionListener(evt -> handleChooseFile());
 		}
-		
+
 		return loadParamsButton;
 	}
 	
 	private JTextField getLimitTextField() {
 		if (limitTextField == null) {
 			limitTextField = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#"))); //$NON-NLS-1$
-	        limitTextField.setText("20"); //$NON-NLS-1$
-	        limitTextField.setColumns(4);
-	        limitTextField.addKeyListener(new KeyAdapter() {
-	        	@Override
-	        	public void keyReleased(KeyEvent e) {
-	        		validateQuery();
-	        	}
+			limitTextField.setText("20"); //$NON-NLS-1$
+			limitTextField.setColumns(4);
+			limitTextField.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyReleased(KeyEvent e) {
+					validateQuery();
+				}
 			});
 		}
 		
@@ -813,13 +846,13 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	private JFormattedTextField getAttributeLimitTextField() {
 		if (attributeLimitTextField == null) {
 			attributeLimitTextField = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#"))); //$NON-NLS-1$
-	        attributeLimitTextField.setText("20"); //$NON-NLS-1$
-	        attributeLimitTextField.setColumns(4);
-	        attributeLimitTextField.addKeyListener(new KeyAdapter() {
-	        	@Override
-	        	public void keyReleased(KeyEvent e) {
-	        		validateQuery();
-	        	}
+			attributeLimitTextField.setText("20"); //$NON-NLS-1$
+			attributeLimitTextField.setColumns(4);
+			attributeLimitTextField.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyReleased(KeyEvent e) {
+					validateQuery();
+				}
 			});
 		}
 		
@@ -929,7 +962,12 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	}
 
 	private void validateQuery() {
-		if (selectedOrganism != null) {
+		boolean hasData = selectedOrganism != null;
+		
+		dataComponents.forEach(c -> c.setVisible(hasData));
+		getWarningPanel().setVisible(!hasData);
+		
+		if (hasData) {
 			boolean hasGenes = getGenePanel().getItemCount() > 0;
 			boolean hasNetworks = selectionPanel.getSelectionCount() > 0;
 			
@@ -951,10 +989,13 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	}
 	
 	private void setControlsEnabled(boolean enabled) {
+		organismLabel.setEnabled(enabled);
+		geneLabel.setEnabled(enabled);
 		getOrganismComboBox().setEnabled(enabled);
 		getGenePanel().setEnabled(enabled);
 		getRemoveGenesButton().setEnabled(enabled);
 		getClearGenesButton().setEnabled(enabled);
+		getAdvancedPanel().setEnabled(enabled);
 		getStartButton().setEnabled(enabled);
 		getLoadParamsButton().setEnabled(enabled);
 		repaint();

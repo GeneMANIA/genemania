@@ -191,6 +191,12 @@ public class CollapsiblePanel extends JPanel {
 		adjust(comp);
 		return contentPane.add(name,comp);
 	}
+	
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		titleComponent.setEnabled(enabled);
+	}
 
 	/**
 	 * Collapses or expands the panel. This is done by adding or removing the
