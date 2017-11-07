@@ -20,13 +20,16 @@ package org.genemania.plugin.cytoscape;
 
 import java.awt.Color;
 import java.awt.Frame;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.genemania.domain.Node;
@@ -35,9 +38,6 @@ import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
-import org.genemania.plugin.proxies.EdgeProxy;
-import org.genemania.plugin.proxies.NetworkProxy;
-import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 
 public interface CytoscapeUtils {
@@ -127,13 +127,41 @@ public interface CytoscapeUtils {
 
 	Set<CyNetwork> getNetworks();
 
-	NetworkProxy getNetworkProxy(CyNetwork network);
-
-	NodeProxy getNodeProxy(CyNode node, CyNetwork network);
-
-	EdgeProxy getEdgeProxy(CyEdge edge, CyNetwork network);
-
 	void handleNetworkPostProcessing(CyNetwork network);
 
 	Properties getGlobalProperties();
+
+	Set<CyEdge> getSelectedEdges(CyNetwork network);
+
+	Set<CyNode> getSelectedNodes(CyNetwork network);
+
+	String getTitle(CyNetwork network);
+
+	void setSelectedEdge(CyNetwork network, CyEdge edge, boolean selected);
+
+	void setSelectedEdges(CyNetwork network, Collection<CyEdge> edges, boolean selected);
+
+	void setSelectedNode(CyNetwork network, CyNode node, boolean selected);
+
+	void setSelectedNodes(CyNetwork network, Collection<CyNode> nodes, boolean selected);
+
+	void unselectAllEdges(CyNetwork network);
+
+	void unselectAllNodes(CyNetwork network);
+
+	Collection<String> getNodeAttributeNames(CyNetwork network);
+
+	Collection<String> getEdgeAttributeNames(CyNetwork network);
+
+	Collection<String> getNames(Collection<CyColumn> columns, CyNetwork network);
+
+	Collection<CyNode> getNeighbours(CyNode node, CyNetwork network);
+
+	String getIdentifier(CyNetwork network, CyIdentifiable entry);
+
+	<U> U getAttribute(CyNetwork network, CyIdentifiable entry, String name, Class<U> type);
+
+	<U> void setAttribute(CyNetwork network, CyIdentifiable entry, String name, U value);
+
+	Class<?> getAttributeType(CyNetwork network, CyIdentifiable entry, String name);
 }

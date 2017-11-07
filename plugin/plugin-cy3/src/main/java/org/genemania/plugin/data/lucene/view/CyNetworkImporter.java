@@ -30,9 +30,6 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.genemania.data.normalizer.NormalizationResult;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
-import org.genemania.plugin.proxies.EdgeProxy;
-import org.genemania.plugin.proxies.NetworkProxy;
-import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.util.ProgressReporter;
 
 public class CyNetworkImporter {
@@ -43,42 +40,44 @@ public class CyNetworkImporter {
 		this.cytoscapeUtils = cytoscapeUtils;
 	}
 	
-	public void process(CyNetwork network, String idAttribute, String weightAttribute, Writer output, ProgressReporter progress) {
+	public void process(CyNetwork network, String idAttribute, String weightAttribute, Writer output,
+			ProgressReporter progress) {
 		PrintWriter writer = new PrintWriter(output);
 		
 		try {
 			Context context = new Context();
-			NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(network);
-			Collection<CyEdge> edges = networkProxy.getEdges();
+			Collection<CyEdge> edges = network.getEdgeList();
 			progress.setMaximumProgress(edges.size());
+			
 			for (CyEdge edge : edges) {
-				if (progress.isCanceled()) {
+				if (progress.isCanceled())
 					return;
-				}
+				
 				progress.setProgress(context.totalInteractions);
 				context.totalInteractions++;
 				
-				EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, network);
-				String sourceSymbol = getSymbol(cytoscapeUtils.getNodeProxy(edgeProxy.getSource(), network), idAttribute);
-				String targetSymbol = getSymbol(cytoscapeUtils.getNodeProxy(edgeProxy.getTarget(), network), idAttribute);
+				String sourceSymbol = getSymbol(edge.getSource(), network, idAttribute);
+				String targetSymbol = getSymbol(edge.getTarget(), network, idAttribute);
+				
 				if (sourceSymbol == null || targetSymbol == null) {
 					context.droppedInteractions++;
 					continue;
 				}
 				
 				Double weight = null;
+				
 				if (weightAttribute != null) {
-					Object rawValue = edgeProxy.getAttribute(weightAttribute, Object.class);
+					Object rawValue = cytoscapeUtils.getAttribute(network, edge, weightAttribute, Object.class);
+					
 					if (!(rawValue instanceof Double) && !(rawValue instanceof Integer)) {
 						context.droppedInteractions++;
 						continue;
 					}
 	
-					if (rawValue instanceof Double) {
+					if (rawValue instanceof Double)
 						weight = (Double) rawValue;
-					} else {
+					else
 						weight = ((Integer) rawValue).doubleValue();
-					}
 				}
 				
 				if (weightAttribute != null) {
@@ -94,30 +93,33 @@ public class CyNetworkImporter {
 		}
 	}
 	
-	public void process(CyNetwork network, String idAttribute, List<String> expressionAttributes, Writer output, ProgressReporter progress) {
+	public void process(CyNetwork network, String idAttribute, List<String> expressionAttributes, Writer output,
+			ProgressReporter progress) {
 		PrintWriter writer = new PrintWriter(output);
+		
 		try {
 			writer.print("IDENTIFIER"); //$NON-NLS-1$
+			
 			for (String attribute : expressionAttributes) {
 				writer.print("\t"); //$NON-NLS-1$
 				writer.print(attribute);
 			}
+			
 			writer.println();
 			
 			Context context = new Context();
-			
-			NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(network);
-			Collection<CyNode> nodes = networkProxy.getNodes();
+			Collection<CyNode> nodes = network.getNodeList();
 			progress.setMaximumProgress(nodes.size());
+			
 			for (CyNode node : nodes) {
-				if (progress.isCanceled()) {
+				if (progress.isCanceled())
 					return;
-				}
+				
 				progress.setProgress(context.totalInteractions);
 				context.totalInteractions++;
 				
-				NodeProxy nodeProxy = cytoscapeUtils.getNodeProxy(node, network);
-				String symbol = getSymbol(nodeProxy, idAttribute);
+				String symbol = getSymbol(node, network, idAttribute);
+				
 				if (symbol == null) {
 					context.droppedInteractions++;
 					continue;
@@ -128,18 +130,20 @@ public class CyNetworkImporter {
 				
 				for (String attribute : expressionAttributes) {
 					Double value = null;
-					Class<?> type = nodeProxy.getAttributeType(attribute);
-					Object rawValue = nodeProxy.getAttribute(attribute, type);
-					if (rawValue instanceof Integer) {
+					Class<?> type = cytoscapeUtils.getAttributeType(network, node, attribute);
+					Object rawValue = cytoscapeUtils.getAttribute(network, node, attribute, type);
+					
+					if (rawValue instanceof Integer)
 						value = ((Integer) rawValue).doubleValue();
-					} else if (rawValue instanceof Double) {
+					else if (rawValue instanceof Double)
 						value = (Double) rawValue;
-					}
-					if (value != null) {
+					
+					if (value != null)
 						writer.print(value);
-					}
+					
 					writer.print("\t"); //$NON-NLS-1$
 				}
+				
 				writer.println();
 			}
 		} finally {
@@ -147,20 +151,20 @@ public class CyNetworkImporter {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	private String getSymbol(NodeProxy nodeProxy, String idAttribute) {
-		Class<?> type = nodeProxy.getAttributeType(idAttribute);
-		Object value = nodeProxy.getAttribute(idAttribute, type);
-		if (value instanceof String) {
-			return nodeProxy.getAttribute(idAttribute, String.class);
-		}
+	private String getSymbol(CyNode node, CyNetwork network, String idAttribute) {
+		Class<?> type = cytoscapeUtils.getAttributeType(network, node, idAttribute);
+		Object value = cytoscapeUtils.getAttribute(network, node, idAttribute, type);
+		
+		if (value instanceof String)
+			return cytoscapeUtils.getAttribute(network, node, idAttribute, String.class);
+		
 		if (value instanceof List) {
-			for (Object item : (List) value) {
-				if (item instanceof String) {
+			for (Object item : (List<?>) value) {
+				if (item instanceof String)
 					return (String) item;
-				}
 			}
 		}
+		
 		return null;
 	}
 
@@ -179,14 +183,15 @@ public class CyNetworkImporter {
 	}
 	
 	static class Context {
+		
 		public int droppedInteractions;
 		public int totalInteractions;
 		public Set<String> invalidSymbols;
 		public Set<String> conflictingSymbols;
 		
 		public Context() {
-			invalidSymbols = new HashSet<String>();
-			conflictingSymbols = new HashSet<String>();
+			invalidSymbols = new HashSet<>();
+			conflictingSymbols = new HashSet<>();
 		}
 	}
 }

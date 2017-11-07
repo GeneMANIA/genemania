@@ -28,15 +28,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.MappingJsonFactory;
+import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
+import org.cytoscape.model.CyTable;
 import org.genemania.domain.Attribute;
 import org.genemania.domain.AttributeGroup;
 import org.genemania.domain.Gene;
@@ -55,9 +58,6 @@ import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
-import org.genemania.plugin.proxies.EdgeProxy;
-import org.genemania.plugin.proxies.NetworkProxy;
-import org.genemania.plugin.proxies.NodeProxy;
 
 public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	
@@ -70,87 +70,35 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	
 	protected static final int DEF_EDGE_TRANSPARENCY = 140;
 
-	private final Map<CyEdge, EdgeProxy> edgeProxies;
-	private final Map<CyNode, NodeProxy> nodeProxies;
-	private final Map<CyNetwork, NetworkProxy> networkProxies;
-
 	private final Map<String, AttributeHandler> attributeHandlerRegistry = createHandlerRegistry();
 	
 	protected final NetworkUtils networkUtils;
 
 	public AbstractCytoscapeUtils(NetworkUtils networkUtils) {
 		this.networkUtils = networkUtils;
-		
-		edgeProxies = new WeakHashMap<>();
-		nodeProxies = new WeakHashMap<>();
-		networkProxies = new WeakHashMap<>();
-	}
-	
-	@Override
-	public EdgeProxy getEdgeProxy(CyEdge edge, CyNetwork network) {
-		if (edge == null) {
-			return null;
-		}
-		if (edgeProxies.containsKey(edge)) {
-			return edgeProxies.get(edge);
-		}
-		EdgeProxy proxy = createEdgeProxy(edge, network);
-		edgeProxies.put(edge, proxy);
-		return proxy;
-	}
-	
-	@Override
-	public NetworkProxy getNetworkProxy(CyNetwork network) {
-		if (network == null) {
-			return null;
-		}
-		if (networkProxies.containsKey(network)) {
-			return networkProxies.get(network);
-		}
-		NetworkProxy proxy = createNetworkProxy(network);
-		networkProxies.put(network, proxy);
-		return proxy;
-	}
-	
-	@Override
-	public NodeProxy getNodeProxy(CyNode node, CyNetwork network) {
-		if (node == null)
-			return null;
-		if (nodeProxies.containsKey(node))
-			return nodeProxies.get(node);
-		
-		NodeProxy proxy = createNodeProxy(node, network);
-		nodeProxies.put(node, proxy);
-		
-		return proxy;
 	}
 
-	protected abstract NodeProxy createNodeProxy(CyNode node, CyNetwork network);
-	protected abstract NetworkProxy createNetworkProxy(CyNetwork network);
-	protected abstract EdgeProxy createEdgeProxy(CyEdge edge, CyNetwork network);
-	
 	@Override
 	@SuppressWarnings("unchecked")
 	public void expandAttributes(CyNetwork cyNetwork, ViewState options, List<String> attributes) {
-		if (attributes.size() == 0) {
+		if (attributes.isEmpty())
 			return;
-		}
 		
-		NetworkProxy networkProxy = getNetworkProxy(cyNetwork);
-		for (CyEdge edge : networkProxy.getEdges()) {
-			EdgeProxy edgeProxy = getEdgeProxy(edge, cyNetwork);
-			String edgeId = edgeProxy.getIdentifier();
+		for (CyEdge edge : cyNetwork.getEdgeList()) {
+			String edgeId = getIdentifier(cyNetwork, edge);
 			Set<Network<?>> networks = options.getNetworksByEdge(edgeId);
-			List<String> networkNames = edgeProxy.getAttribute(NETWORK_NAMES_ATTRIBUTE, List.class);
+			List<String> networkNames = getAttribute(cyNetwork, edge, NETWORK_NAMES_ATTRIBUTE, List.class);
 			
 			for (String attribute : attributes) {
 				List<Object> values = new ArrayList<>();
 				AttributeHandler handler = attributeHandlerRegistry.get(attribute);
+				
 				for (String networkName : networkNames) {
 					InteractionNetwork network = findNetwork(networkName, networks);
 					values.add(handler.getValue(network));
 				}
-				edgeProxy.setAttribute(attribute, values);
+				
+				setAttribute(cyNetwork, edge, attribute, values);
 			}
 		}
 	}
@@ -158,17 +106,19 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	private InteractionNetwork findNetwork(String networkName, Set<Network<?>> networks) {
 		for (Network<?> network : networks) {
 			InteractionNetwork adapted = network.adapt(InteractionNetwork.class);
-			if (adapted == null) {
+			
+			if (adapted == null)
 				continue;
-			}
-			if (adapted.getName().equals(networkName)) {
+			
+			if (adapted.getName().equals(networkName))
 				return adapted;
-			}
 		}
+		
 		return null;
 	}
 	
 	interface AttributeHandler {
+		
 		public abstract Object getValue(InteractionNetwork network);
 	}
 	
@@ -176,12 +126,13 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 		@Override
 		public Object getValue(InteractionNetwork network) {
 			StringBuilder builder = new StringBuilder();
+			
 			for (Tag tag : network.getTags()) {
-				if (builder.length() > 0) {
+				if (builder.length() > 0)
 					builder.append("|"); //$NON-NLS-1$
-				}
 				builder.append(tag.getName());
 			}
+			
 			return builder.toString();
 		}
 	}
@@ -193,6 +144,7 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 			name = attributeName;
 		}
 		
+		@Override
 		public Object getValue(InteractionNetwork network) {
 			try {
 				return BeanUtils.getProperty(network.getMetadata(), name);
@@ -209,6 +161,7 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	private Map<String, AttributeHandler> createHandlerRegistry() {
 		Map<String, AttributeHandler> map = new HashMap<>();
 		map.put(TAGS, new TagAttributeHandler());
+		
 		for (String name : new String[] {
 			AUTHORS,
 			INTERACTION_COUNT,
@@ -223,6 +176,7 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 		}) {
 			map.put(name, new MetadataAttributeHandler(name));
 		}
+		
 		return map;
 	}
 	
@@ -258,20 +212,18 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 
 		target = createNode(id, network);
 		
-		NodeProxy nodeProxy = getNodeProxy(target, network);
-		nodeProxy.setAttribute(GENE_NAME_ATTRIBUTE, name);
-		exportSynonyms(nodeProxy, node);
+		setAttribute(network, target, GENE_NAME_ATTRIBUTE, name);
+		exportSynonyms(network, target, node);
+		
 		return target;
 	}
 	
 	protected String getNodeId(CyNetwork network, Node node) {
-		NetworkProxy proxy = getNetworkProxy(network);
-		return String.format("%s-%s", filterTitle(proxy.getTitle()), node.getName()); //$NON-NLS-1$
+		return String.format("%s-%s", filterTitle(getTitle(network)), node.getName()); //$NON-NLS-1$
 	}
 	
 	protected String getNodeId(CyNetwork network, Attribute attribute) {
-		NetworkProxy proxy = getNetworkProxy(network);
-		return String.format("%s-%s", filterTitle(proxy.getTitle()), attribute.getName()); //$NON-NLS-1$
+		return String.format("%s-%s", filterTitle(getTitle(network)), attribute.getName()); //$NON-NLS-1$
 	}
 
 	private String filterTitle(String title) {
@@ -287,11 +239,12 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 		return builder.toString();
 	}
 
-	private void exportSynonyms(NodeProxy proxy, Node node) {
+	private void exportSynonyms(CyNetwork cyNetwork, CyNode cyNode, Node node) {
 		Collection<Gene> genes = node.getGenes();
+		
 		for (Gene gene : genes) {
 			GeneNamingSource source = gene.getNamingSource();
-			proxy.setAttribute(source.getName(), gene.getSymbol());
+			setAttribute(cyNetwork, cyNode, source.getName(), gene.getSymbol());
 		}
 	}
 
@@ -305,7 +258,7 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	 * Creates a Cytoscape network from the interaction network given by
 	 * <code>RelatedResult</code>.
 	 * 
-	 * @param name the name of the new <code>NetworkProxy</code>
+	 * @param name the name of the new <code>CyNetwork</code>
 	 * @param result the results from running the GeneMANIA algorithm
 	 * @param queryGenes the genes used to 
 	 * @return
@@ -314,17 +267,16 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	public CyNetwork createNetwork(String name, String dataVersion, SearchResult options, ViewStateBuilder builder,
 			EdgeAttributeProvider attributeProvider) {
 		CyNetwork currentNetwork = createNetwork(name);
-		NetworkProxy networkProxy = getNetworkProxy(currentNetwork);
-		networkProxy.setAttribute(TYPE_ATTRIBUTE, GENEMANIA_NETWORK_TYPE);
-		networkProxy.setAttribute(ORGANISM_NAME_ATTRIBUTE, options.getOrganism().getName());
-		networkProxy.setAttribute(NETWORKS_ATTRIBUTE, serializeNetworks(options));
-		networkProxy.setAttribute(COMBINING_METHOD_ATTRIBUTE, options.getCombiningMethod().getCode());
-		networkProxy.setAttribute(GENE_SEARCH_LIMIT_ATTRIBUTE, options.getGeneSearchLimit());
-		networkProxy.setAttribute(ATTRIBUTE_SEARCH_LIMIT_ATTRIBUTE, options.getAttributeSearchLimit());
-		networkProxy.setAttribute(ANNOTATIONS_ATTRIBUTE, serializeAnnotations(options));
+		setAttribute(currentNetwork, currentNetwork, TYPE_ATTRIBUTE, GENEMANIA_NETWORK_TYPE);
+		setAttribute(currentNetwork, currentNetwork, ORGANISM_NAME_ATTRIBUTE, options.getOrganism().getName());
+		setAttribute(currentNetwork, currentNetwork, NETWORKS_ATTRIBUTE, serializeNetworks(options));
+		setAttribute(currentNetwork, currentNetwork, COMBINING_METHOD_ATTRIBUTE, options.getCombiningMethod().getCode());
+		setAttribute(currentNetwork, currentNetwork, GENE_SEARCH_LIMIT_ATTRIBUTE, options.getGeneSearchLimit());
+		setAttribute(currentNetwork, currentNetwork, ATTRIBUTE_SEARCH_LIMIT_ATTRIBUTE, options.getAttributeSearchLimit());
+		setAttribute(currentNetwork, currentNetwork, ANNOTATIONS_ATTRIBUTE, serializeAnnotations(options));
 		
 		if (dataVersion != null)
-			networkProxy.setAttribute(DATA_VERSION_ATTRIBUTE, dataVersion);
+			setAttribute(currentNetwork, currentNetwork, DATA_VERSION_ATTRIBUTE, dataVersion);
 
 		for (Group<?, ?> group : builder.getAllGroups()) {
 			Group<InteractionNetworkGroup, InteractionNetwork> adapted = group.adapt(InteractionNetworkGroup.class, InteractionNetwork.class);
@@ -376,23 +328,21 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 				
 				if (from == null) {
 					from = createNode(id, currentNetwork);
-					NodeProxy nodeProxy = getNodeProxy(from, currentNetwork);
-					nodeProxy.setAttribute(GENE_NAME_ATTRIBUTE, attribute.getName());
-					nodeProxy.setAttribute(NODE_TYPE_ATTRIBUTE, NODE_TYPE_ATTRIBUTE_NODE);
-					nodeProxy.setAttribute(SCORE_ATTRIBUTE, weights.get(attribute));
-					builder.addSourceNetworkForNode(nodeProxy.getIdentifier(), network);
+					setAttribute(currentNetwork, from, GENE_NAME_ATTRIBUTE, attribute.getName());
+					setAttribute(currentNetwork, from, NODE_TYPE_ATTRIBUTE, NODE_TYPE_ATTRIBUTE_NODE);
+					setAttribute(currentNetwork, from, SCORE_ATTRIBUTE, weights.get(attribute));
+					builder.addSourceNetworkForNode(getIdentifier(currentNetwork, from), network);
 				}
 				
 				String edgeLabel = attribute.getName();
 				CyEdge edge = getEdge(from, to, EDGE_TYPE_INTERACTION, edgeLabel, currentNetwork);
-				EdgeProxy edgeProxy = getEdgeProxy(edge, currentNetwork);
 				
 				AttributeGroup group = options.getAttributeGroup(attribute.getId());
-				edgeProxy.setAttribute(NETWORK_GROUP_NAME_ATTRIBUTE, group.getName());
-				edgeProxy.setAttribute(ATTRIBUTE_NAME_ATTRIBUTE, edgeLabel);
-				edgeProxy.setAttribute(HIGHLIGHT_ATTRIBUTE, 1);
+				setAttribute(currentNetwork, edge, NETWORK_GROUP_NAME_ATTRIBUTE, group.getName());
+				setAttribute(currentNetwork, edge, ATTRIBUTE_NAME_ATTRIBUTE, edgeLabel);
+				setAttribute(currentNetwork, edge, HIGHLIGHT_ATTRIBUTE, 1);
 				
-				String edgeId = edgeProxy.getIdentifier();
+				String edgeId = getIdentifier(currentNetwork, edge);
 				builder.addEdge(builder.getGroup(network), edgeId);
 				builder.addSourceNetworkForEdge(edgeId, network);
 			}
@@ -477,36 +427,38 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 			
 			String edgeLabel = attributeProvider.getEdgeLabel(model);
 			CyEdge edge = getEdge(from, to, EDGE_TYPE_INTERACTION, edgeLabel, currentNetwork);
-			EdgeProxy edgeProxy = getEdgeProxy(edge, currentNetwork);
 			
-			String edgeId = edgeProxy.getIdentifier();
+			String edgeId = getIdentifier(currentNetwork, edge);
 			Double rawWeight = (double) interaction.getWeight();
 
 			builder.addSourceNetworkForEdge(edgeId, network);
 			Double weight = rawWeight * network.getWeight();
 			
-			List<String> networkNames = edgeProxy.getAttribute(NETWORK_NAMES_ATTRIBUTE, List.class);
-			if (networkNames == null) {
+			List<String> networkNames = getAttribute(currentNetwork, edge, NETWORK_NAMES_ATTRIBUTE, List.class);
+			
+			if (networkNames == null)
 				networkNames = new ArrayList<>();
-			}
+			
 			networkNames.add(network.getName());
-			edgeProxy.setAttribute(NETWORK_NAMES_ATTRIBUTE, networkNames);
+			setAttribute(currentNetwork, edge, NETWORK_NAMES_ATTRIBUTE, networkNames);
 			
-			List<Double> edgeWeights = edgeProxy.getAttribute(RAW_WEIGHTS_ATTRIBUTE, List.class);
-			if (edgeWeights == null) {
+			List<Double> edgeWeights = getAttribute(currentNetwork, edge, RAW_WEIGHTS_ATTRIBUTE, List.class);
+			
+			if (edgeWeights == null)
 				edgeWeights = new ArrayList<>();
-			}
-			edgeWeights.add((double) interaction.getWeight());
-			edgeProxy.setAttribute(RAW_WEIGHTS_ATTRIBUTE, edgeWeights);
-
-			Double oldWeight = edgeProxy.getAttribute(MAX_WEIGHT_ATTRIBUTE, Double.class);
-			if (oldWeight == null || oldWeight < weight) {
-				edgeProxy.setAttribute(MAX_WEIGHT_ATTRIBUTE, weight);
-			}
 			
-			edgeProxy.setAttribute(HIGHLIGHT_ATTRIBUTE, 1);
+			edgeWeights.add((double) interaction.getWeight());
+			setAttribute(currentNetwork, edge, RAW_WEIGHTS_ATTRIBUTE, edgeWeights);
+
+			Double oldWeight = getAttribute(currentNetwork, edge, MAX_WEIGHT_ATTRIBUTE, Double.class);
+			
+			if (oldWeight == null || oldWeight < weight)
+				setAttribute(currentNetwork, edge, MAX_WEIGHT_ATTRIBUTE, weight);
+			
+			setAttribute(currentNetwork, edge, HIGHLIGHT_ATTRIBUTE, 1);
+			
 			for (Entry<String, Object> entry : attributeProvider.getAttributes(model).entrySet()) {
-				edgeProxy.setAttribute(entry.getKey(), entry.getValue());
+				setAttribute(currentNetwork, edge, entry.getKey(), entry.getValue());
 			}
 		}
 	}
@@ -544,17 +496,15 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 			Node node = entry.getKey().getNode();
 			
 			CyNode cyNode = getNode(currentNetwork, node, getSymbol(queryGenes.get(node)));
-			NodeProxy nodeProxy = getNodeProxy(cyNode, currentNetwork);
 	
-			nodeProxy.setAttribute(LOG_SCORE_ATTRIBUTE, Math.log(score));
-			nodeProxy.setAttribute(SCORE_ATTRIBUTE, score);
+			setAttribute(currentNetwork, cyNode, LOG_SCORE_ATTRIBUTE, Math.log(score));
+			setAttribute(currentNetwork, cyNode, SCORE_ATTRIBUTE, score);
 			final String type;
 			
-			if (queryGenes.containsKey(node.getId())) {
+			if (queryGenes.containsKey(node.getId()))
 				type = NODE_TYPE_QUERY;
-			} else {
+			else
 				type = NODE_TYPE_RESULT;
-			}
 			
 			Collection<AnnotationEntry> nodeAnnotations = options.getAnnotations(node.getId());
 			
@@ -567,29 +517,29 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 					annotationNames.add(annotation.getDescription());
 				}
 				
-				nodeProxy.setAttribute(ANNOTATION_ID_ATTRIBUTE, annotationIds);
-				nodeProxy.setAttribute(ANNOTATION_NAME_ATTRIBUTE, annotationNames);
+				setAttribute(currentNetwork, cyNode, ANNOTATION_ID_ATTRIBUTE, annotationIds);
+				setAttribute(currentNetwork, cyNode, ANNOTATION_NAME_ATTRIBUTE, annotationNames);
 			}
 			
-			nodeProxy.setAttribute(NODE_TYPE_ATTRIBUTE, type);
+			setAttribute(currentNetwork, cyNode, NODE_TYPE_ATTRIBUTE, type);
 		}
 	}
 
 	@Override
 	public void setHighlighted(ViewState options, CyNetwork cyNetwork, boolean visible) {
-		NetworkProxy networkProxy = getNetworkProxy(cyNetwork);
-		for (CyEdge edge : networkProxy.getEdges()) {
-			EdgeProxy edgeProxy = getEdgeProxy(edge, cyNetwork);
-			String groupName = (String) edgeProxy.getAttribute(NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
-			if (groupName == null) {
+		for (CyEdge edge : cyNetwork.getEdgeList()) {
+			String groupName = getAttribute(cyNetwork, edge, NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
+			
+			if (groupName == null)
 				continue;
-			}
+			
 			Group<?, ?> group = options.getGroup(groupName);
-			if (group == null) {
+			
+			if (group == null)
 				continue;
-			}
+			
 			Integer value = options.isEnabled(group) || visible ? 1 : 0;
-			edgeProxy.setAttribute(HIGHLIGHT_ATTRIBUTE, value);
+			setAttribute(cyNetwork, edge, HIGHLIGHT_ATTRIBUTE, value);
 		}
 		
 		updateVisualStyles(cyNetwork);
@@ -597,8 +547,7 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	}
 	
 	protected String getVisualStyleName(CyNetwork network) {
-		NetworkProxy proxy = getNetworkProxy(network);
-		return proxy.getTitle().replace(".", ""); //$NON-NLS-1$ //$NON-NLS-2$;
+		return getTitle(network).replace(".", ""); //$NON-NLS-1$ //$NON-NLS-2$;
 	}
 	
 	@Override
@@ -613,18 +562,77 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 		if (selected) {
 			for (String edgeId : edgeIds) {
 				CyEdge edge = getEdge(edgeId, network);
-				EdgeProxy edgeProxy = getEdgeProxy(edge, network);
-				edgeProxy.setAttribute(HIGHLIGHT_ATTRIBUTE, 1);
+				setAttribute(network, edge, HIGHLIGHT_ATTRIBUTE, 1);
 			}
 		} else {
 			for (String edgeId : edgeIds) {
 				CyEdge edge = getEdge(edgeId, network);
-				EdgeProxy edgeProxy = getEdgeProxy(edge, network);
-				edgeProxy.setAttribute(HIGHLIGHT_ATTRIBUTE, 0);
+				setAttribute(network, edge, HIGHLIGHT_ATTRIBUTE, 0);
 			}
 		}
 		
 		updateVisualStyles(network);
 		repaint();
+	}
+	
+	@Override
+	public String getIdentifier(CyNetwork network, CyIdentifiable entry) {
+		return network.getRow(entry).get(CyNetwork.NAME, String.class);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public <U> U getAttribute(CyNetwork network, CyIdentifiable entry, String name, Class<U> type) {
+		CyRow row = network.getRow(entry);
+		
+		if (type.equals(List.class)) {
+			CyTable table = row.getTable();
+			CyColumn column = table.getColumn(name);
+			
+			if (column == null)
+				return null;
+			
+			Class<?> elementType = column.getListElementType();
+			return (U) row.getList(name, elementType);
+		}
+		
+		if (type.equals(Object.class)) {
+			CyTable table = row.getTable();
+			CyColumn column = table.getColumn(name);
+			type = (Class<U>) column.getType();
+		}
+		
+		return row.get(name, type);
+	}
+	
+	@Override
+	public <U> void setAttribute(CyNetwork network, CyIdentifiable entry, String name, U value) {
+		CyRow row = network.getRow(entry);
+		CyTable table = row.getTable();
+		CyColumn column = table.getColumn(name);
+		
+		if (column == null) {
+			if (value instanceof List<?>) {
+				List<?> list = (List<?>) value;
+				Class<?> elementType;
+				
+				if (list.size() == 0) {
+					elementType = String.class;
+				} else {
+					elementType = list.get(0).getClass();
+				}
+				
+				table.createListColumn(name, elementType, false);
+			} else {
+				table.createColumn(name, value.getClass(), false);
+			}
+		}
+		
+		row.set(name, value);
+	}
+	
+	@Override
+	public Class<?> getAttributeType(CyNetwork network, CyIdentifiable entry, String name) {
+		return network.getRow(entry).getTable().getColumn(name).getType();
 	}
 }

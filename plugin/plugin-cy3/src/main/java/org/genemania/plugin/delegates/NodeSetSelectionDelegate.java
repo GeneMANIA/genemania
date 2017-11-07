@@ -26,7 +26,6 @@ import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 
 public class NodeSetSelectionDelegate extends SelectionDelegate {
@@ -48,8 +47,7 @@ public class NodeSetSelectionDelegate extends SelectionDelegate {
 	@Override
 	protected void handleSelection(ViewState options) throws ApplicationException {
 		for (CyNode node : nodes) {
-			NodeProxy nodeProxy = cytoscapeUtils.getNodeProxy(node, network);
-			String name = nodeProxy.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
+			String name = cytoscapeUtils.getAttribute(network, node, CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
 			options.setGeneHighlighted(name, selected);
 		}
 	}

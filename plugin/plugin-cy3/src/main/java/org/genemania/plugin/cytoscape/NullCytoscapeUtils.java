@@ -20,13 +20,16 @@ package org.genemania.plugin.cytoscape;
 
 import java.awt.Color;
 import java.awt.Frame;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.genemania.domain.Node;
@@ -35,16 +38,12 @@ import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
-import org.genemania.plugin.proxies.EdgeProxy;
-import org.genemania.plugin.proxies.NetworkProxy;
-import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 
 public class NullCytoscapeUtils implements CytoscapeUtils {
 
 	@Override
-	public void applyVisualization(CyNetwork network,
-			Map<Long, Double> filterGeneScores,
+	public void applyVisualization(CyNetwork network, Map<Long, Double> filterGeneScores,
 			Map<String, Color> computeColors, double[] extrema) {
 	}
 
@@ -107,21 +106,6 @@ public class NullCytoscapeUtils implements CytoscapeUtils {
 	}
 
 	@Override
-	public NetworkProxy getNetworkProxy(CyNetwork network) {
-		return null;
-	}
-
-	@Override
-	public EdgeProxy getEdgeProxy(CyEdge edge, CyNetwork network) {
-		return null;
-	}
-
-	@Override
-	public NodeProxy getNodeProxy(CyNode node, CyNetwork network) {
-		return null;
-	}
-
-	@Override
 	public void handleNetworkPostProcessing(CyNetwork network) {
 	}
 
@@ -130,4 +114,81 @@ public class NullCytoscapeUtils implements CytoscapeUtils {
 		return null;
 	}
 
+	@Override
+	public Set<CyEdge> getSelectedEdges(CyNetwork network) {
+		return null;
+	}
+
+	@Override
+	public Set<CyNode> getSelectedNodes(CyNetwork network) {
+		return null;
+	}
+
+	@Override
+	public String getTitle(CyNetwork network) {
+		return null;
+	}
+
+	@Override
+	public void setSelectedEdge(CyNetwork network, CyEdge edge, boolean selected) {
+	}
+
+	@Override
+	public void setSelectedEdges(CyNetwork network, Collection<CyEdge> edges, boolean selected) {
+	}
+
+	@Override
+	public void setSelectedNode(CyNetwork network, CyNode node, boolean selected) {
+	}
+
+	@Override
+	public void setSelectedNodes(CyNetwork network, Collection<CyNode> nodes, boolean selected) {
+	}
+
+	@Override
+	public void unselectAllEdges(CyNetwork network) {
+	}
+
+	@Override
+	public void unselectAllNodes(CyNetwork network) {
+	}
+
+	@Override
+	public Collection<String> getNodeAttributeNames(CyNetwork network) {
+		return null;
+	}
+
+	@Override
+	public Collection<String> getEdgeAttributeNames(CyNetwork network) {
+		return null;
+	}
+
+	@Override
+	public Collection<String> getNames(Collection<CyColumn> columns, CyNetwork network) {
+		return null;
+	}
+
+	@Override
+	public Collection<CyNode> getNeighbours(CyNode node, CyNetwork network) {
+		return null;
+	}
+
+	@Override
+	public String getIdentifier(CyNetwork network, CyIdentifiable entry) {
+		return null;
+	}
+
+	@Override
+	public <U> U getAttribute(CyNetwork network, CyIdentifiable entry, String name, Class<U> type) {
+		return null;
+	}
+
+	@Override
+	public <U> void setAttribute(CyNetwork network, CyIdentifiable entry, String name, U value) {
+	}
+
+	@Override
+	public Class<?> getAttributeType(CyNetwork network, CyIdentifiable entry, String name) {
+		return null;
+	}
 }

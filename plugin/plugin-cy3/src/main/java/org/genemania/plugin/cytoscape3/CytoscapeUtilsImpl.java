@@ -46,7 +46,9 @@ import org.cytoscape.application.swing.CytoPanel;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.CytoPanelState;
 import org.cytoscape.event.CyEventHelper;
+import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyEdge.Type;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
@@ -89,9 +91,6 @@ import org.genemania.plugin.cytoscape3.layout.GeneManiaFDLayout;
 import org.genemania.plugin.delegates.SelectionDelegate;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.proxies.EdgeProxy;
-import org.genemania.plugin.proxies.NetworkProxy;
-import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 
 public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements CytoscapeUtils, RowsSetListener {
@@ -222,10 +221,9 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	
 	@Override
 	public void setHighlighted(final ViewState config, final CyNetwork network, final boolean visible) {
-		final NetworkProxy networkProxy = getNetworkProxy(network);
 		final Collection<CyNetworkView> netViews = viewManager.getNetworkViews(network);
 		
-		for (final CyEdge edge : networkProxy.getEdges()) {
+		for (final CyEdge edge : network.getEdgeList()) {
 			for (final CyNetworkView nv : netViews) {
 				final View<CyEdge> ev = nv.getEdgeView(edge);
 				
@@ -418,23 +416,105 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	}
 	
 	@Override
-	protected NetworkProxy createNetworkProxy(CyNetwork network) {
-		return new NetworkProxyImpl(network, eventHelper);
+	public Set<CyEdge> getSelectedEdges(CyNetwork network) {
+		Set<CyEdge> results = new HashSet<>();
+		
+		for (CyEdge edge : network.getEdgeList()) {
+			if (network.getRow(edge).get(CyNetwork.SELECTED, Boolean.class))
+				results.add(edge);
+		}
+		
+		return results;
 	}
 	
 	@Override
-	protected NodeProxy createNodeProxy(CyNode node, CyNetwork network) {
-		return new NodeProxyImpl(node, network);
+	public Set<CyNode> getSelectedNodes(CyNetwork network) {
+		Set<CyNode> results = new HashSet<>();
+		
+		for (CyNode node :network.getNodeList()) {
+			if (network.getRow(node).get(CyNetwork.SELECTED, Boolean.class))
+				results.add(node);
+		}
+		
+		return results;
+	}
+
+	@Override
+	public String getTitle(CyNetwork network) {
+		return network.getRow(network).get(CyNetwork.NAME, String.class);
+	}
+
+	@Override
+	public void setSelectedEdge(CyNetwork network, CyEdge edge, boolean selected) {
+		network.getRow(edge).set(CyNetwork.SELECTED, selected);
+		eventHelper.flushPayloadEvents();
+	}
+
+	@Override
+	public void setSelectedEdges(CyNetwork network, Collection<CyEdge> edges, boolean selected) {
+		for (CyEdge edge : edges)
+			network.getRow(edge).set(CyNetwork.SELECTED, selected);
+		
+		eventHelper.flushPayloadEvents();
+	}
+
+	@Override
+	public void setSelectedNode(CyNetwork network, CyNode node, boolean selected) {
+		network.getRow(node).set(CyNetwork.SELECTED, selected);
+		eventHelper.flushPayloadEvents();
+	}
+
+	@Override
+	public void setSelectedNodes(CyNetwork network, Collection<CyNode> nodes, boolean selected) {
+		for (CyNode node : nodes)
+			network.getRow(node).set(CyNetwork.SELECTED, selected);
+		
+		eventHelper.flushPayloadEvents();
+	}
+
+	@Override
+	public void unselectAllEdges(CyNetwork network) {
+		setSelectedEdges(network, network.getEdgeList(), false);
+	}
+
+	@Override
+	public void unselectAllNodes(CyNetwork network) {
+		setSelectedNodes(network, network.getNodeList(), false);
 	}
 	
 	@Override
-	protected EdgeProxy createEdgeProxy(CyEdge edge, CyNetwork network) {
-		return new EdgeProxyImpl(edge, network);
+	public Collection<String> getNodeAttributeNames(CyNetwork network) {
+		CyTable table = network.getDefaultNodeTable();
+		
+		return getNames(table.getColumns(), network);
+	}
+	
+	@Override
+	public Collection<String> getEdgeAttributeNames(CyNetwork network) {
+		CyTable table = network.getDefaultEdgeTable();
+		
+		return getNames(table.getColumns(), network);
+	}
+
+	@Override
+	public Collection<String> getNames(Collection<CyColumn> columns, CyNetwork network) {
+		Set<String> names = new HashSet<>();
+		
+		for (CyColumn column : columns)
+			names.add(column.getName());
+		
+		return names;
+	}
+	
+	@Override
+	public Collection<CyNode> getNeighbours(CyNode node, CyNetwork network) {
+		return network.getNeighborList(node, Type.ANY);
 	}
 	
 	@Override
 	protected CyEdge getEdge(CyNode from, CyNode to, String type, String label, CyNetwork network) {
 		Map<String, Reference<CyEdge>> networkEdges = edges.get(network);
+		
 		if (networkEdges == null) {
 			networkEdges = new HashMap<>();
 			edges.put(network, networkEdges);
@@ -442,6 +522,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 		
 		String key = getEdgeKey(network, from, to, label);
 		Reference<CyEdge> reference = networkEdges.get(key);
+		
 		if (reference != null) {
 			CyEdge edge = reference.get();
 			if (edge != null) {
@@ -472,12 +553,14 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	protected CyNode createNode(String id, CyNetwork network) {
 		CyNode node = network.addNode();
 		network.getRow(node).set(CyNetwork.NAME, id);
-		
 		Map<String, Reference<CyNode>> nodeMap = nodes.get(network);
+		
 		if (nodeMap == null) {
 			nodeMap = new HashMap<>();
 			nodes.put(network, nodeMap);
 		}
+		
+		
 		nodeMap.put(id, new WeakReference<>(node));
 		return node;
 	}
@@ -485,13 +568,15 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	@Override
 	protected CyNode getNode(String id, CyNetwork network) {
 		Map<String, Reference<CyNode>> nodeMap = nodes.get(network);
-		if (nodeMap == null) {
+		
+		if (nodeMap == null)
 			return null;
-		}
+		
 		Reference<CyNode> reference = nodeMap.get(id);
-		if (reference == null) {
+		
+		if (reference == null)
 			return null;
-		}
+		
 		return reference.get();
 	}
 
@@ -506,6 +591,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 			edgeMap = cacheEdges(network);
 			edges.put(network, edgeMap);
 		}
+		
 		Reference<CyEdge> reference = edgeMap.get(id);
 		
 		if (reference == null)
@@ -574,9 +660,8 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 		
 		@Override
 		protected void handleSelection(ViewState options) throws ApplicationException {
-			if (!manager.isSelectionListenerEnabled()) {
+			if (!manager.isSelectionListenerEnabled())
 				return;
-			}
 			
 			if (type.equals(CyNode.class)) {
 				for (RowSetRecord record : event.getPayloadCollection()) {
@@ -586,14 +671,12 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 					boolean selected = (Boolean) record.getValue();
 					String id = record.getRow().get(CyNetwork.NAME, String.class);
 					CyNode node = getNode(id, network);
-					NodeProxy nodeProxy = getNodeProxy(node, network);
 					
-					String name = nodeProxy.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
+					String name = getAttribute(network, node, CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
 					options.setGeneHighlighted(name, selected);
 				}
 			} else if (type.equals(CyEdge.class)) {
-				NetworkProxy networkProxy = getNetworkProxy(network);
-				Set<CyEdge> previousSelection = networkProxy.getSelectedEdges();
+				Set<CyEdge> previousSelection = getSelectedEdges(network);
 				
 				for (RowSetRecord record : event.getPayloadCollection()) {
 					if (!record.getColumn().equals(CyNetwork.SELECTED))

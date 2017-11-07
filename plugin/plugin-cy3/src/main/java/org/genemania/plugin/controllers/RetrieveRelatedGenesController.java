@@ -88,9 +88,6 @@ import org.genemania.plugin.model.ViewStateBuilder;
 import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.model.impl.ViewStateImpl;
 import org.genemania.plugin.parsers.Query;
-import org.genemania.plugin.proxies.EdgeProxy;
-import org.genemania.plugin.proxies.NetworkProxy;
-import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.plugin.task.GeneManiaTask;
 import org.genemania.plugin.task.TaskDispatcher;
@@ -623,23 +620,21 @@ public class RetrieveRelatedGenesController {
 		};
 	}
 	
-	void computeGraphCache(CyNetwork currentNetwork, SearchResult result, ViewStateBuilder config, Collection<Group<?, ?>> selectedGroups) {
+	void computeGraphCache(CyNetwork currentNetwork, SearchResult result, ViewStateBuilder config,
+			Collection<Group<?, ?>> selectedGroups) {
 		// Build edge cache
-		NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(currentNetwork);
-		
-		for (CyEdge edge : networkProxy.getEdges()) {
-			EdgeProxy edgeProxy = cytoscapeUtils.getEdgeProxy(edge, currentNetwork);
-			String name = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
+		for (CyEdge edge : currentNetwork.getEdgeList()) {
+			String name = cytoscapeUtils.getAttribute(currentNetwork, edge, CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE,
+					String.class);
 			Group<?, ?> group = config.getGroup(name);
-			config.addEdge(group, edgeProxy.getIdentifier());
+			config.addEdge(group, cytoscapeUtils.getIdentifier(currentNetwork, edge));
 		}
 		
 		// Build node cache
 		for (Gene gene : result.getScores().keySet()) {
 			Node node = gene.getNode();
 			CyNode cyNode = cytoscapeUtils.getNode(currentNetwork, node, null);
-			NodeProxy nodeProxy = cytoscapeUtils.getNodeProxy(cyNode, currentNetwork);
-			config.addNode(node, nodeProxy.getIdentifier());
+			config.addNode(node, cytoscapeUtils.getIdentifier(currentNetwork, cyNode));
 		}
 		
 		// Cache selected networks

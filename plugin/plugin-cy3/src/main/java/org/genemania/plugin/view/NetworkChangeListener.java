@@ -28,7 +28,6 @@ import org.cytoscape.model.CyNetwork;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.proxies.NetworkProxy;
 
 public class NetworkChangeListener implements ActionListener {
 	
@@ -55,8 +54,7 @@ public class NetworkChangeListener implements ActionListener {
 			return;
 		
 		boolean selected = checkBox.isSelected();
-		NetworkProxy networkProxy = cytoscapeUtils.getNetworkProxy(network);
-		ViewState config = configurations.get(networkProxy.getIdentifier());
+		ViewState config = configurations.get(cytoscapeUtils.getIdentifier(network, network));
 		
 		if (config == null)
 			return;
