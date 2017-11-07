@@ -33,6 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.util.swing.IconManager;
 import org.genemania.domain.Gene;
 import org.genemania.domain.Organism;
 import org.genemania.exception.ApplicationException;
@@ -48,7 +49,6 @@ import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.view.components.BaseInfoPanel;
-import org.genemania.plugin.view.util.IconManager;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class ManiaResultsPanel extends JPanel {

@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.view.util;
 
 import java.awt.Color;
@@ -76,6 +75,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.cytoscape.util.swing.IconManager;
 import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.Strings;
 import org.genemania.plugin.SystemUtils;
@@ -103,9 +103,9 @@ public class UiUtils {
 	private final ImageCache images;
 	private final IconManager iconManager;
 	
-	public UiUtils() {
+	public UiUtils(IconManager iconManager) {
+		this.iconManager = iconManager;
 		images = new ImageCache();
-		iconManager = new IconManager();
 		
 		if (isAquaLAF()) {
 			JLabel lbl = new JLabel();
@@ -157,7 +157,7 @@ public class UiUtils {
 		Pattern pattern = Pattern.compile("\\@\\{(.+?)\\}"); //$NON-NLS-1$
 		Matcher matcher = pattern.matcher(text);
 		
-		Set<String> keys = new HashSet<String>();
+		Set<String> keys = new HashSet<>();
 		int offset = 0;
 		while (matcher.find(offset)) {
 			String key = matcher.group(1);

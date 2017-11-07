@@ -88,6 +88,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.text.NumberFormatter;
 
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.util.swing.IconManager;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.AttributeGroup;
@@ -132,7 +133,6 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.util.CollapsiblePanel;
 import org.genemania.plugin.view.util.CollapsiblePanel.CollapseListener;
 import org.genemania.plugin.view.util.FileSelectionMode;
-import org.genemania.plugin.view.util.IconManager;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
