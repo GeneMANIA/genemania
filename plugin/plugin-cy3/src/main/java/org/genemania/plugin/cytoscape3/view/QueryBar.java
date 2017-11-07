@@ -29,6 +29,8 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
@@ -36,17 +38,21 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -56,9 +62,10 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.IconManager;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.genemania.domain.Organism;
-import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.cytoscape3.model.OrganismManager;
 import org.genemania.plugin.view.util.TextIcon;
+
+import com.sun.glass.events.KeyEvent;
 
 @SuppressWarnings("serial")
 public class QueryBar extends JPanel {
@@ -74,16 +81,10 @@ public class QueryBar extends JPanel {
 	
 	private Organism selectedOrganism;
 	
-	private final GeneMania plugin;
 	private final OrganismManager organismManager;
 	private final CyServiceRegistrar serviceRegistrar;
 	
-	public QueryBar(
-			GeneMania plugin,
-			OrganismManager organismManager,
-			CyServiceRegistrar serviceRegistrar
-	) {
-		this.plugin = plugin;
+	public QueryBar(OrganismManager organismManager, CyServiceRegistrar serviceRegistrar) {
 		this.organismManager = organismManager;
 		this.serviceRegistrar = serviceRegistrar;
 		
@@ -138,6 +139,10 @@ public class QueryBar extends JPanel {
 				.addComponent(getQueryTextField(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
 				.addGap(0, 0, Short.MAX_VALUE)
 		);
+		
+		String tooltip = "Press " + (LookAndFeelUtil.isMac() ? "Command" : "Ctrl") + "+ENTER to run the search";
+		getQueryTextField().setToolTipText(tooltip);
+		getQueryTextArea().setToolTipText(tooltip);
 	}
 	
 	private JButton getOrganismButton() {
@@ -230,6 +235,24 @@ public class QueryBar extends JPanel {
 		if (queryTextArea == null) {
 			queryTextArea = new JTextArea();
 			LookAndFeelUtil.makeSmall(queryTextArea);
+			
+			// When Ctrl+ENTER (command+ENTER on macOS) is pressed, ask Cytoscape to perform the query
+			String ENTER_ACTION_KEY = "ENTER_ACTION_KEY";
+			KeyStroke enterKey = KeyStroke.getKeyStroke(
+					KeyEvent.VK_ENTER,
+					LookAndFeelUtil.isMac() ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK,
+					false
+			);
+			InputMap inputMap = queryTextArea.getInputMap(JComponent.WHEN_FOCUSED);
+			inputMap.put(enterKey, ENTER_ACTION_KEY);
+			
+			queryTextArea.getActionMap().put(ENTER_ACTION_KEY, new AbstractAction() {
+				@Override
+				public void actionPerformed(ActionEvent e) {System.out.println("\n\nENTER");
+					QueryBar.this.firePropertyChange(
+							NetworkSearchTaskFactory.SEARCH_REQUESTED_PROPERTY, null, null);
+				}
+			});
 		}
 		
 		return queryTextArea;

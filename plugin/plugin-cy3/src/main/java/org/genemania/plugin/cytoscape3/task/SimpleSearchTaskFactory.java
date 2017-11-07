@@ -150,7 +150,7 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 	@Override
 	public JComponent getQueryComponent() {
 		if (queryBar == null) {
-			queryBar = new QueryBar(plugin, organismManager, serviceRegistrar);
+			queryBar = new QueryBar(organismManager, serviceRegistrar);
 		}
 		
 		return queryBar;
