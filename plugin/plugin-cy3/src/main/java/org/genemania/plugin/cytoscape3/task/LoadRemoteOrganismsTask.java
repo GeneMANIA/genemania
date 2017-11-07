@@ -21,7 +21,9 @@ package org.genemania.plugin.cytoscape3.task;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
+import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -42,14 +44,23 @@ public class LoadRemoteOrganismsTask extends AbstractTask {
 	protected static final String URL = "http://genemania.org/json/organisms";
 	
 	private Set<Organism> organisms = new LinkedHashSet<>();
+	private Future<String> future;
 	
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
+		tm.setTitle("GeneMANIA");
+		tm.setStatusMessage("Loading organisms from server...");
+		
 		try {
 			Client client = ClientBuilder.newClient();
 			WebTarget target = client.target(URL);
+			AsyncInvoker invoker = target.request().async();
+			future = invoker.get(String.class);
+			String json = future.get();
 			
-			String json = target.request().get(String.class);
+			if (cancelled)
+				return;
+			
 			Gson gson = new Gson();
 			List<Organism> orgList = gson.fromJson(json, new TypeToken<List<Organism>>() {}.getType());
 			
@@ -62,5 +73,13 @@ public class LoadRemoteOrganismsTask extends AbstractTask {
 	
 	public Set<Organism> getOrganisms() {
 		return organisms;
+	}
+	
+	@Override
+	public void cancel() {
+		super.cancel();
+		
+		if (future != null)
+			future.cancel(true);
 	}
 }
