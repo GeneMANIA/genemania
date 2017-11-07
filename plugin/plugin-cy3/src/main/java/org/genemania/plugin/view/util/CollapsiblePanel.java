@@ -46,6 +46,7 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 
 // TODO delete this and use Cytoscape's BasicCollapsiblePanel after Cytoscape v3.3 is released
+// TODO BasicCollapsiblePanel must disable title/arrow properly
 
 /**
  * A user-triggered collapsible panel containing the component (trigger) in the titled border

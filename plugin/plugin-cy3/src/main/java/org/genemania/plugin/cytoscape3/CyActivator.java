@@ -47,6 +47,7 @@ import org.cytoscape.property.SimpleCyProperty;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.visualize.ApplyPreferredLayoutTaskFactory;
+import org.cytoscape.util.swing.IconManager;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -101,10 +102,11 @@ public class CyActivator extends AbstractCyActivator {
 		UndoSupport undoSupport = getService(bc, UndoSupport.class);
 		RenderingEngineManager renderingEngineManager = getService(bc, RenderingEngineManager.class);
 		StreamUtil streamUtil = getService(bc, StreamUtil.class);
+		IconManager iconManager = getService(bc, IconManager.class);
 
 		closeAppPanels();
 		
-		UiUtils uiUtils = new UiUtils();
+		UiUtils uiUtils = new UiUtils(iconManager);
 		FileUtils fileUtils = new CyFileUtils(streamUtil);
 		NetworkUtils networkUtils = new NetworkUtils();
 		CytoscapeUtilsImpl cytoscapeUtils = new CytoscapeUtilsImpl(
