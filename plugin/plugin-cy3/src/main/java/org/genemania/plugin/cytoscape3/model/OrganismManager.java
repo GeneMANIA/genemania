@@ -41,9 +41,11 @@ import org.genemania.plugin.data.DataSetManager;
 
 public class OrganismManager {
 
+	private boolean initialized;
 	private boolean offline;
 	private Set<Organism> localOrganisms = new LinkedHashSet<>();
 	private Set<Organism> remoteOrganisms = new LinkedHashSet<>();
+	private Exception loadRemoteOrganismsException;
 	
 	private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 	
@@ -57,11 +59,15 @@ public class OrganismManager {
 		this.plugin = plugin;
 		this.serviceRegistrar = serviceRegistrar;
 		
-		loadRemoteOrganisms();
-		
 		DataSetManager dataSetManager = plugin.getDataSetManager();
 		dataSetManager.addDataSetChangeListener((dataSet, progress) -> setLocalData(dataSet));
 		initLocalData();
+		
+		loadRemoteOrganisms();
+	}
+	
+	public boolean isInitialized() {
+		return initialized;
 	}
 	
 	public boolean isOffline() {
@@ -85,6 +91,10 @@ public class OrganismManager {
 	
 	public Set<Organism> getRemoteOrganisms() {
 		return new LinkedHashSet<>(remoteOrganisms);
+	}
+	
+	public Exception getLoadRemoteOrganismsException() {
+		return loadRemoteOrganismsException;
 	}
 	
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -118,7 +128,7 @@ public class OrganismManager {
     		synchronized (lock) {
     			localOrganisms.clear();
     			localOrganisms.addAll(newValue);
-			}
+		}
     		
     		if (isOffline())
     			propertyChangeSupport.firePropertyChange("organisms", oldValue, newValue);
@@ -137,10 +147,7 @@ public class OrganismManager {
 			}
 			@Override
 			public void allFinished(FinishStatus finishStatus) {
-				if (finishStatus != FinishStatus.getSucceeded()) {
-					setOffline(true);
-					return;
-				}
+				loadRemoteOrganismsException = finishStatus.getException();
 				
 				Set<Organism> oldValue = new LinkedHashSet<>(remoteOrganisms);
 				Set<Organism> newValue = task.getOrganisms();
@@ -149,9 +156,13 @@ public class OrganismManager {
 					remoteOrganisms.clear();
 					remoteOrganisms.addAll(newValue);
 				}
-	    		
-				if (!isOffline())
+				
+				initialized = true;
+				
+				if (finishStatus == FinishStatus.getSucceeded())
 					propertyChangeSupport.firePropertyChange("organisms", oldValue, newValue);
+				else
+					propertyChangeSupport.firePropertyChange("loadRemoteOrganismsException", null, loadRemoteOrganismsException);
 			}
 		});
 	}

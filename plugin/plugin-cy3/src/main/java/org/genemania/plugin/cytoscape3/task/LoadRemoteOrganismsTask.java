@@ -45,15 +45,19 @@ public class LoadRemoteOrganismsTask extends AbstractTask {
 	
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
-		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target(URL);
-		
-		String json = target.request().get(String.class);
-		Gson gson = new Gson();
-		List<Organism> orgList = gson.fromJson(json, new TypeToken<List<Organism>>() {}.getType());
-		
-		if (orgList != null)
-			organisms.addAll(orgList);
+		try {
+			Client client = ClientBuilder.newClient();
+			WebTarget target = client.target(URL);
+			
+			String json = target.request().get(String.class);
+			Gson gson = new Gson();
+			List<Organism> orgList = gson.fromJson(json, new TypeToken<List<Organism>>() {}.getType());
+			
+			if (orgList != null)
+				organisms.addAll(orgList);
+		} catch (Throwable e) {
+			throw new Exception("Error loading organisms from the GeneMANIA server: " + e.getMessage(), e);
+		}
 	}
 	
 	public Set<Organism> getOrganisms() {

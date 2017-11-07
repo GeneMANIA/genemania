@@ -53,10 +53,12 @@ import javax.swing.event.DocumentListener;
 
 import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
 import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.util.swing.IconManager;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.genemania.domain.Organism;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.cytoscape3.model.OrganismManager;
+import org.genemania.plugin.view.util.TextIcon;
 
 @SuppressWarnings("serial")
 public class QueryBar extends JPanel {
@@ -86,10 +88,13 @@ public class QueryBar extends JPanel {
 		this.serviceRegistrar = serviceRegistrar;
 		
 		init();
-		updateOrganisms();
+		
+		if (organismManager.isInitialized())
+			updateOrganisms();
 		
 		organismManager.addPropertyChangeListener("organisms", evt -> updateOrganisms());
-		organismManager.addPropertyChangeListener("offline", evt -> updateOrganisms());
+		organismManager.addPropertyChangeListener("loadRemoteOrganismsException", evt -> updateOrganisms());
+//		organismManager.addPropertyChangeListener("offline", evt -> updateOrganisms());
 	}
 
 	public Set<String> getQueryGenes() {
@@ -243,8 +248,11 @@ public class QueryBar extends JPanel {
 	
 	private void updateOrganisms() {
 		Set<Organism> organisms = organismManager.getOrganisms();
+		Exception exception = organismManager.getLoadRemoteOrganismsException();
 		
-		if (selectedOrganism == null || !organisms.contains(selectedOrganism))
+		if (organisms.isEmpty() && exception != null)
+			showOrganismsException(exception);
+		else if (selectedOrganism == null || !organisms.contains(selectedOrganism))
 			setSelectedOrganism(organisms.isEmpty() ? null : organisms.iterator().next());
     }
 	
@@ -261,6 +269,16 @@ public class QueryBar extends JPanel {
 			getOrganismButton().setIcon(selectedOrganism != null ? getIcon(selectedOrganism) : null);
 			fireQueryChanged();
 		}
+	}
+	
+	private void showOrganismsException(Exception ex) {
+		selectedOrganism = null;
+		getOrganismButton().setToolTipText(ex.getMessage());
+		IconManager iconManager = serviceRegistrar.getService(IconManager.class);
+		TextIcon icon = new TextIcon(IconManager.ICON_TIMES_CIRCLE, iconManager.getIconFont(24.0f),
+				LookAndFeelUtil.getErrorColor(), ICON_SIZE, ICON_SIZE);
+		getOrganismButton().setIcon(icon);
+		fireQueryChanged();
 	}
 	
 	private void showOrganismPopup() {
