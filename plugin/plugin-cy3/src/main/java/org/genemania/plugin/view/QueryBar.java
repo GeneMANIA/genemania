@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package org.genemania.plugin.cytoscape3.view;
+package org.genemania.plugin.view;
 
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
@@ -158,7 +158,15 @@ public class QueryBar extends JPanel {
 			Dimension d = new Dimension(ICON_SIZE, Math.max(ICON_SIZE, getQueryTextField().getPreferredSize().height));
 			organismButton.setMinimumSize(d);
 			organismButton.setPreferredSize(d);
-			organismButton.addActionListener(evt -> showOrganismPopup());
+			organismButton.addActionListener(evt -> {
+				if (!organismManager.isInitialized())
+					return;
+				
+				if (organismManager.getLoadRemoteOrganismsException() == null)
+					showOrganismPopup();
+				else // Try to load organisms again...
+					organismManager.loadRemoteOrganisms();
+			});
 		}
 		
 		return organismButton;
@@ -296,7 +304,7 @@ public class QueryBar extends JPanel {
 	
 	private void showOrganismsException(Exception ex) {
 		selectedOrganism = null;
-		getOrganismButton().setToolTipText(ex.getMessage());
+		getOrganismButton().setToolTipText("<html>" + ex.getMessage() + "<br><br><b>(Click to try again)</b></html>");
 		IconManager iconManager = serviceRegistrar.getService(IconManager.class);
 		TextIcon icon = new TextIcon(IconManager.ICON_TIMES_CIRCLE, iconManager.getIconFont(24.0f),
 				LookAndFeelUtil.getErrorColor(), ICON_SIZE, ICON_SIZE);

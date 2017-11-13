@@ -113,37 +113,14 @@ public class OrganismManager {
 		propertyChangeSupport.removePropertyChangeListener(propertyName, listener);
 	}
 	
-	private void initLocalData() {
-		if (plugin.getDataSetManager().getDataSet() == null)
-			plugin.initializeData(serviceRegistrar.getService(CySwingApplication.class).getJFrame(), true);
-	}
-	
-	private void setLocalData(final DataSet data) {
-    	try {
-    		Set<Organism> oldValue = new LinkedHashSet<>(localOrganisms);
-    		
-    		OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
-    		Set<Organism> newValue = new LinkedHashSet<>(mediator.getAllOrganisms());
-    		
-    		synchronized (lock) {
-    			localOrganisms.clear();
-    			localOrganisms.addAll(newValue);
-		}
-    		
-    		if (isOffline())
-    			propertyChangeSupport.firePropertyChange("organisms", oldValue, newValue);
-		} catch (DataStoreException e) {
-			LogUtils.log(getClass(), e);
-		}
-    }
-	
-	private void loadRemoteOrganisms() {
+	public void loadRemoteOrganisms() {
 		LoadRemoteOrganismsTask task = new LoadRemoteOrganismsTask();
 		
 		DialogTaskManager taskManager = serviceRegistrar.getService(DialogTaskManager.class);
 		taskManager.execute(new TaskIterator(task), new TaskObserver() {
 			@Override
-			public void taskFinished(ObservableTask task) {
+			public void taskFinished(ObservableTask ot) {
+				// Nothing to do here...
 			}
 			@Override
 			public void allFinished(FinishStatus finishStatus) {
@@ -166,4 +143,28 @@ public class OrganismManager {
 			}
 		});
 	}
+	
+	private void initLocalData() {
+		if (plugin.getDataSetManager().getDataSet() == null)
+			plugin.initializeData(serviceRegistrar.getService(CySwingApplication.class).getJFrame(), true);
+	}
+	
+	private void setLocalData(final DataSet data) {
+		try {
+			Set<Organism> oldValue = new LinkedHashSet<>(localOrganisms);
+
+			OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
+			Set<Organism> newValue = new LinkedHashSet<>(mediator.getAllOrganisms());
+
+			synchronized (lock) {
+				localOrganisms.clear();
+				localOrganisms.addAll(newValue);
+			}
+
+			if (isOffline())
+				propertyChangeSupport.firePropertyChange("organisms", oldValue, newValue);
+		} catch (DataStoreException e) {
+			LogUtils.log(getClass(), e);
+		}
+    }
 }

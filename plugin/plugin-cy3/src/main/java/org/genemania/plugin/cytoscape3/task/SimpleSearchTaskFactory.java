@@ -49,7 +49,6 @@ import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
 import org.genemania.plugin.cytoscape3.model.OrganismManager;
-import org.genemania.plugin.cytoscape3.view.QueryBar;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ViewState;
@@ -57,6 +56,7 @@ import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.model.impl.WeightingMethod;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.view.QueryBar;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
 

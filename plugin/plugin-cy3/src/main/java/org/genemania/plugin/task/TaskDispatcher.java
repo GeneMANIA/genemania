@@ -32,6 +32,7 @@ import org.genemania.plugin.view.TaskDialog;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class TaskDispatcher {
+	
 	private final UiUtils uiUtils;
 	private final Object mutex = new Object();
 	private final Object executionMutex = new Object();
