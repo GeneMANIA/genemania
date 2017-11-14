@@ -19,8 +19,8 @@
 package org.genemania.plugin.controllers;
 
 import java.awt.Color;
-import java.awt.Window;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,19 +30,26 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.subnetwork.CySubNetwork;
+import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.ObservableTask;
+import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.work.TaskMonitor.Level;
+import org.cytoscape.work.json.JSONResult;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.AttributeGroup;
 import org.genemania.domain.Gene;
@@ -89,8 +96,8 @@ import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.model.impl.ViewStateImpl;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.NetworkSelectionManager;
-import org.genemania.plugin.task.GeneManiaTask;
 import org.genemania.plugin.task.TaskDispatcher;
+import org.genemania.plugin.util.TaskMonitorProgressReporter;
 import org.genemania.plugin.view.components.WrappedOptionPane;
 import org.genemania.type.CombiningMethod;
 import org.genemania.util.ChildProgressReporter;
@@ -277,181 +284,11 @@ public class RetrieveRelatedGenesController {
 		return result;
 	}
 	
-	public CyNetwork runMania(Window parent, final Query query, final Collection<Group<?, ?>> groups, boolean offline) {
-		final Object[] result = new Object[1];
+	public ObservableTask runMania(Query query, Collection<Group<?, ?>> groups, boolean offline) {
 		// Create the WS client here, to avoid a thread/OSGI related issues;
-		final Client client = offline ? null : ClientBuilder.newClient();
+		Client client = offline ? null : ClientBuilder.newClient();
 		
-		GeneManiaTask task = new GeneManiaTask(Strings.retrieveRelatedGenes_status) {
-			@Override
-			public void runTask() throws DataStoreException {
-				result[0] = createNetwork(query, groups, offline, client, progress);
-			}
-		};
-		taskDispatcher.executeTask(task, parent, true, true);
-		LogUtils.log(getClass(), task.getLastError());
-		
-		return (CyNetwork) result[0];
-	}
-	
-	private CyNetwork createNetwork(Query query, Collection<Group<?, ?>> selectedGroups, boolean offline, Client client,
-			ProgressReporter progress) throws DataStoreException {
-		int stage = 0;
-		progress.setMaximumProgress(5);
-		progress.setStatus(Strings.retrieveRelatedGenes_status4);
-		
-		ChildProgressReporter childProgress = new ChildProgressReporter(progress);
-		childProgress.close();
-		stage++;
-
-		Organism organism = query.getOrganism();
-		List<String> queryGenes = query.getGenes();
-		
-		SearchResult options = null;
-		String dataVersion = null; // TODO online?
-		double[] extrema =  null;
-		Map<String, Color> networkColors = CytoscapeUtils.NETWORK_COLORS;
-		Map<Long, Double> scores = null;
-		
-		if (offline) {
-			DataSet data = plugin.getDataSetManager().getDataSet();
-			dataVersion = data.getVersion().toString();
-			networkColors = computeNetworkColors(data, organism);
-			
-			childProgress = new ChildProgressReporter(progress);
-			RelatedGenesEngineRequestDto request = createRequest(data, query, selectedGroups, childProgress);
-			request.setProgressReporter(childProgress);
-			RelatedGenesEngineResponseDto response = runQuery(request, data);
-			request.setCombiningMethod(response.getCombiningMethodApplied());
-			childProgress.close();
-			stage++;
-			
-			if (progress.isCanceled())
-				return null;
-	
-			scores = computeGeneScores(response);
-			
-			if (scores.size() == 0) {
-				WrappedOptionPane.showConfirmDialog(
-						taskDispatcher.getTaskDialog(),
-						Strings.retrieveRelatedGenesNoResults,
-						Strings.default_title,
-						JOptionPane.DEFAULT_OPTION,
-						JOptionPane.WARNING_MESSAGE,
-						40
-				);
-				
-				return null;
-			}
-			
-			extrema = computeEdgeWeightExtrema(response);
-			
-			EnrichmentEngineRequestDto enrichmentRequest = createEnrichmentRequest(organism, response);
-			EnrichmentEngineResponseDto enrichmentResponse = null;
-			
-			if (enrichmentRequest != null) {
-				childProgress = new ChildProgressReporter(progress);
-				enrichmentRequest.setProgressReporter(childProgress);
-				enrichmentResponse = computeEnrichment(enrichmentRequest, data);
-				childProgress.close();
-			}
-			
-			stage++;
-			
-			if (progress.isCanceled())
-				return null;
-			
-			options = networkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data,
-					queryGenes);
-		} else {
-			SearchRequest req = new SearchRequest(
-					query.getOrganism().getId(),
-					query.getGenes().stream().collect(Collectors.joining("\n"))
-			);
-			req.setWeightingFromEnum(query.getCombiningMethod());
-			req.setGeneThreshold(query.getGeneLimit());
-			req.setAttrThreshold(query.getAttributeLimit());
-			// TODO
-//			req.setAttrGroups(new Long[] {});
-//			req.setNetworks(new Long[] {});
-			
-			Gson gson = new Gson();
-			String jsonReq = gson.toJson(req);
-			
-			Response res = null;
-			SearchResults searchResults = null;
-			
-			try {
-				WebTarget target = client.target(SEARCH_URL);
-				res = target.request(MediaType.APPLICATION_JSON).post(Entity.json(jsonReq));
-				
-				if (res.getStatus() != 200)
-					throw new RuntimeException(
-							res.getStatusInfo().getStatusCode() + ": " + res.getStatusInfo().getReasonPhrase());
-				
-				String json = res.readEntity(String.class);
-				searchResults = gson.fromJson(json, SearchResults.class);
-			} finally {
-				if (res != null)
-					res.close();
-			}
-			
-			if (progress.isCanceled())
-				return null;
-	
-			scores = computeGeneScores(searchResults.getResultGenes());
-			
-			if (scores.size() == 0) {
-				WrappedOptionPane.showConfirmDialog(
-						taskDispatcher.getTaskDialog(),
-						Strings.retrieveRelatedGenesNoResults,
-						Strings.default_title,
-						JOptionPane.DEFAULT_OPTION,
-						JOptionPane.WARNING_MESSAGE,
-						40
-				);
-				
-				return null;
-			}
-			
-			extrema = computeEdgeWeightExtrema(searchResults);
-			options = networkUtils.createSearchOptions(searchResults);
-			
-			// On online searches, the user cannot select network groups yet, so we need to get all groups
-			// returned with the response, otherwise all of them will be unchecked on the Networks panel by the default.
-			if (selectedGroups == null || selectedGroups.isEmpty()) {
-				selectedGroups = new HashSet<>();
-				
-				for (InteractionNetworkGroup group : options.getInteractionNetworkGroups().values())
-					selectedGroups.add(new InteractionNetworkGroupImpl(group));
-			}
-		}
-		
-		CyNetwork network = null;
-		
-		if (options != null) {
-			EdgeAttributeProvider provider = createEdgeAttributeProvider(options);
-			
-			progress.setStatus(Strings.retrieveRelatedGenes_status5);
-			progress.setProgress(stage++);
-			ViewStateBuilder builder = new ViewStateImpl(options);
-			String netName = getNextNetworkName(organism);
-			
-			network = cytoscapeUtils.createNetwork(netName, dataVersion, options, builder, provider);
-	
-			// Set up edge cache
-			progress.setStatus(Strings.retrieveRelatedGenes_status6);
-			progress.setProgress(stage++);
-			NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
-			
-			computeGraphCache(network, options, builder, selectedGroups);
-			manager.addNetworkConfiguration(network, builder.build());
-	
-			cytoscapeUtils.registerSelectionListener(network, manager, plugin);
-			cytoscapeUtils.applyVisualization(network, filterGeneScores(scores, options), networkColors, extrema);
-		}
-		
-		return network;
+		return new RunGeneManiaTask(query, groups, client, offline);
 	}
 	
 	private EnrichmentEngineResponseDto computeEnrichment(EnrichmentEngineRequestDto request, DataSet data)
@@ -692,6 +529,204 @@ public class RetrieveRelatedGenesController {
 			LogUtils.log(getClass(), e);
 			
 			return null;
+		}
+	}
+	
+	private class RunGeneManiaTask extends AbstractTask implements ObservableTask {
+
+		private final Query query;
+		private Collection<Group<?, ?>> groups;
+		private final Client client;
+		private final boolean offline;
+		
+		private Future<String> future;
+		private CyNetwork network;
+
+		public RunGeneManiaTask(Query query, Collection<Group<?, ?>> groups, Client client, boolean offline) {
+			this.query = query;
+			this.groups = groups;
+			this.client = client;
+			this.offline = offline;
+		}
+
+		@Override
+		public void run(TaskMonitor tm) throws Exception {
+			tm.setTitle(Strings.retrieveRelatedGenes_status);
+			tm.setStatusMessage(Strings.retrieveRelatedGenes_status4);
+			
+			ProgressReporter progress = new TaskMonitorProgressReporter(tm, 5);
+			int stage = 0;
+			
+			ChildProgressReporter childProgress = new ChildProgressReporter(progress);
+			childProgress.close();
+			stage++;
+
+			Organism organism = query.getOrganism();
+			List<String> queryGenes = query.getGenes();
+			
+			SearchResult options = null;
+			String dataVersion = null; // TODO server should also return this when searching online
+			double[] extrema =  null;
+			Map<String, Color> networkColors = CytoscapeUtils.NETWORK_COLORS;
+			Map<Long, Double> scores = null;
+			
+			if (offline) {
+				DataSet data = plugin.getDataSetManager().getDataSet();
+				dataVersion = data.getVersion().toString();
+				networkColors = computeNetworkColors(data, organism);
+				
+				childProgress = new ChildProgressReporter(progress);
+				RelatedGenesEngineRequestDto request = createRequest(data, query, groups, childProgress);
+				request.setProgressReporter(childProgress);
+				RelatedGenesEngineResponseDto response = runQuery(request, data);
+				request.setCombiningMethod(response.getCombiningMethodApplied());
+				childProgress.close();
+				stage++;
+				
+				if (cancelled == true)
+					return;
+		
+				scores = computeGeneScores(response);
+				
+				if (scores.size() == 0) {
+					showNoResultsWarning(tm);
+					tm.setProgress(1.0);
+					
+					return;
+				}
+				
+				extrema = computeEdgeWeightExtrema(response);
+				
+				EnrichmentEngineRequestDto enrichmentRequest = createEnrichmentRequest(organism, response);
+				EnrichmentEngineResponseDto enrichmentResponse = null;
+				
+				if (enrichmentRequest != null) {
+					childProgress = new ChildProgressReporter(progress);
+					enrichmentRequest.setProgressReporter(childProgress);
+					enrichmentResponse = computeEnrichment(enrichmentRequest, data);
+					childProgress.close();
+				}
+				
+				stage++;
+				
+				if (cancelled == true)
+					return;
+				
+				options = networkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data,
+						queryGenes);
+			} else {
+				SearchRequest req = new SearchRequest(
+						query.getOrganism().getId(),
+						query.getGenes().stream().collect(Collectors.joining("\n"))
+				);
+				req.setWeightingFromEnum(query.getCombiningMethod());
+				req.setGeneThreshold(query.getGeneLimit());
+				req.setAttrThreshold(query.getAttributeLimit());
+				// TODO
+//				req.setAttrGroups(new Long[] {});
+//				req.setNetworks(new Long[] {});
+				
+				Gson gson = new Gson();
+				String jsonReq = gson.toJson(req);
+				
+				WebTarget target = client.target(SEARCH_URL);
+				AsyncInvoker invoker = target.request().async();
+				future = invoker.post(Entity.json(jsonReq), String.class);
+				String json = future.get();
+				SearchResults searchResults = gson.fromJson(json, SearchResults.class);
+				
+				if (cancelled == true)
+					return;
+		
+				scores = computeGeneScores(searchResults.getResultGenes());
+				
+				if (scores.size() == 0) {
+					showNoResultsWarning(tm);
+					tm.setProgress(1.0);
+					
+					return;
+				}
+				
+				extrema = computeEdgeWeightExtrema(searchResults);
+				options = networkUtils.createSearchOptions(searchResults);
+				
+				// On online searches, the user cannot select network groups yet, so we need to get all groups
+				// returned with the response, otherwise all of them will be unchecked on the Networks panel by the default.
+				if (groups == null || groups.isEmpty()) {
+					groups = new HashSet<>();
+					
+					for (InteractionNetworkGroup group : options.getInteractionNetworkGroups().values())
+						groups.add(new InteractionNetworkGroupImpl(group));
+				}
+			}
+			
+			if (options != null) {
+				EdgeAttributeProvider provider = createEdgeAttributeProvider(options);
+				
+				tm.setStatusMessage(Strings.retrieveRelatedGenes_status5);
+				progress.setProgress(stage++);
+				ViewStateBuilder builder = new ViewStateImpl(options);
+				String netName = getNextNetworkName(organism);
+				
+				network = cytoscapeUtils.createNetwork(netName, dataVersion, options, builder, provider);
+		
+				// Set up edge cache
+				tm.setStatusMessage(Strings.retrieveRelatedGenes_status6);
+				progress.setProgress(stage++);
+				NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
+				
+				computeGraphCache(network, options, builder, groups);
+				manager.addNetworkConfiguration(network, builder.build());
+		
+				cytoscapeUtils.registerSelectionListener(network, manager, plugin);
+				cytoscapeUtils.applyVisualization(network, filterGeneScores(scores, options), networkColors, extrema);
+			}
+		}
+		
+		@Override
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public Object getResults(Class type) {
+			if (type == CyNetwork.class || type == CySubNetwork.class)
+				return network;
+			
+			if (type == String.class)
+				return network == null ? 
+						"Search returned no results." :
+						String.format("Created network '%s' (SUID=%d)", 
+								network.getRow(network).get(CyNetwork.NAME, String.class), network.getSUID());
+			
+			if (type == JSONResult.class) {
+				JSONResult res = () -> { return network != null ? "" + network.getSUID() : null; };
+				return res;
+			}
+				
+			return null;
+		}
+		
+		@Override
+		public List<Class<?>> getResultClasses() {
+			return Arrays.asList(CyNetwork.class, CySubNetwork.class, String.class, JSONResult.class);
+		}
+		
+		@Override
+		public void cancel() {
+			super.cancel();
+			
+			if (future != null)
+				future.cancel(true);
+		}
+		
+		private void showNoResultsWarning(TaskMonitor tm) {
+			tm.showMessage(Level.WARN, Strings.retrieveRelatedGenesNoResults);
+			
+			SwingUtilities.invokeLater(() -> WrappedOptionPane.showConfirmDialog(
+					cytoscapeUtils.getFrame(),
+					Strings.retrieveRelatedGenesNoResults,
+					Strings.default_title,
+					JOptionPane.DEFAULT_OPTION,
+					JOptionPane.WARNING_MESSAGE,
+					40
+			));
 		}
 	}
 }

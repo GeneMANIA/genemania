@@ -61,11 +61,13 @@
 		</repository>
     </repositories>
     <dependencies>
+     	<!-- GeneMANIA -->
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>plugin-distribution</artifactId>
             <version>${project.version}</version>
         </dependency>
+         <!-- Cytoscape -->
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>model-api</artifactId>
@@ -101,13 +103,19 @@
             <artifactId>io-api</artifactId>
             <version>${cy3.version}</version>
         </dependency>
+        <!-- Third Party -->
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <version>${osgi.api.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Third Party -->
+        <dependency>
+			<groupId>org.ops4j.pax.logging</groupId>
+			<artifactId>pax-logging-api</artifactId>
+			<version>1.5.2</version>
+			<scope>provided</scope>
+		</dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>

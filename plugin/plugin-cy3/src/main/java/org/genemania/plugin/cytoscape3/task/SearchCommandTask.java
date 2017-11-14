@@ -21,23 +21,15 @@ package org.genemania.plugin.cytoscape3.task;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import javax.swing.JFrame;
-import javax.ws.rs.core.Response;
-
-import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
-import org.cytoscape.work.json.JSONResult;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.genemania.domain.Organism;
-import org.genemania.domain.SearchRequest;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
@@ -50,9 +42,7 @@ import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
 
-import com.google.gson.Gson;
-
-public class SearchCommandTask extends AbstractTask implements ObservableTask {
+public class SearchCommandTask extends AbstractTask {
 
 	@Tunable(description = "Offline search:", context = "nogui")
 	public boolean offline;
@@ -75,8 +65,6 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 	// TODO not supported by ONLINE search!
 	@Tunable(description = "Scoring method", context = "nogui")
 	public ListSingleSelection<ScoringMethod> scoringMethod = new ListSingleSelection<>(ScoringMethod.values());
-	
-	private CyNetwork network;
 	
 	private final GeneMania plugin;
 	private final RetrieveRelatedGenesController controller;
@@ -124,134 +112,32 @@ public class SearchCommandTask extends AbstractTask implements ObservableTask {
 		
 		List<Group<?, ?>> groups = SimpleSearchTaskFactory.getGroups(query.getOrganism());
 		
-		JFrame parent = serviceRegistrar.getService(CySwingApplication.class).getJFrame();
-		network = controller.runMania(parent, query, groups, offline);
-
-		tm.setStatusMessage("Applying layout...");
+		ObservableTask nextTask = controller.runMania(query, groups, offline);
 		
-		cytoscapeUtils.handleNetworkPostProcessing(network);
-		cytoscapeUtils.performLayout(network);
-		cytoscapeUtils.maximize(network);
+		AbstractTask finalTask = new AbstractTask() {
+			@Override
+			public void run(TaskMonitor tm) throws Exception {
+				CyNetwork network = nextTask.getResults(CyNetwork.class);
+				
+				if (network != null) {
+					tm.setStatusMessage("Applying layout...");
+					
+					cytoscapeUtils.handleNetworkPostProcessing(network);
+					cytoscapeUtils.performLayout(network);
+					cytoscapeUtils.maximize(network);
+					
+					NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
+					ViewState options = selManager.getNetworkConfiguration(network);
+					plugin.applyOptions(options);
+					plugin.showResults();
+				}
+			}
+		};
 		
-		NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
-		ViewState options = selManager.getNetworkConfiguration(network);
-		plugin.applyOptions(options);
-		plugin.showResults();
+		insertTasksAfterCurrentTask(finalTask);
+		insertTasksAfterCurrentTask(nextTask);
 	}
 
-	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Object getResults(Class type) {
-		if (type == CyNetwork.class || type == CySubNetwork.class)
-			return network;
-		
-		if (type == String.class)
-			return network == null ? 
-					"Search returned no results." :
-					String.format("Created network '%s' (SUID=%d)", 
-							network.getRow(network).get(CyNetwork.NAME, String.class), network.getSUID());
-		
-		if (type == JSONResult.class) {
-			JSONResult res = () -> { return network != null ? "" + network.getSUID() : null; };
-			return res;
-		}
-			
-		return null;
-	}
-	
-//	private void searchOffline(Query query, TaskMonitor tm) {
-//		List<Group<?, ?>> groups = SimpleSearchTaskFactory.getGroups(query.getOrganism());
-//		
-//		JFrame parent = serviceRegistrar.getService(CySwingApplication.class).getJFrame();
-//		network = controller.runMania(parent, query, groups, true);
-//
-//		tm.setStatusMessage("Applying layout...");
-//		
-//		cytoscapeUtils.handleNetworkPostProcessing(network);
-//		cytoscapeUtils.performLayout(network);
-//		cytoscapeUtils.maximize(network);
-//		
-//		NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
-//		ViewState options = selManager.getNetworkConfiguration(network);
-//		plugin.applyOptions(options);
-//		plugin.showResults();
-//	}
-	
-	private void searchOnline(Query query, TaskMonitor tm) {
-		SearchRequest req = new SearchRequest(
-				query.getOrganism().getId(),
-				query.getGenes().stream().collect(Collectors.joining("\n"))
-		);
-		req.setWeightingFromEnum(query.getCombiningMethod());
-		req.setGeneThreshold(query.getGeneLimit());
-		req.setAttrThreshold(query.getAttributeLimit());
-		// TODO
-//		req.setAttrGroups(new Long[] {});
-//		req.setNetworks(new Long[] {});
-		
-		Gson gson = new Gson();
-		String jsonReq = gson.toJson(req);
-		
-		Response res = null;
-		
-		try {
-//			Client client = ClientBuilder.newClient();
-//			WebTarget target = client.target(URL);
-//			res = target.request(MediaType.APPLICATION_JSON).post(Entity.json(jsonReq));
-//			
-//			if (res.getStatus() != 200)
-//				throw new RuntimeException(
-//						res.getStatusInfo().getStatusCode() + ": " + res.getStatusInfo().getReasonPhrase());
-//			
-//			String json = res.readEntity(String.class);
-//			SearchResults searchResults = gson.fromJson(json, SearchResults.class);
-//			System.out.println(searchResults);
-			
-//			RelatedGenesEngineRequestDto request,
-//			RelatedGenesEngineResponseDto response,
-//			EnrichmentEngineResponseDto enrichmentResponse,
-//			SearchResult options
-			
-			// TODO:
-			// A) ============
-//			DataSet data = plugin.getDataSetManager().getDataSet();
-//			List<Group<?, ?>> groups = SimpleSearchTaskFactory.getGroups(query.getOrganism());
-//			SearchResult options = networkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data, queryGenes);
-//			
-//			SearchResult options = new Searchres
-//			EdgeAttributeProvider provider = RetrieveRelatedGenesController.createEdgeAttributeProvider(data, options);
-//			
-////			progress.setStatus(Strings.retrieveRelatedGenes_status5);
-////			progress.setProgress(stage++);
-//			ViewStateBuilder builder = new ViewStateImpl(options);
-//			CyNetwork network = cytoscapeUtils.createNetwork(data, RetrieveRelatedGenesController.getNextNetworkName(query.getOrganism()), options, builder, provider);
-//
-//			// Set up edge cache
-////			progress.setStatus(Strings.retrieveRelatedGenes_status6);
-////			progress.setProgress(stage++);
-//			NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
-//			
-//			computeGraphCache(network, options, builder, selectedGroups);
-//			
-//			manager.addNetworkConfiguration(network, builder.build());
-//
-//			cytoscapeUtils.registerSelectionListener(network, manager, plugin);
-//			cytoscapeUtils.applyVisualization(network, filterGeneScores(scores, options), computeColors(data, organism), extrema);
-			
-			// B) ============
-//			cytoscapeUtils.handleNetworkPostProcessing(network);
-//			cytoscapeUtils.performLayout(network);
-//			cytoscapeUtils.maximize(network);
-//			
-//			ViewState viewState = manager.getNetworkConfiguration(network);
-//			plugin.applyOptions(viewState);
-//			plugin.showResults();
-		} finally {
-			if (res != null)
-				res.close();
-		}
-	}
-	
 	private Query getQuery() {
 		// Create list of gene names
 		List<String> geneList = new ArrayList<>();

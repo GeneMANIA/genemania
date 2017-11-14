@@ -88,8 +88,14 @@ import javax.swing.event.TableModelListener;
 import javax.swing.text.NumberFormatter;
 
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.IconManager;
 import org.cytoscape.util.swing.LookAndFeelUtil;
+import org.cytoscape.work.FinishStatus;
+import org.cytoscape.work.ObservableTask;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskObserver;
+import org.cytoscape.work.swing.DialogTaskManager;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.AttributeGroup;
 import org.genemania.domain.InteractionNetwork;
@@ -541,41 +547,41 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	        statusField.setBorder(BorderFactory.createEmptyBorder());
 	        
 	        getGenePanel().setProgressReporter(new ProgressReporter() {
-	        	@Override
-	        	public void setStatus(String status) {
-	        		statusField.setText(status);
-	        		statusField.invalidate();
-	        	}
-	        	@Override
+				@Override
+				public void setStatus(String status) {
+					statusField.setText(status);
+					statusField.invalidate();
+				}
+				@Override
 				public String getStatus() {
 					return statusField.getText();
 				}
-	        	@Override
+				@Override
 				public void cancel() {
 				}
-	        	@Override
+				@Override
 				public int getMaximumProgress() {
 					return 0;
 				}
-	        	@Override
+				@Override
 				public int getProgress() {
 					return 0;
 				}
-	        	@Override
+				@Override
 				public boolean isCanceled() {
 					return false;
 				}
-	        	@Override
+				@Override
 				public void setMaximumProgress(int maximum) {
 				}
-	        	@Override
+				@Override
 				public void setProgress(int progress) {
 				}
-	        	@Override
+				@Override
 				public String getDescription() {
 					return null;
 				}
-	        	@Override
+				@Override
 				public void setDescription(String description) {
 				}
 	        });
@@ -949,16 +955,39 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	private void handleStartButton() {
 		Query query = getQuery();
 		Collection<Group<?, ?>> groups = selectionPanel.getSelectedGroups();
-		CyNetwork cyNetwork = controller.runMania(this, query, groups, true);
+		ObservableTask task = controller.runMania(query, groups, true);
 
-		cytoscapeUtils.handleNetworkPostProcessing(cyNetwork);
-		cytoscapeUtils.performLayout(cyNetwork);
-		cytoscapeUtils.maximize(cyNetwork);
+		CyServiceRegistrar serviceRegistrar = cytoscapeUtils.getServiceRegistrar();
+		DialogTaskManager taskManager = serviceRegistrar != null ?
+				serviceRegistrar.getService(DialogTaskManager.class) : null;
 		
-		NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
-		ViewState options = manager.getNetworkConfiguration(cyNetwork);
-		plugin.applyOptions(options);
-		plugin.showResults();
+		if (taskManager != null) {
+			taskManager.execute(new TaskIterator(task), new TaskObserver() {
+				
+				private CyNetwork network;
+				
+				@Override
+				public void taskFinished(ObservableTask observableTask) {
+					if (observableTask.getResultClasses().contains(CyNetwork.class))
+						network = observableTask.getResults(CyNetwork.class);
+				}
+				
+				@Override
+				public void allFinished(FinishStatus finishStatus) {
+					if (network != null) {
+						// Show results
+						cytoscapeUtils.handleNetworkPostProcessing(network);
+						cytoscapeUtils.performLayout(network);
+						cytoscapeUtils.maximize(network);
+						
+						NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
+						ViewState options = selManager.getNetworkConfiguration(network);
+						plugin.applyOptions(options);
+						plugin.showResults();
+					}
+				}
+			});
+		}
 	}
 
 	private void validateQuery() {

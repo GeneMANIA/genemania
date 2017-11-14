@@ -25,6 +25,7 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 public class WrappedOptionPane extends JOptionPane {
+	
 	public static final int DEFAULT_WIDTH = 40;
 	
 	private static final long serialVersionUID = 1L;
@@ -40,7 +41,8 @@ public class WrappedOptionPane extends JOptionPane {
 		return charactersPerLine;
 	}
 	
-	public static int showConfirmDialog(Component parentComponent, String message, String title, int optionType, int messageType, int charactersPerLine) {
+	public static int showConfirmDialog(Component parentComponent, String message, String title, int optionType,
+			int messageType, int charactersPerLine) {
 		WrappedOptionPane pane = new WrappedOptionPane(message, messageType, optionType, charactersPerLine);
         pane.setInitialValue(null);
         JDialog dialog = pane.createDialog(parentComponent, title);
@@ -50,12 +52,11 @@ public class WrappedOptionPane extends JOptionPane {
 
         Object selectedValue = pane.getValue();
 
-        if (selectedValue == null) {
+        if (selectedValue == null)
             return CLOSED_OPTION;
-        }
-        if (selectedValue instanceof Integer) {
+        if (selectedValue instanceof Integer)
             return (Integer) selectedValue;
-        }
+        
         return CLOSED_OPTION;
 	}
 }

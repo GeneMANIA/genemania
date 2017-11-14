@@ -32,6 +32,7 @@ import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.genemania.domain.Node;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.model.Group;
@@ -164,4 +165,6 @@ public interface CytoscapeUtils {
 	<U> void setAttribute(CyNetwork network, CyIdentifiable entry, String name, U value);
 
 	Class<?> getAttributeType(CyNetwork network, CyIdentifiable entry, String name);
+	
+	CyServiceRegistrar getServiceRegistrar();
 }

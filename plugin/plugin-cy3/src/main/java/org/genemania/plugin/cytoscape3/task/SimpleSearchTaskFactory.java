@@ -28,12 +28,13 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
 
 import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.FinishStatus;
+import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
@@ -183,18 +184,8 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 				
 				List<Group<?, ?>> groups = getGroups(query.getOrganism());
 				
-				new Thread(() -> {
-					CyNetwork network = controller.runMania(SwingUtilities.getWindowAncestor(queryBar), query, groups,
-							offline);
-					cytoscapeUtils.handleNetworkPostProcessing(network);
-					cytoscapeUtils.performLayout(network);
-					cytoscapeUtils.maximize(network);
-					
-					NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
-					ViewState options = selManager.getNetworkConfiguration(network);
-					plugin.applyOptions(options);
-					plugin.showResults();
-				}).start();
+				ObservableTask nextTask = controller.runMania(query, groups, offline);
+				insertTasksAfterCurrentTask(nextTask);
 			}
 		});
 	}
@@ -226,7 +217,31 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 
 	@Override
 	public TaskObserver getTaskObserver() {
-		return null;
+		return new TaskObserver() {
+			
+			private CyNetwork network;
+			
+			@Override
+			public void taskFinished(ObservableTask task) {
+				if (task.getResultClasses().contains(CyNetwork.class))
+					network = task.getResults(CyNetwork.class);
+			}
+			
+			@Override
+			public void allFinished(FinishStatus finishStatus) {
+				if (network != null) {
+					// Show results
+					cytoscapeUtils.handleNetworkPostProcessing(network);
+					cytoscapeUtils.performLayout(network);
+					cytoscapeUtils.maximize(network);
+					
+					NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
+					ViewState options = selManager.getNetworkConfiguration(network);
+					plugin.applyOptions(options);
+					plugin.showResults();
+				}
+			}
+		};
 	}
 
 	@Override

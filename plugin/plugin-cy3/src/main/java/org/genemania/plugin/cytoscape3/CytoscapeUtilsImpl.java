@@ -220,6 +220,11 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	}
 	
 	@Override
+	public CyServiceRegistrar getServiceRegistrar() {
+		return serviceRegistrar;
+	}
+	
+	@Override
 	public void setHighlighted(final ViewState config, final CyNetwork network, final boolean visible) {
 		final Collection<CyNetworkView> netViews = viewManager.getNetworkViews(network);
 		
@@ -411,7 +416,6 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	}
 
 	public Properties getGlobalProperties() {
-		// TODO Auto-generated method stub
 		return new Properties();
 	}
 	
