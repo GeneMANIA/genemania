@@ -19,6 +19,8 @@
 
 package org.genemania.engine.config;
 
+import java.net.URL;
+
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -85,7 +87,11 @@ public class Config {
 
         try {
             Config newConfig = new Config();
-            newConfig.configData = new PropertiesConfiguration(configFile);
+            // Must load it from a URL and not a File, or the config file may not be located
+            // when the engine is used by the Cytoscape app Task,
+            // because of OSGI and its multiple class loaders.
+            URL url = Config.class.getClassLoader().getResource(configFile);
+			newConfig.configData = new PropertiesConfiguration(url);
             
             // replace previous instance if successful
             config = newConfig;
