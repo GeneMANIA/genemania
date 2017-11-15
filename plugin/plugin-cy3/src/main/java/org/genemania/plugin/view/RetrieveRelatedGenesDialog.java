@@ -71,6 +71,7 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JSeparator;
@@ -136,6 +137,7 @@ import org.genemania.plugin.selection.SelectionEvent;
 import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.task.GeneManiaTask;
 import org.genemania.plugin.task.TaskDispatcher;
+import org.genemania.plugin.view.components.WrappedOptionPane;
 import org.genemania.plugin.view.util.CollapsiblePanel;
 import org.genemania.plugin.view.util.CollapsiblePanel.CollapseListener;
 import org.genemania.plugin.view.util.FileSelectionMode;
@@ -974,7 +976,16 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 				
 				@Override
 				public void allFinished(FinishStatus finishStatus) {
-					if (network != null) {
+					if (network == null) {
+						SwingUtilities.invokeLater(() -> WrappedOptionPane.showConfirmDialog(
+								cytoscapeUtils.getFrame(),
+								Strings.retrieveRelatedGenesNoResults,
+								Strings.default_title,
+								JOptionPane.DEFAULT_OPTION,
+								JOptionPane.INFORMATION_MESSAGE,
+								60
+						));
+					} else {
 						// Show results
 						cytoscapeUtils.handleNetworkPostProcessing(network);
 						cytoscapeUtils.performLayout(network);

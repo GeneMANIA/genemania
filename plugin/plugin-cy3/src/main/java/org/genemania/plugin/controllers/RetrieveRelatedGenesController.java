@@ -33,8 +33,6 @@ import java.util.Vector;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -48,7 +46,6 @@ import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
-import org.cytoscape.work.TaskMonitor.Level;
 import org.cytoscape.work.json.JSONResult;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.AttributeGroup;
@@ -98,7 +95,6 @@ import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.util.TaskMonitorProgressReporter;
-import org.genemania.plugin.view.components.WrappedOptionPane;
 import org.genemania.type.CombiningMethod;
 import org.genemania.util.ChildProgressReporter;
 import org.genemania.util.NullProgressReporter;
@@ -553,13 +549,13 @@ public class RetrieveRelatedGenesController {
 		public void run(TaskMonitor tm) throws Exception {
 			tm.setTitle(Strings.retrieveRelatedGenes_status);
 			tm.setStatusMessage(Strings.retrieveRelatedGenes_status4);
+			tm.setProgress(0.0);
 			
-			ProgressReporter progress = new TaskMonitorProgressReporter(tm, 5);
+			ProgressReporter progress = new TaskMonitorProgressReporter(tm, 8);
 			int stage = 0;
 			
 			ChildProgressReporter childProgress = new ChildProgressReporter(progress);
 			childProgress.close();
-			stage++;
 
 			Organism organism = query.getOrganism();
 			List<String> queryGenes = query.getGenes();
@@ -575,30 +571,30 @@ public class RetrieveRelatedGenesController {
 				dataVersion = data.getVersion().toString();
 				networkColors = computeNetworkColors(data, organism);
 				
+				progress.setProgress(++stage);
 				childProgress = new ChildProgressReporter(progress);
 				RelatedGenesEngineRequestDto request = createRequest(data, query, groups, childProgress);
 				request.setProgressReporter(childProgress);
 				RelatedGenesEngineResponseDto response = runQuery(request, data);
 				request.setCombiningMethod(response.getCombiningMethodApplied());
 				childProgress.close();
-				stage++;
 				
 				if (cancelled == true)
 					return;
 		
+				progress.setProgress(++stage);
 				scores = computeGeneScores(response);
 				
-				if (scores.size() == 0) {
-					showNoResultsWarning(tm);
-					tm.setProgress(1.0);
-					
+				if (scores.isEmpty())
 					return;
-				}
 				
+				progress.setProgress(++stage);
 				extrema = computeEdgeWeightExtrema(response);
 				
 				EnrichmentEngineRequestDto enrichmentRequest = createEnrichmentRequest(organism, response);
 				EnrichmentEngineResponseDto enrichmentResponse = null;
+				
+				progress.setProgress(++stage);
 				
 				if (enrichmentRequest != null) {
 					childProgress = new ChildProgressReporter(progress);
@@ -607,14 +603,15 @@ public class RetrieveRelatedGenesController {
 					childProgress.close();
 				}
 				
-				stage++;
-				
 				if (cancelled == true)
 					return;
 				
+				progress.setProgress(++stage);
 				options = networkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data,
 						queryGenes);
 			} else {
+				tm.setProgress(-1.0);
+				
 				SearchRequest req = new SearchRequest(
 						query.getOrganism().getId(),
 						query.getGenes().stream().collect(Collectors.joining("\n"))
@@ -629,6 +626,8 @@ public class RetrieveRelatedGenesController {
 				Gson gson = new Gson();
 				String jsonReq = gson.toJson(req);
 				
+				progress.setProgress(++stage);
+				
 				WebTarget target = client.target(SEARCH_URL);
 				AsyncInvoker invoker = target.request().async();
 				future = invoker.post(Entity.json(jsonReq), String.class);
@@ -638,17 +637,19 @@ public class RetrieveRelatedGenesController {
 				if (cancelled == true)
 					return;
 		
+				progress.setProgress(++stage);
 				scores = computeGeneScores(searchResults.getResultGenes());
 				
-				if (scores.size() == 0) {
-					showNoResultsWarning(tm);
-					tm.setProgress(1.0);
-					
+				if (scores.isEmpty())
 					return;
-				}
 				
+				progress.setProgress(++stage);
 				extrema = computeEdgeWeightExtrema(searchResults);
+				
+				progress.setProgress(++stage);
 				options = networkUtils.createSearchOptions(searchResults);
+				
+				progress.setProgress(++stage);
 				
 				// On online searches, the user cannot select network groups yet, so we need to get all groups
 				// returned with the response, otherwise all of them will be unchecked on the Networks panel by the default.
@@ -658,13 +659,15 @@ public class RetrieveRelatedGenesController {
 					for (InteractionNetworkGroup group : options.getInteractionNetworkGroups().values())
 						groups.add(new InteractionNetworkGroupImpl(group));
 				}
+				
+				progress.setProgress(++stage);
 			}
 			
 			if (options != null) {
 				EdgeAttributeProvider provider = createEdgeAttributeProvider(options);
 				
 				tm.setStatusMessage(Strings.retrieveRelatedGenes_status5);
-				progress.setProgress(stage++);
+				progress.setProgress(++stage);
 				ViewStateBuilder builder = new ViewStateImpl(options);
 				String netName = getNextNetworkName(organism);
 				
@@ -672,7 +675,7 @@ public class RetrieveRelatedGenesController {
 		
 				// Set up edge cache
 				tm.setStatusMessage(Strings.retrieveRelatedGenes_status6);
-				progress.setProgress(stage++);
+				progress.setProgress(++stage);
 				NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
 				
 				computeGraphCache(network, options, builder, groups);
@@ -714,19 +717,6 @@ public class RetrieveRelatedGenesController {
 			
 			if (future != null)
 				future.cancel(true);
-		}
-		
-		private void showNoResultsWarning(TaskMonitor tm) {
-			tm.showMessage(Level.WARN, Strings.retrieveRelatedGenesNoResults);
-			
-			SwingUtilities.invokeLater(() -> WrappedOptionPane.showConfirmDialog(
-					cytoscapeUtils.getFrame(),
-					Strings.retrieveRelatedGenesNoResults,
-					Strings.default_title,
-					JOptionPane.DEFAULT_OPTION,
-					JOptionPane.WARNING_MESSAGE,
-					40
-			));
 		}
 	}
 }

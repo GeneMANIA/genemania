@@ -28,6 +28,8 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
 import org.cytoscape.model.CyNetwork;
@@ -58,6 +60,7 @@ import org.genemania.plugin.model.impl.WeightingMethod;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.plugin.view.QueryBar;
+import org.genemania.plugin.view.components.WrappedOptionPane;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
 
@@ -229,7 +232,16 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 			
 			@Override
 			public void allFinished(FinishStatus finishStatus) {
-				if (network != null) {
+				if (network == null) {
+					SwingUtilities.invokeLater(() -> WrappedOptionPane.showConfirmDialog(
+							cytoscapeUtils.getFrame(),
+							Strings.retrieveRelatedGenesNoResults,
+							Strings.default_title,
+							JOptionPane.DEFAULT_OPTION,
+							JOptionPane.INFORMATION_MESSAGE,
+							60
+					));
+				} else {
 					// Show results
 					cytoscapeUtils.handleNetworkPostProcessing(network);
 					cytoscapeUtils.performLayout(network);
