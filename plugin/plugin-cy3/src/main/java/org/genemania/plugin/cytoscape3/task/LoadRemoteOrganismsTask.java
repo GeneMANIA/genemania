@@ -28,8 +28,11 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
+import org.apache.log4j.Logger;
+import org.cytoscape.application.CyUserLog;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.work.TaskMonitor.Level;
 import org.genemania.domain.Organism;
 
 import com.google.gson.Gson;
@@ -45,7 +48,10 @@ public class LoadRemoteOrganismsTask extends AbstractTask {
 	
 	private Set<Organism> organisms = new LinkedHashSet<>();
 	private Future<String> future;
+	private String errorMessage;
 	
+	private final Logger logger = Logger.getLogger(CyUserLog.NAME);
+
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
 		tm.setTitle("GeneMANIA");
@@ -67,12 +73,19 @@ public class LoadRemoteOrganismsTask extends AbstractTask {
 			if (orgList != null)
 				organisms.addAll(orgList);
 		} catch (Throwable e) {
-			throw new Exception("Error loading organisms from the GeneMANIA server: " + e.getMessage(), e);
+			// Don't throw an exception here, we don't want to block the Cytoscape UI.
+			errorMessage = "GeneMANIA cannot load organisms from the server: " + e.getMessage();
+			tm.showMessage(Level.ERROR, errorMessage);
+			logger.error("GeneMANIA cannot load organisms from the server.", e);
 		}
 	}
 	
 	public Set<Organism> getOrganisms() {
 		return organisms;
+	}
+	
+	public String getErrorMessage() {
+		return errorMessage;
 	}
 	
 	@Override

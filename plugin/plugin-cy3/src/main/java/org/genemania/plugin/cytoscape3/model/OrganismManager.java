@@ -45,7 +45,7 @@ public class OrganismManager {
 	private boolean offline;
 	private Set<Organism> localOrganisms = new LinkedHashSet<>();
 	private Set<Organism> remoteOrganisms = new LinkedHashSet<>();
-	private Exception loadRemoteOrganismsException;
+	private String loadRemoteOrganismsErrorMessage;
 	
 	private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 	
@@ -93,8 +93,8 @@ public class OrganismManager {
 		return new LinkedHashSet<>(remoteOrganisms);
 	}
 	
-	public Exception getLoadRemoteOrganismsException() {
-		return loadRemoteOrganismsException;
+	public String getLoadRemoteOrganismsErrorMessage() {
+		return loadRemoteOrganismsErrorMessage;
 	}
 	
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -124,7 +124,10 @@ public class OrganismManager {
 			}
 			@Override
 			public void allFinished(FinishStatus finishStatus) {
-				loadRemoteOrganismsException = finishStatus.getException();
+				loadRemoteOrganismsErrorMessage = task.getErrorMessage();
+				
+				if (finishStatus != FinishStatus.getSucceeded() && finishStatus.getException() != null)
+					loadRemoteOrganismsErrorMessage = finishStatus.getException().getMessage();
 				
 				Set<Organism> oldValue = new LinkedHashSet<>(remoteOrganisms);
 				Set<Organism> newValue = task.getOrganisms();
@@ -136,10 +139,10 @@ public class OrganismManager {
 				
 				initialized = true;
 				
-				if (finishStatus == FinishStatus.getSucceeded())
+				if (finishStatus == FinishStatus.getSucceeded() && loadRemoteOrganismsErrorMessage == null)
 					propertyChangeSupport.firePropertyChange("organisms", oldValue, newValue);
 				else
-					propertyChangeSupport.firePropertyChange("loadRemoteOrganismsException", null, loadRemoteOrganismsException);
+					propertyChangeSupport.firePropertyChange("loadRemoteOrganismsException", null, loadRemoteOrganismsErrorMessage);
 			}
 		});
 	}

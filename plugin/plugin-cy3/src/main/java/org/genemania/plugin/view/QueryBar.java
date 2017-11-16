@@ -162,7 +162,7 @@ public class QueryBar extends JPanel {
 				if (!organismManager.isInitialized())
 					return;
 				
-				if (organismManager.getLoadRemoteOrganismsException() == null)
+				if (organismManager.getLoadRemoteOrganismsErrorMessage() == null)
 					showOrganismPopup();
 				else // Try to load organisms again...
 					organismManager.loadRemoteOrganisms();
@@ -279,10 +279,10 @@ public class QueryBar extends JPanel {
 	
 	private void updateOrganisms() {
 		Set<Organism> organisms = organismManager.getOrganisms();
-		Exception exception = organismManager.getLoadRemoteOrganismsException();
+		String errorMessage = organismManager.getLoadRemoteOrganismsErrorMessage();
 		
-		if (organisms.isEmpty() && exception != null)
-			showOrganismsException(exception);
+		if (organisms.isEmpty() && errorMessage != null)
+			showOrganismsException(errorMessage);
 		else if (selectedOrganism == null || !organisms.contains(selectedOrganism))
 			setSelectedOrganism(organisms.isEmpty() ? null : organisms.iterator().next());
     }
@@ -302,9 +302,9 @@ public class QueryBar extends JPanel {
 		}
 	}
 	
-	private void showOrganismsException(Exception ex) {
+	private void showOrganismsException(String errorMessage) {
 		selectedOrganism = null;
-		getOrganismButton().setToolTipText("<html>" + ex.getMessage() + "<br><br><b>(Click to try again)</b></html>");
+		getOrganismButton().setToolTipText("<html>" + errorMessage + "<br><br><b>(Click to try again)</b></html>");
 		IconManager iconManager = serviceRegistrar.getService(IconManager.class);
 		TextIcon icon = new TextIcon(IconManager.ICON_TIMES_CIRCLE, iconManager.getIconFont(24.0f),
 				LookAndFeelUtil.getErrorColor(), ICON_SIZE, ICON_SIZE);
