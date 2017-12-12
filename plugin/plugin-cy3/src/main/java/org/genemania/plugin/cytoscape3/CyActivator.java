@@ -20,7 +20,10 @@ package org.genemania.plugin.cytoscape3;
 
 import static org.cytoscape.work.ServiceProperties.COMMAND;
 import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
+import static org.cytoscape.work.ServiceProperties.COMMAND_EXAMPLE_JSON;
+import static org.cytoscape.work.ServiceProperties.COMMAND_LONG_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
+import static org.cytoscape.work.ServiceProperties.COMMAND_SUPPORTS_JSON;
 import static org.cytoscape.work.ServiceProperties.INSERT_SEPARATOR_AFTER;
 import static org.cytoscape.work.ServiceProperties.INSERT_SEPARATOR_BEFORE;
 import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
@@ -217,9 +220,33 @@ public class CyActivator extends AbstractCyActivator {
 		{
 			ListOrganismsCommandTaskFactory factory = new ListOrganismsCommandTaskFactory(organismManager);
 			Properties p = new Properties();
-			p.put(COMMAND, "list organisms");
-			p.put(COMMAND_NAMESPACE, "genemania");
-			p.put(COMMAND_DESCRIPTION, "List supported GeneMANIA organisms");
+			p.setProperty(COMMAND, "organisms");
+			p.setProperty(COMMAND_NAMESPACE, "genemania");
+			p.setProperty(COMMAND_DESCRIPTION, "Lists supported GeneMANIA organisms");
+			p.setProperty(COMMAND_LONG_DESCRIPTION, "Lists all available organisms that have been installed or are supported for online searches");
+			p.setProperty(COMMAND_SUPPORTS_JSON, "true");
+			p.setProperty(COMMAND_EXAMPLE_JSON,
+					"[\n" + 
+					"    {\n" + 
+					"      \"taxonomyId\": 3702,\n" + 
+					"      \"scientificName\": \"Arabidopsis thaliana\",\n" + 
+					"      \"abbreviatedName\": \"A. thaliana\",\n" + 
+					"      \"commonName\": \"arabidopsis\"\n" + 
+					"    },\n" + 
+					"    {\n" + 
+					"      \"taxonomyId\": 83333,\n" + 
+					"      \"scientificName\": \"Escherichia coli\",\n" + 
+					"      \"abbreviatedName\": \"E. coli\",\n" + 
+					"      \"commonName\": \"escherichia coli\"\n" + 
+					"    },\n" + 
+					"    {\n" + 
+					"      \"taxonomyId\": 9606,\n" + 
+					"      \"scientificName\": \"Homo sapiens\",\n" + 
+					"      \"abbreviatedName\": \"H. sapiens\",\n" + 
+					"      \"commonName\": \"human\"\n" + 
+					"    }\n" + 
+					"  ]"
+			);
 			registerService(bc, factory, TaskFactory.class, p);
 		}
 	}

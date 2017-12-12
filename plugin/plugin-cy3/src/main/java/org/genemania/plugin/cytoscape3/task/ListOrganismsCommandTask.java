@@ -20,12 +20,12 @@ package org.genemania.plugin.cytoscape3.task;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.cytoscape.work.AbstractTask;
@@ -34,13 +34,21 @@ import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.json.JSONResult;
 import org.genemania.domain.Organism;
+import org.genemania.plugin.cytoscape3.model.OrganismDto;
 import org.genemania.plugin.cytoscape3.model.OrganismManager;
 
 import com.google.gson.Gson;
 
 public class ListOrganismsCommandTask extends AbstractTask implements ObservableTask {
 
-	@Tunable(description = "Offline search:", context = "nogui")
+	@Tunable(
+			description = "Offline search:",
+			longDescription = 
+					"If ```true```, it lists only organisms that have been installed locally and are available for offline searches."
+					+ "If ```false```, it lists all the organisms that are supported by the geneMANIA server on online searches.",
+			exampleStringValue = "false",
+			context = "nogui"
+	)
 	public boolean offline;
 	
 	private Set<Organism> organisms;
@@ -67,9 +75,7 @@ public class ListOrganismsCommandTask extends AbstractTask implements Observable
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object getResults(Class type) {
-		if (Vector.class.isAssignableFrom(type))
-			return new Vector<>(organisms);
-		else if (Set.class.isAssignableFrom(type))
+		if (Set.class.isAssignableFrom(type))
 			return new LinkedHashSet<>(organisms);
 		else if (List.class.isAssignableFrom(type))
 			return new ArrayList<>(organisms);
@@ -85,21 +91,25 @@ public class ListOrganismsCommandTask extends AbstractTask implements Observable
 			StringBuilder sb = new StringBuilder(String.format(
 					"<html><body><table style='font-family: monospace; color: %s;'>"
 					+ "<tr style='font-weight: bold; border-width: 0px 0px 1px 0px; border-style: dotted;'>"
-					+ "<th style='text-align: left;'>Name</th>"
-					+ "<th style='text-align: left;'>Alias</th>"
-					+ "<th style='text-align: left;'>Description</th>"
-					+ "<th style='text-align: left;'>Taxonomy ID</th>"
+					+ "<th style='text-align: left; padding: 0px 24px 0px 0px;'>Taxonomy ID</th>"
+					+ "<th style='text-align: left; padding: 0px 24px 0px 0px;'>Scientific Name</th>"
+					+ "<th style='text-align: left; padding: 0px 24px 0px 0px;'>Abbreviated Name</th>"
+					+ "<th style='text-align: left; padding: 0px 24px 0px 0px;'>Common Name</th>"
 					+ "</tr>",
 					("#" + Integer.toHexString(color.getRGB()).substring(2))
 			));
 			
 			for (Organism org : organisms)
 				sb.append(String.format(
-						"<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
-						org.getName(),
+						"<tr>"
+						+ "<td style='padding: 2px 24px 2px 0px; text-align: right;'>%s</td>"
+						+ "<td style='padding: 2px 24px 2px 0px;'>%s</td>"
+						+ "<td style='padding: 2px 24px 2px 0px;'>%s</td>"
+						+ "<td style='padding: 2px 24px 2px 0px;'>%s</td></tr>",
+						org.getTaxonomyId(),
 						org.getAlias(),
-						org.getDescription(),
-						org.getTaxonomyId()
+						org.getName(),
+						org.getDescription()
 				));
 			
 			sb.append("</table></body></html>");
@@ -108,11 +118,21 @@ public class ListOrganismsCommandTask extends AbstractTask implements Observable
 		}
 		
 		if (type == JSONResult.class) {
+			List<OrganismDto> dtoList = new ArrayList<>();
+			
+			for (Organism org : organisms)
+				dtoList.add(new OrganismDto(org));
+			
 			Gson gson = new Gson();
-			JSONResult res = () -> { return gson.toJson(organisms); };
+			JSONResult res = () -> { return gson.toJson(dtoList); };
 			return res;
 		}
 			
 		return null;
+	}
+	
+	@Override
+	public List<Class<?>> getResultClasses() {
+		return Arrays.asList(Set.class, List.class, Collection.class, String.class, JSONResult.class);
 	}
 }
