@@ -77,6 +77,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -423,7 +424,7 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 			final JLabel interactionsLabel = createLabel(Strings.retrieveRelatedGenesStatisticsInteractions_label, valLabelFont);
 			final JLabel versionLabel = createLabel(Strings.retrieveRelatedGenesStatisticsVersion_label, valLabelFont);
 			
-			final JSeparator sep = new JSeparator(JSeparator.VERTICAL);
+			final JSeparator sep = new JSeparator(SwingConstants.VERTICAL);
 			
 			dataComponents.add(totalOrganismsLabel);
 			dataComponents.add(totalNetworksLabel);
@@ -1165,8 +1166,10 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	private void handleConfigureButton() {
 		DataSet data = dataSetManager.getDataSet();
 		
-		if (data == null)
+		if (data == null) {
+			plugin.initializeData(cytoscapeUtils.getFrame(), false);
 			return;
+		}
 		
 		IConfiguration config = data.getConfiguration();
 		
