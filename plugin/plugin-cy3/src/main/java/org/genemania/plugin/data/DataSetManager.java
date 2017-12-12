@@ -113,9 +113,10 @@ public class DataSetManager {
 	
 	protected static String getString(XPath xpath, String query, Node root) throws XPathExpressionException {
 		String value = (String) xpath.evaluate(query, root, XPathConstants.STRING);
-		if (value == null || value.trim().length() == 0) {
+		
+		if (value == null || value.trim().length() == 0)
 			return null;
-		}
+		
 		return value;
 	}
 	
@@ -124,14 +125,12 @@ public class DataSetManager {
 		//                 cache isn't static.
 		SoftRefObjectCache.instance().clear();
 
-		dataSet = data;
-		notifyDataSetListeners(progress);
-		File path;
-		if (data != null) {
-			path = new File(data.getBasePath());
-		} else {
-			path = null;
+		if (data != dataSet) {
+			dataSet = data;
+			notifyDataSetListeners(progress);
 		}
+		
+		File path = data != null ? new File(data.getBasePath()) : null;
 		setDataSourcePath(path);
 	}
 	
