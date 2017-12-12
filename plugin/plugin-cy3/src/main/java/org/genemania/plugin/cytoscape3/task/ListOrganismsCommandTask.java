@@ -124,7 +124,11 @@ public class ListOrganismsCommandTask extends AbstractTask implements Observable
 				dtoList.add(new OrganismDto(org));
 			
 			Gson gson = new Gson();
-			JSONResult res = () -> { return gson.toJson(dtoList); };
+			String json = gson.toJson(dtoList);
+			JSONResult res = () -> {
+				return "{ \"organisms\": " + json + " }";
+			};
+			
 			return res;
 		}
 			

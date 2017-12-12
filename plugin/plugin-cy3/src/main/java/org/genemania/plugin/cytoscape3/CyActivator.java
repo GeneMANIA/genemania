@@ -226,26 +226,28 @@ public class CyActivator extends AbstractCyActivator {
 			p.setProperty(COMMAND_LONG_DESCRIPTION, "Lists all available organisms that have been installed or are supported for online searches");
 			p.setProperty(COMMAND_SUPPORTS_JSON, "true");
 			p.setProperty(COMMAND_EXAMPLE_JSON,
-					"[\n" + 
-					"    {\n" + 
-					"      \"taxonomyId\": 3702,\n" + 
-					"      \"scientificName\": \"Arabidopsis thaliana\",\n" + 
-					"      \"abbreviatedName\": \"A. thaliana\",\n" + 
-					"      \"commonName\": \"arabidopsis\"\n" + 
-					"    },\n" + 
-					"    {\n" + 
-					"      \"taxonomyId\": 83333,\n" + 
-					"      \"scientificName\": \"Escherichia coli\",\n" + 
-					"      \"abbreviatedName\": \"E. coli\",\n" + 
-					"      \"commonName\": \"escherichia coli\"\n" + 
-					"    },\n" + 
-					"    {\n" + 
-					"      \"taxonomyId\": 9606,\n" + 
-					"      \"scientificName\": \"Homo sapiens\",\n" + 
-					"      \"abbreviatedName\": \"H. sapiens\",\n" + 
-					"      \"commonName\": \"human\"\n" + 
-					"    }\n" + 
-					"  ]"
+					"{\n" + 
+					"    \"organisms\": [\n" + 
+					"      {\n" + 
+					"        \"taxonomyId\": 3702,\n" + 
+					"        \"scientificName\": \"Arabidopsis thaliana\",\n" + 
+					"        \"abbreviatedName\": \"A. thaliana\",\n" + 
+					"        \"commonName\": \"arabidopsis\"\n" + 
+					"      },\n" + 
+					"      {\n" + 
+					"        \"taxonomyId\": 83333,\n" + 
+					"        \"scientificName\": \"Escherichia coli\",\n" + 
+					"        \"abbreviatedName\": \"E. coli\",\n" + 
+					"        \"commonName\": \"escherichia coli\"\n" + 
+					"      },\n" + 
+					"      {\n" + 
+					"        \"taxonomyId\": 9606,\n" + 
+					"        \"scientificName\": \"Homo sapiens\",\n" + 
+					"        \"abbreviatedName\": \"H. sapiens\",\n" + 
+					"        \"commonName\": \"human\"\n" + 
+					"      }\n" + 
+					"    ]\n" + 
+					"  }"
 			);
 			registerService(bc, factory, TaskFactory.class, p);
 		}
