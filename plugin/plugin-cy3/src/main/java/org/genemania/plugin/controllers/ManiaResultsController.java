@@ -101,9 +101,9 @@ public class ManiaResultsController {
 				List<GeneNamingSource> preferences = Collections.emptyList();
 				IGeneProvider provider = new RankedGeneProviderWithUniprotHack(data.getAllNamingSources(), preferences);
 				TextReportExporter exporter = new CytoscapeTextReportExporter(provider, networkUtils);
-				ManiaReport report = new ManiaReport(viewState, data );
+				ManiaReport report = new ManiaReport(viewState, data);
 				exporter.export(report, stream);
-					stream.flush();
+				stream.flush();
 			} finally {
 				stream.close();
 			}

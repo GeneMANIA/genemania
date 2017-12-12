@@ -57,7 +57,7 @@ import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.SelectionEvent;
 import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.view.components.BaseInfoPanel;
-import org.genemania.plugin.view.components.ScrollablePanel;
+import org.genemania.plugin.view.util.ScrollablePanel;
 import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")

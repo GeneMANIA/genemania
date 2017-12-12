@@ -181,7 +181,7 @@ public class AttributesDialog extends JDialog {
 	
 	private JButton getSelectAllButton() {
 		if (selectAllButton == null) {
-			selectAllButton = new JButton(new AbstractAction(Strings.attributesDialogSelectAllButton_label) {
+			selectAllButton = new JButton(new AbstractAction(Strings.selectAllButton_label) {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					setSelected(true);
@@ -195,7 +195,7 @@ public class AttributesDialog extends JDialog {
 	
 	private JButton getSelectNoneButton() {
 		if (selectNoneButton == null) {
-			selectNoneButton = new JButton(new AbstractAction(Strings.attributesDialogSelectNoneButton_label) {
+			selectNoneButton = new JButton(new AbstractAction(Strings.selectNoneButton_label) {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					setSelected(false);

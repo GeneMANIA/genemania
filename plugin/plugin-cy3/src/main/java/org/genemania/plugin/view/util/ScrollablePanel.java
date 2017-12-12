@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.genemania.plugin.view.components;
+package org.genemania.plugin.view.util;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -27,22 +27,28 @@ import javax.swing.Scrollable;
 
 @SuppressWarnings("serial")
 public class ScrollablePanel extends JPanel implements Scrollable {
+	
+	@Override
 	public Dimension getPreferredScrollableViewportSize() {
 		return getPreferredSize();
 	}
-
+	
+	@Override
 	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
 		return visibleRect.height;
 	}
 
+	@Override
 	public boolean getScrollableTracksViewportHeight() {
 		return false;
 	}
 
+	@Override
 	public boolean getScrollableTracksViewportWidth() {
 		return true;
 	}
 
+	@Override
 	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
 		return getFontMetrics(getFont()).getHeight();
 	}

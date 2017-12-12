@@ -182,7 +182,6 @@ public class Strings extends AbstractStrings {
 	public static String retrieveRelatedGenesClearGenesButton_label;
 	public static String retrieveRelatedGenesNetworkPanel_label;
 	public static String retrieveRelatedGenesNetworkPanel_tooltip;
-	public static String retrieveRelatedGenesNetworkPanelSelection_label;
 	public static String retrieveRelatedGenes_label;
 	public static String retrieveRelatedGenes_label2;
 	public static String retrieveRelatedGenes_label3;
@@ -278,6 +277,10 @@ public class Strings extends AbstractStrings {
 	public static String reportSource_label;
 	public static String reportTags_label;
 	
+	public static String selectAllButton_label;
+	public static String selectNoneButton_label;
+	public static String selectDefaultButton_label;
+	
 	public static String attributesDialog_title;
 	public static String attributesDialog_description;
 	public static String attributesDialogAddButton_label;
@@ -293,8 +296,6 @@ public class Strings extends AbstractStrings {
 	public static String attributesDialogTags_label;
 	public static String attributesDialogTitle_label;
 	public static String attributesDialogUrl_label;
-	public static String attributesDialogSelectAllButton_label;
-	public static String attributesDialogSelectNoneButton_label;
 	
 	public static String maniaResultsAttributesButton_label;
 	
