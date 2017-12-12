@@ -186,8 +186,8 @@ public class NetworkUtils {
 	}
 	
 	public Color getNetworkColor(DataSet data, Group<?, ?> group) {
-		Colour colour = data.getColor(group.getCode());
-		Color color = colour != null ? new Color(colour.getRgb()): CytoscapeUtils.NETWORK_COLORS.get(group.getName());
+		Colour colour = data != null ? data.getColor(group.getCode()) : null;
+		Color color = colour != null ? new Color(colour.getRgb()) : CytoscapeUtils.NETWORK_COLORS.get(group.getName());
 		
 		return color != null ? color : CytoscapeUtils.DEFAULT_NETWORK_COLOUR;
 	}

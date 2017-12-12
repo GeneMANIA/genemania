@@ -23,7 +23,6 @@ import java.beans.PropertyChangeSupport;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.FinishStatus;
 import org.cytoscape.work.ObservableTask;
@@ -61,7 +60,13 @@ public class OrganismManager {
 		
 		DataSetManager dataSetManager = plugin.getDataSetManager();
 		dataSetManager.addDataSetChangeListener((dataSet, progress) -> setLocalData(dataSet));
-		initLocalData();
+		
+		// ==================
+		// Note: We don't want to initialize local data here (when loading the app) anymore,
+		//       which would popup a dialog automatically, because no local data is necessary
+		//       if all the user wants is to use the online search!
+		// initLocalData();
+		// ==================
 		
 		loadRemoteOrganisms();
 	}
@@ -147,10 +152,10 @@ public class OrganismManager {
 		});
 	}
 	
-	private void initLocalData() {
-		if (plugin.getDataSetManager().getDataSet() == null)
-			plugin.initializeData(serviceRegistrar.getService(CySwingApplication.class).getJFrame(), true);
-	}
+//	private void initLocalData() {
+//		if (plugin.getDataSetManager().getDataSet() == null)
+//			plugin.initializeData(serviceRegistrar.getService(CySwingApplication.class).getJFrame(), true);
+//	}
 	
 	private void setLocalData(final DataSet data) {
 		try {
