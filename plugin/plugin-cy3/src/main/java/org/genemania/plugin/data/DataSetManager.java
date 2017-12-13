@@ -25,7 +25,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +47,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 public class DataSetManager {
+	
 	public static final String DATA_FILE_NAME = "genemania.xml"; //$NON-NLS-1$
 	protected static final String LAST_DATA_SET = "last_data_set"; //$NON-NLS-1$
 
@@ -59,8 +59,8 @@ public class DataSetManager {
 	protected File dataSourcePath;
 
 	public DataSetManager() {
-		factories = new HashMap<String, IDataSetFactory>();
-		dataSetListeners = new ArrayList<DataSetChangeListener>();
+		factories = new HashMap<>();
+		dataSetListeners = new ArrayList<>();
 	}
 	
 	public void addDataSetFactory(IDataSetFactory factory, Map<?, ?> serviceProperties) {
@@ -88,6 +88,7 @@ public class DataSetManager {
 			String type = getString(xpath, "type", root); //$NON-NLS-1$
 			
 			IDataSetFactory dataSetFactory = getFactory(type);
+			
 			return dataSetFactory.create(path, root);
 		} catch (IOException e) {
 			throw new SAXException(e);
@@ -169,9 +170,10 @@ public class DataSetManager {
 	}
 
 	public List<File> getDataSetPaths() {
-		List<File> paths = new LinkedList<File>();
+		List<File> paths = new LinkedList<>();
 		File mostRecent = getMostRecentDataSetFile();
 		File root = AbstractGeneMania.getSettingsDirectory();
+		
 		for (File file : root.listFiles()) {
 			if (!file.isDirectory() || mostRecent != null && file.equals(mostRecent)) {
 				continue;
@@ -180,32 +182,32 @@ public class DataSetManager {
 				paths.add(file);
 			}
 		}
-		Collections.sort(paths, new Comparator<File>() {
-			@Override
-			public int compare(File o1, File o2) {
-				return (int) (o1.lastModified() - o2.lastModified());
-			}
+		
+		Collections.sort(paths, (o1, o2) -> {
+			return (int) (o1.lastModified() - o2.lastModified());
 		});
-		if (mostRecent != null) {
+		
+		if (mostRecent != null)
 			paths.add(0, mostRecent);
-		}
+		
 		return paths;
 	}
 	
 	public File getDataSetPath(String dataSetName) {
 		File mostRecent = getMostRecentDataSetFile();
 		File root = AbstractGeneMania.getSettingsDirectory();
+		
 		for (File file : root.listFiles()) {
-			if (!file.isDirectory() || mostRecent != null && file.equals(mostRecent)) {
+			if (!file.isDirectory() || mostRecent != null && file.equals(mostRecent))
 				continue;
-			}
-			if (!isDataSet(file)) {
+			
+			if (!isDataSet(file))
 				continue;
-			}
+			
 			String name = file.getName();
-			if (name.equals(dataSetName)) {
+			
+			if (name.equals(dataSetName))
 				return file;
-			}
 		}
 		return null;
 	}
@@ -234,9 +236,9 @@ public class DataSetManager {
 	}
 	
 	public void reloadDataSet(ProgressReporter progress) {
-		if (dataSet == null) {
+		if (dataSet == null)
 			return;
-		}
+		
 		try {
 			dataSet.reload(progress);
 			notifyDataSetListeners(progress);

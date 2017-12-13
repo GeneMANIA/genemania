@@ -694,17 +694,6 @@ public class NetworkUtils {
 			
 			groupsByNetwork.put(networkId, canonicalGroup);
 		}
-//		// DELETEME======
-//		System.out.println("\n\n====> " + groupsByNetwork.size() + " <====");
-//		groupsByNetwork.forEach((gid, ing) -> {
-//			System.out.println(". "+gid + " :: " + ing.getName());
-//			ing.getInteractionNetworks().forEach((in) -> {
-//				System.out.println("\t.. "+in.getId() + " :: " + in.getName());
-//				in.getInteractions().forEach((i) -> {
-//					System.out.println("\t\t.... "+i.getId() + " :: " + i.getLabel() + " -- " + i.getWeight());
-//				});
-//			});
-//		});//======
 		
 		return groupsByNetwork;
 	}
@@ -733,17 +722,6 @@ public class NetworkUtils {
 				groupsByNetwork.put(networkId, canonicalGroup);
 			}
 		}
-//		// DELETEME======
-//		System.out.println("\n\n----> " + groupsByNetwork.size() + " <----");
-//		groupsByNetwork.forEach((gid, ing) -> {
-//			System.out.println("* "+gid + " :: " + ing.getName());
-//			ing.getInteractionNetworks().forEach((in) -> {
-//				System.out.println("\t.. "+in.getId() + " :: " + in.getName());
-//				in.getInteractions().forEach((i) -> {
-//					System.out.println("\t\t.... "+i.getId() + " :: " + i.getLabel() + " -- " + i.getWeight());
-//				});
-//			});
-//		});//======
 		
 		return groupsByNetwork;
 	}
@@ -755,12 +733,6 @@ public class NetworkUtils {
 			for (InteractionNetwork network : group.getInteractionNetworks())
 				canonicalNetworks.put(network.getId(), network);
 		}
-//		// DELETEME======
-//		System.out.println("\n\n=====> canonicalNetworks <====");
-//		System.out.println("=====[ " + canonicalNetworks.size() + " ]====");
-//		canonicalNetworks.forEach((id, net) -> {
-//			System.out.println("* "+id + " :: " + net.getName());
-//		});//======
 		
 		return canonicalNetworks;
 	}
@@ -810,21 +782,12 @@ public class NetworkUtils {
 		config.setGroupsByAttribute(groupsByAttribute);
 		config.setAttributeWeights(weights);
 		config.setAttributes(attributesByNode);
-		
-//		// DELETEME======
-//		System.out.println("\n\n=====> AttributeWeights <====");
-//		System.out.println("=====[ " + weights.size() + " ]====");
-//		weights.forEach((attr, w) -> {
-//			System.out.println("* "+ attr.getName() + " :: " + w);
-//		});
-//		System.out.println("=========================================\n\n\n\n\n\n\n");
-//		//======
 	}
 	
 	/**
 	 * Online Search version.
 	 */
-	private void computeAttributes(SearchResultBuilder config, SearchResults res) {System.out.println(">>>>>>> " + res.getResultAttributeGroups());
+	private void computeAttributes(SearchResultBuilder config, SearchResults res) {
 		if (res.getResultAttributeGroups() == null || res.getResultAttributeGroups().isEmpty())
 			return;
 		
@@ -851,7 +814,7 @@ public class NetworkUtils {
 			}
 		}
 		
-// TODO	Probably wrong:
+		// TODO	Probably wrong:
 		for (ResultGene resGene : res.getResultGenes()) {
 			Gene gene = resGene.getGene();
 			
@@ -875,15 +838,6 @@ public class NetworkUtils {
 		config.setGroupsByAttribute(groupsByAttribute);
 		config.setAttributeWeights(weights);
 		config.setAttributes(attributesByNode);
-		
-//		// DELETEME======
-//		System.out.println("\n\n----> AttributeWeights <----");
-//		System.out.println("----[ " + weights.size() + " ]----");
-//		weights.forEach((attr, w) -> {
-//			System.out.println("* "+ attr.getName() + " :: " + w);
-//		});
-//		System.out.println("----------------------------------------\n\n\n\n\n\n\n");
-//		//======
 	}
 	
 	/**
