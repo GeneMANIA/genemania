@@ -101,6 +101,8 @@ import org.genemania.util.NullProgressReporter;
 import org.genemania.util.ProgressReporter;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 public class RetrieveRelatedGenesController {
 	
@@ -537,6 +539,7 @@ public class RetrieveRelatedGenesController {
 		
 		private Future<String> future;
 		private CyNetwork network;
+		private SearchResult searchResult;
 
 		public RunGeneManiaTask(Query query, Collection<Group<?, ?>> groups, Client client, boolean offline) {
 			this.query = query;
@@ -560,7 +563,6 @@ public class RetrieveRelatedGenesController {
 			Organism organism = query.getOrganism();
 			List<String> queryGenes = query.getGenes();
 			
-			SearchResult options = null;
 			String dataVersion = null; // TODO server should also return this when searching online
 			double[] extrema =  null;
 			Map<String, Color> networkColors = CytoscapeUtils.NETWORK_COLORS;
@@ -607,7 +609,7 @@ public class RetrieveRelatedGenesController {
 					return;
 				
 				progress.setProgress(++stage);
-				options = networkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data,
+				searchResult = networkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data,
 						queryGenes);
 			} else {
 				tm.setProgress(-1.0);
@@ -647,7 +649,7 @@ public class RetrieveRelatedGenesController {
 				extrema = computeEdgeWeightExtrema(searchResults);
 				
 				progress.setProgress(++stage);
-				options = networkUtils.createSearchOptions(searchResults);
+				searchResult = networkUtils.createSearchOptions(searchResults);
 				
 				progress.setProgress(++stage);
 				
@@ -656,33 +658,33 @@ public class RetrieveRelatedGenesController {
 				if (groups == null || groups.isEmpty()) {
 					groups = new HashSet<>();
 					
-					for (InteractionNetworkGroup group : options.getInteractionNetworkGroups().values())
+					for (InteractionNetworkGroup group : searchResult.getInteractionNetworkGroups().values())
 						groups.add(new InteractionNetworkGroupImpl(group));
 				}
 				
 				progress.setProgress(++stage);
 			}
 			
-			if (options != null) {
-				EdgeAttributeProvider provider = createEdgeAttributeProvider(options);
+			if (searchResult != null) {
+				EdgeAttributeProvider provider = createEdgeAttributeProvider(searchResult);
 				
 				tm.setStatusMessage(Strings.retrieveRelatedGenes_status5);
 				progress.setProgress(++stage);
-				ViewStateBuilder builder = new ViewStateImpl(options);
+				ViewStateBuilder builder = new ViewStateImpl(searchResult);
 				String netName = getNextNetworkName(organism);
 				
-				network = cytoscapeUtils.createNetwork(netName, dataVersion, options, builder, provider);
+				network = cytoscapeUtils.createNetwork(netName, dataVersion, searchResult, builder, provider);
 		
 				// Set up edge cache
 				tm.setStatusMessage(Strings.retrieveRelatedGenes_status6);
 				progress.setProgress(++stage);
 				NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
 				
-				computeGraphCache(network, options, builder, groups);
+				computeGraphCache(network, searchResult, builder, groups);
 				manager.addNetworkConfiguration(network, builder.build());
 		
 				cytoscapeUtils.registerSelectionListener(network, manager, plugin);
-				cytoscapeUtils.applyVisualization(network, filterGeneScores(scores, options), networkColors, extrema);
+				cytoscapeUtils.applyVisualization(network, filterGeneScores(scores, searchResult), networkColors, extrema);
 			}
 		}
 		
@@ -699,7 +701,42 @@ public class RetrieveRelatedGenesController {
 								network.getRow(network).get(CyNetwork.NAME, String.class), network.getSUID());
 			
 			if (type == JSONResult.class) {
-				JSONResult res = () -> { return network != null ? "" + network.getSUID() : null; };
+				Gson gson = new Gson();
+				JsonObject jsonObject = new JsonObject();
+				
+				// Params
+//				jsonObject.addProperty("organism", gson.toJson(searchResult.getOrganism()));
+				
+				if (searchResult.getCombiningMethod() != null)
+					jsonObject.addProperty("combiningMethod", searchResult.getCombiningMethod().toString());
+				
+				// Gene scores
+				JsonArray jsonGenesArr = new JsonArray();
+				Map<Gene, Double> scores = searchResult.getScores();
+				
+				if (scores != null) {
+					scores.forEach((gene, score) -> {
+						JsonObject jsonGene = new JsonObject();
+						jsonGene.addProperty("symbol", gene.getSymbol());
+						
+						if (gene.getNode() != null && gene.getNode().getGeneData() != null)
+							jsonGene.addProperty("description", gene.getNode().getGeneData().getDescription());
+						
+						jsonGene.addProperty("score", score);
+						
+						jsonGenesArr.add(jsonGene);
+					});
+				}
+				
+				jsonObject.add("genes", jsonGenesArr);
+				
+				// Created network
+				if (network != null)
+					jsonObject.addProperty("network", network.getSUID());
+
+				// Return
+				JSONResult res = () -> { return jsonObject.toString(); };
+				
 				return res;
 			}
 				

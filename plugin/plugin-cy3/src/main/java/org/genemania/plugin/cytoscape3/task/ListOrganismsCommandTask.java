@@ -44,8 +44,8 @@ public class ListOrganismsCommandTask extends AbstractTask implements Observable
 	@Tunable(
 			description = "Offline search:",
 			longDescription = 
-					"If ```true```, it lists only organisms that have been installed locally and are available for offline searches."
-					+ "If ```false```, it lists all the organisms that are supported by the geneMANIA server on online searches.",
+					"If ```true```, it lists only organisms that have been installed locally and are available for offline searches. "
+					+ "If ```false```, it lists all the organisms that are supported by the GeneMANIA server on online searches.",
 			exampleStringValue = "false",
 			context = "nogui"
 	)

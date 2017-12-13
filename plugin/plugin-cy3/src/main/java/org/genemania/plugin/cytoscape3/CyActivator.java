@@ -210,11 +210,36 @@ public class CyActivator extends AbstractCyActivator {
 		}
 		{
 			SearchCommandTaskFactory factory = new SearchCommandTaskFactory(geneMania, controller,
-					organismManager, networkUtils, cytoscapeUtils, serviceRegistrar);
+					organismManager, cytoscapeUtils);
 			Properties p = new Properties();
-			p.put(COMMAND, "search");
-			p.put(COMMAND_NAMESPACE, "genemania");
-			p.put(COMMAND_DESCRIPTION, "Search GeneMANIA");
+			p.setProperty(COMMAND, "search");
+			p.setProperty(COMMAND_NAMESPACE, "genemania");
+			p.setProperty(COMMAND_DESCRIPTION, "Searches GeneMANIA");
+			p.setProperty(COMMAND_LONG_DESCRIPTION, "Finds related genes from a locally installed data set (i.e. offline search) or by querying the GeneMANIA server (i.e. online search).");
+			p.setProperty(COMMAND_SUPPORTS_JSON, "true");
+			p.setProperty(COMMAND_EXAMPLE_JSON,
+					"{\n" + 
+					"    \"combiningMethod\": \"AUTOMATIC_SELECT\",\n" + 
+					"    \"genes\": [\n" + 
+					"      {\n" + 
+					"        \"symbol\": \"ybcN\",\n" + 
+					"        \"description\": \"DLP12 prophage; putative protein\",\n" + 
+					"        \"score\": 0.7550105796324988\n" + 
+					"      },\n" + 
+					"      {\n" + 
+					"        \"symbol\": \"ybcO\",\n" + 
+					"        \"description\": \"DLP12 prophage; putative protein\",\n" + 
+					"        \"score\": 0.007381754018362385\n" + 
+					"      },\n" + 
+					"      {\n" + 
+					"        \"symbol\": \"ninE\",\n" + 
+					"        \"description\": \"DLP12 prophage; conserved protein\",\n" + 
+					"        \"score\": 0.009564379669797896\n" + 
+					"      }\n" + 
+					"    ],\n" + 
+					"    \"network\": 2526\n" + 
+					"}"
+			);
 			registerService(bc, factory, TaskFactory.class, p);
 		}
 		{
@@ -247,7 +272,7 @@ public class CyActivator extends AbstractCyActivator {
 					"        \"commonName\": \"human\"\n" + 
 					"      }\n" + 
 					"    ]\n" + 
-					"  }"
+					"}"
 			);
 			registerService(bc, factory, TaskFactory.class, p);
 		}

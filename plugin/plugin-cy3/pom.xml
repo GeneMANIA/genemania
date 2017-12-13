@@ -103,6 +103,11 @@
             <artifactId>io-api</artifactId>
             <version>${cy3.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>util-api</artifactId>
+            <version>${cy3.version}</version>
+        </dependency>
         <!-- Third Party -->
         <dependency>
             <groupId>org.osgi</groupId>

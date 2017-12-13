@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
@@ -31,7 +30,6 @@ import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.genemania.domain.Organism;
 import org.genemania.plugin.GeneMania;
-import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape3.model.OrganismManager;
@@ -44,49 +42,88 @@ import org.genemania.type.ScoringMethod;
 
 public class SearchCommandTask extends AbstractTask {
 
-	@Tunable(description = "Offline search:", context = "nogui")
-	public boolean offline;
-	
-	@Tunable(description = "Organism", context = "nogui")
+	@Tunable(
+			description = "Organism",
+			longDescription = "The name or NCBI taxonomy id of an organism whose genes should be considered.",
+			exampleStringValue = "83333",
+			required = true,
+			context = "nogui"
+	)
 	public String organism;
 	
-	@Tunable(description = "List of query genes", context = "nogui")
+	@Tunable(
+			description = "Query genes",
+			longDescription = "One or more input genes. The gene symbols must be separated by a \"vertical bar\" character (```|```).",
+			exampleStringValue = "ybcN|vsr|mutS|mutH|ssb|mutL",
+			required = true,
+			context = "nogui"
+	)
 	public String genes;
 	
-	@Tunable(description = "Maximum number of resultant genes", context = "nogui")
+	@Tunable(
+			description = "Offline search",
+			longDescription = 
+					"If ```true```, it runs GeneMANIA against a local data set, so at least one data set and organism data must be installed. "
+					+ "If ```false``` (default falue), the genes search is done by the GeneMANIA server, which means it requires an internet connection.",
+			exampleStringValue = "false",
+			context = "nogui"
+	)
+	public boolean offline;
+	
+	@Tunable(
+			description = "Maximum number of resultant genes",
+			longDescription = "The maximum number of genes returned by the search. The default value is ```20```.",
+			exampleStringValue = "20",
+			context = "nogui"
+	)
 	public int geneLimit = 20;
 	
-	@Tunable(description = "Maximum number of resultant attributes", context = "nogui")
+	@Tunable(
+			description = "Maximum number of resultant attributes",
+			longDescription = "The maximum number of attributes returned by GeneMANIA. The default value is ```10```.",
+			exampleStringValue = "10",
+			context = "nogui"
+	)
 	public int attrLimit = 10;
 	
-	@Tunable(description = "Combining method", context = "nogui")
+	@Tunable(
+			description = "Combining method",
+			longDescription = 
+					"GeneMANIA can use a few different methods to weight networks when combining all networks to form "
+					+ "the final composite network that results from a search. The default settings (i.e. ```AUTOMATIC_SELECT```) "
+					+ "are usually appropriate, but you can choose a weighting method.",
+			exampleStringValue = "AUTOMATIC_SELECT",
+			context = "nogui"
+	)
 	public ListSingleSelection<CombiningMethod> combiningMethod = new ListSingleSelection<>(CombiningMethod.values());
 	
 	// TODO not supported by ONLINE search!
-	@Tunable(description = "Scoring method", context = "nogui")
+	@Tunable(
+			description = "Scoring method",
+			longDescription = 
+					"The method used to compute the gene scores. "
+					+ "This option is only supported by the offline search. "
+					+ "The default value is ```DISCRIMINANT```.",
+			exampleStringValue = "DISCRIMINANT",
+			context = "nogui"
+	)
 	public ListSingleSelection<ScoringMethod> scoringMethod = new ListSingleSelection<>(ScoringMethod.values());
 	
 	private final GeneMania plugin;
 	private final RetrieveRelatedGenesController controller;
 	private final OrganismManager organismManager;
-	private final NetworkUtils networkUtils;
 	private final CytoscapeUtils cytoscapeUtils;
-	private final CyServiceRegistrar serviceRegistrar;
 
 	public SearchCommandTask(
 			GeneMania plugin,
 			RetrieveRelatedGenesController controller,
 			OrganismManager organismManager,
-			NetworkUtils networkUtils,
-			CytoscapeUtils cytoscapeUtils, 
-			CyServiceRegistrar serviceRegistrar
+			CytoscapeUtils cytoscapeUtils
 	) {
 		this.plugin = plugin;
 		this.controller = controller;
 		this.organismManager = organismManager;
-		this.networkUtils = networkUtils;
 		this.cytoscapeUtils = cytoscapeUtils;
-		this.serviceRegistrar = serviceRegistrar;
 		
 		combiningMethod.setSelectedValue(CombiningMethod.AUTOMATIC_SELECT);
 		scoringMethod.setSelectedValue(ScoringMethod.DISCRIMINANT);
