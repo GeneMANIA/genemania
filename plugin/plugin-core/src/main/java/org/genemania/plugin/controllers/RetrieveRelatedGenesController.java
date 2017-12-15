@@ -16,17 +16,23 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+package org.genemania.plugin.controllers;
 
-package org.genemania.plugin.selection;
+import java.util.Collection;
+import java.util.Vector;
 
-import java.util.Set;
+import org.cytoscape.work.ObservableTask;
+import org.genemania.domain.Organism;
+import org.genemania.exception.DataStoreException;
+import org.genemania.plugin.data.DataSet;
+import org.genemania.plugin.model.Group;
+import org.genemania.plugin.model.ModelElement;
+import org.genemania.plugin.parsers.Query;
 
-public class SelectionEvent<T> {
-	public final Set<T> items;
-	public final boolean selected;
-	
-	public SelectionEvent(Set<T> items, boolean selected) {
-		this.items = items;
-		this.selected = selected;
-	}
+public interface RetrieveRelatedGenesController {
+
+	Vector<ModelElement<Organism>> createModel(DataSet data) throws DataStoreException;
+
+	ObservableTask runMania(Query query, Collection<Group<?, ?>> groups, boolean offline);
+
 }

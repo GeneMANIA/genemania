@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin;
 
 import java.awt.Color;
@@ -87,7 +86,6 @@ import org.genemania.util.GeneLinkoutGenerator;
  * objects to Cytoscape objects.
  */
 public class NetworkUtils {
-	
 	
 	public NetworkUtils() {
 		

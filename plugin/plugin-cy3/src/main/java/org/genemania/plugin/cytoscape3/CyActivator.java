@@ -69,6 +69,7 @@ import org.genemania.plugin.cytoscape3.actions.CheckForUpdatesAction;
 import org.genemania.plugin.cytoscape3.actions.DownloadDataSetAction;
 import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
 import org.genemania.plugin.cytoscape3.actions.SwitchDataSetAction;
+import org.genemania.plugin.cytoscape3.controllers.RetrieveRelatedGenesControllerImpl;
 import org.genemania.plugin.cytoscape3.layout.GeneManiaFDLayout;
 import org.genemania.plugin.cytoscape3.model.OrganismManager;
 import org.genemania.plugin.cytoscape3.task.ListOrganismsCommandTaskFactory;
@@ -144,7 +145,7 @@ public class CyActivator extends AbstractCyActivator {
 		registerLayoutAlgorithms(bc, fdLayout);
 		
 		RetrieveRelatedGenesController controller =
-				new RetrieveRelatedGenesController(geneMania, cytoscapeUtils, networkUtils, taskDispatcher);
+				new RetrieveRelatedGenesControllerImpl(geneMania, cytoscapeUtils, networkUtils, taskDispatcher);
 
 		Map<String, String> props;
 		{

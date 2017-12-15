@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 
 public class LogUtils {
+	
 	private static final String ERROR_LOG = "error.log"; //$NON-NLS-1$
 
 	public static void configureLogging(File baseDirectory) throws IOException {

@@ -29,9 +29,9 @@ import java.util.Set;
 import org.genemania.plugin.selection.SelectionEvent;
 import org.genemania.plugin.view.util.UiUtils;
 
+@SuppressWarnings("serial")
 public abstract class ToggleInfoPanel<U, T extends ToggleDetailPanel<U>> extends BaseInfoPanel<U, T> {
-	private static final long serialVersionUID = 1L;
-
+	
 	public ToggleInfoPanel(UiUtils uiUtils) {
 		super(uiUtils);
 	}

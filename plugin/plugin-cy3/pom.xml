@@ -8,8 +8,7 @@
 	</parent>
     <properties>
 		<bundle.symbolicName>org.genemania.plugin-impl</bundle.symbolicName>
-		<bundle.namespace>org.genemania.plugin</bundle.namespace>
-		<cy3.version>3.6.0</cy3.version>
+		<bundle.namespace>org.genemania.plugin.cytoscape3</bundle.namespace>
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<maven-pax-plugin.version>1.5</maven-pax-plugin.version>
 		<maven-bundle-plugin.version>3.0.0</maven-bundle-plugin.version>
@@ -20,46 +19,7 @@
     <packaging>bundle</packaging>
 
 	<name>GeneMANIA Cytoscape App</name>
-    <repositories>
-        <repository>
-            <id>genemania_maven_repo</id>
-            <name>GeneMANIA Maven Project Repository</name>
-            <url>http://genemania.org/mvn/</url>
-        </repository>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven</name>
-            <url>http://download.java.net/maven/2/</url>
-            <layout>default</layout>
-        </repository>
-		<repository>
-			<id>cytoscape_thirdparty</id>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<name>Wrapped Third Party Libraries</name>
-            <url>http://code.cytoscape.org/nexus/content/repositories/thirdparty/</url>
-		</repository>
-		<repository>
-			<id>releases</id>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<name>Internal Releases</name>
-            <url>http://code.cytoscape.org/nexus/content/repositories/releases/</url>
-		</repository>
-		<repository>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<id>snapshots</id>
-			<name>Internal Snapshots</name>
-            <url>http://code.cytoscape.org/nexus/content/repositories/snapshots/</url>
-		</repository>
-    </repositories>
+    
     <dependencies>
      	<!-- GeneMANIA -->
         <dependency>
@@ -67,74 +27,60 @@
             <artifactId>plugin-distribution</artifactId>
             <version>${project.version}</version>
         </dependency>
-         <!-- Cytoscape -->
+        <!-- Cytoscape -->
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>model-api</artifactId>
             <version>${cy3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>swing-application-api</artifactId>
             <version>${cy3.version}</version>
+             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>swing-util-api</artifactId>
             <version>${cy3.version}</version>
+             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>application-api</artifactId>
             <version>${cy3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>layout-api</artifactId>
             <version>${cy3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>service-api</artifactId>
             <version>${cy3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>io-api</artifactId>
             <version>${cy3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>util-api</artifactId>
             <version>${cy3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <!-- Third Party -->
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <version>${osgi.api.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-			<groupId>org.ops4j.pax.logging</groupId>
-			<artifactId>pax-logging-api</artifactId>
-			<version>1.5.2</version>
-			<scope>provided</scope>
-		</dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib-nodep</artifactId>
-            <version>2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>zip64file</groupId>
-            <artifactId>zip64file</artifactId>
-            <version>20091028</version>
         </dependency>
         <!-- JSON -->
         <dependency>
@@ -181,7 +127,7 @@
 
     <build>
         <plugins>
-        	<plugin>
+    			<plugin>
 				<!-- To prevent maven from corrupting .TTF files -->
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>2.5</version>
@@ -190,21 +136,6 @@
 					<nonFilteredFileExtensions>
 						<nonFilteredFileExtension>ttf</nonFilteredFileExtension>
 					</nonFilteredFileExtensions>
-				</configuration>
-			</plugin>
-            <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-					<optimize>true</optimize>
-					<showWarnings>true</showWarnings>
-					<showDeprecation>true</showDeprecation>
-					<compilerArguments>
-						<Xmaxwarns>10000</Xmaxwarns>
-						<Xmaxerrs>10000</Xmaxerrs>
-					</compilerArguments>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -222,9 +153,12 @@
 					    <Bundle-Name>GeneMANIA</Bundle-Name>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${cytoscapeVersion}</Bundle-Version>
-						<Bundle-Activator>${bundle.namespace}.cytoscape3.CyActivator</Bundle-Activator>
-						<Embed-Dependency>*;scope=!provided|test;groupId=!org.cytoscape</Embed-Dependency>
-						<Embed-Transitive>false</Embed-Transitive>
+						<Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
+						<Embed-Dependency>
+							jackson-core-asl,jackson-mapper-asl,jersey-client,gson,
+							plugin-distribution;inline=true
+						</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
 						<Private-Package>${bundle.namespace}.*</Private-Package>
 						<Export-Package>!${bundle.namespace}.*;version="${cytoscapeVersion}"</Export-Package>
 						<Import-Package>*;resolution:=optional</Import-Package>
@@ -301,12 +235,6 @@
         		</plugin>
         	</plugins>
         </pluginManagement>
-        <resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
     </build>
     <reporting>
         <plugins>

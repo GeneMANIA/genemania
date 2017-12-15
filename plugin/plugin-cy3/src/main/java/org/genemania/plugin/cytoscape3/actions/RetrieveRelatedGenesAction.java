@@ -28,7 +28,9 @@ import org.genemania.plugin.FileUtils;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
+import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
+import org.genemania.plugin.cytoscape3.controllers.RetrieveRelatedGenesControllerImpl;
 import org.genemania.plugin.delegates.RetrieveRelatedGenesDelegate;
 import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.util.UiUtils;
@@ -50,9 +52,13 @@ public class RetrieveRelatedGenesAction extends AbstractCyAction {
 			CyNetworkViewManager viewManager
 	) {
 		super(properties, applicationManager, viewManager);
+		
 		putValue(NAME, Strings.retrieveRelatedGenes_menuLabel);
-		delegate = new RetrieveRelatedGenesDelegate(plugin, cytoscapeUtils, networkUtils, uiUtils, fileUtils,
-				taskDispatcher);
+		
+		RetrieveRelatedGenesController retrieveRelatedGenesController = new RetrieveRelatedGenesControllerImpl(plugin,
+				cytoscapeUtils, networkUtils, taskDispatcher);
+		delegate = new RetrieveRelatedGenesDelegate(plugin, retrieveRelatedGenesController, cytoscapeUtils,
+				networkUtils, uiUtils, fileUtils, taskDispatcher);
 	}
 
 	public RetrieveRelatedGenesDelegate getDelegate() {

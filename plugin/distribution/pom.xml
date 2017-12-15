@@ -12,6 +12,19 @@
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.genemania</groupId>
+            <artifactId>plugin-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- <dependency>
+            <groupId>org.genemania</groupId>
+            <artifactId>plugin-cy2</artifactId>
+            <version>${project.version}</version>
+        </dependency> -->
+    </dependencies>
+    
     <build>
         <plugins>
             <plugin>

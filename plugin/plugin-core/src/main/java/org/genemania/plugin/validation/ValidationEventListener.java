@@ -16,24 +16,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+package org.genemania.plugin.validation;
 
-package org.genemania.plugin;
-
-import java.util.Iterator;
-
-/**
- * An Iterable that can only be used once because it consumes the Iterator
- * it is initialized with.  This class is meant to allow Iterators to be
- * used in for-each loops.
- */
-public class OneUseIterable<T> implements Iterable<T> {
-	private final Iterator<T> source;
-
-	public OneUseIterable(Iterator<T> iterator) {
-		source = iterator; 
-	}
+public interface ValidationEventListener {
 	
-	public Iterator<T> iterator() {
-		return source;
-	}
+	void validate(boolean isValid);
 }

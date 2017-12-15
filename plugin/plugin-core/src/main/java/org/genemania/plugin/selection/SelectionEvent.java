@@ -16,9 +16,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+package org.genemania.plugin.selection;
 
-package org.genemania.plugin.validation;
+import java.util.Set;
 
-public interface ValidationEventListener {
-	void validate(boolean isValid);
+public class SelectionEvent<T> {
+	
+	public final Set<T> items;
+	public final boolean selected;
+	
+	public SelectionEvent(Set<T> items, boolean selected) {
+		this.items = items;
+		this.selected = selected;
+	}
 }

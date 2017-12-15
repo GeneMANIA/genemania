@@ -25,6 +25,7 @@ import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 
 public abstract class AbstractGroup<G, N> implements Group<G, N> {
+	
 	private Collection<Network<N>> networks;
 	private boolean hasInteractions;
 

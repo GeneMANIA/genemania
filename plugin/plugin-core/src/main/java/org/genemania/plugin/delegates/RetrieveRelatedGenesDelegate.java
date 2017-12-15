@@ -46,6 +46,7 @@ public class RetrieveRelatedGenesDelegate implements Delegate {
 	private RetrieveRelatedGenesDialog dialog;
 
 	private final GeneMania plugin;
+	private RetrieveRelatedGenesController retrieveRelatedGenesController;
 	private final UiUtils uiUtils;
 	private final CytoscapeUtils cytoscapeUtils;
 	private final NetworkUtils networkUtils;
@@ -57,6 +58,7 @@ public class RetrieveRelatedGenesDelegate implements Delegate {
 
 	public RetrieveRelatedGenesDelegate(
 			GeneMania plugin,
+			RetrieveRelatedGenesController retrieveRelatedGenesController,
 			CytoscapeUtils cytoscapeUtils,
 			NetworkUtils networkUtils,
 			UiUtils uiUtils,
@@ -64,6 +66,7 @@ public class RetrieveRelatedGenesDelegate implements Delegate {
 			TaskDispatcher taskDispatcher
 	) {
 		this.plugin = plugin;
+		this.retrieveRelatedGenesController = retrieveRelatedGenesController;
 		this.uiUtils = uiUtils;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.networkUtils = networkUtils;
@@ -79,7 +82,7 @@ public class RetrieveRelatedGenesDelegate implements Delegate {
 				dialog = new RetrieveRelatedGenesDialog(
 						null,
 						false,
-						new RetrieveRelatedGenesController(plugin, cytoscapeUtils, networkUtils, taskDispatcher),
+						retrieveRelatedGenesController,
 						dataSetManager,
 						networkUtils,
 						uiUtils,

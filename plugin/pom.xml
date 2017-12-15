@@ -15,6 +15,10 @@
     <name>GeneMANIA Cytoscape App Parent</name>
 
     <modules>
+        <module>plugin-core</module>
+        <!-- <module>plugin-cy2-support</module>
+        <module>plugin-cy26-support</module>
+        <module>plugin-cy2</module> -->
         <module>plugin-cy3</module>
         <module>distribution</module>
     </modules>
@@ -22,10 +26,10 @@
     <properties>
         <!-- Oldest data set that works with this binary -->
         <minDataVersion>2010-08-25</minDataVersion>
-        
-        <!-- Cytoscape metadata -->
+         <!-- App version -->
         <cytoscapeVersion>3.5.0</cytoscapeVersion>
-        <releaseVersion></releaseVersion> <!-- No longed used -->
+        <!-- Cytoscape metadata -->
+		<cy3.version>3.6.0</cy3.version>
     </properties>
     
     <repositories>
@@ -73,18 +77,7 @@
             <name>Cytoscape Third Party</name>
             <url>http://code.cytoscape.org/nexus/content/repositories/thirdparty/</url>
         </repository>
-        <repository>
-            <id>biopax</id>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <name>BioPAX Releases</name>
-            <url>http://code.cytoscape.org/nexus/content/repositories/biopax-release/</url>
-        </repository>
-    </repositories>
+	</repositories>
 
     <build>
         <plugins>

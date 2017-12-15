@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package org.genemania.plugin.controllers;
+package org.genemania.plugin.cytoscape3.controllers;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -78,6 +78,7 @@ import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.LogUtils;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
+import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape.EdgeAttributeProvider;
 import org.genemania.plugin.data.DataSet;
@@ -104,7 +105,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-public class RetrieveRelatedGenesController {
+public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesController {
 	
 	// TODO Make it a CyProperty?
 	private static final String SEARCH_URL = "http://genemania.org/json/search_results";
@@ -118,7 +119,7 @@ public class RetrieveRelatedGenesController {
 	private final NetworkUtils networkUtils;
 	private final TaskDispatcher taskDispatcher;
 	
-	public RetrieveRelatedGenesController(
+	public RetrieveRelatedGenesControllerImpl(
 			GeneMania plugin,
 			CytoscapeUtils cytoscapeUtils,
 			NetworkUtils networkUtils,
@@ -130,6 +131,7 @@ public class RetrieveRelatedGenesController {
 		this.taskDispatcher = taskDispatcher;
 	}
 	
+	@Override
 	public Vector<ModelElement<Organism>> createModel(DataSet data) throws DataStoreException {
 		Vector<ModelElement<Organism>> organismChoices = new Vector<>();
 		OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
@@ -282,6 +284,7 @@ public class RetrieveRelatedGenesController {
 		return result;
 	}
 	
+	@Override
 	public ObservableTask runMania(Query query, Collection<Group<?, ?>> groups, boolean offline) {
 		// Create the WS client here, to avoid a thread/OSGI related issues;
 		Client client = offline ? null : ClientBuilder.newClient();
