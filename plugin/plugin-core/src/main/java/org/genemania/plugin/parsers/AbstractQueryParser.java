@@ -29,11 +29,12 @@ import org.genemania.plugin.data.DataSet;
 import org.genemania.type.CombiningMethod;
 
 public abstract class AbstractQueryParser implements IQueryParser {
-    protected static String [] preferredGroupCodes = {
-    	"coexp", // co-expression //$NON-NLS-1$
-        "pi",    // physical interaction //$NON-NLS-1$
-        "gi"     // genetic interaction //$NON-NLS-1$
-    };
+	
+	protected static String[] preferredGroupCodes = {
+			"coexp", // co-expression //$NON-NLS-1$
+			"pi", // physical interaction //$NON-NLS-1$
+			"gi" // genetic interaction //$NON-NLS-1$
+	};
 
     protected CombiningMethod parseCombiningMethod(String combiningMethod, Query query, IQueryErrorHandler handler) {
 		if (combiningMethod == null) {

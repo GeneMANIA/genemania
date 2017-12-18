@@ -39,8 +39,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import no.uib.cipr.matrix.Vector;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.genemania.domain.Gene;
@@ -101,7 +99,10 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.xml.sax.SAXException;
 
+import no.uib.cipr.matrix.Vector;
+
 public class QueryRunner extends AbstractPluginDataApp {
+	
 	private static final int MIN_CATEGORIES = 10;
 
 	private static final double Q_VALUE_THRESHOLD = 0.1;
@@ -301,28 +302,24 @@ public class QueryRunner extends AbstractPluginDataApp {
 	private SearchResult runAlgorithm(DataSet data, Query query) throws DataStoreException, ApplicationException {
 		RelatedGenesEngineRequestDto request = createRequest(query);
 		RelatedGenesEngineResponseDto response = runQuery(request);
-		
-		
 		EnrichmentEngineRequestDto enrichmentRequest;
-		if ("scores".equals(fOutputFormat)) { //$NON-NLS-1$
+		
+		if ("scores".equals(fOutputFormat)) //$NON-NLS-1$
 			enrichmentRequest = null;
-		} else {
+		else
 			enrichmentRequest = createEnrichmentRequest(query, response);
-		}
+		
 		EnrichmentEngineResponseDto enrichmentResponse = computeEnrichment(enrichmentRequest);
 
 		List<String> queryGenes = query.getGenes();
 		Organism organism = query.getOrganism();
 		SearchResult options = fNetworkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data, queryGenes);
+		
 		return options;
 	}
 
 	private EnrichmentEngineResponseDto computeEnrichment(EnrichmentEngineRequestDto request) throws ApplicationException {
-		if (request == null) {
-			return null;
-		}
-		
-		return fMania.computeEnrichment(request);
+		return request == null ? null : fMania.computeEnrichment(request);
 	}
 
 	File getOutputDirectory() {
@@ -332,6 +329,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 	private void runQuery(String filename, File outputDirectory) throws IOException, DataStoreException, ApplicationException {
 		Query query;
 		Reader reader = new InputStreamReader(new FileInputStream(filename), "UTF-8"); //$NON-NLS-1$
+		
 		try {
 			query = fQueryParser.parse(fData, reader, new IQueryErrorHandler() {
 				public void handleUnrecognizedGene(String gene) {
@@ -387,6 +385,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 		final Iterator<String> jobQueue = arguments.iterator();
 		List<Thread> threads = new ArrayList<Thread>();
 		long start = System.currentTimeMillis();
+		
 		for (int i = 0; i < getThreads(); i++) {
 			final int threadId = i + 1;
 			
@@ -427,19 +426,23 @@ public class QueryRunner extends AbstractPluginDataApp {
 	}
 
 	public static void main(String[] args) throws Exception {
-        Logger.getLogger("org.genemania").setLevel(Level.FATAL); //$NON-NLS-1$
+		Logger.getLogger("org.genemania").setLevel(Level.FATAL); //$NON-NLS-1$
 
-        final QueryRunner runner = new QueryRunner();
-        CmdLineParser parser = new CmdLineParser(runner);
-        try {
-        	parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println(String.format("\nUsage: %s options query-file-1 [query-file-2...]\n", QueryRunner.class.getSimpleName())); //$NON-NLS-1$
-            parser.printUsage(System.err);
-            return;
-        }
-        runner.handleArguments();
+		final QueryRunner runner = new QueryRunner();
+		CmdLineParser parser = new CmdLineParser(runner);
+
+		try {
+			parser.parseArgument(args);
+		} catch (CmdLineException e) {
+			System.err.println(e.getMessage());
+			System.err.println(String.format("\nUsage: %s options query-file-1 [query-file-2...]\n", //$NON-NLS-1$
+					QueryRunner.class.getSimpleName()));
+			parser.printUsage(System.err);
+			
+			return;
+		}
+
+		runner.handleArguments();
 	}
 	
 	/**
