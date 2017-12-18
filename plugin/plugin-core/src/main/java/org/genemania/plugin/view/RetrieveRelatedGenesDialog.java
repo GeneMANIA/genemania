@@ -225,7 +225,7 @@ public class RetrieveRelatedGenesDialog extends JDialog {
     	this.plugin = plugin;
     	this.dataSetManager = dataSetManager;
     	
-    	selectedGenes = new HashMap<Long, List<String>>();
+    	selectedGenes = new HashMap<>();
     	
     	createLabels();
     	
@@ -1131,14 +1131,14 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		if (genes != null)
 			getGenePanel().setItems(genes);
 		
-		List<Group<?, ?>> sortedGroups = new ArrayList<Group<?, ?>>();
+		List<Group<?, ?>> sortedGroups = new ArrayList<>();
 
 		for (InteractionNetworkGroup group : organism.getInteractionNetworkGroups()) {
 			sortedGroups.add(new InteractionNetworkGroupImpl(group));
 		}
 		
 		AttributeMediator mediator = data.getMediatorProvider().getAttributeMediator();
-		Collection<Network<AttributeGroup>> networks = new ArrayList<Network<AttributeGroup>>();
+		Collection<Network<AttributeGroup>> networks = new ArrayList<>();
 		
 		for (AttributeGroup group : mediator.findAttributeGroupsByOrganism(organism.getId())) {
 			networks.add(new QueryAttributeNetworkImpl(group, 0));
@@ -1215,30 +1215,24 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		}
 	}
 	
-    private void handleChooseFile() {
-    	HashSet<String> extensions = new HashSet<String>();
-    	extensions.add("json"); //$NON-NLS-1$
+	private void handleChooseFile() {
+		HashSet<String> extensions = new HashSet<>();
+		extensions.add("json"); //$NON-NLS-1$
 		File initialFile = fileUtils.getUserHome();
 		final File file;
-		
+
 		try {
-			file = uiUtils.getFile(
-					this,
-					Strings.retrieveRelatedGenesChooseFile_title,
-					initialFile,
-					Strings.jsonDescription,
-					extensions,
-					FileSelectionMode.OPEN_FILE
-			);
+			file = uiUtils.getFile(this, Strings.retrieveRelatedGenesChooseFile_title, initialFile,
+					Strings.jsonDescription, extensions, FileSelectionMode.OPEN_FILE);
 		} catch (ApplicationException e) {
 			LogUtils.log(getClass(), e);
 			return;
 		}
-		
+
 		if (file == null)
 			return;
 		
-    	GeneManiaTask task = new GeneManiaTask(Strings.retrieveRelatedGenesChooseFile_title) {
+	    	GeneManiaTask task = new GeneManiaTask(Strings.retrieveRelatedGenesChooseFile_title) {
 			@Override
 			protected void runTask() throws Throwable {
 				progress.setStatus(Strings.retrieveRelatedGenesChooseFile_status);
@@ -1263,18 +1257,17 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 				};
 				
 				final Query query = parseQuery(data, file, handler);
-				SwingUtilities.invokeAndWait(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							applyQuery(query);
-						} catch (ApplicationException e) {
-							throw new RuntimeException(e);
-						}
+				
+				SwingUtilities.invokeAndWait(() -> {
+					try {
+						applyQuery(query);
+					} catch (ApplicationException e) {
+						throw new RuntimeException(e);
 					}
 				});
 			}
 		};
+		
 		taskDispatcher.executeTask(task, this, true, false);
 	}
 	

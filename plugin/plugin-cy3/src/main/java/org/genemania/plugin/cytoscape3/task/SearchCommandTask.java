@@ -18,6 +18,10 @@
  */
 package org.genemania.plugin.cytoscape3.task;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -28,14 +32,20 @@ import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
+import org.genemania.domain.InteractionNetwork;
 import org.genemania.domain.Organism;
 import org.genemania.plugin.GeneMania;
+import org.genemania.plugin.apps.IQueryErrorHandler;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape3.model.OrganismManager;
+import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ViewState;
+import org.genemania.plugin.parsers.IQueryParser;
+import org.genemania.plugin.parsers.JsonQueryParser;
 import org.genemania.plugin.parsers.Query;
+import org.genemania.plugin.parsers.WebsiteQueryParser;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
@@ -109,6 +119,21 @@ public class SearchCommandTask extends AbstractTask {
 	)
 	public ListSingleSelection<ScoringMethod> scoringMethod = new ListSingleSelection<>(ScoringMethod.values());
 	
+	// TODO not supported by ONLINE search!
+	@Tunable(
+			description = "Query file",
+			longDescription = 
+					"Optional path to a file that contains the search parameters. "
+					+ "It accepts two file formats (plain text and JSON), "
+					+ "which are the same ones you can download from http://genemania.org/ after executing a search. "
+					+ "If this argument is passed, the other ones are not necessary, as the query file should contain all of them. "
+					+ "However, if any other arguments are also passed, they overwrite the ones parsed from the query file. "
+					+ "This option is only supported by the offline search.",
+			exampleStringValue = "/Users/johndoe/Downloads/genemania-parameters.json",
+			context = "nogui"
+	)
+	public File queryFile;
+	
 	private final GeneMania plugin;
 	private final RetrieveRelatedGenesController controller;
 	private final OrganismManager organismManager;
@@ -176,37 +201,110 @@ public class SearchCommandTask extends AbstractTask {
 	}
 
 	private Query getQuery() {
-		// Create list of gene names
-		List<String> geneList = new ArrayList<>();
+		Query query = null;
 		
-		if (genes != null) {
-			String[] arr = genes.split("\\|");
+		// If queryFile is passed, try to parse it first
+		if (queryFile != null) {
+			if (!queryFile.exists())
+				throw new RuntimeException("Query file does not exist.");
 			
-			for (String s : arr) {
-				s = s.trim();
-				
-				if (!s.isEmpty())
-					geneList.add(s);
+			DataSet data = plugin.getDataSetManager().getDataSet();
+			
+			if (data == null) {
+				plugin.initializeData(cytoscapeUtils.getFrame(), false);
+				data = plugin.getDataSetManager().getDataSet();
 			}
+			
+			if (data == null)
+				throw new RuntimeException("No data set installed.");
+			
+			IQueryErrorHandler handler = new IQueryErrorHandler() {
+				@Override
+				public void warn(String message) {
+					// Not implemented...
+				}
+				@Override
+				public void handleUnrecognizedGene(String gene) {
+					// Not implemented...
+				}
+				@Override
+				public void handleSynonym(String gene) {
+					// Not implemented...
+				}
+				@Override
+				public void handleNetwork(InteractionNetwork network) {
+					// Not implemented...
+				}
+				@Override
+				public void handleUnrecognizedNetwork(String network) {
+					// Not implemented...
+				}
+			};
+			
+			IQueryParser[] parsers = new IQueryParser[] { new JsonQueryParser(), new WebsiteQueryParser() };
+			
+			for (IQueryParser parser : parsers) {
+				try {
+					// TODO: Assume UTF-8 for now
+					Reader reader = new InputStreamReader(new FileInputStream(queryFile), "UTF-8"); //$NON-NLS-1$
+					query = parser.parse(data, reader, handler);
+					break;
+				} catch (Exception e) {
+					System.out.println(e);
+					// Ignore...
+				}
+			}
+			
+			if (query == null)
+				throw new RuntimeException("Invalid query file.");
+		}
+		
+		// The other arguments will overwrite the ones parsed from the query file
+		if (query == null)
+			query = new Query();
+		
+		if (query.getGenes() == null || query.getGenes().isEmpty()) {
+			// Create list of gene names
+			List<String> geneList = new ArrayList<>();
+			
+			if (genes != null) {
+				String[] arr = genes.split("\\|");
+				
+				for (String s : arr) {
+					s = s.trim();
+					
+					if (!s.isEmpty())
+						geneList.add(s);
+				}
+			}
+			
+			query.setGenes(geneList);
 		}
 		
 		// Retrieve Organism object
-		if (organism != null)
-			organism = organism.trim();
+		if (query.getOrganism() == null) {
+			if (organism != null)
+				organism = organism.trim();
+			
+			Set<Organism> organismSet = offline ? organismManager.getLocalOrganisms()
+					: organismManager.getRemoteOrganisms();
+			
+			query.setOrganism(findOrganism(organismSet));
+		}
 		
-		Set<Organism> organismSet = offline ? organismManager.getLocalOrganisms()
-				: organismManager.getRemoteOrganisms();
+		if (query.getGeneLimit() <= 0)
+			query.setGeneLimit(geneLimit);
 		
-		// Create Query object
-		final Query query = new Query();
-		query.setOrganism(findOrganism(organismSet));
-		query.setGenes(geneList);
-		query.setGeneLimit(geneLimit);
-		query.setAttributeLimit(0);
-		query.setCombiningMethod(combiningMethod.getSelectedValue() != null ?
-				combiningMethod.getSelectedValue() : CombiningMethod.AUTOMATIC_SELECT);
-		query.setScoringMethod(scoringMethod.getSelectedValue() != null ?
-				scoringMethod.getSelectedValue() : ScoringMethod.DISCRIMINANT);
+		if (query.getAttributeLimit() <= 0)
+			query.setAttributeLimit(0);
+		
+		if (query.getCombiningMethod() == null)
+			query.setCombiningMethod(combiningMethod.getSelectedValue() != null ?
+					combiningMethod.getSelectedValue() : CombiningMethod.AUTOMATIC_SELECT);
+		
+		if (query.getScoringMethod() == null)
+			query.setScoringMethod(scoringMethod.getSelectedValue() != null ?
+					scoringMethod.getSelectedValue() : ScoringMethod.DISCRIMINANT);
 		
 		return query;
 	}
