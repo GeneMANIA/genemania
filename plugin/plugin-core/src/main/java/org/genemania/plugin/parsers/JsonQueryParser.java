@@ -60,7 +60,7 @@ public class JsonQueryParser extends AbstractQueryParser {
 			query.setCombiningMethod(parseCombiningMethod(root.get("selectedWeighting").getTextValue(), query, handler)); //$NON-NLS-1$
 			query.setGeneLimit(root.get("numberOfResultGenes").getIntValue()); //$NON-NLS-1$
 			query.setGenes(parseGenes(data, root.get("genes"))); //$NON-NLS-1$
-			query.setNetworks(parseNetworks(data, root.get("networks"), organism)); //$NON-NLS-1$
+			query.setGroups(parseNetworks(data, root.get("networks"), organism)); //$NON-NLS-1$
 			query.setScoringMethod(ScoringMethod.DISCRIMINANT);
 		} catch (DataStoreException e) {
 			throw new IOException(e.getMessage());

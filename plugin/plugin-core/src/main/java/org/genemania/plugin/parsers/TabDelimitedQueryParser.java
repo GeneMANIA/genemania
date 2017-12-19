@@ -92,7 +92,7 @@ public class TabDelimitedQueryParser extends AbstractQueryParser {
 					}
 				}
 			}
-			query.setNetworks(groups);
+			query.setGroups(groups);
 			
 			String limits = in.readLine();
 			setLimits(query, limits);

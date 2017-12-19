@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +35,7 @@ import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.genemania.domain.InteractionNetwork;
+import org.genemania.domain.InteractionNetworkGroup;
 import org.genemania.domain.Organism;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.apps.IQueryErrorHandler;
@@ -41,7 +44,9 @@ import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape3.model.OrganismManager;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.model.Group;
+import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.ViewState;
+import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.parsers.IQueryParser;
 import org.genemania.plugin.parsers.JsonQueryParser;
 import org.genemania.plugin.parsers.Query;
@@ -119,6 +124,26 @@ public class SearchCommandTask extends AbstractTask {
 	)
 	public ListSingleSelection<ScoringMethod> scoringMethod = new ListSingleSelection<>(ScoringMethod.values());
 	
+	@Tunable(
+			description = "Networks",
+			longDescription =
+					"A comma-separated list of network types and/or network ids. "
+					+ "If not specified or empty, the default networks for the organism is used instead. "
+					+ "To get a full listing of network ids for a specific organism, use the command ```genemania networks```. "
+					+ "Available network types: " + 
+					"```coexp``` (Co-Expression), " + 
+					"```coloc``` (Co-Localization), " + 
+					"```gi``` (Genetic Interactions), " + 
+					"```path``` (Pathway Interactions), " + 
+					"```pi``` (Physical Interactions), " + 
+					"```predict``` (Predicted), " + 
+					"```spd``` (Shared Protein Domains), " + 
+					"```other``` (networks that don't belong to any of the above types).",
+			exampleStringValue = "2311,2309,gi,spd",
+			context = "nogui"
+	)
+	public String networks;
+	
 	// TODO not supported by ONLINE search!
 	@Tunable(
 			description = "Query file",
@@ -133,6 +158,8 @@ public class SearchCommandTask extends AbstractTask {
 			context = "nogui"
 	)
 	public File queryFile;
+	
+	private LoadRemoteNetworksTask loadRemoteNetworksTask;
 	
 	private final GeneMania plugin;
 	private final RetrieveRelatedGenesController controller;
@@ -161,7 +188,10 @@ public class SearchCommandTask extends AbstractTask {
 		tm.setStatusMessage("Validating search...");
 		tm.setProgress(-1);
 		
-		Query query = getQuery();
+		Query query = getQuery(tm);
+		
+		if (cancelled)
+			return;
 		
 		if (query.getOrganism() == null)
 			throw new RuntimeException("Please specify a valid organism.");
@@ -172,9 +202,7 @@ public class SearchCommandTask extends AbstractTask {
 			
 		tm.setStatusMessage("Searching " + (offline ? "installed data set" : "ONLINE") + "...");
 		
-		List<Group<?, ?>> groups = SimpleSearchTaskFactory.getGroups(query.getOrganism());
-		
-		ObservableTask nextTask = controller.runMania(query, groups, offline);
+		ObservableTask nextTask = controller.runMania(query, offline);
 		
 		AbstractTask finalTask = new AbstractTask() {
 			@Override
@@ -185,12 +213,27 @@ public class SearchCommandTask extends AbstractTask {
 					tm.setStatusMessage("Applying layout...");
 					
 					cytoscapeUtils.handleNetworkPostProcessing(network);
+					
+					if (cancelled)
+						return;
+					
 					cytoscapeUtils.performLayout(network);
+					
+					if (cancelled)
+						return;
+					
 					cytoscapeUtils.maximize(network);
+					
+					if (cancelled)
+						return;
 					
 					NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
 					ViewState options = selManager.getNetworkConfiguration(network);
 					plugin.applyOptions(options);
+					
+					if (cancelled)
+						return;
+					
 					plugin.showResults();
 				}
 			}
@@ -199,8 +242,16 @@ public class SearchCommandTask extends AbstractTask {
 		insertTasksAfterCurrentTask(finalTask);
 		insertTasksAfterCurrentTask(nextTask);
 	}
+	
+	@Override
+	public void cancel() {
+		super.cancel();
+		
+		if (loadRemoteNetworksTask != null)
+			loadRemoteNetworksTask.cancel();
+	}
 
-	private Query getQuery() {
+	private Query getQuery(TaskMonitor tm) {
 		Query query = null;
 		
 		// If queryFile is passed, try to parse it first
@@ -245,6 +296,9 @@ public class SearchCommandTask extends AbstractTask {
 			
 			for (IQueryParser parser : parsers) {
 				try {
+					if (cancelled)
+						return query;
+					
 					// TODO: Assume UTF-8 for now
 					Reader reader = new InputStreamReader(new FileInputStream(queryFile), "UTF-8"); //$NON-NLS-1$
 					query = parser.parse(data, reader, handler);
@@ -262,6 +316,20 @@ public class SearchCommandTask extends AbstractTask {
 		// The other arguments will overwrite the ones parsed from the query file
 		if (query == null)
 			query = new Query();
+		
+		// Retrieve Organism object
+		if (query.getOrganism() == null) {
+			if (organism != null)
+				organism = organism.trim();
+			
+			Set<Organism> organismSet = offline ? organismManager.getLocalOrganisms()
+					: organismManager.getRemoteOrganisms();
+			
+			query.setOrganism(findOrganism(organismSet));
+		}
+		
+		if (cancelled)
+			return query;
 		
 		if (query.getGenes() == null || query.getGenes().isEmpty()) {
 			// Create list of gene names
@@ -281,17 +349,67 @@ public class SearchCommandTask extends AbstractTask {
 			query.setGenes(geneList);
 		}
 		
-		// Retrieve Organism object
-		if (query.getOrganism() == null) {
-			if (organism != null)
-				organism = organism.trim();
+		if (cancelled)
+			return query;
+		
+		// Networks and Attributes
+		final List<Group<?, ?>> groups = new ArrayList<>();
+		
+		if (networks != null && query.getOrganism() != null) {
+			networks = networks.trim().toLowerCase();
 			
-			Set<Organism> organismSet = offline ? organismManager.getLocalOrganisms()
-					: organismManager.getRemoteOrganisms();
-			
-			query.setOrganism(findOrganism(organismSet));
+			if (!networks.isEmpty()) {
+				Set<Object> netKeySet = new HashSet<>();
+				String[] netKeyArr = networks.split(",");
+				
+				for (String s : netKeyArr) {
+					try {
+						// Is it a number (network ID)?
+						netKeySet.add(Long.parseLong(s.trim()));
+					} catch (Exception e) {
+						// Is it a string (probably a network group/type)?
+						netKeySet.add(s);
+					}
+				}
+				
+				Collection<InteractionNetworkGroup> allGroups = query.getOrganism().getInteractionNetworkGroups();
+				
+				allGroups.forEach(ng -> {
+					Group<InteractionNetworkGroup, InteractionNetwork> gr = new InteractionNetworkGroupImpl(ng);
+					Collection<? extends Network<InteractionNetwork>> allNets = gr.getNetworks();
+					
+					if (allNets != null) {
+						Set<Network<?>> filteredNets = new HashSet<>();
+						
+						if (ng.getCode() != null && netKeySet.contains(ng.getCode().toLowerCase())) {
+							// The user params contain this network GROUP code, so add all of its networks
+							filteredNets.addAll(allNets);
+						} else {
+							// Check each individual network
+							allNets.forEach(n -> {
+								if (netKeySet.contains(n.getModel().getId()))
+									filteredNets.add(n);
+							});
+						}
+						
+						// Convert to query Groups
+						if (!filteredNets.isEmpty()) {
+							Group<InteractionNetworkGroup, InteractionNetwork> filter = gr.filter(filteredNets);
+							
+							if (filter != null && filter.getNetworks() != null && !filter.getNetworks().isEmpty())
+								groups.add(filter);
+						}
+					}
+				});
+			}
 		}
 		
+		if (query.getOrganism() != null && groups.isEmpty()) // Use default groups instead
+			groups.addAll(SimpleSearchTaskFactory.getDefaultGroups(query.getOrganism()));
+		
+		query.setGroups(groups);
+		
+		// Other parameters
 		if (query.getGeneLimit() <= 0)
 			query.setGeneLimit(geneLimit);
 		

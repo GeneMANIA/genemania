@@ -231,8 +231,8 @@ public class QueryRunner extends AbstractPluginDataApp {
 		RelatedGenesEngineRequestDto request = new RelatedGenesEngineRequestDto();
 		request.setNamespace(GeneMania.DEFAULT_NAMESPACE);
 		request.setOrganismId(query.getOrganism().getId());
-		request.setInteractionNetworks(collapseNetworks(query.getNetworks()));
-		request.setAttributeGroups(collapseAttributeGroups(query.getNetworks()));
+		request.setInteractionNetworks(collapseNetworks(query.getGroups()));
+		request.setAttributeGroups(collapseAttributeGroups(query.getGroups()));
 		request.setPositiveNodes(query.getNodes());
 		request.setLimitResults(query.getGeneLimit());
 		request.setAttributesLimit(query.getAttributeLimit());
@@ -580,8 +580,8 @@ public class QueryRunner extends AbstractPluginDataApp {
 			} else {
 				namespace = "CORE";
 			}
-			Collection<Collection<Long>> networkIds = collapseNetworks(query.getNetworks());
-			Collection<Long> attributeGroupIds = collapseAttributeGroups(query.getNetworks());
+			Collection<Collection<Long>> networkIds = collapseNetworks(query.getGroups());
+			Collection<Long> attributeGroupIds = collapseAttributeGroups(query.getGroups());
 			int attributeLimit = query.getAttributeLimit();
 			
 	        if (fVerbose) {

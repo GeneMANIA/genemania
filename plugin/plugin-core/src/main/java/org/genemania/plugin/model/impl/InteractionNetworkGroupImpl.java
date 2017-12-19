@@ -27,6 +27,7 @@ import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 
 public class InteractionNetworkGroupImpl extends AbstractGroup<InteractionNetworkGroup, InteractionNetwork> {
+	
 	private InteractionNetworkGroup group;
 
 	public InteractionNetworkGroupImpl(InteractionNetworkGroup group) {
@@ -35,10 +36,14 @@ public class InteractionNetworkGroupImpl extends AbstractGroup<InteractionNetwor
 	}
 	
 	private static Collection<Network<InteractionNetwork>> extractNetworks(InteractionNetworkGroup group) {
-		Collection<Network<InteractionNetwork>> result = new ArrayList<Network<InteractionNetwork>>();
-		for (InteractionNetwork network : group.getInteractionNetworks()) {
-			result.add(new InteractionNetworkImpl(network, 0));
+		Collection<Network<InteractionNetwork>> result = new ArrayList<>();
+		Collection<InteractionNetwork> interactionNetworks = group.getInteractionNetworks();
+		
+		if (interactionNetworks != null) {
+			for (InteractionNetwork network : interactionNetworks)
+				result.add(new InteractionNetworkImpl(network, 0));
 		}
+		
 		return result;
 	}
 
@@ -64,9 +69,9 @@ public class InteractionNetworkGroupImpl extends AbstractGroup<InteractionNetwor
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof InteractionNetworkGroupImpl)) {
+		if (!(other instanceof InteractionNetworkGroupImpl))
 			return false;
-		}
+		
 		return ((InteractionNetworkGroupImpl) other).getModel().getId() == group.getId();
 	}
 	
@@ -78,12 +83,12 @@ public class InteractionNetworkGroupImpl extends AbstractGroup<InteractionNetwor
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T, S> Group<T, S> adapt(Class<T> groupType, Class<S> networkType) {
-		if (!groupType.equals(InteractionNetworkGroup.class)) {
+		if (!groupType.equals(InteractionNetworkGroup.class))
 			return null;
-		}
-		if (!networkType.equals(InteractionNetwork.class)) {
+		
+		if (!networkType.equals(InteractionNetwork.class))
 			return null;
-		}
+		
 		return (Group<T, S>) this;
 	}
 	

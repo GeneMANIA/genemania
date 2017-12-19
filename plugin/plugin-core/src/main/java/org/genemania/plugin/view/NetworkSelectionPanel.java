@@ -406,18 +406,21 @@ public class NetworkSelectionPanel extends JPanel {
 	
 	public void setSelection(Query query) {
 		selectAllNetworks(false);
-		for (Group<?, ?> group : query.getNetworks()) {
+		
+		for (Group<?, ?> group : query.getGroups()) {
 			for (Network<?> network : group.getNetworks()) {
 				for (Entry<Network<?>, JCheckBox> entry : networkSelections.entrySet()) {
 					Network<?> otherNetwork = entry.getKey();
-					if (!network.equals(otherNetwork)) {
+					
+					if (!network.equals(otherNetwork))
 						continue;
-					}
+					
 					JCheckBox checkBox = entry.getValue();
 					checkBox.setSelected(true);
 				}
 			}
 		}
+		
 		synchronizeGroupCheckBoxState();
 	}
 }

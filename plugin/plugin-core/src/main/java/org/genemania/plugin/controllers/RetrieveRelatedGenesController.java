@@ -18,14 +18,12 @@
  */
 package org.genemania.plugin.controllers;
 
-import java.util.Collection;
 import java.util.Vector;
 
 import org.cytoscape.work.ObservableTask;
 import org.genemania.domain.Organism;
 import org.genemania.exception.DataStoreException;
 import org.genemania.plugin.data.DataSet;
-import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ModelElement;
 import org.genemania.plugin.parsers.Query;
 
@@ -33,6 +31,6 @@ public interface RetrieveRelatedGenesController {
 
 	Vector<ModelElement<Organism>> createModel(DataSet data) throws DataStoreException;
 
-	ObservableTask runMania(Query query, Collection<Group<?, ?>> groups, boolean offline);
+	ObservableTask runMania(Query query, boolean offline);
 
 }

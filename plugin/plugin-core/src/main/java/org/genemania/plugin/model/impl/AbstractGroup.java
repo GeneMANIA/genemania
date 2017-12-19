@@ -30,7 +30,7 @@ public abstract class AbstractGroup<G, N> implements Group<G, N> {
 	private boolean hasInteractions;
 
 	public AbstractGroup(Collection<Network<N>> networks) {
-		this.networks = new ArrayList<Network<N>>(networks);
+		this.networks = new ArrayList<>(networks);
 		hasInteractions = hasInteractions(networks);
 	}
 	
@@ -39,22 +39,23 @@ public abstract class AbstractGroup<G, N> implements Group<G, N> {
 		return networks;
 	}
 	
-	
 	@Override
 	public double getWeight() {
 		double weight = 0;
+		
 		for (Network<N> network : networks) {
 			weight += network.getWeight();
 		}
+		
 		return weight;
 	}
 	
 	private boolean hasInteractions(Collection<Network<N>> networks) {
 		for (Network<N> network : networks) {
-			if (network.hasInteractions()) {
+			if (network.hasInteractions())
 				return true;
-			}
 		}
+		
 		return false;
 	}
 
@@ -65,12 +66,13 @@ public abstract class AbstractGroup<G, N> implements Group<G, N> {
 
 	@Override
 	public Group<G, N> filter(Collection<Network<?>> filter) {
-		Collection<Network<N>> filtered = new ArrayList<Network<N>>();
+		Collection<Network<N>> filtered = new ArrayList<>();
+		
 		for (Network<N> network : networks) {
-			if (filter.contains(network)) {
+			if (filter.contains(network))
 				filtered.add(network);
-			}
 		}
+		
 		return create(filtered);
 	}
 	

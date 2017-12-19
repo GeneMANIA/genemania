@@ -19,16 +19,9 @@
 
 package org.genemania.plugin.parsers;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Collection;
 import java.util.List;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.MappingJsonFactory;
-import org.genemania.domain.AttributeGroup;
 import org.genemania.domain.Organism;
 import org.genemania.plugin.model.Group;
 import org.genemania.type.CombiningMethod;
@@ -38,12 +31,11 @@ public final class Query {
 	
 	private Organism organism;
 	private List<String> genes;
-	private Collection<Group<?, ?>> networks;
+	private Collection<Group<?, ?>> groups;
 	private int geneLimit;
 	private CombiningMethod combiningMethod;
 	private ScoringMethod scoringMethod;
 	private Collection<Long> nodes;
-	private Collection<AttributeGroup> attributes;
 	private int attributeLimit;
 	
 	public Organism getOrganism() {
@@ -54,12 +46,8 @@ public final class Query {
 		return genes;
 	}
 	
-	public Collection<Group<?, ?>> getNetworks() {
-		return networks;
-	}
-	
-	public Collection<AttributeGroup> getAttributes() {
-		return attributes;
+	public Collection<Group<?, ?>> getGroups() {
+		return groups;
 	}
 	
 	public int getGeneLimit() {
@@ -90,12 +78,8 @@ public final class Query {
 		this.genes = genes;
 	}
 	
-	public void setNetworks(Collection<Group<?, ?>> groups) {
-		this.networks = groups;
-	}
-	
-	public void setAttributes(Collection<AttributeGroup> attributes) {
-		this.attributes = attributes;
+	public void setGroups(Collection<Group<?, ?>> groups) {
+		this.groups = groups;
 	}
 	
 	public void setGeneLimit(int limit) {
@@ -116,24 +100,5 @@ public final class Query {
 	
 	public void setNodes(Collection<Long> nodes) {
 		this.nodes = nodes;
-	}
-	
-	public String toJson() throws IOException {
-		StringWriter writer = new StringWriter();
-		JsonFactory jsonFactory = new MappingJsonFactory();
-		
-		try {
-			JsonGenerator generator = jsonFactory.createJsonGenerator(writer);
-			generator.writeStartObject();
-			
-			try {
-			} finally {
-				generator.writeEndObject();
-			}
-			
-			return writer.toString();
-		} catch (JsonGenerationException e) {
-			throw new IOException(e.getMessage());
-		}
 	}
 }

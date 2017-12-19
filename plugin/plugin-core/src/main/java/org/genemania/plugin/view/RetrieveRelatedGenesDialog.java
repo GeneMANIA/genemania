@@ -976,6 +976,7 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 		final Query query = new Query();
 		query.setOrganism(selectedOrganism);
 		query.setGenes(getGenePanel().getItems());
+		query.setGroups(selectionPanel.getSelectedGroups());
 		query.setGeneLimit(getLimit(getLimitTextField()));
 		query.setAttributeLimit(getLimit(getAttributeLimitTextField()));
 		query.setCombiningMethod(getCombiningMethod());
@@ -986,8 +987,7 @@ public class RetrieveRelatedGenesDialog extends JDialog {
 	
 	private void handleStartButton() {
 		Query query = getQuery();
-		Collection<Group<?, ?>> groups = selectionPanel.getSelectedGroups();
-		ObservableTask task = controller.runMania(query, groups, true);
+		ObservableTask task = controller.runMania(query, true);
 
 		CyServiceRegistrar serviceRegistrar = cytoscapeUtils.getServiceRegistrar();
 		DialogTaskManager taskManager = serviceRegistrar != null ?

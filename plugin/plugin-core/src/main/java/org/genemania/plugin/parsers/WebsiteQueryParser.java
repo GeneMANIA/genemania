@@ -52,7 +52,7 @@ public class WebsiteQueryParser extends AbstractQueryParser {
 	public Query parse(DataSet data, Reader reader, IQueryErrorHandler handler) throws IOException {
 		BufferedReader input = new BufferedReader(reader);
 		Query query = new Query();
-		query.setNetworks(new HashSet<Group<?, ?>>());
+		query.setGroups(new HashSet<Group<?, ?>>());
 		State state = State.read_parameters;
 		String line = input.readLine();
 		try {
@@ -124,7 +124,7 @@ public class WebsiteQueryParser extends AbstractQueryParser {
 			throw new IOException("No networks were recognized"); //$NON-NLS-1$
 		}
 		
-		query.getNetworks().add(new InteractionNetworkGroupImpl(targetGroup, networks));
+		query.getGroups().add(new InteractionNetworkGroupImpl(targetGroup, networks));
 	}
 
 	private void handleGeneLimit(DataSet data, String[] values, Query query) {

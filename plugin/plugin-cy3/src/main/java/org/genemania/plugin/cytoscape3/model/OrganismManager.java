@@ -34,6 +34,7 @@ import org.genemania.exception.DataStoreException;
 import org.genemania.mediator.OrganismMediator;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.LogUtils;
+import org.genemania.plugin.cytoscape3.task.LoadRemoteNetworksTask;
 import org.genemania.plugin.cytoscape3.task.LoadRemoteOrganismsTask;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetManager;
@@ -119,35 +120,58 @@ public class OrganismManager {
 	}
 	
 	public void loadRemoteOrganisms() {
-		LoadRemoteOrganismsTask task = new LoadRemoteOrganismsTask();
+		LoadRemoteOrganismsTask task1 = new LoadRemoteOrganismsTask();
+		LoadRemoteNetworksTask task2 = new LoadRemoteNetworksTask();
 		
 		DialogTaskManager taskManager = serviceRegistrar.getService(DialogTaskManager.class);
-		taskManager.execute(new TaskIterator(task), new TaskObserver() {
+		taskManager.execute(new TaskIterator(task1, task2), new TaskObserver() {
 			@Override
 			public void taskFinished(ObservableTask ot) {
 				// Nothing to do here...
 			}
 			@Override
 			public void allFinished(FinishStatus finishStatus) {
-				loadRemoteOrganismsErrorMessage = task.getErrorMessage();
+				// First, retrieve the organisms
+				loadRemoteOrganismsErrorMessage = task1.getErrorMessage();
 				
-				if (finishStatus != FinishStatus.getSucceeded() && finishStatus.getException() != null)
+				if (finishStatus != FinishStatus.getSucceeded() && finishStatus.getException() != null) {
 					loadRemoteOrganismsErrorMessage = finishStatus.getException().getMessage();
+					return;
+				}
 				
-				Set<Organism> oldValue = new LinkedHashSet<>(remoteOrganisms);
-				Set<Organism> newValue = task.getOrganisms();
+				final Set<Organism> oldValue = new LinkedHashSet<>(remoteOrganisms);
+				final Set<Organism> newValue = task1.getOrganisms();
 				
 				synchronized (lock) {
 					remoteOrganisms.clear();
 					remoteOrganisms.addAll(newValue);
 				}
 				
+				// Then retrieve the networks and assign them to their organisms
+				if (task2.getErrorMessage() != null) {
+					if (loadRemoteOrganismsErrorMessage == null)
+						loadRemoteOrganismsErrorMessage = task2.getErrorMessage();
+					else
+						loadRemoteOrganismsErrorMessage = "1) " + loadRemoteOrganismsErrorMessage + "; 2) "
+								+ task2.getErrorMessage();
+				}
+				
+				task2.getNetworkGroups().forEach((id, groups) -> {
+					for (Organism org : remoteOrganisms) {
+						if (id == org.getId()) {
+							org.setInteractionNetworkGroups(groups);
+							break;
+						}
+					}
+				});
+				
+				// Finally, fire the property change event
 				initialized = true;
 				
 				if (finishStatus == FinishStatus.getSucceeded() && loadRemoteOrganismsErrorMessage == null)
 					propertyChangeSupport.firePropertyChange("organisms", oldValue, newValue);
 				else
-					propertyChangeSupport.firePropertyChange("loadRemoteOrganismsException", null, loadRemoteOrganismsErrorMessage);
+					propertyChangeSupport.firePropertyChange("loadRemoteOrganismsException", null, loadRemoteOrganismsErrorMessage);	
 			}
 		});
 	}

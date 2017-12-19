@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.Icon;
@@ -44,6 +45,7 @@ import org.cytoscape.work.Tunable;
 import org.cytoscape.work.swing.util.UserAction;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
+import org.genemania.domain.InteractionNetwork;
 import org.genemania.domain.InteractionNetworkGroup;
 import org.genemania.domain.Organism;
 import org.genemania.plugin.GeneMania;
@@ -55,6 +57,7 @@ import org.genemania.plugin.cytoscape3.model.OrganismManager;
 import org.genemania.plugin.cytoscape3.view.QueryBar;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.model.Group;
+import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.model.impl.WeightingMethod;
@@ -184,10 +187,8 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 					throw new RuntimeException("Please specify a set of valid gene names and try again.");
 					
 				tm.setStatusMessage("Searching...");
-				
-				List<Group<?, ?>> groups = getGroups(query.getOrganism());
-				
-				ObservableTask nextTask = controller.runMania(query, groups, offline);
+
+				ObservableTask nextTask = controller.runMania(query, offline);
 				insertTasksAfterCurrentTask(nextTask);
 			}
 		});
@@ -278,12 +279,28 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		return false;
 	}
 	
-	protected static List<Group<?, ?>> getGroups(Organism organism) {
+	protected static List<Group<?, ?>> getDefaultGroups(Organism organism) {
 		List<Group<?, ?>> groups = new ArrayList<>();
 		
-		// TODO get only default or selected groups
-		for (InteractionNetworkGroup group : organism.getInteractionNetworkGroups())
-			groups.add(new InteractionNetworkGroupImpl(group));
+		// Only default or selected groups
+		for (InteractionNetworkGroup netGroup : organism.getInteractionNetworkGroups()) {
+			Group<InteractionNetworkGroup, InteractionNetwork> gr = new InteractionNetworkGroupImpl(netGroup);
+			Collection<? extends Network<InteractionNetwork>> networks = gr.getNetworks();
+			
+			if (networks != null) {
+				Collection<Network<?>> defNetworks = new ArrayList<>();
+				
+				for (Network<?> n : networks) {
+					if (n.isDefaultSelected())
+						defNetworks.add(n);
+				}
+				
+				Group<InteractionNetworkGroup, InteractionNetwork> filter = gr.filter(defNetworks);
+				
+				if (filter != null && filter.getNetworks() != null && !filter.getNetworks().isEmpty())
+					groups.add(filter);
+			}
+		}
 		
 		return groups;
 	}
@@ -297,6 +314,9 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		query.setCombiningMethod(getWeighting().getSelectedValue() != null ?
 				getWeighting().getSelectedValue().getMethod() : CombiningMethod.AUTOMATIC_SELECT);
 		query.setScoringMethod(ScoringMethod.DISCRIMINANT);
+		
+		if (query.getOrganism() != null)
+			query.setGroups(getDefaultGroups(query.getOrganism()));
 		
 		return query;
 	}

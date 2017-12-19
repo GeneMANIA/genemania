@@ -91,6 +91,9 @@ import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
 import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
+import org.genemania.plugin.model.impl.InteractionNetworkImpl;
+import org.genemania.plugin.model.impl.QueryAttributeGroupImpl;
+import org.genemania.plugin.model.impl.QueryAttributeNetworkImpl;
 import org.genemania.plugin.model.impl.ViewStateImpl;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.NetworkSelectionManager;
@@ -146,8 +149,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 		return organismChoices;
     }
 
-	private RelatedGenesEngineRequestDto createRequest(DataSet data, Query query, Collection<Group<?, ?>> groups,
-			ProgressReporter progress) {
+	private RelatedGenesEngineRequestDto createRequest(DataSet data, Query query, ProgressReporter progress) {
 		int stage = 0;
 		progress.setMaximumProgress(2);
 		
@@ -160,7 +162,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 		// Collect the selected networks
 		ChildProgressReporter childProgress = new ChildProgressReporter(progress);
 		childProgress.setStatus(Strings.retrieveRelatedGenes_status2);
-		request.setInteractionNetworks(getInteractionNetworks(groups, childProgress));
+		request.setInteractionNetworks(getInteractionNetworks(query.getGroups(), childProgress));
 		childProgress.close();
 		stage++;
 		
@@ -168,7 +170,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 			return null;
 		
 		// Collect attributes
-		request.setAttributeGroups(getAttributeGroups(groups));
+		request.setAttributeGroups(getAttributeGroups(query.getGroups()));
 		
 		// Parse out all the gene names
 		childProgress = new ChildProgressReporter(progress);
@@ -285,11 +287,11 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 	}
 	
 	@Override
-	public ObservableTask runMania(Query query, Collection<Group<?, ?>> groups, boolean offline) {
+	public ObservableTask runMania(Query query, boolean offline) {
 		// Create the WS client here, to avoid a thread/OSGI related issues;
 		Client client = offline ? null : ClientBuilder.newClient();
 		
-		return new RunGeneManiaTask(query, groups, client, offline);
+		return new RunGeneManiaTask(query, client, offline);
 	}
 	
 	private EnrichmentEngineResponseDto computeEnrichment(EnrichmentEngineRequestDto request, DataSet data)
@@ -536,7 +538,6 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 	private class RunGeneManiaTask extends AbstractTask implements ObservableTask {
 
 		private final Query query;
-		private Collection<Group<?, ?>> groups;
 		private final Client client;
 		private final boolean offline;
 		
@@ -544,9 +545,8 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 		private CyNetwork network;
 		private SearchResult searchResult;
 
-		public RunGeneManiaTask(Query query, Collection<Group<?, ?>> groups, Client client, boolean offline) {
+		RunGeneManiaTask(Query query, Client client, boolean offline) {
 			this.query = query;
-			this.groups = groups;
 			this.client = client;
 			this.offline = offline;
 		}
@@ -565,6 +565,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 
 			Organism organism = query.getOrganism();
 			List<String> queryGenes = query.getGenes();
+			Collection<Group<?, ?>> groups = query.getGroups();
 			
 			String dataVersion = null; // TODO server should also return this when searching online
 			double[] extrema =  null;
@@ -578,7 +579,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				
 				progress.setProgress(++stage);
 				childProgress = new ChildProgressReporter(progress);
-				RelatedGenesEngineRequestDto request = createRequest(data, query, groups, childProgress);
+				RelatedGenesEngineRequestDto request = createRequest(data, query, childProgress);
 				request.setProgressReporter(childProgress);
 				RelatedGenesEngineResponseDto response = runQuery(request, data);
 				request.setCombiningMethod(response.getCombiningMethodApplied());
@@ -624,9 +625,31 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				req.setWeightingFromEnum(query.getCombiningMethod());
 				req.setGeneThreshold(query.getGeneLimit());
 				req.setAttrThreshold(query.getAttributeLimit());
-				// TODO
-//				req.setAttrGroups(new Long[] {});
-//				req.setNetworks(new Long[] {});
+				
+				if (groups != null) {
+					List<Long> netIds = new ArrayList<>();
+					List<Long> attIds = new ArrayList<>();
+					
+					groups.forEach(gr -> {
+						Collection<?> networks = gr.getNetworks();
+						
+						if (networks != null) {
+							networks.forEach(n -> {
+								if (n instanceof InteractionNetworkImpl)
+									netIds.add(((InteractionNetworkImpl) n).getModel().getId());
+								else if (n instanceof QueryAttributeGroupImpl)
+									attIds.add(((QueryAttributeNetworkImpl) n).getModel().getId());
+							});
+						}
+							
+					});
+					
+					if (!netIds.isEmpty())
+						req.setNetworks(netIds.toArray(new Long[netIds.size()]));
+					
+					if (!attIds.isEmpty())
+						req.setAttrGroups(attIds.toArray(new Long[attIds.size()]));
+				}
 				
 				Gson gson = new Gson();
 				String jsonReq = gson.toJson(req);
