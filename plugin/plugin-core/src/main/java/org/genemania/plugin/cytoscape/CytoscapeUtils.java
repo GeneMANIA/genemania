@@ -94,8 +94,10 @@ public interface CytoscapeUtils {
 		put("Predicted", new Color(246, 195, 132));
 		put("Genetic Interactions", new Color(144, 225, 144));
 		put("Co-localization", new Color(160, 179, 220));
+		put("Pathway", new Color(155, 216, 222));
 		put("Co-expression", new Color(208, 183, 213));
 		put("Physical Interactions", new Color(234, 162, 162));
+		put("Other", new Color(187, 187, 187));
 	}};
 
 	void expandAttributes(CyNetwork cyNetwork, ViewState options, List<String> attributes);
