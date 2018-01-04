@@ -31,6 +31,8 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URL;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -57,6 +59,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JRootPane;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
@@ -607,9 +611,24 @@ public class UiUtils {
 						return this;
 					}
 				});
-			} else if (c instanceof JMenuItem) {
+			} else if (c instanceof JMenuItem || c instanceof JSpinner) {
 				c.setFont(c.getFont().deriveFont(getSmallFontSize()));
 			}
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void makeLabelsSmall(JSlider slider) {
+		// Change the slider's label sizes -- only works if it's done after the slider has been added to
+		// its parent container and had its UI assigned
+		final Font tickFont = slider.getFont().deriveFont(getSmallFontSize());
+		final Dictionary<Integer, JLabel> labelTable = slider.getLabelTable();
+		
+		for (Enumeration<Integer> enumeration = labelTable.keys(); enumeration.hasMoreElements();) {
+			int k = enumeration.nextElement();
+			final JLabel label = labelTable.get(k);
+			label.setFont(tickFont); // Updates the font size
+			label.setSize(label.getPreferredSize()); // Updates the label size and slider layout
 		}
 	}
 	

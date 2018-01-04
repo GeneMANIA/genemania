@@ -41,14 +41,12 @@ import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
-import org.cytoscape.work.Tunable;
-import org.cytoscape.work.swing.util.UserAction;
-import org.cytoscape.work.util.ListSingleSelection;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.InteractionNetwork;
 import org.genemania.domain.InteractionNetworkGroup;
 import org.genemania.domain.Organism;
 import org.genemania.plugin.GeneMania;
+import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
@@ -60,46 +58,14 @@ import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
-import org.genemania.plugin.model.impl.WeightingMethod;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.plugin.view.components.WrappedOptionPane;
-import org.genemania.type.CombiningMethod;
+import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.type.ScoringMethod;
 
 public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, ActionListener {
 
-	@Tunable(description = "Max Resultant Genes:", groups = { "_Default" }, gravity = 1.0)
-	public int geneLimit = 20;
-	
-	@Tunable(description = "Max Resultant Attributes:", groups = { "_Default" }, gravity = 1.1)
-	public int attributeLimit = 10;
-	
-	public ListSingleSelection<WeightingMethod> weighting;
-	@Tunable(description = "Weighting:", groups = { "_Default" }, gravity = 1.2)
-	public ListSingleSelection<WeightingMethod> getWeighting() {
-		return weighting;
-	}
-	public void setWeighting(ListSingleSelection<WeightingMethod> weighting) {
-		this.weighting = weighting;
-	}
-	
-	/** The simple search must be online only for now! */
-	private boolean offline;
-//	@Tunable(description = "Offline Search:", groups = { "_Default" }, gravity = 1.3)
-	public boolean getOffline() {
-		return offline;
-	}
-	public void setOffline(boolean offline) {
-		if (this.offline != offline) {
-			this.offline = offline;
-			organismManager.setOffline(offline);
-		}
-	}
-	
-	@Tunable(description="Advanced Search...", gravity = 2.0)
-	public UserAction advancedSearchAction = new UserAction(this);
-	
 	private static final String ID = "ca.utoronto.GeneMANIA";
 	private static final String NAME = "GeneMANIA";
 	private static final String DESCRIPTION = "Search related genes on GeneMANIA";
@@ -114,6 +80,8 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 	private final RetrieveRelatedGenesController controller;
 	private final RetrieveRelatedGenesAction retrieveRelatedGenesAction;
 	private final OrganismManager organismManager;
+	private final NetworkUtils networkUtils;
+	private final UiUtils uiUtils;
 	private final CytoscapeUtils cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
 
@@ -122,12 +90,16 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 			RetrieveRelatedGenesController controller,
 			RetrieveRelatedGenesAction retrieveRelatedGenesAction, 
 			OrganismManager organismManager, 
+			NetworkUtils networkUtils, 
+			UiUtils uiUtils, 
 			CytoscapeUtils cytoscapeUtils, 
 			CyServiceRegistrar serviceRegistrar
 	) {
 		this.plugin = plugin;
 		this.controller = controller;
 		this.retrieveRelatedGenesAction = retrieveRelatedGenesAction;
+		this.networkUtils = networkUtils;
+		this.uiUtils = uiUtils;
 		this.organismManager = organismManager;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.serviceRegistrar = serviceRegistrar;
@@ -138,26 +110,12 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
-		
-		List<WeightingMethod> weightingValues = new ArrayList<>();
-		weightingValues.add(new WeightingMethod(CombiningMethod.AUTOMATIC_SELECT, Strings.default_combining_method));
-		weightingValues.add(new WeightingMethod(CombiningMethod.AUTOMATIC, Strings.automatic));
-		weightingValues.add(new WeightingMethod(CombiningMethod.BP, Strings.bp));
-		weightingValues.add(new WeightingMethod(CombiningMethod.MF, Strings.mf));
-		weightingValues.add(new WeightingMethod(CombiningMethod.CC, Strings.cc));
-		weightingValues.add(new WeightingMethod(CombiningMethod.AVERAGE, Strings.average));
-		weightingValues.add(new WeightingMethod(CombiningMethod.AVERAGE_CATEGORY, Strings.average_category));
-		weighting = new ListSingleSelection<>(weightingValues);
-		weighting.setSelectedValue(weightingValues.get(0));
-		
-		setOffline(organismManager.isOffline());
-		organismManager.addPropertyChangeListener("offline", evt -> setOffline(organismManager.isOffline()));
 	}
 	
 	@Override
 	public JComponent getQueryComponent() {
 		if (queryBar == null) {
-			queryBar = new QueryBar(organismManager, serviceRegistrar);
+			queryBar = new QueryBar(organismManager, networkUtils, uiUtils, serviceRegistrar);
 		}
 		
 		return queryBar;
@@ -165,7 +123,7 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 	
 	@Override
 	public JComponent getOptionsComponent() {
-		return null;
+		return ((QueryBar) getQueryComponent()).getOptionsPanel();
 	}
 	
 	@Override
@@ -183,12 +141,10 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 					throw new RuntimeException("Please select an organism.");
 				if (query.getGenes().isEmpty())
 					throw new RuntimeException("Please enter one or more genes.");
-				if (offline && !hasValidGenes(query.getOrganism(), query.getGenes(), plugin))
-					throw new RuntimeException("Please specify a set of valid gene names and try again.");
 					
 				tm.setStatusMessage("Searching...");
 
-				ObservableTask nextTask = controller.runMania(query, offline);
+				ObservableTask nextTask = controller.runMania(query, false);
 				insertTasksAfterCurrentTask(nextTask);
 			}
 		});
@@ -309,14 +265,11 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		final Query query = new Query();
 		query.setOrganism(queryBar.getSelectedOrganism());
 		query.setGenes(new ArrayList<>(queryBar.getQueryGenes()));
-		query.setGeneLimit(geneLimit);
-		query.setAttributeLimit(attributeLimit);
-		query.setCombiningMethod(getWeighting().getSelectedValue() != null ?
-				getWeighting().getSelectedValue().getMethod() : CombiningMethod.AUTOMATIC_SELECT);
+		query.setGeneLimit(queryBar.getGeneLimit());
+		query.setAttributeLimit(queryBar.getAttributeLimit());
+		query.setCombiningMethod(queryBar.getCombiningMethod());
 		query.setScoringMethod(ScoringMethod.DISCRIMINANT);
-		
-		if (query.getOrganism() != null)
-			query.setGroups(getDefaultGroups(query.getOrganism()));
+		query.setGroups(queryBar.getSelectedGroups());
 		
 		return query;
 	}

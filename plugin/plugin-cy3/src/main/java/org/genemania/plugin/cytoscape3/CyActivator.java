@@ -206,7 +206,8 @@ public class CyActivator extends AbstractCyActivator {
 		
 		{
 			SimpleSearchTaskFactory factory = new SimpleSearchTaskFactory(geneMania, controller,
-					retrieveRelatedGenesAction, organismManager, cytoscapeUtils, serviceRegistrar);
+					retrieveRelatedGenesAction, organismManager, networkUtils, uiUtils, cytoscapeUtils,
+					serviceRegistrar);
 			registerService(bc, factory, NetworkSearchTaskFactory.class);
 		}
 		{

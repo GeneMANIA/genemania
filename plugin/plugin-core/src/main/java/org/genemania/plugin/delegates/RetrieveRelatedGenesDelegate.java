@@ -36,14 +36,14 @@ import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.data.IConfiguration;
 import org.genemania.plugin.task.TaskDispatcher;
-import org.genemania.plugin.view.RetrieveRelatedGenesDialog;
+import org.genemania.plugin.view.LocalSearchDialog;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class RetrieveRelatedGenesDelegate implements Delegate {
 	
 	private static final long MIN_HEAP_SIZE = 900 * 1000000;
 
-	private RetrieveRelatedGenesDialog dialog;
+	private LocalSearchDialog dialog;
 
 	private final GeneMania plugin;
 	private RetrieveRelatedGenesController retrieveRelatedGenesController;
@@ -76,10 +76,10 @@ public class RetrieveRelatedGenesDelegate implements Delegate {
 		dataSetManager = plugin.getDataSetManager();
     }
 	
-	public RetrieveRelatedGenesDialog getDialog() {
+	public LocalSearchDialog getDialog() {
 		synchronized(lock) {
 			if (dialog == null) {
-				dialog = new RetrieveRelatedGenesDialog(
+				dialog = new LocalSearchDialog(
 						null,
 						false,
 						retrieveRelatedGenesController,

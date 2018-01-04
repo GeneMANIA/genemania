@@ -21,6 +21,7 @@ package org.genemania.plugin.completion;
 
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
+import static org.cytoscape.util.swing.LookAndFeelUtil.makeSmall;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -28,8 +29,6 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.SystemColor;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
@@ -275,6 +274,7 @@ public class CompletionPanel extends JPanel {
 	private JLabel getStatusLabel() {
 		if (statusLabel == null) {
 			statusLabel = new JLabel();
+			makeSmall(statusLabel);
 		}
 		
 		return statusLabel;
@@ -350,6 +350,8 @@ public class CompletionPanel extends JPanel {
 					restoreCaret();
 				}
 			});
+			
+			makeSmall(textField);
 		}
 		
 		return textField;
@@ -384,6 +386,8 @@ public class CompletionPanel extends JPanel {
 				public void focusLost(FocusEvent e) {
 				}
 			});
+			
+			makeSmall(resultTable);
 		}
 		
 		return resultTable;
@@ -437,6 +441,8 @@ public class CompletionPanel extends JPanel {
 					handleFocusLost(event);
 				}
 			});
+			
+			makeSmall(proposalTable);
 		}
 		
 		return proposalTable;
@@ -445,21 +451,17 @@ public class CompletionPanel extends JPanel {
 	private void createMenu() {
 		JPopupMenu contextMenu = new JPopupMenu();
 		JMenuItem pasteMenu = new JMenuItem(Strings.paste_menuLabel);
-		pasteMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				getTextField().requestFocus();
-				new DefaultEditorKit.PasteAction().actionPerformed(event);
-			}
+		pasteMenu.addActionListener(evt -> {
+			getTextField().requestFocus();
+			new DefaultEditorKit.PasteAction().actionPerformed(evt);
 		});
 		contextMenu.add(pasteMenu);
 		getTextField().setComponentPopupMenu(contextMenu);
 	}
 
 	public void handleParentMoved() {
-		if (getProposalDialog().isVisible()) {
+		if (getProposalDialog().isVisible())
 			popUpBelow(getTextField());
-		}
 	}
 
 	void restoreCaret() {
@@ -537,7 +539,6 @@ public class CompletionPanel extends JPanel {
 		}
 	}
 	
-	@SuppressWarnings("serial")
 	private JTable createTable(TableModel model) {
 		JTable table = new JTable(model) {
 			@Override
@@ -622,15 +623,16 @@ public class CompletionPanel extends JPanel {
 		getTextField().setTransferHandler(new CompletionTransferHandler(provider, new CompletionConsumer() {
 			List<String> completions = new ArrayList<String>();
 			
+			@Override
 			public void consume(String completion) {
 				completions.add(completion);
 			}
-
+			@Override
 			public void finish() {
 				validateGene(completions);
 				completions.clear();
 			}
-
+			@Override
 			public void tooManyCompletions() {
 			}
 		}, networkUtils, uiUtils, taskDispatcher));

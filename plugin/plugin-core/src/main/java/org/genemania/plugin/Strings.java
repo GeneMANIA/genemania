@@ -31,6 +31,8 @@ public class Strings extends AbstractStrings {
 	}
 	
 	public static String retrieveRelatedGenes_menuLabel;
+	public static String retrieveRelatedGenesDialog_title;
+	
 	public static String maniaResults_menuLabel;
 	public static String maniaResults_menuLabel2;
 	public static String maniaResults_title;
