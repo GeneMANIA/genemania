@@ -733,12 +733,12 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				// Params
 //				jsonObject.addProperty("organism", gson.toJson(searchResult.getOrganism()));
 				
-				if (searchResult.getCombiningMethod() != null)
+				if (searchResult != null && searchResult.getCombiningMethod() != null)
 					jsonObject.addProperty("combiningMethod", searchResult.getCombiningMethod().toString());
 				
 				// Gene scores
 				JsonArray jsonGenesArr = new JsonArray();
-				Map<Gene, Double> scores = searchResult.getScores();
+				Map<Gene, Double> scores = searchResult != null ? searchResult.getScores() : null;
 				
 				if (scores != null) {
 					scores.forEach((gene, score) -> {
