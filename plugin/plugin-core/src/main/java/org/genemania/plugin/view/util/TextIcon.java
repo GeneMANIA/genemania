@@ -63,10 +63,10 @@ public class TextIcon implements Icon {
         Color fg = color;
         
         if (c instanceof AbstractButton) {
-        	if (!c.isEnabled())
-        		fg = UIManager.getColor("Label.disabledForeground");
-        	else if (((AbstractButton) c).getModel().isPressed())
-        		fg = fg.darker();
+	        	if (!c.isEnabled())
+	        		fg = UIManager.getColor("Label.disabledForeground");
+	        	else if (((AbstractButton) c).getModel().isPressed())
+	        		fg = fg.darker();
         }
         
         g2d.setPaint(fg);
