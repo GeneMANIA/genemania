@@ -1,6 +1,6 @@
 /**
  * This file is part of GeneMANIA.
- * Copyright (C) 2010 University of Toronto.
+ * Copyright (C) 2018 University of Toronto.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,11 +16,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.cytoscape3.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
+import org.genemania.domain.InteractionNetworkGroup;
 import org.genemania.domain.Organism;
 
 /**
@@ -35,6 +37,7 @@ public class OrganismDto implements Serializable {
 	private String scientificName;
 	private String abbreviatedName;
 	private String commonName;
+	private Collection<InteractionNetworkGroupDto> interactionNetworkGroups = new ArrayList<>();
 
 	public OrganismDto() {
 	}
@@ -44,6 +47,15 @@ public class OrganismDto implements Serializable {
 		scientificName = org.getAlias();
 		abbreviatedName = org.getName();
 		commonName = org.getDescription();
+		
+		if (org.getInteractionNetworkGroups() != null) {
+			Collection<InteractionNetworkGroupDto> groups = new ArrayList<>();
+			
+			for (InteractionNetworkGroup ing : org.getInteractionNetworkGroups())
+				groups.add(new InteractionNetworkGroupDto(ing));
+			
+			setInteractionNetworkGroups(groups);
+		}
 	}
 
 	public long getTaxonomyId() {
@@ -76,6 +88,17 @@ public class OrganismDto implements Serializable {
 
 	public void setCommonName(String commonName) {
 		this.commonName = commonName;
+	}
+
+	public Collection<InteractionNetworkGroupDto> getInteractionNetworkGroups() {
+		return new ArrayList<>(interactionNetworkGroups);
+	}
+
+	public void setInteractionNetworkGroups(Collection<InteractionNetworkGroupDto> interactionNetworkGroups) {
+		this.interactionNetworkGroups.clear();
+		
+		if (interactionNetworkGroups != null)
+			this.interactionNetworkGroups.addAll(interactionNetworkGroups);
 	}
 
 	@Override

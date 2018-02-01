@@ -249,8 +249,8 @@ public class CyActivator extends AbstractCyActivator {
 			Properties p = new Properties();
 			p.setProperty(COMMAND, "organisms");
 			p.setProperty(COMMAND_NAMESPACE, "genemania");
-			p.setProperty(COMMAND_DESCRIPTION, "Lists supported GeneMANIA organisms");
-			p.setProperty(COMMAND_LONG_DESCRIPTION, "Lists all available organisms that have been installed or are supported for online searches");
+			p.setProperty(COMMAND_DESCRIPTION, "Lists supported GeneMANIA organisms and interaction networks");
+			p.setProperty(COMMAND_LONG_DESCRIPTION, "Lists all available organisms--and their interaction networks--that have been installed or are supported for online searches.");
 			p.setProperty(COMMAND_SUPPORTS_JSON, "true");
 			p.setProperty(COMMAND_EXAMPLE_JSON,
 					"{\n" + 
@@ -259,19 +259,173 @@ public class CyActivator extends AbstractCyActivator {
 					"        \"taxonomyId\": 3702,\n" + 
 					"        \"scientificName\": \"Arabidopsis thaliana\",\n" + 
 					"        \"abbreviatedName\": \"A. thaliana\",\n" + 
-					"        \"commonName\": \"arabidopsis\"\n" + 
+					"        \"commonName\": \"arabidopsis\",\n" + 
+					"        \"interactionNetworkGroups\": [\n" + 
+					"          {\n" + 
+					"            \"code\": \"spd\",\n" + 
+					"            \"name\": \"Shared protein domains\",\n" + 
+					"            \"description\": \"\",\n" + 
+					"            \"interactionNetworks\": [\n" + 
+					"              {\n" + 
+					"                \"id\": 55,\n" + 
+					"                \"name\": \"Lee-Rhee-2010 Shared protein domains\",\n" + 
+					"                \"description\": \"\",\n" + 
+					"                \"metadata\": {\n" + 
+					"                  \"id\": 55,\n" + 
+					"                  \"source\": \"SUPPLEMENTARY_MATERIAL\",\n" + 
+					"                  \"reference\": \"\",\n" + 
+					"                  \"pubmedId\": \"20118918\",\n" + 
+					"                  \"authors\": \"Lee,Rhee\",\n" + 
+					"                  \"publicationName\": \"Nat Biotechnol\",\n" + 
+					"                  \"yearPublished\": \"2010.0\",\n" + 
+					"                  \"processingDescription\": \"Direct interaction\",\n" + 
+					"                  \"networkType\": \"Shared protein domains\",\n" + 
+					"                  \"alias\": \"\",\n" + 
+					"                  \"interactionCount\": 50665,\n" + 
+					"                  \"dynamicRange\": \"\",\n" + 
+					"                  \"edgeWeightDistribution\": \"\",\n" + 
+					"                  \"accessStats\": 0,\n" + 
+					"                  \"comment\": \"\",\n" + 
+					"                  \"other\": \"\",\n" + 
+					"                  \"title\": \"Rational association of genes with traits using a genome-scale gene network for Arabidopsis thaliana.\",\n" + 
+					"                  \"url\": \"http://www.ncbi.nlm.nih.gov/pubmed/20118918\",\n" + 
+					"                  \"sourceUrl\": \"\"\n" + 
+					"                },\n" + 
+					"                \"defaultSelected\": true\n" + 
+					"              },\n" + 
+					"              {\n" + 
+					"                \"id\": 74,\n" + 
+					"                \"name\": \"INTERPRO\",\n" + 
+					"                \"description\": \"\",\n" + 
+					"                \"metadata\": {\n" + 
+					"                  \"id\": 74,\n" + 
+					"                  \"source\": \"INTERPRO\",\n" + 
+					"                  \"reference\": \"\",\n" + 
+					"                  \"pubmedId\": \"0\",\n" + 
+					"                  \"authors\": \"\",\n" + 
+					"                  \"publicationName\": \"\",\n" + 
+					"                  \"yearPublished\": \"\",\n" + 
+					"                  \"processingDescription\": \"sharedneighbour\",\n" + 
+					"                  \"networkType\": \"Shared protein domains\",\n" + 
+					"                  \"alias\": \"\",\n" + 
+					"                  \"interactionCount\": 743516,\n" + 
+					"                  \"dynamicRange\": \"\",\n" + 
+					"                  \"edgeWeightDistribution\": \"\",\n" + 
+					"                  \"accessStats\": 0,\n" + 
+					"                  \"comment\": \"\",\n" + 
+					"                  \"other\": \"\",\n" + 
+					"                  \"title\": \"\",\n" + 
+					"                  \"url\": \"\",\n" + 
+					"                  \"sourceUrl\": \"http://www.ebi.ac.uk/interpro/\"\n" + 
+					"                },\n" + 
+					"                \"defaultSelected\": true\n" + 
+					"              }\n" + 
+					"            ]\n" + 
+					"          },\n" + 
+					"          {\n" + 
+					"            \"code\": \"coexp\",\n" + 
+					"            \"name\": \"Co-expression\",\n" + 
+					"            \"description\": \"\",\n" + 
+					"            \"interactionNetworks\": [\n" + 
+					"              {\n" + 
+					"                \"id\": 164,\n" + 
+					"                \"name\": \"Adrian-Bergmann-2015\",\n" + 
+					"                \"description\": \"\",\n" + 
+					"                \"metadata\": {\n" + 
+					"                  \"id\": 164,\n" + 
+					"                  \"source\": \"GEO\",\n" + 
+					"                  \"reference\": \"GSE58855\",\n" + 
+					"                  \"pubmedId\": \"25850675\",\n" + 
+					"                  \"authors\": \"Adrian,Bergmann\",\n" + 
+					"                  \"publicationName\": \"Dev Cell\",\n" + 
+					"                  \"yearPublished\": \"2015.0\",\n" + 
+					"                  \"processingDescription\": \"Pearson correlation\",\n" + 
+					"                  \"networkType\": \"Co-expression\",\n" + 
+					"                  \"alias\": \"\",\n" + 
+					"                  \"interactionCount\": 486602,\n" + 
+					"                  \"dynamicRange\": \"\",\n" + 
+					"                  \"edgeWeightDistribution\": \"\",\n" + 
+					"                  \"accessStats\": 0,\n" + 
+					"                  \"comment\": \"\",\n" + 
+					"                  \"other\": \"\",\n" + 
+					"                  \"title\": \"Transcriptome dynamics of the stomatal lineage: birth, amplification, and termination of a self-renewing population.\",\n" + 
+					"                  \"url\": \"http://www.ncbi.nlm.nih.gov/pubmed/25850675\",\n" + 
+					"                  \"sourceUrl\": \"http://www.ncbi.nlm.nih.gov/projects/geo/query/acc.cgi?acc=GSE58855\"\n" + 
+					"                },\n" + 
+					"                \"defaultSelected\": false\n" + 
+					"              }\n" + 
+					"            ]\n" + 
+					"          }\n" + 
+					"        ]\n" + 
 					"      },\n" + 
 					"      {\n" + 
-					"        \"taxonomyId\": 83333,\n" + 
-					"        \"scientificName\": \"Escherichia coli\",\n" + 
-					"        \"abbreviatedName\": \"E. coli\",\n" + 
-					"        \"commonName\": \"escherichia coli\"\n" + 
-					"      },\n" + 
-					"      {\n" + 
-					"        \"taxonomyId\": 9606,\n" + 
-					"        \"scientificName\": \"Homo sapiens\",\n" + 
-					"        \"abbreviatedName\": \"H. sapiens\",\n" + 
-					"        \"commonName\": \"human\"\n" + 
+					"        \"taxonomyId\": 6239,\n" + 
+					"        \"scientificName\": \"Caenorhabditis elegans\",\n" + 
+					"        \"abbreviatedName\": \"C. elegans\",\n" + 
+					"        \"commonName\": \"worm\",\n" + 
+					"        \"interactionNetworkGroups\": [\n" + 
+					"          {\n" + 
+					"            \"code\": \"predict\",\n" + 
+					"            \"name\": \"Predicted\",\n" + 
+					"            \"description\": \"\",\n" + 
+					"            \"interactionNetworks\": [\n" + 
+					"              {\n" + 
+					"                \"id\": 429,\n" + 
+					"                \"name\": \"I2D-BIND-Fly2Worm\",\n" + 
+					"                \"description\": \"\",\n" + 
+					"                \"metadata\": {\n" + 
+					"                  \"id\": 429,\n" + 
+					"                  \"source\": \"I2D\",\n" + 
+					"                  \"reference\": \"\",\n" + 
+					"                  \"pubmedId\": \"10871269\",\n" + 
+					"                  \"authors\": \"Bader,Hogue\",\n" + 
+					"                  \"publicationName\": \"Bioinformatics\",\n" + 
+					"                  \"yearPublished\": \"2000.0\",\n" + 
+					"                  \"processingDescription\": \"Direct interaction\",\n" + 
+					"                  \"networkType\": \"Predicted\",\n" + 
+					"                  \"alias\": \"\",\n" + 
+					"                  \"interactionCount\": 380,\n" + 
+					"                  \"dynamicRange\": \"\",\n" + 
+					"                  \"edgeWeightDistribution\": \"\",\n" + 
+					"                  \"accessStats\": 0,\n" + 
+					"                  \"comment\": \"\",\n" + 
+					"                  \"other\": \"\",\n" + 
+					"                  \"title\": \"BIND--a data specification for storing and describing biomolecular interactions, molecular complexes and pathways.\",\n" + 
+					"                  \"url\": \"http://www.ncbi.nlm.nih.gov/pubmed/10871269\",\n" + 
+					"                  \"sourceUrl\": \"http://ophid.utoronto.ca/\"\n" + 
+					"                },\n" + 
+					"                \"defaultSelected\": true\n" + 
+					"              },\n" + 
+					"              {\n" + 
+					"                \"id\": 408,\n" + 
+					"                \"name\": \"I2D-BIND-Human2Worm\",\n" + 
+					"                \"description\": \"\",\n" + 
+					"                \"metadata\": {\n" + 
+					"                  \"id\": 408,\n" + 
+					"                  \"source\": \"I2D\",\n" + 
+					"                  \"reference\": \"\",\n" + 
+					"                  \"pubmedId\": \"10871269\",\n" + 
+					"                  \"authors\": \"Bader,Hogue\",\n" + 
+					"                  \"publicationName\": \"Bioinformatics\",\n" + 
+					"                  \"yearPublished\": \"2000.0\",\n" + 
+					"                  \"processingDescription\": \"Direct interaction\",\n" + 
+					"                  \"networkType\": \"Predicted\",\n" + 
+					"                  \"alias\": \"\",\n" + 
+					"                  \"interactionCount\": 257,\n" + 
+					"                  \"dynamicRange\": \"\",\n" + 
+					"                  \"edgeWeightDistribution\": \"\",\n" + 
+					"                  \"accessStats\": 0,\n" + 
+					"                  \"comment\": \"\",\n" + 
+					"                  \"other\": \"\",\n" + 
+					"                  \"title\": \"BIND--a data specification for storing and describing biomolecular interactions, molecular complexes and pathways.\",\n" + 
+					"                  \"url\": \"http://www.ncbi.nlm.nih.gov/pubmed/10871269\",\n" + 
+					"                  \"sourceUrl\": \"http://ophid.utoronto.ca/\"\n" + 
+					"                },\n" + 
+					"                \"defaultSelected\": true\n" + 
+					"              }\n" + 
+					"            ]\n" + 
+					"          }\n" + 
+					"        ]\n" + 
 					"      }\n" + 
 					"    ]\n" + 
 					"}"
