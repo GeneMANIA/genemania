@@ -221,25 +221,35 @@ public class CyActivator extends AbstractCyActivator {
 			p.setProperty(COMMAND_SUPPORTS_JSON, "true");
 			p.setProperty(COMMAND_EXAMPLE_JSON,
 					"{\n" + 
+					"    \"organism\": {\n" + 
+					"      \"taxonomyId\": 83333,\n" + 
+					"      \"scientificName\": \"Escherichia coli\",\n" + 
+					"      \"abbreviatedName\": \"E. coli\",\n" + 
+					"      \"commonName\": \"escherichia coli\"\n" + 
+					"    },\n" + 
 					"    \"combiningMethod\": \"AUTOMATIC_SELECT\",\n" + 
 					"    \"genes\": [\n" + 
 					"      {\n" + 
 					"        \"symbol\": \"ybcN\",\n" + 
+					"        \"queryGene\": true,\n" + 
+					"        \"querySymbol\": \"ybcN\",\n" + 
 					"        \"description\": \"DLP12 prophage; putative protein\",\n" + 
-					"        \"score\": 0.7550105796324988\n" + 
-					"      },\n" + 
-					"      {\n" + 
-					"        \"symbol\": \"ybcO\",\n" + 
-					"        \"description\": \"DLP12 prophage; putative protein\",\n" + 
-					"        \"score\": 0.007381754018362385\n" + 
+					"        \"score\": 0.6959143703846894\n" + 
 					"      },\n" + 
 					"      {\n" + 
 					"        \"symbol\": \"ninE\",\n" + 
+					"        \"queryGene\": false,\n" + 
 					"        \"description\": \"DLP12 prophage; conserved protein\",\n" + 
-					"        \"score\": 0.009564379669797896\n" + 
+					"        \"score\": 0.009407267625495375\n" + 
+					"      },\n" + 
+					"      {\n" + 
+					"        \"symbol\": \"ylcG\",\n" + 
+					"        \"queryGene\": false,\n" + 
+					"        \"description\": \"expressed protein, DLP12 prophage\",\n" + 
+					"        \"score\": 0.009310159553433284\n" + 
 					"      }\n" + 
 					"    ],\n" + 
-					"    \"network\": 2526\n" + 
+					"    \"network\": 5908\n" + 
 					"}"
 			);
 			registerService(bc, factory, TaskFactory.class, p);

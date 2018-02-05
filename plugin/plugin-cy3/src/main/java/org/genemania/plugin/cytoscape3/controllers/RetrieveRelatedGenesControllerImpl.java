@@ -727,11 +727,18 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 								network.getRow(network).get(CyNetwork.NAME, String.class), network.getSUID());
 			
 			if (type == JSONResult.class) {
-				Gson gson = new Gson();
 				JsonObject jsonObject = new JsonObject();
 				
 				// Params
-//				jsonObject.addProperty("organism", gson.toJson(searchResult.getOrganism()));
+				Organism org = searchResult.getOrganism();
+				
+				JsonObject jsonOrg = new JsonObject();
+				jsonOrg.addProperty("taxonomyId", org.getTaxonomyId());
+				jsonOrg.addProperty("scientificName", org.getAlias());
+				jsonOrg.addProperty("abbreviatedName", org.getName());
+				jsonOrg.addProperty("commonName", org.getDescription());
+				
+				jsonObject.add("organism", jsonOrg);
 				
 				if (searchResult != null && searchResult.getCombiningMethod() != null)
 					jsonObject.addProperty("combiningMethod", searchResult.getCombiningMethod().toString());
@@ -741,14 +748,30 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				Map<Gene, Double> scores = searchResult != null ? searchResult.getScores() : null;
 				
 				if (scores != null) {
-					scores.forEach((gene, score) -> {
+					List<Gene> allGenes = new ArrayList<>(scores.keySet());
+					
+					// Sort it by score
+					Collections.sort(allGenes, (g1, g2) -> {
+						return scores.get(g2).compareTo(scores.get(g1));
+					});
+					
+					Map<Long, Gene> queryGenesByNode = searchResult.getQueryGenes();
+					
+					allGenes.forEach(gene -> {
+						Gene preferredGene = networkUtils.getPreferredGene(gene.getNode());
+						Gene queryGene = queryGenesByNode.get(gene.getNode().getId());
+						
 						JsonObject jsonGene = new JsonObject();
-						jsonGene.addProperty("symbol", gene.getSymbol());
+						jsonGene.addProperty("symbol", preferredGene != null ? preferredGene.getSymbol() : gene.getSymbol());
+						jsonGene.addProperty("queryGene", queryGene != null);
+						
+						if (queryGene != null)
+							jsonGene.addProperty("querySymbol", queryGene.getSymbol());
 						
 						if (gene.getNode() != null && gene.getNode().getGeneData() != null)
 							jsonGene.addProperty("description", gene.getNode().getGeneData().getDescription());
 						
-						jsonGene.addProperty("score", score);
+						jsonGene.addProperty("score", scores.get(gene));
 						
 						jsonGenesArr.add(jsonGene);
 					});
