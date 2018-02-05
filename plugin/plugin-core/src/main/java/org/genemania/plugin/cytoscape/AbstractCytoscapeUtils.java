@@ -479,12 +479,7 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 
 	/**
 	 * Decorates the nodes in the active NETWORK with the results of
-	 * the GeneMANIA algorithm.  For example, scores are assigned to the
-	 * nodes.
-	 * @param currentNetwork 
-	 *   
-	 * @param options
-	 * @param queryGenes
+	 * the GeneMANIA algorithm.  For example, scores are assigned to the nodes.
 	 */
 	private void decorateNodes(CyNetwork currentNetwork, SearchResult options) {
 		// Assign scores.
@@ -614,14 +609,7 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 		if (column == null) {
 			if (value instanceof List<?>) {
 				List<?> list = (List<?>) value;
-				Class<?> elementType;
-				
-				if (list.size() == 0) {
-					elementType = String.class;
-				} else {
-					elementType = list.get(0).getClass();
-				}
-				
+				Class<?> elementType = list.size() == 0 ? String.class : list.get(0).getClass();
 				table.createListColumn(name, elementType, false);
 			} else {
 				table.createColumn(name, value.getClass(), false);

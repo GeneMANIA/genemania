@@ -116,10 +116,12 @@ public class NetworkUtils {
 
 	public Map<Long, Collection<Interaction>> createInteractionMap(Map<InteractionNetwork, Collection<Interaction>> sourceInteractions) {
 		Map<Long, Collection<Interaction>> networks = new HashMap<>();
+		
 		for (Entry<InteractionNetwork, Collection<Interaction>> entry : sourceInteractions.entrySet()) {
 			InteractionNetwork network = entry.getKey();
 			networks.put(network.getId(), entry.getValue());
 		}
+		
 		return networks;
 	}
 
@@ -130,24 +132,30 @@ public class NetworkUtils {
 		Gene best = null;
 		byte bestRank = Byte.MIN_VALUE;
 		Collection<Gene> genes = node.getGenes();
+		
 		for (Gene gene : genes) {
 			byte rank = gene.getNamingSource().getRank();
+			
 			if (rank > bestRank) {
 				best = gene;
 				bestRank = rank;
 			}
 		}
+		
 		return best;
 	}
 
 	public double[] sortScores(Map<?, Double> scores) {
 		double[] values = new double[scores.size()];
 		int i = 0;
+		
 		for (Entry<?, Double> entry : scores.entrySet()) {
 			values[i] = entry.getValue();
 			i++;
 		}
+		
 		Arrays.sort(values);
+		
 		return values;
 	}
 	
@@ -578,14 +586,13 @@ public class NetworkUtils {
 		
 		Collection<ResultInteractionNetworkGroup> resNetGroups = res.getResultNetworkGroups();
 		
-		// TODO TEST it!!!
 		Map<Long, InteractionNetworkGroup> groupsByNetwork = computeGroupsByNetwork(resNetGroups);
 		config.setGroups(groupsByNetwork);
 		
 		Map<Long, Node> uniqueNodes = new HashMap<>();
 		sanitize(res, uniqueNodes);
 		
-		Map<Gene, Double> geneScores = computeGeneScores(res.getResultGenes(), params.getGenes());
+		Map<Gene, Double> geneScores = computeGeneScores(res.getResultGenes());
 		config.setGeneScores(geneScores);
 		
 		Map<Long, InteractionNetwork> canonicalNetworks = computeCanonicalNetworks(groupsByNetwork);
@@ -645,6 +652,15 @@ public class NetworkUtils {
 		}
 		
 		// Fixes resultGenes and Node's genes
+		Map<Long, Gene> queryGenesByNode = new HashMap<>();
+		
+		for (Gene gene : res.getParameters().getGenes()) {
+			Node node = gene.getNode();
+			
+			if (node != null)
+				queryGenesByNode.put(node.getId(), gene);
+		}
+		
 		for (ResultGene resGene : res.getResultGenes()) {
 			Gene gene = resGene.getGene();
 			
@@ -657,7 +673,7 @@ public class NetworkUtils {
 				
 				if (node != null) {
 					gene.setNode(node);
-					// Also set genes to each Node, because this relationship is missing
+					// Set genes to each Node, because this relationship is missing
 					// when the data comes from the web service
 					Collection<Gene> geneList = node.getGenes();
 					
@@ -665,6 +681,20 @@ public class NetworkUtils {
 						node.setGenes(geneList = new ArrayList<>());
 					
 					geneList.add(gene);
+					
+					// Also add genes that were deserialized from the query parameters
+					// (they usually contain the input gene names)
+					Gene queryGene = queryGenesByNode.get(node.getId());
+					
+					if (queryGene != null && queryGene.getId() != gene.getId()) {
+						// So add it to the list, because it's a synonym, probably the input one
+						geneList.add(queryGene);
+						// Don't forget to "fix" the query gene as well
+						queryGene.setNode(node);
+						queryGene.setOrganism(res.getParameters().getOrganism());
+						// And, finally, the query gene must replace the result gene here
+						resGene.setGene(queryGene);
+					}
 				}
 			}
 		}
@@ -880,7 +910,7 @@ public class NetworkUtils {
 	/**
 	 * Online Search.
 	 */
-	private Map<Gene, Double> computeGeneScores(Collection<ResultGene> resultGenes, Collection<Gene> queryGenes) {
+	private Map<Gene, Double> computeGeneScores(Collection<ResultGene> resultGenes) {
 		double maxScore = 0;
 		Map<Gene, Double> scores = new HashMap<>();
 		
@@ -893,13 +923,6 @@ public class NetworkUtils {
 				scores.put(gene, score);
 			}
 		}
-		
-//		for (Gene gene : queryGenes) {
-//			gene = uniqueGenes.get(gene.getId());
-//			
-//			if (gene != null && !scores.containsKey(gene))
-//				scores.put(gene, maxScore);
-//		}
 		
 		return scores;
 	}
