@@ -136,9 +136,8 @@ public class UiUtils {
 	}
 	
 	public JEditorPane createLinkEnabledEditorPane(final Component parent, String text, URL baseUrl) {
-		if (baseUrl != null) {
+		if (baseUrl != null)
 			text = filter(text, baseUrl);
-		}
 		
 		JEditorPane pane = createEditorPane(text);
 		HyperlinkListener linkListener = new HyperlinkListener() {

@@ -1058,18 +1058,17 @@ public class NetworkUtils {
 
 	public void normalizeNetworkWeights(RelatedGenesEngineResponseDto result) {
 		double totalWeight = 0;
-		for (NetworkDto network : result.getNetworks()) {
-			totalWeight += network.getWeight();
-		}
 		
-		if (totalWeight == 0) {
+		for (NetworkDto network : result.getNetworks())
+			totalWeight += network.getWeight();
+		
+		if (totalWeight == 0)
 			return;
-		}
 
 		double correctionFactor = 1 / totalWeight;
-		for (NetworkDto network : result.getNetworks()) {
+		
+		for (NetworkDto network : result.getNetworks())
 			network.setWeight(network.getWeight() * correctionFactor);
-		}
 	}
 
 	public String buildGeneDescription(Gene gene) {
@@ -1079,16 +1078,18 @@ public class NetworkUtils {
 		boolean first = true;
 		StringBuilder builder = new StringBuilder();
 		Map<String, String> linkouts = GeneLinkoutGenerator.instance().getLinkouts(gene.getOrganism(), node);
+		
 		for (Entry<String, String> entry : linkouts.entrySet()) {
-			if (!first) {
+			if (!first)
 				builder.append(", "); //$NON-NLS-1$
-			}
+			
 			builder.append(String.format("<a href=\"%s\">%s</a>", htmlEscape(entry.getValue()), entry.getKey())); //$NON-NLS-1$
 			first = false;
 		}
-		if (builder.length() == 0) {
+		
+		if (builder.length() == 0)
 			return String.format(Strings.geneDetailPanelDescription_label, htmlEscape(data.getDescription()), builder.toString());
-		}
+		
 		return String.format(Strings.geneDetailPanelDescription2_label, htmlEscape(data.getDescription()), builder.toString());
 	}
 }
