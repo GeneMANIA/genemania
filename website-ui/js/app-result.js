@@ -1,10 +1,10 @@
 'use strict';
 
 app.factory('Result',
-[ '$$search', '$$user', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts', 'Result_selectedinfo', 'Result_functions', 'Result_highlight', 'Result_report', 'Result_save',
-function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save ){
+[ '$$search', '$$user', 'cy', 'cyStylesheet', 'util', 'Result_genes', 'Result_networks', 'Result_layouts', 'Result_selectedinfo', 'Result_functions', 'Result_highlight', 'Result_report', 'Result_save', 'Result_shortcuts',
+function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save, Result_shortcuts ){
 
-  var rmods = [ Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save ];
+  var rmods = [ Result_genes, Result_networks, Result_layouts, Result_selectedinfo, Result_functions, Result_highlight, Result_report, Result_save, Result_shortcuts ];
 
   var Result = window.Result = function( opts ){
     if( !(this instanceof Result) ){
@@ -33,6 +33,8 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
       store: opts.store || opts.store === undefined ? true : false,
       positions: opts.positions
     });
+
+    this.bindShortcutKeys();
   };
   var r = Result;
   var rfn = Result.prototype;

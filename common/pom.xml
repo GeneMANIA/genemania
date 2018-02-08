@@ -4,10 +4,11 @@
     <parent>
         <groupId>org.genemania</groupId>
         <artifactId>parent</artifactId>
-        <version>3.5.0</version>
+        <version>3.6.0</version>
         <relativePath>..</relativePath>
     </parent>
 
+    <groupId>org.genemania</groupId>
     <artifactId>genemania-common</artifactId>
     <packaging>jar</packaging>
     <name>GeneMANIA Common</name>

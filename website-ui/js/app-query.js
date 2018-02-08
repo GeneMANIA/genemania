@@ -272,10 +272,9 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
     var hash = decodeURIComponent( window.location.hash );
     var search = decodeURIComponent( window.location.search );
 
-
     try {
 
-      if( pathname.match(/link$/) ){
+      if( pathname.match(/link$/) || search !== "" ){
         var vars = {};
 
         search.substring(1).split('&').forEach(function( nameVal ){
@@ -286,7 +285,7 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
 
         if( vars.o ){
           var org = self.organisms.filter(function( org ){
-            return org.taxonomyId === vars.o;
+            return org.taxonomyId == vars.o;
           })[0];
 
           if( org ){
@@ -318,13 +317,19 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
 
         self.search();
       } else if( pathname.match(/\/search\//) || hash.match(/\/search\//) ){
-        var match = pathname.match(/\/search\/(.+?)\/(.+)/) || hash.match(/\/search\/(.+?)\/(.+)/);
+        var rgx = /\/search\/(.+?)\/(.+)/;
+        var match = pathname.match(rgx) || hash.match(rgx);
 
-        var sanitize = function( str ){ return ('' + str).toLowerCase().replace(/ /g, '-').replace(/\'/g, ''); };
+        var orgSpec = match[1];
+        var genesSpec = match[2];
+
+        var sanitize = function( str ){ return ('' + str).toLowerCase().replace(/\s/g, '-').replace(/\'/g, ''); };
 
         var org = self.organisms.filter(function( org ){
           var matches = function( str ){
-            return sanitize( str ) === match[1];
+            var m = sanitize( str );
+
+            return m == orgSpec;
           };
 
           return matches( org.name ) || matches( org.alias ) || matches( org.description ) || matches( org.taxonomyId );
@@ -334,7 +339,7 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
           self.setOrganism( org );
         }
 
-        var genes = match[2].replace(/\|/g, '\n').replace(/\//g, '\n');
+        var genes = genesSpec.replace(/\|/g, '\n').replace(/\//g, '\n');
 
         if( genes ){
           self.setGenes( genes );
@@ -347,6 +352,8 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
 
     } catch( err ){
       // just allow user to revise query
+      console.error('The permalink could not be parsed');
+      console.error( err );
     }
   };
 
@@ -370,6 +377,8 @@ function( $scope, updateScope, Query ){
 
     // $scope.$apply();
     updateScope();
+
+    responsive.restyle();
   }
 
   PubSub.subscribe('ready', init);

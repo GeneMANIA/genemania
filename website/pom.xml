@@ -4,10 +4,11 @@
     <parent>
         <groupId>org.genemania</groupId>
         <artifactId>parent</artifactId>
-        <version>3.5.0</version>
+        <version>3.6.0</version>
         <relativePath>..</relativePath>
     </parent>
 
+	<groupId>org.genemania</groupId>
 	<artifactId>genemania-website</artifactId>
 	<packaging>war</packaging>
 	<name>GeneMANIA Website</name>
@@ -247,6 +248,23 @@
 			<groupId>com.google.collections</groupId>
 			<artifactId>google-collections</artifactId>
 			<version>1.0</version>
+		</dependency>
+
+		<!-- these need to be manually listed as dependencies or maven doesn't bundle the war properly -->
+		<dependency>
+			<groupId>net.sourceforge.f2j</groupId>
+			<artifactId>arpack_combined_all</artifactId>
+			<version>0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.netlib-java</groupId>
+			<artifactId>netlib-java</artifactId>
+			<version>0.9.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.matrix-toolkits-java</groupId>
+			<artifactId>mtj</artifactId>
+			<version>0.9.14d</version>
 		</dependency>
 	</dependencies>
 	<build>

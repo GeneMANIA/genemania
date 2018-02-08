@@ -186,6 +186,10 @@ gulp.task( 'javac', shell.task([
   'export PRIVATE_REPO=' + path.resolve( process.cwd(), '../../genemania-private' ) + ' && mvn -Dmaven.test.skip=true clean install -e -pl website -P dev-debug'
 ], { cwd: '..' }) );
 
+gulp.task( 'javac-prod', ['website'], shell.task([
+  'export PRIVATE_REPO=' + path.resolve( process.cwd(), '../../genemania-private' ) + ' && mvn -Dmaven.test.skip=true clean package -e -pl website -am -P prod'
+], { cwd: '..' }) );
+
 // fix dir refs w/ `~` in springmvc confs
 // (can't hardcode single user's homedir in spring config)
 gulp.task('fix-spring-dir-refs', function(){

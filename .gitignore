@@ -1,6 +1,5 @@
 target
 *.class
-*.jar
 *.war
 .settings
 .classpath
@@ -10,3 +9,4 @@ build.xml
 profiles.xml
 /bin/
 .tomcatplugin
+npm-debug.log
