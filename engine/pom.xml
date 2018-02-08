@@ -100,7 +100,7 @@
               <version>2.5.2</version>
               <executions>
                   <execution>
-                      <id>install-external</id>
+                      <id>install-external-mtj</id>
                       <phase>clean</phase>
                       <configuration>
                           <file>${basedir}/lib/mtj-0.9.14d.jar</file>
@@ -108,6 +108,38 @@
                           <groupId>com.googlecode.matrix-toolkits-java</groupId>
                           <artifactId>mtj</artifactId>
                           <version>0.9.14d</version>
+                          <packaging>jar</packaging>
+                          <generatePom>true</generatePom>
+                      </configuration>
+                      <goals>
+                          <goal>install-file</goal>
+                      </goals>
+                  </execution>
+                  <execution>
+                      <id>install-external-netlib</id>
+                      <phase>clean</phase>
+                      <configuration>
+                          <file>${basedir}/lib/netlib-java-0.9.3.jar</file>
+                          <repositoryLayout>default</repositoryLayout>
+                          <groupId>com.googlecode.netlib-java</groupId>
+                          <artifactId>netlib-java</artifactId>
+                          <version>0.9.3</version>
+                          <packaging>jar</packaging>
+                          <generatePom>true</generatePom>
+                      </configuration>
+                      <goals>
+                          <goal>install-file</goal>
+                      </goals>
+                  </execution>
+                  <execution>
+                      <id>install-external-arpack</id>
+                      <phase>clean</phase>
+                      <configuration>
+                          <file>${basedir}/lib/arpack_combined_all-0.1.jar</file>
+                          <repositoryLayout>default</repositoryLayout>
+                          <groupId>net.sourceforge.f2j</groupId>
+                          <artifactId>arpack_combined_all</artifactId>
+                          <version>0.1</version>
                           <packaging>jar</packaging>
                           <generatePom>true</generatePom>
                       </configuration>
