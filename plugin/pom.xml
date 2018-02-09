@@ -183,7 +183,22 @@
             <artifactId>genemania-engine</artifactId>
             <version>3.6.0</version>
         </dependency>
-
+        	<!-- These need to be manually listed as dependencies or maven doesn't bundle the jar properly -->
+		<dependency>
+			<groupId>net.sourceforge.f2j</groupId>
+			<artifactId>arpack_combined_all</artifactId>
+			<version>0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.netlib-java</groupId>
+			<artifactId>netlib-java</artifactId>
+			<version>0.9.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.matrix-toolkits-java</groupId>
+			<artifactId>mtj</artifactId>
+			<version>0.9.14d</version>
+		</dependency>
 		<!-- Unit Tests -->
         <dependency>
             <groupId>junit</groupId>
