@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.genemania</groupId>
         <artifactId>parent</artifactId>
-        <version>3.5.0</version>
+        <version>3.6.0</version>
         <relativePath>..</relativePath>
     </parent>
 
 
     <artifactId>plugin-parent</artifactId>
-    <version>3.4.1</version>
+    <version>3.5.0</version>
     <packaging>pom</packaging>
     <name>GeneMANIA Cytoscape App Parent</name>
 
@@ -172,17 +172,19 @@
     </reporting>
 
     <dependencies>
+    		<!-- GeneMANIA -->
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>genemania-common</artifactId>
-            <version>3.4.0</version>
+            <version>3.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>genemania-engine</artifactId>
-            <version>3.4.0</version>
+            <version>3.6.0</version>
         </dependency>
 
+		<!-- Unit Tests -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
