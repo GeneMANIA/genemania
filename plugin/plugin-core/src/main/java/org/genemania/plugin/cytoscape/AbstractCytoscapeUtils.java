@@ -181,16 +181,11 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	}
 	
 	/**
-	 * Returns the <code>CyNode</code> that corresponds to the given
-	 * <code>Node</code>.  If the <code>CyNode</code> does not already
-	 * exist, a new one is created.
-	 * 
-	 * @param node
-	 * @param preferredSymbol
-	 * @return
+	 * Returns the <code>CyNode</code> that corresponds to the given <code>Node</code>.
+	 * If the <code>CyNode</code> does not already exist, a new one is created.
 	 */
 	@Override
-	public CyNode getNode(CyNetwork network, Node node, String preferredSymbol) {
+	public CyNode getNode(CyNetwork network, Node node, final String preferredSymbol) {
 		String id = getNodeId(network, node);
 		CyNode target = getNode(id, network);
 		
@@ -268,16 +263,16 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	 * @return
 	 */
 	@Override
-	public CyNetwork createNetwork(String name, String dataVersion, SearchResult options, ViewStateBuilder builder,
+	public CyNetwork createNetwork(String name, String dataVersion, SearchResult res, ViewStateBuilder builder,
 			EdgeAttributeProvider attributeProvider) {
 		CyNetwork currentNetwork = createNetwork(name);
 		setAttribute(currentNetwork, currentNetwork, TYPE_ATTRIBUTE, GENEMANIA_NETWORK_TYPE);
-		setAttribute(currentNetwork, currentNetwork, ORGANISM_NAME_ATTRIBUTE, options.getOrganism().getName());
-		setAttribute(currentNetwork, currentNetwork, NETWORKS_ATTRIBUTE, serializeNetworks(options));
-		setAttribute(currentNetwork, currentNetwork, COMBINING_METHOD_ATTRIBUTE, options.getCombiningMethod().getCode());
-		setAttribute(currentNetwork, currentNetwork, GENE_SEARCH_LIMIT_ATTRIBUTE, options.getGeneSearchLimit());
-		setAttribute(currentNetwork, currentNetwork, ATTRIBUTE_SEARCH_LIMIT_ATTRIBUTE, options.getAttributeSearchLimit());
-		setAttribute(currentNetwork, currentNetwork, ANNOTATIONS_ATTRIBUTE, serializeAnnotations(options));
+		setAttribute(currentNetwork, currentNetwork, ORGANISM_NAME_ATTRIBUTE, res.getOrganism().getName());
+		setAttribute(currentNetwork, currentNetwork, NETWORKS_ATTRIBUTE, serializeNetworks(res));
+		setAttribute(currentNetwork, currentNetwork, COMBINING_METHOD_ATTRIBUTE, res.getCombiningMethod().getCode());
+		setAttribute(currentNetwork, currentNetwork, GENE_SEARCH_LIMIT_ATTRIBUTE, res.getGeneSearchLimit());
+		setAttribute(currentNetwork, currentNetwork, ATTRIBUTE_SEARCH_LIMIT_ATTRIBUTE, res.getAttributeSearchLimit());
+		setAttribute(currentNetwork, currentNetwork, ANNOTATIONS_ATTRIBUTE, serializeAnnotations(res));
 		
 		if (dataVersion != null)
 			setAttribute(currentNetwork, currentNetwork, DATA_VERSION_ATTRIBUTE, dataVersion);
@@ -294,12 +289,12 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 				if (sourceInteractions == null || sourceInteractions.size() == 0)
 					continue;
 				
-				buildGraph(currentNetwork, sourceInteractions, network, attributeProvider, options, builder);
+				buildGraph(currentNetwork, sourceInteractions, network, attributeProvider, res, builder);
 			}
 		}
 		
 		// Add all query genes in case they don't show up in the results
-		for (Gene gene : options.getQueryGenes().values()) {
+		for (Gene gene : res.getQueryGenes().values()) {
 			Node node = gene.getNode();
 			getNode(currentNetwork, node, getSymbol(gene));
 		}
@@ -318,10 +313,10 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 			}
 		}
 		
-		Map<Attribute, Double> weights = options.getAttributeWeights();
+		Map<Attribute, Double> weights = res.getAttributeWeights();
 		
-		for (Entry<Long, Collection<Attribute>> entry : options.getAttributesByNodeId().entrySet()) {
-			Gene gene = options.getGene(entry.getKey());
+		for (Entry<Long, Collection<Attribute>> entry : res.getAttributesByNodeId().entrySet()) {
+			Gene gene = res.getGene(entry.getKey());
 			CyNode to = getNode(currentNetwork, gene.getNode(), null);
 			
 			for (Attribute attribute : entry.getValue()) {
@@ -333,6 +328,7 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 				if (from == null) {
 					from = createNode(id, currentNetwork);
 					setAttribute(currentNetwork, from, GENE_NAME_ATTRIBUTE, attribute.getName());
+					setAttribute(currentNetwork, from, QUERY_TERM_ATTRIBUTE, attribute.getName());
 					setAttribute(currentNetwork, from, NODE_TYPE_ATTRIBUTE, NODE_TYPE_ATTRIBUTE_NODE);
 					setAttribute(currentNetwork, from, SCORE_ATTRIBUTE, weights.get(attribute));
 					builder.addSourceNetworkForNode(getIdentifier(currentNetwork, from), network);
@@ -341,7 +337,7 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 				String edgeLabel = attribute.getName();
 				CyEdge edge = getEdge(from, to, EDGE_TYPE_INTERACTION, edgeLabel, currentNetwork);
 				
-				AttributeGroup group = options.getAttributeGroup(attribute.getId());
+				AttributeGroup group = res.getAttributeGroup(attribute.getId());
 				setAttribute(currentNetwork, edge, NETWORK_GROUP_NAME_ATTRIBUTE, group.getName());
 				setAttribute(currentNetwork, edge, ATTRIBUTE_NAME_ATTRIBUTE, edgeLabel);
 				setAttribute(currentNetwork, edge, HIGHLIGHT_ATTRIBUTE, 1);
@@ -352,7 +348,7 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 			}
 		}
 
-		decorateNodes(currentNetwork, options);
+		decorateNodes(currentNetwork, res);
 		
 		return currentNetwork;
 	}
@@ -418,8 +414,10 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void buildGraph(CyNetwork currentNetwork, Collection<Interaction> interactions, Network<InteractionNetwork> network, EdgeAttributeProvider attributeProvider, SearchResult options, ViewStateBuilder builder) {
-		Map<Long, Gene> queryGenes = options.getQueryGenes();
+	private void buildGraph(CyNetwork currentNetwork, Collection<Interaction> interactions,
+			Network<InteractionNetwork> network, EdgeAttributeProvider attributeProvider, SearchResult res,
+			ViewStateBuilder builder) {
+		Map<Long, Gene> queryGenes = res.getQueryGenes();
 		InteractionNetwork model = network.getModel();
 		
 		for (Interaction interaction : interactions) {
@@ -470,15 +468,9 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	/**
 	 * Returns the symbol for the given <code>Gene</code> or <code>null</code>
 	 * if the <code>Gene</code> is <code>null</code>.
-	 * 
-	 * @param gene
-	 * @return
 	 */
 	private String getSymbol(Gene gene) {
-		if (gene == null) {
-			return null;
-		}
-		return gene.getSymbol();
+		return gene == null ? null : gene.getSymbol();
 	}
 
 	/**
