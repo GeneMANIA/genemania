@@ -52,6 +52,7 @@ public interface CytoscapeUtils {
 	static final String NODE_TYPE_QUERY = "query"; //$NON-NLS-1$
 	static final String NODE_TYPE_ATTRIBUTE_NODE = "attribute"; //$NON-NLS-1$
 	static final String GENE_NAME_ATTRIBUTE = "gene name"; //$NON-NLS-1$
+	static final String QUERY_TERM_ATTRIBUTE = "query term"; //$NON-NLS-1$
 	static final String SYNONYMS_ATTRIBUTE = "synonyms"; //$NON-NLS-1$
 	static final String RANK_ATTRIBUTE = "rank"; //$NON-NLS-1$
 	static final String TYPE_ATTRIBUTE = "type"; //$NON-NLS-1$

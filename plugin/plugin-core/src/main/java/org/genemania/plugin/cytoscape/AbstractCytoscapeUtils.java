@@ -212,7 +212,11 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 
 		target = createNode(id, network);
 		
-		setAttribute(network, target, GENE_NAME_ATTRIBUTE, name);
+		if (name != null)
+			setAttribute(network, target, GENE_NAME_ATTRIBUTE, name);
+		if (preferredSymbol != null)
+			setAttribute(network, target, QUERY_TERM_ATTRIBUTE, preferredSymbol);
+		
 		exportSynonyms(network, target, node);
 		
 		return target;
