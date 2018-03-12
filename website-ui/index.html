@@ -569,7 +569,7 @@
         <a target="_blank" href="http://apps.cytoscape.org/apps/genemania">Cytoscape app</a> |
         <a target="_blank" href="http://pages.genemania.org/help/">Help</a> |
         <a target="_blank" href="http://pages.genemania.org/contact/">Contact</a> |
-        <a target="_blank" href="http://pages.genemania.org/help/faq/#How_do_I_cite_GeneMANIA?">Cite</a> |
+        <a target="_blank" href="http://pages.genemania.org/faq/#how-do-i-cite-genemania">Cite</a> |
         <a target="_blank" href="http://www.utoronto.ca/">&copy; UToronto</a>
       </div>
 
