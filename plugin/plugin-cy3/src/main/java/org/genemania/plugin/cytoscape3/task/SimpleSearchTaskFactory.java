@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -61,6 +60,8 @@ import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.NetworkSelectionManager;
 import org.genemania.plugin.view.components.WrappedOptionPane;
+import org.genemania.plugin.view.util.IconUtil;
+import org.genemania.plugin.view.util.TextIcon;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.type.ScoringMethod;
 
@@ -103,7 +104,7 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 		this.organismManager = organismManager;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.serviceRegistrar = serviceRegistrar;
-		icon = new ImageIcon(getClass().getClassLoader().getResource("/img/logo_squared.png"));
+		icon = new TextIcon(IconUtil.GENEMANIA_LOGO, IconUtil.getIconFont(32.0f), IconUtil.GENEMANIA_LOGO_COLOR, 36, 36);
 		
 		try {
 			website = new URL(WEBSITE_URL);

@@ -46,13 +46,12 @@ import ch.enterag.utils.zip.FileEntry;
 import ch.enterag.utils.zip.Zip64File;
 
 /**
- * Convenience functions for downloading and manipulating files from the
- * GeneMANIA server.
+ * Convenience functions for downloading and manipulating files from the GeneMANIA server.
  */
 public class FileUtils {
 	
-	public static final String DEFAULT_BASE_URL = "http://www.genemania.org/plugin"; //$NON-NLS-1$
-	public static final String DEFAULT_METADATA_URL = DEFAULT_BASE_URL + "/versions.txt"; //$NON-NLS-1$
+	// Old one was http://www.genemania.org/plugin
+	public static final String DEFAULT_BASE_URL = "http://plugin.genemania.org"; //$NON-NLS-1$
 	
 	public static final String DESCRIPTION_FILE = "descriptions.txt"; //$NON-NLS-1$
 	public static final String SIZE_FILE = "sizes.txt"; //$NON-NLS-1$

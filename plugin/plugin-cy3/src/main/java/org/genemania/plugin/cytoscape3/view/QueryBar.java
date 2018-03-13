@@ -42,7 +42,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,7 +58,6 @@ import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -96,6 +94,7 @@ import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.model.impl.WeightingMethod;
 import org.genemania.plugin.view.NetworkSelectionPanel;
+import org.genemania.plugin.view.util.IconUtil;
 import org.genemania.plugin.view.util.TextIcon;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.type.CombiningMethod;
@@ -435,18 +434,12 @@ public class QueryBar extends JPanel {
 	}
 	
 	private Icon getIcon(Organism org) {
-		String description = org != null ? org.getDescription() : null;
+		Long taxonId = org != null ? org.getTaxonomyId() : null;
 		
-		if (description == null)
+		if (taxonId == null)
 			return null;
 		
-		description = description.replace(" ", "_").replaceAll("'", "");
-		URL resource = getClass().getClassLoader().getResource("/img/organism/" + description + "-32.png");
-		
-		if (resource == null)
-			resource = getClass().getClassLoader().getResource("/img/organism/missing-32.png");
-		
-		return resource != null ? new ImageIcon(resource) : null;
+		return IconUtil.getOrganismIcon(taxonId);
 	}
 	
 	private void fireQueryChanged() {
