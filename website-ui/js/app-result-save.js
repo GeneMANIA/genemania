@@ -295,8 +295,8 @@ function( util ){ return function( Result ){
       }).join('\t');
     }) + '\n\n';
 
-    txt += 'Network weighting\t' + config.networks.weightings[ qu.weighting ].name + '\n';
-    txt += 'Network weighting code\t' + qu.weighting + '\n\n';
+    txt += 'Network weighting\t' + qu.weighting.name + '\n';
+    txt += 'Network weighting code\t' + qu.weighting.value + '\n\n';
 
     txt += 'Attribute groups\t' + qu.attributeGroups.map(function( aGr ){
       return aGr.name;
