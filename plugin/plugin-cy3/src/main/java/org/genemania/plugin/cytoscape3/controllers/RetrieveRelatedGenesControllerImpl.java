@@ -668,9 +668,6 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				progress.setProgress(++stage);
 				scores = computeGeneScores(searchResults.getResultGenes());
 				
-				if (scores.isEmpty())
-					return;
-				
 				progress.setProgress(++stage);
 				extrema = computeEdgeWeightExtrema(searchResults);
 				
@@ -691,7 +688,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				progress.setProgress(++stage);
 			}
 			
-			if (searchResult != null) {
+			if (searchResult != null && !scores.isEmpty()) {
 				EdgeAttributeProvider provider = createEdgeAttributeProvider(searchResult);
 				
 				tm.setStatusMessage(Strings.retrieveRelatedGenes_status5);
@@ -732,13 +729,15 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				// Params
 				Organism org = searchResult.getOrganism();
 				
-				JsonObject jsonOrg = new JsonObject();
-				jsonOrg.addProperty("taxonomyId", org.getTaxonomyId());
-				jsonOrg.addProperty("scientificName", org.getAlias());
-				jsonOrg.addProperty("abbreviatedName", org.getName());
-				jsonOrg.addProperty("commonName", org.getDescription());
-				
-				jsonObject.add("organism", jsonOrg);
+				if (org != null) {
+	 				JsonObject jsonOrg = new JsonObject();
+					jsonOrg.addProperty("taxonomyId", org.getTaxonomyId());
+					jsonOrg.addProperty("scientificName", org.getAlias());
+					jsonOrg.addProperty("abbreviatedName", org.getName());
+					jsonOrg.addProperty("commonName", org.getDescription());
+					
+					jsonObject.add("organism", jsonOrg);
+				}
 				
 				if (searchResult != null && searchResult.getCombiningMethod() != null)
 					jsonObject.addProperty("combiningMethod", searchResult.getCombiningMethod().toString());

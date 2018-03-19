@@ -576,32 +576,37 @@ public class NetworkUtils {
 		SearchResultBuilder config = new SearchResultImpl();
 		
 		SearchParameters params = res.getParameters();
-		Organism organism = params.getOrganism();
 		
-		config.setOrganism(organism);
-		config.setCombiningMethod(params.getWeighting());
-		config.setGeneSearchLimit(params.getResultsSize());
-		config.setAttributeSearchLimit(params.getAttributeResultsSize());
-		config.setSearchQuery(params.getGenes().stream().collect(Collectors.toMap(g -> g.getNode().getId(), g -> g)));
+		if (params != null) {
+			Organism organism = params.getOrganism();
+			
+			config.setOrganism(organism);
+			config.setCombiningMethod(params.getWeighting());
+			config.setGeneSearchLimit(params.getResultsSize());
+			config.setAttributeSearchLimit(params.getAttributeResultsSize());
+			config.setSearchQuery(params.getGenes().stream().collect(Collectors.toMap(g -> g.getNode().getId(), g -> g)));
+		}
 		
 		Collection<ResultInteractionNetworkGroup> resNetGroups = res.getResultNetworkGroups();
 		
-		Map<Long, InteractionNetworkGroup> groupsByNetwork = computeGroupsByNetwork(resNetGroups);
-		config.setGroups(groupsByNetwork);
+		if (resNetGroups != null) {
+			Map<Long, InteractionNetworkGroup> groupsByNetwork = computeGroupsByNetwork(resNetGroups);
+			config.setGroups(groupsByNetwork);
 		
-		Map<Long, Node> uniqueNodes = new HashMap<>();
-		sanitize(res, uniqueNodes);
-		
-		Map<Gene, Double> geneScores = computeGeneScores(res.getResultGenes());
-		config.setGeneScores(geneScores);
-		
-		Map<Long, InteractionNetwork> canonicalNetworks = computeCanonicalNetworks(groupsByNetwork);
-		computeSourceInteractions(resNetGroups, canonicalNetworks, uniqueNodes);
-		computeAttributes(config, res);
-		config.setNetworkWeights(computeNetworkWeights(resNetGroups, canonicalNetworks, config.getAttributeWeights()));
-		
-		if (res.getResultOntologyCategories() != null)
-			config.setEnrichment(processAnnotations(res));
+			Map<Long, Node> uniqueNodes = new HashMap<>();
+			sanitize(res, uniqueNodes);
+			
+			Map<Gene, Double> geneScores = computeGeneScores(res.getResultGenes());
+			config.setGeneScores(geneScores);
+			
+			Map<Long, InteractionNetwork> canonicalNetworks = computeCanonicalNetworks(groupsByNetwork);
+			computeSourceInteractions(resNetGroups, canonicalNetworks, uniqueNodes);
+			computeAttributes(config, res);
+			config.setNetworkWeights(computeNetworkWeights(resNetGroups, canonicalNetworks, config.getAttributeWeights()));
+			
+			if (res.getResultOntologyCategories() != null)
+				config.setEnrichment(processAnnotations(res));
+		}
 		
 		return config.build();
 	}
@@ -650,6 +655,9 @@ public class NetworkUtils {
 				}
 			}
 		}
+		
+		if (res.getParameters() == null)
+			return;
 		
 		// Fixes resultGenes and Node's genes
 		Map<Long, Gene> queryGenesByNode = new HashMap<>();
@@ -914,13 +922,15 @@ public class NetworkUtils {
 		double maxScore = 0;
 		Map<Gene, Double> scores = new HashMap<>();
 		
-		for (ResultGene resGene : resultGenes) {
-			Gene gene = resGene.getGene();
-			
-			if (gene != null) {
-				double score = resGene.getScore();
-				maxScore = Math.max(maxScore, score);
-				scores.put(gene, score);
+		if (resultGenes != null) {
+			for (ResultGene resGene : resultGenes) {
+				Gene gene = resGene.getGene();
+				
+				if (gene != null) {
+					double score = resGene.getScore();
+					maxScore = Math.max(maxScore, score);
+					scores.put(gene, score);
+				}
 			}
 		}
 		
@@ -1019,6 +1029,10 @@ public class NetworkUtils {
 	
 	private Map<Long, Collection<AnnotationEntry>> processAnnotations(SearchResults res) {
 		Map<Long, Collection<AnnotationEntry>> result = new HashMap<>();
+		
+		if (res.getResultGenes() == null)
+			return result;
+		
 		Map<Long, AnnotationEntry> annotationCache = new HashMap<>();
 		
 		for (ResultGene resGene : res.getResultGenes()) {
