@@ -4,7 +4,7 @@ var config = {
   debug: !!window.DEBUG || !!window.location.href.match(/\?debug/),
 
   service: {
-    baseUrl: window.DEBUG_URL || 'http://server4.baderlab.med.utoronto.ca:8080/genemania/json/',
+    baseUrl: window.DEBUG_URL || 'http://genemania.org/genemania/json/',
     baseUrlProd: tomcatContextPath() + 'json/' // assuming that the ui is deployed in tomcat
   },
 
