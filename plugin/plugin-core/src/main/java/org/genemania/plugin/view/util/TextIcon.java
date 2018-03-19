@@ -35,16 +35,28 @@ public class TextIcon implements Icon {
 	
 	private final Color TRANSPARENT_COLOR = new Color(255, 255, 255, 0);
 	
-	private final String text;
-	private final Font font;
-	private final Color color;
+	private final String[] texts;
+	private final Font[] fonts;
+	private final Color[] colors;
 	private final int width;
 	private final int height;
 	
 	public TextIcon(String text, Font font, Color color, int width, int height) {
-		this.text = text;
-		this.font = font;
-		this.color = color != null ? color : UIManager.getColor("CyColor.complement(-2)");
+		this.texts = new String[] { text };
+		this.fonts = new Font[] { font };
+		this.colors = new Color[] { color };
+		this.width = width;
+		this.height = height;
+	}
+	
+	public TextIcon(String[] texts, Font font, Color[] colors, int width, int height) {
+		this(texts, new Font[] { font }, colors, width, height);
+	}
+	
+	public TextIcon(String[] texts, Font[] fonts, Color[] colors, int width, int height) {
+		this.texts = texts;
+		this.fonts = fonts;
+		this.colors = colors;
 		this.width = width;
 		this.height = height;
 	}
@@ -60,18 +72,37 @@ public class TextIcon implements Icon {
         g2d.setPaint(TRANSPARENT_COLOR);
         g2d.fillRect(0, 0, xx, yy);
         
-        Color fg = color;
-        
-        if (c instanceof AbstractButton) {
-	        	if (!c.isEnabled())
-	        		fg = UIManager.getColor("Label.disabledForeground");
-	        	else if (((AbstractButton) c).getModel().isPressed())
-	        		fg = fg.darker();
-        }
-        
-        g2d.setPaint(fg);
-        g2d.setFont(font);
-        drawText(g2d, x, y);
+        if (texts != null && fonts != null) {
+	    		Font f = null;
+	    		Color fg = null;
+	    	
+	    		for (int i = 0; i < texts.length; i++) {
+	    			String txt = texts[i];
+	    			
+	    			if (fonts.length > i) 
+	    				f = fonts[i];
+	    			
+	    			if (txt == null || f == null)
+	    				continue;
+	    			
+	    			if (colors != null && colors.length > i)
+	    				fg =  colors[i];
+		        
+		        if (fg == null)
+	        			fg = c.getForeground();
+		        
+		        if (c instanceof AbstractButton) {
+			        	if (!c.isEnabled())
+			        		fg = UIManager.getColor("Label.disabledForeground");
+			        	else if (((AbstractButton) c).getModel().isPressed())
+			        		fg = fg.darker();
+		        }
+		        
+		        g2d.setPaint(fg);
+		        g2d.setFont(f);
+		        drawText(txt, f, g2d, c, x, y);
+	    		}
+	    }
         
         g2d.dispose();
 	}
@@ -86,7 +117,7 @@ public class TextIcon implements Icon {
 		return height;
 	}
 	
-	private void drawText(Graphics g, int x, int y) {
+	protected void drawText(String text, Font font, Graphics g, Component c, int x, int y) {
 		FontMetrics fm = g.getFontMetrics(font);
 		Rectangle2D rect = fm.getStringBounds(text, g);
 
@@ -94,8 +125,8 @@ public class TextIcon implements Icon {
 		int textWidth = (int) rect.getWidth();
 
 		// Center text horizontally and vertically
-		int xx = x + (getIconWidth() - textWidth) / 2;
-		int yy = y + (getIconHeight() - textHeight) / 2 + fm.getAscent();
+		int xx = x + Math.round((getIconWidth() - textWidth) / 2.0f);
+		int yy = y + Math.round((getIconHeight() - textHeight) / 2.0f) + fm.getAscent();
 
 		g.drawString(text, xx, yy);
 	}

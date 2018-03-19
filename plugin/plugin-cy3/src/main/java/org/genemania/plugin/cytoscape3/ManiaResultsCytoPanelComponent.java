@@ -19,6 +19,9 @@
 package org.genemania.plugin.cytoscape3;
 
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static org.genemania.plugin.view.util.IconUtil.GENEMANIA_LOGO;
+import static org.genemania.plugin.view.util.IconUtil.GENEMANIA_LOGO_COLOR;
+import static org.genemania.plugin.view.util.IconUtil.getIconFont;
 
 import java.awt.Component;
 
@@ -35,6 +38,7 @@ import org.genemania.plugin.controllers.ManiaResultsController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.view.ManiaResultsPanel;
+import org.genemania.plugin.view.util.TextIcon;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelComponent2 {
@@ -43,6 +47,8 @@ public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelC
 	
 	ManiaResultsPanel panel;
 
+	private final Icon compIcon = new TextIcon(GENEMANIA_LOGO, getIconFont(16.0f), GENEMANIA_LOGO_COLOR, 16, 16);
+	
 	public ManiaResultsCytoPanelComponent(
 			DataSetManager dataSetManager,
 			GeneMania plugin,
@@ -85,7 +91,7 @@ public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelC
 
 	@Override
 	public Icon getIcon() {
-		return null;
+		return compIcon;
 	}
 
 	@Override
