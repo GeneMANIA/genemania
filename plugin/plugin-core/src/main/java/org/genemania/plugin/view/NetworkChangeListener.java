@@ -32,12 +32,12 @@ import org.genemania.plugin.model.ViewState;
 public class NetworkChangeListener implements ActionListener {
 	
 	private final Group<?, ?> source;
-	private final Map<Object, ViewState> configurations;
+	private final Map<Long, ViewState> configurations;
 	private final CytoscapeUtils cytoscapeUtils;
 
 	public NetworkChangeListener(
 			Group<?, ?> group,
-			Map<Object, ViewState> configurations,
+			Map<Long, ViewState> configurations,
 			CytoscapeUtils cytoscapeUtils
 	) {
 		this.source = group;
@@ -54,7 +54,7 @@ public class NetworkChangeListener implements ActionListener {
 			return;
 		
 		boolean selected = checkBox.isSelected();
-		ViewState config = configurations.get(cytoscapeUtils.getIdentifier(network, network));
+		ViewState config = configurations.get(network.getSUID());
 		
 		if (config == null)
 			return;

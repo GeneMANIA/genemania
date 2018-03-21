@@ -61,24 +61,10 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 		}
 	}
 
-	void handleNetworkChanged(CyNetwork network) {
-		if (network == null)
-			return;
-		
-		String networkId = cytoscapeUtils.getIdentifier(network, network);
-		handleNetworkChanged(networkId);
-	}
-	
 	@Override
 	public void handleEvent(NetworkAboutToBeDestroyedEvent event) {
 		synchronized (this) {
-			CyNetwork network = event.getNetwork();
-			
-			if (network == null)
-				return;
-			
-			String networkId = cytoscapeUtils.getIdentifier(network, network);
-			handleNetworkDeleted(networkId);
+			handleNetworkDeleted(event.getNetwork());
 		}
 	}
 	
@@ -125,9 +111,8 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 					return;
 				
 				CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
-				ViewState options = networkOptions.get(cytoscapeUtils.getIdentifier(cyNetwork, cyNetwork));
 				
-				if (options == null)
+				if (cyNetwork == null)
 					return;
 				
 				Set<CyEdge> enabledEdges = new HashSet<>();
@@ -174,7 +159,11 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 					return;
 				
 				CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
-				ViewState options = networkOptions.get(cytoscapeUtils.getIdentifier(cyNetwork, cyNetwork));
+				
+				if (cyNetwork == null)
+					return;
+				
+				ViewState options = networkOptions.get(cyNetwork.getSUID());
 				
 				if (options == null)
 					return;

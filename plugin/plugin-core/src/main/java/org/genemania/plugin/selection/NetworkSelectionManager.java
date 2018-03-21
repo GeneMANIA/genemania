@@ -18,7 +18,7 @@ import org.genemania.plugin.view.components.BaseInfoPanel;
 
 public interface NetworkSelectionManager {
 
-	String getSelectedNetworkId();
+	Long getSelectedNetworkId();
 
 	int getTotalNetworks();
 

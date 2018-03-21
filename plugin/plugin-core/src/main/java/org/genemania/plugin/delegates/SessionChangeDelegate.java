@@ -40,7 +40,12 @@ public class SessionChangeDelegate implements Delegate {
 	private final ProgressReporter progress;
 	private final CytoscapeUtils cytoscapeUtils;
 
-	public SessionChangeDelegate(File dataSetPath, GeneMania plugin, ProgressReporter progress, CytoscapeUtils cytoscapeUtils) {
+	public SessionChangeDelegate(
+			File dataSetPath,
+			GeneMania plugin,
+			ProgressReporter progress,
+			CytoscapeUtils cytoscapeUtils
+	) {
 		this.dataSetPath = dataSetPath;
 		this.plugin = plugin;
 		this.progress = progress;
@@ -51,20 +56,25 @@ public class SessionChangeDelegate implements Delegate {
 	public void invoke() throws ApplicationException {
 		DataSetManager dataSetManager = plugin.getDataSetManager();
 		dataSetManager.setDataSourcePath(dataSetPath);
+		
 		try {
 			DataSet data = findDataSet(dataSetPath, dataSetManager);
+			
 			if (data == null) {
 				plugin.initializeData(progress, true);
 				data = dataSetManager.getDataSet();
 			}
+			
 			NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
+			ResultReconstructor reconstructor = new ResultReconstructor(data, plugin, cytoscapeUtils);
+			
 			// Reconstruct networks
 			for (CyNetwork cyNetwork : cytoscapeUtils.getNetworks()) {
-				ResultReconstructor reconstructor = new ResultReconstructor(data, plugin, cytoscapeUtils);
 				ViewState options = reconstructor.reconstructCache(cyNetwork, progress);
-				if (options == null) {
+				
+				if (options == null)
 					continue;
-				}
+				
 				manager.addNetworkConfiguration(cyNetwork, options);
 			}
 		} catch (IOException e) {
@@ -75,24 +85,28 @@ public class SessionChangeDelegate implements Delegate {
 	}
 
 	private DataSet findDataSet(File path, DataSetManager dataSetManager) throws ApplicationException {
-		if (path == null) {
+		if (path == null)
 			return null;
-		}
+		
 		if (path.exists()) {
 			plugin.loadDataSet(path, progress, false, true);
 			return dataSetManager.getDataSet();
 		}
+		
 		String rawPath = path.getPath();
+		
 		for (String delimiter : new String[] { "/", "\\\\" }) { //$NON-NLS-1$ //$NON-NLS-2$
 			String[] parts = rawPath.split(delimiter);
 			String name = parts[parts.length - 1];
 			File candidatePath = dataSetManager.getDataSetPath(name);
-			if (candidatePath == null) {
+			
+			if (candidatePath == null)
 				continue;
-			}
+			
 			plugin.loadDataSet(candidatePath, progress, false, true);
 			return dataSetManager.getDataSet();
 		}
+		
 		return null;
 	}
 }

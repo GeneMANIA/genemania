@@ -44,11 +44,11 @@ import org.genemania.plugin.view.components.BaseInfoPanel;
 
 public abstract class AbstractNetworkSelectionManager implements NetworkSelectionManager {
 	
-	protected final Map<Object, ViewState> networkOptions;
+	protected final Map<Long, ViewState> networkOptions;
 	protected final CytoscapeUtils cytoscapeUtils;
 	protected GeneMania plugin;
 
-	protected String selectedNetworkId;
+	protected Long selectedNetworkId;
 	protected boolean selectionListenerEnabled;
 
 	public AbstractNetworkSelectionManager(CytoscapeUtils cytoscapeUtils) {
@@ -64,7 +64,7 @@ public abstract class AbstractNetworkSelectionManager implements NetworkSelectio
 	}
 	
 	@Override
-	public String getSelectedNetworkId() {
+	public Long getSelectedNetworkId() {
 		return selectedNetworkId;
 	}
 	
@@ -75,17 +75,17 @@ public abstract class AbstractNetworkSelectionManager implements NetworkSelectio
 	
 	@Override
 	public void addNetworkConfiguration(CyNetwork network, ViewState config) {
-		networkOptions.put(cytoscapeUtils.getIdentifier(network, network), config);
+		networkOptions.put(network.getSUID(), config);
 	}
 
 	@Override
 	public ViewState getNetworkConfiguration(CyNetwork network) {
-		return networkOptions.get(cytoscapeUtils.getIdentifier(network, network));
+		return networkOptions.get(network.getSUID());
 	}
 	
 	@Override
 	public boolean isGeneManiaNetwork(CyNetwork network) {
-		return networkOptions.get(cytoscapeUtils.getIdentifier(network, network)) != null;
+		return networkOptions.get(network.getSUID()) != null;
 	}
 	
 	@Override
@@ -158,7 +158,7 @@ public abstract class AbstractNetworkSelectionManager implements NetworkSelectio
 					return;
 				
 				CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
-				ViewState options = networkOptions.get(cytoscapeUtils.getIdentifier(cyNetwork, cyNetwork));
+				ViewState options = networkOptions.get(cyNetwork.getSUID());
 				
 				if (options == null)
 					return;
@@ -229,7 +229,7 @@ public abstract class AbstractNetworkSelectionManager implements NetworkSelectio
 					return;
 				
 				CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
-				ViewState options = networkOptions.get(cytoscapeUtils.getIdentifier(cyNetwork, cyNetwork));
+				ViewState options = networkOptions.get(cyNetwork.getSUID());
 				
 				if (options == null)
 					return;
@@ -342,7 +342,7 @@ public abstract class AbstractNetworkSelectionManager implements NetworkSelectio
 					return;
 				
 				CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
-				ViewState options = networkOptions.get(cytoscapeUtils.getIdentifier(cyNetwork, cyNetwork));
+				ViewState options = networkOptions.get(cyNetwork.getSUID());
 				
 				if (options == null)
 					return;
@@ -372,18 +372,18 @@ public abstract class AbstractNetworkSelectionManager implements NetworkSelectio
 		};
 	}
 	
-	protected void handleNetworkChanged(String networkId) {
-		if (networkId == null && selectedNetworkId == null)
+	protected void handleNetworkChanged(CyNetwork network) {
+		if (network == null && selectedNetworkId == null)
 			return;
 		
-		selectedNetworkId = networkId;
+		selectedNetworkId = network != null ? network.getSUID() : null;
 		
-		if (networkId == null) {
+		if (selectedNetworkId == null) {
 			plugin.hideResults();
 			return;
 		}
 		
-		ViewState options = networkOptions.get(networkId);
+		ViewState options = networkOptions.get(selectedNetworkId);
 		
 		if (options == null) {
 			plugin.hideResults();
@@ -394,11 +394,11 @@ public abstract class AbstractNetworkSelectionManager implements NetworkSelectio
 		plugin.showResults();
 	}
 	
-	protected void handleNetworkDeleted(String networkId) {
-		if (networkId == null && selectedNetworkId == null)
+	protected void handleNetworkDeleted(CyNetwork network) {
+		if (network == null)
 			return;
 		
-		networkOptions.remove(networkId);
+		networkOptions.remove(network.getSUID());
 		
 		if (networkOptions.size() == 0)
 			plugin.hideResults();
