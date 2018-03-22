@@ -19,18 +19,23 @@
 package org.genemania.plugin.cytoscape3.controllers;
 
 import java.awt.Color;
+import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -100,6 +105,7 @@ import org.genemania.util.ProgressReporter;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 import okhttp3.Call;
 import okhttp3.MediaType;
@@ -115,6 +121,8 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 
 	private static Map<Long, Integer> sequenceNumbers = new HashMap<>();
 
+	private static String webDataVersion;
+	
 	private final CytoscapeUtils cytoscapeUtils;
 	private final GeneMania plugin;
 	private final NetworkUtils networkUtils;
@@ -535,8 +543,12 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 	private class RunGeneManiaTask extends AbstractTask implements ObservableTask {
 
 		// TODO Make it a CyProperty?
-		private static final String URL = "http://genemania.org/json/search_results";
-		private final String TAG = "search";
+		private static final String SEARCH_URL = "http://genemania.org/json/search_results";
+		private static final String VERSION_URL = "http://genemania.org/json/version";
+		
+		private final String SEARCH_TAG = "search";
+		private final String VERSION_TAG = "version";
+		
 		private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 		
 		private final Query query;
@@ -657,9 +669,9 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				
 				RequestBody body = RequestBody.create(JSON, jsonReq);
 				Request request = new Request.Builder()
-						.url(URL)
+						.url(SEARCH_URL)
 						.post(body)
-						.tag(TAG)
+						.tag(SEARCH_TAG)
 						.build();
 				Response response = httpClient.newCall(request).execute();
 				
@@ -671,6 +683,14 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				
 				if (cancelled)
 					return;
+				
+				if (webDataVersion == null && !searchResults.getResultGenes().isEmpty())
+					updateWebDataVersion();
+				
+				if (cancelled)
+					return;
+				
+				dataVersion = webDataVersion;
 		
 				progress.setProgress(++stage);
 				scores = computeGeneScores(searchResults.getResultGenes());
@@ -721,6 +741,31 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 			}
 		}
 		
+		private void updateWebDataVersion() throws Exception {
+			Request request = new Request.Builder()
+					.url(VERSION_URL)
+					.get()
+					.tag(VERSION_TAG)
+					.build();
+			Response response = httpClient.newCall(request).execute();
+			String json = response.body().string();
+			
+			Gson gson = new Gson();
+			Type type = new TypeToken<Map<String, String>>(){}.getType();
+			Map<String, String> map = gson.fromJson(json, type);
+			
+			String value = map.get("dbVersion");
+			
+			if (value != null) {
+				// Convert the website date format to the plugin one (e.g. "13 March 2017 00:00:00" to "2017-03-13")
+				SimpleDateFormat inFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH);
+				SimpleDateFormat outFormat = new SimpleDateFormat("yyyy-MM-dd");
+				
+				Date date = inFormat.parse(value);
+				webDataVersion = outFormat.format(date) + "-web";
+			}
+		}
+
 		@Override
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public Object getResults(Class type) {
@@ -811,12 +856,16 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 			super.cancel();
 			
 			try {
-				for (Call call : httpClient.dispatcher().queuedCalls()) {
-					if (call.request().tag().equals(TAG))
-						call.cancel();
-				}
-				for (Call call : httpClient.dispatcher().runningCalls()) {
-					if (call.request().tag().equals(TAG))
+				List<Call> allCalls = 
+						Stream.concat(
+								httpClient.dispatcher().queuedCalls().stream(),
+								httpClient.dispatcher().runningCalls().stream()
+						).collect(Collectors.toList());
+				
+				for (Call call : allCalls) {
+					Object tag = call.request().tag();
+					
+					if (SEARCH_TAG.equals(tag) || VERSION_TAG.equals(tag))
 						call.cancel();
 				}
 			} catch (Exception e) {

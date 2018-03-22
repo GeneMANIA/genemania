@@ -255,10 +255,11 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 	private String findVersion(Set<CyNetwork> networks) {
 		for (CyNetwork network : networks) {
 			String version = network.getRow(network).get(CytoscapeUtils.DATA_VERSION_ATTRIBUTE, String.class);
-			if (version != null) {
+			
+			if (version != null)
 				return version;
-			}
 		}
+		
 		return null;
 	}
 }

@@ -155,7 +155,7 @@ public class CyActivator extends AbstractCyActivator {
 			props.put(MENU_GRAVITY, "1.0");
 			props.put(INSERT_SEPARATOR_AFTER, "true");
 			retrieveRelatedGenesAction = new RetrieveRelatedGenesAction(props, applicationManager, geneMania,
-					cytoscapeUtils, networkUtils, uiUtils, fileUtils, taskDispatcher, networkViewManager);
+					controller, cytoscapeUtils, networkUtils, uiUtils, fileUtils, taskDispatcher, networkViewManager);
 			registerService(bc, retrieveRelatedGenesAction, CyAction.class);
 		}
 		{
