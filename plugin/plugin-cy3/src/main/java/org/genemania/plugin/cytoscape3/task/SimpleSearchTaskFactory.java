@@ -190,6 +190,9 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 			
 			@Override
 			public void allFinished(FinishStatus finishStatus) {
+				if (finishStatus != FinishStatus.getSucceeded())
+					return;
+				
 				if (network == null) {
 					SwingUtilities.invokeLater(() -> WrappedOptionPane.showConfirmDialog(
 							cytoscapeUtils.getFrame(),
