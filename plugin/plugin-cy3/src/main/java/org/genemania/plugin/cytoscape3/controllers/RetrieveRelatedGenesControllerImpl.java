@@ -30,14 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-
-import javax.ws.rs.client.AsyncInvoker;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
 
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -108,10 +101,15 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesController {
 	
-	// TODO Make it a CyProperty?
-	private static final String SEARCH_URL = "http://genemania.org/json/search_results";
 	private static final int MIN_CATEGORIES = 10;
 	private static final double Q_VALUE_THRESHOLD = 0.1;
 
@@ -122,6 +120,8 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 	private final NetworkUtils networkUtils;
 	private final TaskDispatcher taskDispatcher;
 	
+	private final OkHttpClient httpClient = new OkHttpClient(); // Avoid creating several instances
+
 	public RetrieveRelatedGenesControllerImpl(
 			GeneMania plugin,
 			CytoscapeUtils cytoscapeUtils,
@@ -288,10 +288,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 	
 	@Override
 	public ObservableTask runMania(Query query, boolean offline) {
-		// Create the WS client here, to avoid a thread/OSGI related issues;
-		Client client = offline ? null : ClientBuilder.newClient();
-		
-		return new RunGeneManiaTask(query, client, offline);
+		return new RunGeneManiaTask(query, offline);
 	}
 	
 	private EnrichmentEngineResponseDto computeEnrichment(EnrichmentEngineRequestDto request, DataSet data)
@@ -537,17 +534,19 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 	
 	private class RunGeneManiaTask extends AbstractTask implements ObservableTask {
 
+		// TODO Make it a CyProperty?
+		private static final String URL = "http://genemania.org/json/search_results";
+		private final String TAG = "search";
+		private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+		
 		private final Query query;
-		private final Client client;
 		private final boolean offline;
 		
-		private Future<String> future;
 		private CyNetwork network;
 		private SearchResult searchResult;
 
-		RunGeneManiaTask(Query query, Client client, boolean offline) {
+		RunGeneManiaTask(Query query, boolean offline) {
 			this.query = query;
-			this.client = client;
 			this.offline = offline;
 		}
 
@@ -585,7 +584,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				request.setCombiningMethod(response.getCombiningMethodApplied());
 				childProgress.close();
 				
-				if (cancelled == true)
+				if (cancelled)
 					return;
 		
 				progress.setProgress(++stage);
@@ -609,7 +608,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 					childProgress.close();
 				}
 				
-				if (cancelled == true)
+				if (cancelled)
 					return;
 				
 				progress.setProgress(++stage);
@@ -656,13 +655,21 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				
 				progress.setProgress(++stage);
 				
-				WebTarget target = client.target(SEARCH_URL);
-				AsyncInvoker invoker = target.request().async();
-				future = invoker.post(Entity.json(jsonReq), String.class);
-				String json = future.get();
+				RequestBody body = RequestBody.create(JSON, jsonReq);
+				Request request = new Request.Builder()
+						.url(URL)
+						.post(body)
+						.tag(TAG)
+						.build();
+				Response response = httpClient.newCall(request).execute();
+				
+				if (cancelled)
+					return;
+				
+				String json = response.body().string();
 				SearchResults searchResults = gson.fromJson(json, SearchResults.class);
 				
-				if (cancelled == true)
+				if (cancelled)
 					return;
 		
 				progress.setProgress(++stage);
@@ -687,6 +694,9 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				
 				progress.setProgress(++stage);
 			}
+			
+			if (cancelled)
+				return;
 			
 			if (searchResult != null && !scores.isEmpty()) {
 				EdgeAttributeProvider provider = createEdgeAttributeProvider(searchResult);
@@ -800,8 +810,18 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 		public void cancel() {
 			super.cancel();
 			
-			if (future != null)
-				future.cancel(true);
+			try {
+				for (Call call : httpClient.dispatcher().queuedCalls()) {
+					if (call.request().tag().equals(TAG))
+						call.cancel();
+				}
+				for (Call call : httpClient.dispatcher().runningCalls()) {
+					if (call.request().tag().equals(TAG))
+						call.cancel();
+				}
+			} catch (Exception e) {
+				LogUtils.log(getClass(), e);
+			}
 		}
 	}
 }

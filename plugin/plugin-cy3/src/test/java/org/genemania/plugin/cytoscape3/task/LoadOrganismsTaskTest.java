@@ -28,16 +28,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import okhttp3.OkHttpClient;
+
 public class LoadOrganismsTaskTest {
 	
 	@Mock
 	private TaskMonitor taskMonitor;
 	
 	private LoadRemoteOrganismsTask task;
+	private OkHttpClient httpClient = new OkHttpClient();
 	
 	@Before
 	public void setUp() {
-		task = new LoadRemoteOrganismsTask();
+		task = new LoadRemoteOrganismsTask(httpClient);
 	}
 	
 	@Test

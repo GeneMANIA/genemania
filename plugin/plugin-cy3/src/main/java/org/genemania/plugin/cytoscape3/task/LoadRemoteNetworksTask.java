@@ -22,12 +22,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
-
-import javax.ws.rs.client.AsyncInvoker;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
 
 import org.apache.log4j.Logger;
 import org.cytoscape.application.CyUserLog;
@@ -35,9 +29,15 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskMonitor.Level;
 import org.genemania.domain.InteractionNetworkGroup;
+import org.genemania.plugin.LogUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Fetch all interaction networks for all organisms available on the GeneMANIA server.
@@ -46,24 +46,32 @@ public class LoadRemoteNetworksTask extends AbstractTask {
 
 	// TODO Make it a CyProperty?
 	protected static final String URL = "http://genemania.org/json/network_groups";
+	private static final String TAG = "network_groups";
 	
 	private Map<Integer, Collection<InteractionNetworkGroup>> networkGroups = new HashMap<>();
-	private Future<String> future;
 	private String errorMessage;
+	
+	private final OkHttpClient httpClient; // Avoid creating several instances
 	
 	private final Logger logger = Logger.getLogger(CyUserLog.NAME);
 
+	public LoadRemoteNetworksTask(OkHttpClient httpClient) {
+		this.httpClient = httpClient;
+	}
+	
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
 		tm.setTitle("GeneMANIA");
 		tm.setStatusMessage("Loading networks from server...");
 		
 		try {
-			Client client = ClientBuilder.newClient();
-			WebTarget target = client.target(URL);
-			AsyncInvoker invoker = target.request().async();
-			future = invoker.get(String.class);
-			String json = future.get();
+			Request request = new Request.Builder()
+					.url(URL)
+					.get()
+					.tag(TAG)
+					.build();
+			Response response = httpClient.newCall(request).execute();
+			String json = response.body().string();
 			
 			if (cancelled)
 				return;
@@ -94,7 +102,17 @@ public class LoadRemoteNetworksTask extends AbstractTask {
 	public void cancel() {
 		super.cancel();
 		
-		if (future != null)
-			future.cancel(true);
+		try {
+			for (Call call : httpClient.dispatcher().queuedCalls()) {
+				if (call.request().tag().equals(TAG))
+					call.cancel();
+			}
+			for (Call call : httpClient.dispatcher().runningCalls()) {
+				if (call.request().tag().equals(TAG))
+					call.cancel();
+			}
+		} catch (Exception e) {
+			LogUtils.log(getClass(), e);
+		}
 	}
 }

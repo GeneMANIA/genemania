@@ -39,6 +39,8 @@ import org.genemania.plugin.cytoscape3.task.LoadRemoteOrganismsTask;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetManager;
 
+import okhttp3.OkHttpClient;
+
 public class OrganismManager {
 
 	private boolean initialized;
@@ -51,6 +53,8 @@ public class OrganismManager {
 	
 	private final GeneMania plugin;
 	private final CyServiceRegistrar serviceRegistrar;
+	
+	private final OkHttpClient httpClient = new OkHttpClient(); // Avoid creating several instances
 	
 	private final Object lock = new Object();
 	public Object get;
@@ -120,8 +124,8 @@ public class OrganismManager {
 	}
 	
 	public void loadRemoteOrganisms() {
-		LoadRemoteOrganismsTask task1 = new LoadRemoteOrganismsTask();
-		LoadRemoteNetworksTask task2 = new LoadRemoteNetworksTask();
+		LoadRemoteOrganismsTask task1 = new LoadRemoteOrganismsTask(httpClient);
+		LoadRemoteNetworksTask task2 = new LoadRemoteNetworksTask(httpClient);
 		
 		DialogTaskManager taskManager = serviceRegistrar.getService(DialogTaskManager.class);
 		taskManager.execute(new TaskIterator(task1, task2), new TaskObserver() {
