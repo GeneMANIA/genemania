@@ -20,6 +20,7 @@ package org.genemania.plugin.cytoscape3.controllers;
 
 import java.awt.Color;
 import java.lang.reflect.Type;
+import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -673,9 +674,17 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 						.post(body)
 						.tag(SEARCH_TAG)
 						.build();
-				Response response = httpClient.newCall(request).execute();
 				
-				if (cancelled)
+				Response response = null;
+				
+				try {
+					response = httpClient.newCall(request).execute();
+				} catch (SocketException e) {
+					if (!cancelled) // This SocketException may be fired when
+						throw e;
+				}
+				
+				if (cancelled || response == null)
 					return;
 				
 				String json = response.body().string();
