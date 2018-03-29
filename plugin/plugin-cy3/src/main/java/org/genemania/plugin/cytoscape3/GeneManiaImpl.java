@@ -35,7 +35,7 @@ import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetChangeListener;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.util.ProgressReporter;
@@ -58,8 +58,8 @@ public class GeneManiaImpl extends AbstractGeneMania {
 			TaskDispatcher taskDispatcher,
 			CySwingApplication application,
 			CyServiceRegistrar serviceRegistrar,
-			NetworkSelectionManager selectionManager,
-			final CyProperty<Properties> properties
+			SessionManager selectionManager,
+			CyProperty<Properties> properties
 	) {
 		super(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils, taskDispatcher, selectionManager);
 		this.serviceRegistrar = serviceRegistrar;

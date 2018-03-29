@@ -18,45 +18,31 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
+
 import org.genemania.domain.AttributeGroup;
 
-public class QueryAttributeNetworkImpl extends AbstractNetwork<AttributeGroup> {
+public class QueryAttributeNetworkImpl extends AbstractNetwork<AttributeGroup> implements Serializable {
 
-	private AttributeGroup network;
-
-	public QueryAttributeNetworkImpl(AttributeGroup network, double weight) {
-		super(weight);
-		this.network = network;
+	private static final long serialVersionUID = -8392020574665538298L;
+	
+	public QueryAttributeNetworkImpl() {
+	}
+	
+	public QueryAttributeNetworkImpl(AttributeGroup model, double weight) {
+		super(model, weight);
 	}
 	
 	@Override
-	public AttributeGroup getModel() {
-		return network;
-	}
-
-	@Override
 	public String getName() {
-		return network.getName();
+		return model.getName();
 	}
 	
 	@Override
 	public boolean isDefaultSelected() {
-		return network.isDefaultSelected();
-	}
-
-	@Override
-	public boolean equals(Object other) {
-		if (!(other instanceof QueryAttributeNetworkImpl)) {
-			return false;
-		}
-		return ((QueryAttributeNetworkImpl) other).getModel().getId() == network.getId();
+		return model != null && model.isDefaultSelected();
 	}
 	
-	@Override
-	public int hashCode() {
-		return (int) (network.getId() % Integer.MAX_VALUE);
-	}
-
 	@Override
 	public boolean hasInteractions() {
 		return true;
@@ -65,9 +51,35 @@ public class QueryAttributeNetworkImpl extends AbstractNetwork<AttributeGroup> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T adapt(Class<T> type) {
-		if (!type.equals(AttributeGroup.class)) {
+		if (!type.equals(AttributeGroup.class))
 			return null;
-		}
-		return (T) network;
+		
+		return (T) model;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 11;
+		int result = 3;
+		result = prime * result + ((model == null) ? 0 : (int) (model.getId() ^ (model.getId() >>> 32)));
+		
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof QueryAttributeNetworkImpl))
+			return false;
+		
+		QueryAttributeNetworkImpl other = (QueryAttributeNetworkImpl) obj;
+		
+		if (model == null || other.model == null)
+			return false;
+		
+		return model.getId() == other.model.getId();
 	}
 }

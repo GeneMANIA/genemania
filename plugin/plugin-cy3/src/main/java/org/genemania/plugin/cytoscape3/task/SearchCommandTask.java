@@ -51,7 +51,7 @@ import org.genemania.plugin.parsers.IQueryParser;
 import org.genemania.plugin.parsers.JsonQueryParser;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.parsers.WebsiteQueryParser;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
 
@@ -227,8 +227,8 @@ public class SearchCommandTask extends AbstractTask {
 					if (cancelled)
 						return;
 					
-					NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
-					ViewState options = selManager.getNetworkConfiguration(network);
+					SessionManager sessionManager = plugin.getSessionManager();
+					ViewState options = sessionManager.getNetworkConfiguration(network);
 					plugin.applyOptions(options);
 					
 					if (cancelled)

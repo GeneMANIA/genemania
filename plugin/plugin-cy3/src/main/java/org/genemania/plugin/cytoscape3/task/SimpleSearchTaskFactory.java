@@ -58,7 +58,7 @@ import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.parsers.Query;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.view.components.WrappedOptionPane;
 import org.genemania.plugin.view.util.IconUtil;
 import org.genemania.plugin.view.util.TextIcon;
@@ -208,8 +208,8 @@ public class SimpleSearchTaskFactory implements NetworkSearchTaskFactory, Action
 					cytoscapeUtils.performLayout(network);
 					cytoscapeUtils.maximize(network);
 					
-					NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
-					ViewState options = selManager.getNetworkConfiguration(network);
+					SessionManager sessionManager = plugin.getSessionManager();
+					ViewState options = sessionManager.getNetworkConfiguration(network);
 					plugin.applyOptions(options);
 					plugin.showResults();
 				}

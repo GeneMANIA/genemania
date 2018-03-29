@@ -18,6 +18,7 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import org.genemania.domain.Attribute;
@@ -25,41 +26,33 @@ import org.genemania.domain.AttributeGroup;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 
-public class ResultAttributeGroupImpl extends AbstractGroup<AttributeGroup, Attribute> {
+public class ResultAttributeGroupImpl extends AbstractGroup<AttributeGroup, Attribute> implements Serializable {
 
-	private AttributeGroup group;
+	private static final long serialVersionUID = -8786531623466138345L;
+	
+	private AttributeGroup model;
 
-	public ResultAttributeGroupImpl(AttributeGroup group, Collection<Network<Attribute>> networks) {
+	public ResultAttributeGroupImpl() {
+	}
+	
+	public ResultAttributeGroupImpl(AttributeGroup model, Collection<Network<Attribute>> networks) {
 		super(networks);
-		this.group = group;
+		this.model = model;
 	}
 
 	@Override
 	public AttributeGroup getModel() {
-		return group;
+		return model;
 	}
 
 	@Override
 	public String getName() {
-		return group.getName();
+		return model.getName();
 	}
 
 	@Override
 	public String getCode() {
-		return group.getCode();
-	}
-
-	@Override
-	public boolean equals(Object other) {
-		if (!(other instanceof ResultAttributeGroupImpl)) {
-			return false;
-		}
-		return ((ResultAttributeGroupImpl) other).getModel().getId() == group.getId();
-	}
-	
-	@Override
-	public int hashCode() {
-		return (int) (group.getId() % Integer.MAX_VALUE);
+		return model.getCode();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -76,6 +69,32 @@ public class ResultAttributeGroupImpl extends AbstractGroup<AttributeGroup, Attr
 	
 	@Override
 	protected Group<AttributeGroup, Attribute> create(Collection<Network<Attribute>> networks) {
-		return new ResultAttributeGroupImpl(group, networks);
+		return new ResultAttributeGroupImpl(model, networks);
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 23;
+		int result = 5;
+		result = prime * result + ((model == null) ? 0 : (int) (model.getId() ^ (model.getId() >>> 32)));
+		
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ResultAttributeGroupImpl))
+			return false;
+		
+		ResultAttributeGroupImpl other = (ResultAttributeGroupImpl) obj;
+		
+		if (model == null || other.model == null)
+			return false;
+		
+		return model.getId() == other.model.getId();
 	}
 }

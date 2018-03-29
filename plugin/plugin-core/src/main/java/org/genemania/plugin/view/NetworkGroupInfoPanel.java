@@ -31,7 +31,7 @@ import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.selection.SelectionEvent;
 import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.view.components.ToggleInfoPanel;
@@ -149,8 +149,8 @@ public class NetworkGroupInfoPanel extends ToggleInfoPanel<Group<?, ?>, NetworkG
 		}
 
 		CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
-		NetworkSelectionManager selectionManager = plugin.getNetworkSelectionManager();
-		ViewState options = selectionManager.getNetworkConfiguration(cyNetwork);
+		SessionManager sessionManager = plugin.getSessionManager();
+		ViewState options = sessionManager.getNetworkConfiguration(cyNetwork);
 		cytoscapeUtils.setHighlight(options, null, cyNetwork, enabled);
 	}
 

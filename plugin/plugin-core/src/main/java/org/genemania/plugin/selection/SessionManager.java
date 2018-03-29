@@ -16,7 +16,7 @@ import org.genemania.plugin.view.NetworkChangeListener;
 import org.genemania.plugin.view.NetworkGroupDetailPanel;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 
-public interface NetworkSelectionManager {
+public interface SessionManager {
 
 	Long getSelectedNetworkId();
 
@@ -49,4 +49,5 @@ public interface NetworkSelectionManager {
 	SelectionListener<Gene> createFunctionListSelectionListener(FunctionInfoPanel functionPanel, SearchResult options);
 
 	void setGeneMania(GeneMania geneMania);
+	
 }

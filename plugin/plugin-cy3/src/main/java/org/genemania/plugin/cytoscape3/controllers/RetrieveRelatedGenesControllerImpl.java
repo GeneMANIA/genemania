@@ -95,7 +95,7 @@ import org.genemania.plugin.model.impl.QueryAttributeGroupImpl;
 import org.genemania.plugin.model.impl.QueryAttributeNetworkImpl;
 import org.genemania.plugin.model.impl.ViewStateImpl;
 import org.genemania.plugin.parsers.Query;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.util.TaskMonitorProgressReporter;
 import org.genemania.type.CombiningMethod;
@@ -740,7 +740,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				// Set up edge cache
 				tm.setStatusMessage(Strings.retrieveRelatedGenes_status6);
 				progress.setProgress(++stage);
-				NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
+				SessionManager manager = plugin.getSessionManager();
 				
 				computeGraphCache(network, searchResult, builder, groups);
 				manager.addNetworkConfiguration(network, builder.build());
@@ -771,7 +771,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				SimpleDateFormat outFormat = new SimpleDateFormat("yyyy-MM-dd");
 				
 				Date date = inFormat.parse(value);
-				webDataVersion = outFormat.format(date) + "-web";
+				webDataVersion = outFormat.format(date) + CytoscapeUtils.WEB_VERSION_TAG;
 			}
 		}
 

@@ -39,7 +39,8 @@ import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
+import org.genemania.util.ProgressReporter;
 
 public interface CytoscapeUtils {
 	
@@ -72,6 +73,11 @@ public interface CytoscapeUtils {
 	static final String ANNOTATIONS_ATTRIBUTE = "annotations"; //$NON-NLS-1$
 	static final String ATTRIBUTE_NAME_ATTRIBUTE = "attribute name"; //$NON-NLS-1$
 	
+	static final String GENEMANIA_VIEWS_TABLE = "GeneMANIA.Views"; //$NON-NLS-1$
+	static final String GENEMANIA_VIEWS_PK_ATTRIBUTE = "ID"; //$NON-NLS-1$
+	static final String NETWORK_SUID_ATTRIBUTE = "Network.SUID"; //$NON-NLS-1$
+	static final String STATE_ATTRIBUTE = "State"; //$NON-NLS-1$
+	
 	static final String URL = "url"; //$NON-NLS-1$
 	static final String TITLE = "title"; //$NON-NLS-1$
 	static final String TAGS = "tags"; //$NON-NLS-1$
@@ -83,6 +89,8 @@ public interface CytoscapeUtils {
 	static final String PUBMED_ID = "pubmedId"; //$NON-NLS-1$
 	static final String INTERACTION_COUNT = "interactionCount"; //$NON-NLS-1$
 	static final String AUTHORS = "authors"; //$NON-NLS-1$
+	
+	static final String WEB_VERSION_TAG = "-web";
 	
 	static final Color QUERY_COLOR = new Color(0, 0, 0);
 	static final Color RESULT_COLOR = new Color(159, 159, 159);
@@ -105,7 +113,7 @@ public interface CytoscapeUtils {
 
 	CyNode getNode(CyNetwork network, Node node, String preferredSymbol);
 
-	void registerSelectionListener(CyNetwork cyNetwork, NetworkSelectionManager manager, GeneMania plugin);
+	void registerSelectionListener(CyNetwork cyNetwork, SessionManager manager, GeneMania plugin);
 
 	void performLayout(CyNetwork network);
 
@@ -130,6 +138,12 @@ public interface CytoscapeUtils {
 	Frame getFrame();
 
 	Set<CyNetwork> getNetworks();
+	
+	CyNetwork getNetwork(long suid);
+	
+	boolean isGeneManiaNetwork(CyNetwork network);
+	
+	String getDataVersion(CyNetwork cyNetwork);
 
 	void handleNetworkPostProcessing(CyNetwork network);
 
@@ -169,5 +183,14 @@ public interface CytoscapeUtils {
 
 	Class<?> getAttributeType(CyNetwork network, CyIdentifiable entry, String name);
 	
+	void saveSessionState(Map<Long, ViewState> states);
+	
+	Map<CyNetwork, ViewState> restoreSessionState(ProgressReporter progress);
+	
+	void removeSavedSessionState(Long networkId);
+	
+	void clearSavedSessionState();
+	
 	CyServiceRegistrar getServiceRegistrar();
+	
 }

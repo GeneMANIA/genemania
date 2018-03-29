@@ -18,25 +18,24 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
+
 import org.genemania.domain.Attribute;
 
-public class ResultAttributeNetworkImpl extends AbstractNetwork<Attribute> {
+public class ResultAttributeNetworkImpl extends AbstractNetwork<Attribute> implements Serializable {
 
-	private Attribute network;
-
-	public ResultAttributeNetworkImpl(Attribute attribute, double weight) {
-		super(weight);
-		network = attribute;
+	private static final long serialVersionUID = -5955219402264581919L;
+	
+	public ResultAttributeNetworkImpl() {
 	}
-
-	@Override
-	public Attribute getModel() {
-		return network;
+	
+	public ResultAttributeNetworkImpl(Attribute model, double weight) {
+		super(model, weight);
 	}
 
 	@Override
 	public String getName() {
-		return network.getName();
+		return model.getName();
 	}
 
 	@Override
@@ -52,10 +51,35 @@ public class ResultAttributeNetworkImpl extends AbstractNetwork<Attribute> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T adapt(Class<T> type) {
-		if (!type.equals(Attribute.class)) {
+		if (!type.equals(Attribute.class))
 			return null;
-		}
-		return (T) network;
+		
+		return (T) model;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 13;
+		int result = 3;
+		result = prime * result + ((model == null) ? 0 : (int) (model.getId() ^ (model.getId() >>> 32)));
+		
+		return result;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof ResultAttributeNetworkImpl))
+			return false;
+		
+		ResultAttributeNetworkImpl other = (ResultAttributeNetworkImpl) obj;
+		
+		if (model == null || other.model == null)
+			return false;
+		
+		return model.getId() == other.model.getId();
+	}
 }

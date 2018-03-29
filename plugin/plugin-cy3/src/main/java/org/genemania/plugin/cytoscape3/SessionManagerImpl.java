@@ -18,17 +18,23 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.property.CyProperty;
+import org.cytoscape.session.events.SessionAboutToBeSavedEvent;
+import org.cytoscape.session.events.SessionAboutToBeSavedListener;
 import org.cytoscape.session.events.SessionLoadedEvent;
 import org.cytoscape.session.events.SessionLoadedListener;
+import org.cytoscape.session.events.SessionSaveCancelledEvent;
+import org.cytoscape.session.events.SessionSaveCancelledListener;
+import org.cytoscape.session.events.SessionSavedEvent;
+import org.cytoscape.session.events.SessionSavedListener;
 import org.genemania.domain.Attribute;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.Strings;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
-import org.genemania.plugin.delegates.SessionChangeDelegate;
+import org.genemania.plugin.cytoscape3.delegates.SessionChangeDelegate;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.AbstractNetworkSelectionManager;
+import org.genemania.plugin.selection.AbstractSessionManager;
 import org.genemania.plugin.selection.SelectionEvent;
 import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.task.GeneManiaTask;
@@ -36,15 +42,16 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.NetworkGroupDetailPanel;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 
-public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
-										 implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener, SessionLoadedListener {
-	
+public class SessionManagerImpl extends AbstractSessionManager
+		implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener, SessionAboutToBeSavedListener,
+		SessionSavedListener, SessionSaveCancelledListener, SessionLoadedListener {
+
 	private TaskDispatcher taskDispatcher;
 	private CyProperty<Properties> properties;
 	
 	private ExecutorService sessionLoadExecutor = Executors.newSingleThreadExecutor();
 
-	public NetworkSelectionManagerImpl(
+	public SessionManagerImpl(
 			CytoscapeUtils cytoscapeUtils,
 			TaskDispatcher taskDispatcher,
 			CyProperty<Properties> properties
@@ -55,50 +62,62 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 	}
 
 	@Override
-	public void handleEvent(SetCurrentNetworkEvent event) {
+	public void handleEvent(SetCurrentNetworkEvent evt) {
 		synchronized (this) {
-			handleNetworkChanged(event.getNetwork());
+			handleNetworkChanged(evt.getNetwork());
 		}
 	}
 
 	@Override
-	public void handleEvent(NetworkAboutToBeDestroyedEvent event) {
+	public void handleEvent(NetworkAboutToBeDestroyedEvent evt) {
 		synchronized (this) {
-			handleNetworkDeleted(event.getNetwork());
+			handleNetworkDeleted(evt.getNetwork());
 		}
 	}
 	
 	@Override
-	public void handleEvent(SessionLoadedEvent event) {
+	public void handleEvent(SessionAboutToBeSavedEvent evt) {
+		cytoscapeUtils.saveSessionState(new HashMap<>(networkOptions));
+	}
+	
+	@Override
+	public void handleEvent(SessionSaveCancelledEvent e) {
+		cytoscapeUtils.clearSavedSessionState();
+	}
+
+	@Override
+	public void handleEvent(SessionSavedEvent e) {
+		cytoscapeUtils.clearSavedSessionState();
+	}
+	
+	@Override
+	public void handleEvent(SessionLoadedEvent evt) {
 		// Don't want this to run on the same thread as the session load progress dialog 
 		// because there is risk of a UI deadlock between modal dialogs.
-		Runnable runnable = new Runnable() {
-			@Override
-			public void run() {
-				String path = (String) properties.getProperties().get(GeneMania.DATA_SOURCE_PATH_PROPERTY);
-				final File dataSourcePath;
-				if (path == null) {
-					String version = findVersion(event.getLoadedSession().getNetworks());
-					dataSourcePath = new File("gmdata-" + version);
-				} else {
-					dataSourcePath = new File(path);
-				}
-				
-				GeneManiaTask task = new GeneManiaTask(Strings.sessionChangeListener_title) {
-					@Override
-					protected void runTask() throws Throwable {
-						SessionChangeDelegate delegate = 
-								new SessionChangeDelegate(dataSourcePath, plugin, progress, cytoscapeUtils);
-						delegate.invoke();
-						
-						CyNetwork currentNetwork = cytoscapeUtils.getCurrentNetwork();
-						handleNetworkChanged(currentNetwork);
-					}
-				};
-				taskDispatcher.executeTask(task, cytoscapeUtils.getFrame(), true, true);
+		sessionLoadExecutor.submit(() -> {
+			String path = (String) properties.getProperties().get(GeneMania.DATA_SOURCE_PATH_PROPERTY);
+			final File dataSourcePath;
+			
+			if (path == null) {
+				String version = findVersion(evt.getLoadedSession().getNetworks());
+				dataSourcePath = new File("gmdata-" + version);
+			} else {
+				dataSourcePath = new File(path);
 			}
-		};
-		sessionLoadExecutor.submit(runnable);
+			
+			GeneManiaTask task = new GeneManiaTask(Strings.sessionChangeListener_title) {
+				@Override
+				protected void runTask() throws Throwable {
+					SessionChangeDelegate delegate =
+							new SessionChangeDelegate(dataSourcePath, plugin, progress, cytoscapeUtils);
+					delegate.invoke();
+					
+					CyNetwork currentNetwork = cytoscapeUtils.getCurrentNetwork();
+					handleNetworkChanged(currentNetwork);
+				}
+			};
+			taskDispatcher.executeTask(task, cytoscapeUtils.getFrame(), true, true);
+		});
 	}
 	
 	@Override
@@ -106,7 +125,7 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 			NetworkGroupDetailPanel> panel, final ViewState options) {
 		return new SelectionListener<Group<?, ?>>() {
 			@Override
-			public void selectionChanged(SelectionEvent<Group<?, ?>> event) {
+			public void selectionChanged(SelectionEvent<Group<?, ?>> evt) {
 				if (!selectionListenerEnabled)
 					return;
 				
@@ -120,9 +139,9 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 				
 				Map<String, Boolean> selectionChanges = new HashMap<>();
 				
-				for (Group<?, ?> group : event.items) {
-					selectionChanges.put(group.getName(), event.selected);
-					options.setGroupHighlighted(group, event.selected);
+				for (Group<?, ?> group : evt.items) {
+					selectionChanges.put(group.getName(), evt.selected);
+					options.setGroupHighlighted(group, evt.selected);
 				}
 				
 				for (final CyEdge edge : cyNetwork.getEdgeList()) {
@@ -154,7 +173,7 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 	public SelectionListener<Network<?>> createNetworkSelectionListener() {
 		return new SelectionListener<Network<?>>() {
 			@Override
-			public void selectionChanged(SelectionEvent<Network<?>> event) {
+			public void selectionChanged(SelectionEvent<Network<?>> evt) {
 				if (!selectionListenerEnabled)
 					return;
 				
@@ -171,15 +190,15 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 				Map<String, Boolean> edgeSelectionChanges = new HashMap<>();
 				Map<String, Boolean> nodeSelectionChanges = new HashMap<>();
 				
-				for (Network<?> network : event.items) {
+				for (Network<?> network : evt.items) {
 					Attribute attribute = network.adapt(Attribute.class);
 					
 					if (attribute != null) {
-						nodeSelectionChanges.put(network.getName(), event.selected);
+						nodeSelectionChanges.put(network.getName(), evt.selected);
 						options.setGeneHighlighted(attribute.getName(), true);
 					} else {
-						edgeSelectionChanges.put(network.getName(), event.selected);
-						options.setNetworkHighlighted(network, event.selected);
+						edgeSelectionChanges.put(network.getName(), evt.selected);
+						options.setNetworkHighlighted(network, evt.selected);
 					}
 				}
 				
@@ -253,8 +272,8 @@ public class NetworkSelectionManagerImpl extends AbstractNetworkSelectionManager
 	}
 
 	private String findVersion(Set<CyNetwork> networks) {
-		for (CyNetwork network : networks) {
-			String version = network.getRow(network).get(CytoscapeUtils.DATA_VERSION_ATTRIBUTE, String.class);
+		for (CyNetwork net : networks) {
+			String version = cytoscapeUtils.getDataVersion(net);
 			
 			if (version != null)
 				return version;

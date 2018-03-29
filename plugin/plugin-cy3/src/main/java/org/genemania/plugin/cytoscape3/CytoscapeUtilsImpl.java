@@ -30,12 +30,19 @@ import static org.cytoscape.view.presentation.property.BasicVisualLexicon.NODE_S
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Paint;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -56,6 +63,8 @@ import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.model.CyTableFactory;
+import org.cytoscape.model.CyTableManager;
 import org.cytoscape.model.events.RowSetRecord;
 import org.cytoscape.model.events.RowsSetEvent;
 import org.cytoscape.model.events.RowsSetListener;
@@ -85,18 +94,22 @@ import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.LogUtils;
 import org.genemania.plugin.NetworkUtils;
+import org.genemania.plugin.Strings;
 import org.genemania.plugin.cytoscape.AbstractCytoscapeUtils;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape3.layout.GeneManiaFDLayout;
 import org.genemania.plugin.delegates.SelectionDelegate;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
+import org.genemania.util.ProgressReporter;
 
 public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements CytoscapeUtils, RowsSetListener {
 
 	private final CySwingApplication application;
 	private final CyApplicationManager applicationManager;
+	private final CyTableManager tableManager;
+	private final CyTableFactory tableFactory;
 	private final CyNetworkManager networkManager;
 	private final CyNetworkFactory networkFactory;
 	private final CyNetworkViewFactory viewFactory;
@@ -127,6 +140,8 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 			NetworkUtils networkUtils,
 			CySwingApplication application,
 			CyApplicationManager applicationManager,
+			CyTableManager tableManager,
+			CyTableFactory tableFactory,
 			CyNetworkManager networkManager,
 			CyNetworkViewManager viewManager,
 			CyNetworkFactory networkFactory,
@@ -145,6 +160,8 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 		super(networkUtils);
 		this.application = application;
 		this.applicationManager = applicationManager;
+		this.tableManager = tableManager;
+		this.tableFactory = tableFactory;
 		this.networkManager = networkManager;
 		this.networkFactory = networkFactory;
 		this.viewFactory = viewFactory;
@@ -304,6 +321,11 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	public Set<CyNetwork> getNetworks() {
 		return networkManager.getNetworkSet();
 	}
+	
+	@Override
+	public CyNetwork getNetwork(long suid) {
+		return networkManager.getNetwork(suid);
+	}
 
 	@Override
 	public void handleNetworkPostProcessing(CyNetwork network) {
@@ -349,7 +371,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	@Override
 	public void registerSelectionListener(
 			CyNetwork cyNetwork,
-			NetworkSelectionManager manager,
+			SessionManager manager,
 			GeneMania plugin
 	) {
 		networksByNodeTable.put(cyNetwork.getDefaultNodeTable(), new WeakReference<>(cyNetwork));
@@ -511,6 +533,16 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	}
 	
 	@Override
+	public boolean isGeneManiaNetwork(CyNetwork network) {
+		return network != null && getDataVersion(network) != null;
+	}
+	
+	@Override
+	public String getDataVersion(CyNetwork network) {
+		return network.getRow(network).get(DATA_VERSION_ATTRIBUTE, String.class);
+	}
+	
+	@Override
 	public Collection<CyNode> getNeighbours(CyNode node, CyNetwork network) {
 		return network.getNeighborList(node, Type.ANY);
 	}
@@ -605,7 +637,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	}
 
 	private Map<String, Reference<CyEdge>> cacheEdges(CyNetwork network) {
-		HashMap<String, Reference<CyEdge>> edges = new HashMap<>();
+		HashMap<String, Reference<CyEdge>> cachedEdges = new HashMap<>();
 		
 		for (CyEdge edge : network.getEdgeList()) {
 			CyRow row = network.getRow(edge);
@@ -614,15 +646,10 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 				continue;
 			
 			String name = row.get(CyNetwork.NAME, String.class);
-			edges.put(name, new WeakReference<>(edge));
+			cachedEdges.put(name, new WeakReference<>(edge));
 		}
 		
-		return edges;
-	}
-
-	private boolean isGeneManiaNetwork(CyNetwork network) {
-		String version = network.getRow(network).get(DATA_VERSION_ATTRIBUTE, String.class);
-		return version != null;
+		return cachedEdges;
 	}
 
 	CyNetworkView getView(CyNetwork network) {
@@ -637,12 +664,137 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 		return reference.get();
 	}
 	
+	@Override
+	public void saveSessionState(Map<Long, ViewState> states) {
+		// Serialize the ViewStates of genemania networks that were searched on the server
+		// (i.e. not from locally installed data)...
+		
+		// First recreate GeneMANIA's hidden global table
+		CyTable table = getGlobalTable(GENEMANIA_VIEWS_TABLE);
+		
+		if (table != null)
+			tableManager.deleteTable(table.getSUID());
+		
+		table = tableFactory.createTable(GENEMANIA_VIEWS_TABLE, GENEMANIA_VIEWS_PK_ATTRIBUTE, Integer.class, false, true);
+		table.createColumn(NETWORK_SUID_ATTRIBUTE, Long.class, true);
+		table.createColumn(STATE_ATTRIBUTE, String.class, true);
+		tableManager.addTable(table);
+		
+		// Serialize ViewState objects as Base 64
+		int id = 1;
+		
+		for (Entry<Long, ViewState> entry : states.entrySet()) {
+			Long netId = entry.getKey();
+			ViewState options = entry.getValue();
+			CyNetwork net = getNetwork(netId);
+			
+			if (net == null || options == null)
+				continue;
+			
+			String dataVersion = getDataVersion(net);
+			
+			if (dataVersion != null && dataVersion.endsWith(WEB_VERSION_TAG)) {
+		        try (
+		        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		        		ObjectOutputStream out = new ObjectOutputStream(baos)
+		        	) {
+		            out.writeObject(options);
+		            out.flush();
+		            byte[] bytes = baos.toByteArray();
+		            String hex = Base64.getEncoder().encodeToString(bytes);
+		            
+		            CyRow row = table.getRow(id++);
+					row.set(NETWORK_SUID_ATTRIBUTE, netId);
+					row.set(STATE_ATTRIBUTE, hex);
+		        } catch (Exception ex) {
+		        		System.out.println(ex);
+		            LogUtils.log(getClass(), ex);
+		        }
+			}
+		}
+	}
+
+	@Override
+	public Map<CyNetwork, ViewState> restoreSessionState(ProgressReporter progress) {
+		Map<CyNetwork, ViewState> states = new HashMap<>();
+		CyTable table = getGlobalTable(GENEMANIA_VIEWS_TABLE);
+		
+		if (table != null && table.getRowCount() > 0) {
+			progress.setStatus(Strings.resultReconstructor_status);
+			int currentProgress = 0;
+			progress.setMaximumProgress(table.getRowCount());
+			progress.setProgress(currentProgress);
+			
+			for (CyRow row : table.getAllRows()) {
+				Long netId = row.get(NETWORK_SUID_ATTRIBUTE, Long.class);
+				String hex = row.get(STATE_ATTRIBUTE, String.class);
+				
+				if (netId != null && hex != null) {
+					// The network SUID changes when the session is reloaded!
+					CyNetwork network = getNetwork(netId);
+					byte[] bytes = Base64.getDecoder().decode(hex);
+					
+					if (network != null) {
+						try (
+							ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+							ObjectInputStream in = new ObjectInputStream(bais)
+						) {
+				            ViewState options = (ViewState) in.readObject();
+				            
+							if (options != null)
+								states.put(network, options);
+				        } catch (Exception ex) {
+				        		System.out.println(ex);
+				            LogUtils.log(getClass(), ex);
+				        }
+					}
+				}
+				
+				progress.setProgress(++currentProgress);
+			}
+			
+			// Always delete the serialization table to save RAM!
+			tableManager.deleteTable(table.getSUID());
+		}
+		
+		return states;
+	}
+	
+	@Override
+	public void removeSavedSessionState(Long networkId) {
+		CyTable table = getGlobalTable(GENEMANIA_VIEWS_TABLE);
+		
+		if (table != null) {
+			Collection<CyRow> rows = table.getMatchingRows(NETWORK_SUID_ATTRIBUTE, networkId);
+			rows.forEach(r -> table.deleteRows(Collections.singleton(r.get(GENEMANIA_VIEWS_PK_ATTRIBUTE, Integer.class))));
+		}
+	}
+	
+	@Override
+	public void clearSavedSessionState() {
+		CyTable table = getGlobalTable(GENEMANIA_VIEWS_TABLE);
+		
+		if (table != null)
+			tableManager.deleteTable(table.getSUID());
+	}
+	
+	private CyTable getGlobalTable(String title) {
+		Set<CyTable> globalTables = tableManager.getGlobalTables();
+		
+		for (CyTable table : globalTables) {
+			if (table.getTitle().equals(title))
+				return table;
+		}
+		
+		return null;
+	}
+
 	public class SelectionHandler extends SelectionDelegate {
 
 		private RowsSetEvent event;
 		private Class<? extends CyIdentifiable> type;
 
-		public SelectionHandler(NetworkSelectionManager manager,
+		public SelectionHandler(SessionManager manager,
 				GeneMania plugin) {
 			super(true, null, manager, plugin, CytoscapeUtilsImpl.this);
 		}
@@ -699,7 +851,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 			}
 		}
 
-		public NetworkSelectionManager getSelectionManager() {
+		public SessionManager getSelectionManager() {
 			return manager;
 		}
 	}

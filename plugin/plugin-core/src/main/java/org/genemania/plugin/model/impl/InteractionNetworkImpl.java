@@ -18,56 +18,68 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
+
 import org.genemania.domain.InteractionNetwork;
 
-public class InteractionNetworkImpl extends AbstractNetwork<InteractionNetwork> {
+public class InteractionNetworkImpl extends AbstractNetwork<InteractionNetwork> implements Serializable {
 
-	private InteractionNetwork network;
-
-	public InteractionNetworkImpl(InteractionNetwork network, double weight) {
-		super(weight);
-		this.network = network;
+	private static final long serialVersionUID = 1343003763593182340L;
+	
+	public InteractionNetworkImpl() {
+	}
+	
+	public InteractionNetworkImpl(InteractionNetwork model, double weight) {
+		super(model, weight);
 	}
 	
 	@Override
-	public InteractionNetwork getModel() {
-		return network;
-	}
-
-	@Override
 	public String getName() {
-		return network.getName();
+		return model != null ? model.getName() : null;
 	}
 	
 	@Override
 	public boolean isDefaultSelected() {
-		return network.isDefaultSelected();
-	}
-	
-	@Override
-	public boolean equals(Object other) {
-		if (!(other instanceof InteractionNetworkImpl)) {
-			return false;
-		}
-		return ((InteractionNetworkImpl) other).getModel().getId() == network.getId();
-	}
-	
-	@Override
-	public int hashCode() {
-		return (int) (network.getId() % Integer.MAX_VALUE);
+		return model != null && model.isDefaultSelected();
 	}
 	
 	@Override
 	public boolean hasInteractions() {
-		return network.getInteractions().size() > 0;
+		return model != null && model.getInteractions().size() > 0;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T adapt(Class<T> type) {
-		if (!type.equals(InteractionNetwork.class)) {
+		if (!type.equals(InteractionNetwork.class))
 			return null;
-		}
-		return (T) network;
+		
+		return (T) model;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 7;
+		int result = 1;
+		result = prime * result + ((model == null) ? 0 : (int) (model.getId() ^ (model.getId() >>> 32)));
+		
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof InteractionNetworkImpl))
+			return false;
+		
+		InteractionNetworkImpl other = (InteractionNetworkImpl) obj;
+		
+		if (model == null || other.model == null)
+			return false;
+		
+		return model.getId() == other.model.getId();
 	}
 }

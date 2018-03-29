@@ -47,7 +47,6 @@ import org.genemania.domain.Node;
 import org.genemania.domain.Organism;
 import org.genemania.exception.DataStoreException;
 import org.genemania.mediator.AttributeMediator;
-import org.genemania.mediator.OrganismMediator;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.OneUseIterable;
 import org.genemania.plugin.Strings;
@@ -60,7 +59,7 @@ import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
 import org.genemania.plugin.model.impl.SearchResultImpl;
 import org.genemania.plugin.model.impl.ViewStateImpl;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.type.CombiningMethod;
 import org.genemania.util.ChildProgressReporter;
 import org.genemania.util.ProgressReporter;
@@ -109,48 +108,37 @@ public class ResultReconstructor {
 	
 	void addEdgeIdForGroup(String name, String edgeId) {
 		Set<String> edgeIds = edgeIdsByGroup.get(name);
+		
 		if (edgeIds == null) {
 			edgeIds = new HashSet<>();
 			edgeIdsByGroup.put(name, edgeIds);
 		}
+		
 		edgeIds.add(edgeId);
 	}
 
 	void addSourceNetworkForNode(String nodeId, Object network) {
 		Set<Object> networks = sourceNetworksByNodeId.get(nodeId);
+		
 		if (networks == null) {
 			networks = new HashSet<>();
 			sourceNetworksByNodeId.put(nodeId, networks);
 		}
+		
 		networks.add(network);
 	}
 	
 	void addSourceNetworkForEdge(String edgeId, Object network) {
 		Set<Object> networks = sourceNetworksByEdgeId.get(edgeId);
+		
 		if (networks == null) {
 			networks = new HashSet<>();
 			sourceNetworksByEdgeId.put(edgeId, networks);
 		}
+		
 		networks.add(network);
 	}
 	
-	Organism reconstructOrganism(CyNetwork network) throws DataStoreException {
-		String organismName = cytoscapeUtils.getAttribute(network, network, CytoscapeUtils.ORGANISM_NAME_ATTRIBUTE,
-				String.class);
-		
-		if (organismName == null)
-			return null;
-		
-		OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
-		
-		for (Organism organism : mediator.getAllOrganisms()) {
-			if (organismName.equals(organism.getName()))
-				return organism;
-		}
-		
-		return null;
-	}
-
 	public ViewState reconstructCache(CyNetwork cyNetwork, ProgressReporter progress)
 			throws DataStoreException, IOException {
 		progress.setStatus(Strings.resultReconstructor_status);
@@ -159,44 +147,44 @@ public class ResultReconstructor {
 		progress.setProgress(currentProgress);
 		
 		// Check data version
-		String dataVersion = cytoscapeUtils.getAttribute(cyNetwork, cyNetwork, CytoscapeUtils.DATA_VERSION_ATTRIBUTE,
-				String.class);
+		String dataVersion = cytoscapeUtils.getDataVersion(cyNetwork);
 		
 		if (dataVersion == null)
 			return null;
 		
 		version = dataVersion;
+		boolean isWeb = dataVersion.endsWith(CytoscapeUtils.WEB_VERSION_TAG);
 		
-		if (!dataVersion.equals(data.getVersion().toString()))
+		if (isWeb || !dataVersion.equals(data.getVersion().toString()))
 			return null;
 		
 		// Locate organism
-		Organism targetOrganism = reconstructOrganism(cyNetwork);
+		final Organism organism = reconstructOrganism(cyNetwork);
 		
-		if (targetOrganism == null)
+		if (organism == null)
 			return null;
 
 		SearchResultBuilder builder = new SearchResultImpl();
-		builder.setOrganism(targetOrganism);
+		builder.setOrganism(organism);
 		builder.setCombiningMethod(reconstructCombiningMethod(cyNetwork));
 		builder.setGeneSearchLimit(reconstructGeneSearchLimit(cyNetwork));
 		builder.setAttributeSearchLimit(reconstructAttributeSearchLimit(cyNetwork));
 		progress.setProgress(++currentProgress);
 		
 		ChildProgressReporter childProgress = new ChildProgressReporter(progress);
-		reconstructNodeCache(builder, cyNetwork, targetOrganism, childProgress);
+		reconstructNodeCache(builder, cyNetwork, organism, childProgress);
 		childProgress.close();
 		
 		childProgress = new ChildProgressReporter(progress);
-		reconstructNetworkCache(builder, cyNetwork, targetOrganism, childProgress);
+		reconstructNetworkCache(builder, cyNetwork, organism, childProgress);
 		childProgress.close();
 		
 		childProgress = new ChildProgressReporter(progress);
-		reconstructEnrichmentCache(builder, cyNetwork, targetOrganism, childProgress);
+		reconstructEnrichmentCache(builder, cyNetwork, organism, childProgress);
 		childProgress.close();
 		
 		childProgress = new ChildProgressReporter(progress);
-		reconstructAttributeCache(builder, cyNetwork, targetOrganism, childProgress);
+		reconstructAttributeCache(builder, cyNetwork, organism, childProgress);
 		childProgress.close();
 		
 		ViewStateBuilder viewStateBuilder = new ViewStateImpl(builder);
@@ -204,10 +192,27 @@ public class ResultReconstructor {
 		reconstructViewState(viewStateBuilder, childProgress);
 		childProgress.close();
 		
-		NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
+		SessionManager manager = plugin.getSessionManager();
 		cytoscapeUtils.registerSelectionListener(cyNetwork, manager, plugin);
 
 		return viewStateBuilder.build();
+	}
+	
+	private Organism reconstructOrganism(CyNetwork network) throws DataStoreException {
+		String organismName = cytoscapeUtils.getAttribute(network, network, CytoscapeUtils.ORGANISM_NAME_ATTRIBUTE,
+				String.class);
+		
+		if (organismName == null)
+			return null;
+		
+		Collection<Organism> allOrganisms = data.getMediatorProvider().getOrganismMediator().getAllOrganisms();
+	
+		for (Organism organism : allOrganisms) {
+			if (organismName.equals(organism.getName()))
+				return organism;
+		}
+		
+		return null;
 	}
 
 	private void reconstructViewState(ViewStateBuilder builder, ProgressReporter progress) {
@@ -222,8 +227,9 @@ public class ResultReconstructor {
 		progress.setMaximumProgress(maximum);
 		
 		int count = 0;
+		
 		for (Entry<Node, String> entry : nodeIds.entrySet()) {
-			builder.addNode(entry.getKey(),  entry.getValue());
+			builder.addNode(entry.getKey(), entry.getValue());
 			progress.setProgress(++count);
 		}
 		
@@ -233,11 +239,13 @@ public class ResultReconstructor {
 			progress.setProgress(++count);
 		}
 
-		Map<Object, Network<?>> networksByModel = new HashMap<Object, Network<?>>();
+		Map<Object, Network<?>> networksByModel = new HashMap<>();
+		
 		for (Group<?, ?> group : builder.getAllGroups()) {
 			for (Network<?> network : group.getNetworks()) {
 				networksByModel.put(network.getModel(), network);
 			}
+			
 			progress.setProgress(++count);
 		}
 		
@@ -246,6 +254,7 @@ public class ResultReconstructor {
 				Network<?> network = networksByModel.get(model);
 				builder.addSourceNetworkForEdge(entry.getKey(), network);
 			}
+			
 			progress.setProgress(++count);
 		}
 		
@@ -254,14 +263,16 @@ public class ResultReconstructor {
 				Network<?> network = networksByModel.get(model);
 				builder.addSourceNetworkForNode(entry.getKey(), network);
 			}
+			
 			progress.setProgress(++count);
 		}
 
 		for (Entry<String, Set<String>> entry : edgeIdsByGroup.entrySet()) {
 			Group<?, ?> group = builder.getGroup(entry.getKey());
-			for (String edgeId : entry.getValue()) {
+			
+			for (String edgeId : entry.getValue())
 				builder.addEdge(group, edgeId);
-			}
+			
 			progress.setProgress(++count);
 		}
 	}

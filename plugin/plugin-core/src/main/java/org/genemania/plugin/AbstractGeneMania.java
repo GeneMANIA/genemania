@@ -39,7 +39,7 @@ import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.data.IConfiguration;
 import org.genemania.plugin.data.Version;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.task.GeneManiaTask;
 import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.DownloadDialog;
@@ -62,28 +62,36 @@ public abstract class AbstractGeneMania implements GeneMania {
 	protected Component rootMenuItem;
 	protected JMenuItem showResultsMenu;
 
-	protected final NetworkSelectionManager selectionManager;
+	protected final DataSetManager dataSetManager;
+	protected final SessionManager selectionManager;
 	protected final Metadata metadata;
 	protected final UiUtils uiUtils;
-	protected final DataSetManager dataSetManager;
 	protected final FileUtils fileUtils;
 	protected final CytoscapeUtils cytoscapeUtils;
 	protected final NetworkUtils networkUtils;
 	protected final TaskDispatcher taskDispatcher;
-	
+
 	protected abstract void startUp();
 	protected abstract void shutDown();
 	
-	public AbstractGeneMania(DataSetManager dataSetManager, CytoscapeUtils cytoscapeUtils, UiUtils uiUtils, FileUtils fileUtils, NetworkUtils networkUtils, TaskDispatcher taskDispatcher, NetworkSelectionManager selectionManager) {
+	public AbstractGeneMania(
+			DataSetManager dataSetManager,
+			CytoscapeUtils cytoscapeUtils,
+			UiUtils uiUtils,
+			FileUtils fileUtils,
+			NetworkUtils networkUtils,
+			TaskDispatcher taskDispatcher,
+			SessionManager selectionManager
+	) {
 		this.dataSetManager = dataSetManager;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.uiUtils = uiUtils;
 		this.fileUtils = fileUtils;
 		this.networkUtils = networkUtils;
 		this.taskDispatcher = taskDispatcher;
+		this.selectionManager = selectionManager;
 		
 		metadata = new Metadata();
-		this.selectionManager = selectionManager;  
 	}
 	
 	public static File getSettingsDirectory() {
@@ -210,7 +218,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 	}
 
 	protected void validateMenu() {
-		NetworkSelectionManager manager = getNetworkSelectionManager();
+		SessionManager manager = getSessionManager();
 		showResultsMenu.setEnabled(manager.isGeneManiaNetwork(cytoscapeUtils.getCurrentNetwork()));
 	}
 
@@ -362,7 +370,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 	}
 
 	@Override
-	public NetworkSelectionManager getNetworkSelectionManager() {
+	public SessionManager getSessionManager() {
 		return selectionManager;
 	}
 

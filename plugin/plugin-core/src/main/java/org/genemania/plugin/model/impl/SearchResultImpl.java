@@ -18,6 +18,7 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,7 +39,9 @@ import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.SearchResultBuilder;
 import org.genemania.type.CombiningMethod;
 
-public class SearchResultImpl implements SearchResultBuilder {
+public class SearchResultImpl implements SearchResultBuilder, Serializable {
+	
+	private static final long serialVersionUID = -5723132964169233141L;
 	
 	private Organism organism;
 	private Map<Long, Gene> queryGenes;

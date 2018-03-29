@@ -22,14 +22,24 @@ import org.genemania.plugin.model.Network;
 
 public abstract class AbstractNetwork<T> implements Network<T> {
 
-	private double weight;
+	protected double weight;
+	protected T model;
 
-	public AbstractNetwork(double weight) {
+	protected AbstractNetwork() {
+	}
+	
+	protected AbstractNetwork(T model, double weight) {
+		this.model = model;
 		this.weight = weight;
 	}
 
 	@Override
 	public double getWeight() {
 		return weight;
+	}
+	
+	@Override
+	public T getModel() {
+		return model;
 	}
 }

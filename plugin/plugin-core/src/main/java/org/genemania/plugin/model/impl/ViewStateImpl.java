@@ -18,6 +18,7 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,12 +40,15 @@ import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
 
-public class ViewStateImpl implements ViewStateBuilder {
+public class ViewStateImpl implements ViewStateBuilder, Serializable {
+	
+	private static final long serialVersionUID = -7700156200747619009L;
+	
+	private final transient Map<Group<?, ?>, Set<String>> edgeCache;
+	private final transient Map<String, Long> nodeCache;
 	
 	private final Map<String, Set<Network<?>>> networksByEdge;
 	private final Map<String, Set<Network<?>>> networksByNode;
-	private final Map<Group<?, ?>, Set<String>> edgeCache;
-	private final Map<String, Long> nodeCache;
 	private final Set<Group<?, ?>> enabledGroups;
 	private final Set<Group<?, ?>> highlightedGroups;
 	private final Set<Network<?>> highlightedNetworks; 
@@ -56,8 +60,7 @@ public class ViewStateImpl implements ViewStateBuilder {
 	private Group<?, ?> mostRecentGroup;
 	private SearchResult searchResult;
 	
-	public ViewStateImpl(SearchResult result) {
-		searchResult = result;
+	public ViewStateImpl() {
 		edgeCache = new HashMap<>();
 		nodeCache = new WeakHashMap<>();
 		enabledGroups = new HashSet<>();
@@ -68,7 +71,11 @@ public class ViewStateImpl implements ViewStateBuilder {
 		networksByNode = new HashMap<>();
 		groupsByName = new HashMap<>();
 		groupsByNetwork = new HashMap<>();
-		
+	}
+	
+	public ViewStateImpl(SearchResult result) {
+		this();
+		searchResult = result;
 		addGroups(result);
 	}
 

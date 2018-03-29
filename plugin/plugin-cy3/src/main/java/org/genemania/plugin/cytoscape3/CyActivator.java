@@ -44,6 +44,8 @@ import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyTableFactory;
+import org.cytoscape.model.CyTableManager;
 import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.property.CyProperty;
 import org.cytoscape.property.SimpleCyProperty;
@@ -95,6 +97,8 @@ public class CyActivator extends AbstractCyActivator {
 		CyNetworkFactory networkFactory = getService(bc, CyNetworkFactory.class);
 		CyNetworkViewManager networkViewManager = getService(bc, CyNetworkViewManager.class);
 		CyNetworkViewFactory networkViewFactory = getService(bc, CyNetworkViewFactory.class);
+		CyTableManager tableManager = getService(bc, CyTableManager.class);
+		CyTableFactory tableFactory = getService(bc, CyTableFactory.class);
 		VisualMappingManager visualMappingManager = getService(bc, VisualMappingManager.class);
 		VisualStyleFactory visualStyleFactory = getService(bc, VisualStyleFactory.class);
 		VisualMappingFunctionFactory discreteMappingFactory = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=discrete)");
@@ -115,6 +119,7 @@ public class CyActivator extends AbstractCyActivator {
 		NetworkUtils networkUtils = new NetworkUtils();
 		CytoscapeUtilsImpl cytoscapeUtils = new CytoscapeUtilsImpl(
 				networkUtils, swingApplication, applicationManager,
+				tableManager, tableFactory,
 				networkManager, networkViewManager,
 				networkFactory, networkViewFactory,
 				visualStyleFactory, visualMappingManager,
@@ -133,7 +138,7 @@ public class CyActivator extends AbstractCyActivator {
 				Properties.class, CyProperty.SavePolicy.SESSION_FILE);
 		registerService(bc, properties, CyProperty.class);
 		
-		NetworkSelectionManagerImpl selectionManager = new NetworkSelectionManagerImpl(cytoscapeUtils, taskDispatcher,
+		SessionManagerImpl selectionManager = new SessionManagerImpl(cytoscapeUtils, taskDispatcher,
 				properties);
 		GeneManiaImpl geneMania = new GeneManiaImpl(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils,
 				taskDispatcher, swingApplication, serviceRegistrar, selectionManager, properties);

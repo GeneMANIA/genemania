@@ -22,7 +22,12 @@
  */
 package org.genemania.plugin.model;
 
-public class AttributeEntry {
+import java.io.Serializable;
+
+public class AttributeEntry implements Serializable {
+	
+	private static final long serialVersionUID = 8808905964273217390L;
+	
 	private final String displayName;
 	private final String attributeName;
 	private boolean selected;

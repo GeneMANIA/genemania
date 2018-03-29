@@ -130,7 +130,7 @@ import org.genemania.plugin.parsers.IQueryParser;
 import org.genemania.plugin.parsers.JsonQueryParser;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.parsers.WebsiteQueryParser;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.task.GeneManiaTask;
 import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.components.WrappedOptionPane;
@@ -973,8 +973,8 @@ public class LocalSearchDialog extends JDialog {
 						cytoscapeUtils.performLayout(network);
 						cytoscapeUtils.maximize(network);
 						
-						NetworkSelectionManager selManager = plugin.getNetworkSelectionManager();
-						ViewState options = selManager.getNetworkConfiguration(network);
+						SessionManager sessionManager = plugin.getSessionManager();
+						ViewState options = sessionManager.getNetworkConfiguration(network);
 						plugin.applyOptions(options);
 						plugin.showResults();
 					}

@@ -39,7 +39,8 @@ import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
+import org.genemania.util.ProgressReporter;
 
 public class NullCytoscapeUtils implements CytoscapeUtils {
 
@@ -73,7 +74,7 @@ public class NullCytoscapeUtils implements CytoscapeUtils {
 	}
 
 	@Override
-	public void registerSelectionListener(CyNetwork cyNetwork, NetworkSelectionManager manager, GeneMania plugin) {
+	public void registerSelectionListener(CyNetwork cyNetwork, SessionManager manager, GeneMania plugin) {
 	}
 
 	@Override
@@ -196,5 +197,37 @@ public class NullCytoscapeUtils implements CytoscapeUtils {
 	@Override
 	public Class<?> getAttributeType(CyNetwork network, CyIdentifiable entry, String name) {
 		return null;
+	}
+
+	@Override
+	public CyNetwork getNetwork(long suid) {
+		return null;
+	}
+
+	@Override
+	public boolean isGeneManiaNetwork(CyNetwork network) {
+		return false;
+	}
+
+	@Override
+	public String getDataVersion(CyNetwork cyNetwork) {
+		return null;
+	}
+
+	@Override
+	public void saveSessionState(Map<Long, ViewState> states) {
+	}
+
+	@Override
+	public Map<CyNetwork, ViewState> restoreSessionState(ProgressReporter progress) {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public void removeSavedSessionState(Long networkId) {
+	}
+
+	@Override
+	public void clearSavedSessionState() {
 	}
 }

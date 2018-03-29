@@ -16,10 +16,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package org.genemania.plugin.delegates;
+package org.genemania.plugin.cytoscape3.delegates;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import org.cytoscape.model.CyNetwork;
 import org.genemania.exception.ApplicationException;
@@ -29,8 +30,9 @@ import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape.ResultReconstructor;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetManager;
+import org.genemania.plugin.delegates.Delegate;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.util.ProgressReporter;
 
 public class SessionChangeDelegate implements Delegate {
@@ -65,10 +67,14 @@ public class SessionChangeDelegate implements Delegate {
 				data = dataSetManager.getDataSet();
 			}
 			
-			NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
+			SessionManager manager = plugin.getSessionManager();
 			ResultReconstructor reconstructor = new ResultReconstructor(data, plugin, cytoscapeUtils);
 			
-			// Reconstruct networks
+			// Reconstruct networks - Web Data
+			Map<CyNetwork, ViewState> states = cytoscapeUtils.restoreSessionState(progress);
+			states.forEach((net, options) -> manager.addNetworkConfiguration(net, options));
+			
+			// Reconstruct networks - Local Data
 			for (CyNetwork cyNetwork : cytoscapeUtils.getNetworks()) {
 				ViewState options = reconstructor.reconstructCache(cyNetwork, progress);
 				

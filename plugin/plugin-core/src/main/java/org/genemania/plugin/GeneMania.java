@@ -24,7 +24,7 @@ import java.io.File;
 import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.util.ProgressReporter;
 
 public interface GeneMania {
@@ -39,7 +39,7 @@ public interface GeneMania {
 
 	void hideResults();
 
-	NetworkSelectionManager getNetworkSelectionManager();
+	SessionManager getSessionManager();
 
 	DataSetManager getDataSetManager();
 

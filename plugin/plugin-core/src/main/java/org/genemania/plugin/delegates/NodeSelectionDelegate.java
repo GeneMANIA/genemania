@@ -24,7 +24,7 @@ import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 
 public class NodeSelectionDelegate extends SelectionDelegate {
 	
@@ -34,7 +34,7 @@ public class NodeSelectionDelegate extends SelectionDelegate {
 			CyNode node,
 			boolean selected,
 			CyNetwork network,
-			NetworkSelectionManager manager,
+			SessionManager manager,
 			GeneMania plugin,
 			CytoscapeUtils cytoscapeUtils
 	) {

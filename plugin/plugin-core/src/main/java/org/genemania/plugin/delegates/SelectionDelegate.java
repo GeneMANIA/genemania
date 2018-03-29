@@ -23,19 +23,19 @@ import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 
 public class SelectionDelegate implements Delegate {
 
 	protected final boolean selected;
 	protected CyNetwork network;
-	protected final NetworkSelectionManager manager;
+	protected final SessionManager manager;
 	private final GeneMania plugin;
 	protected final CytoscapeUtils cytoscapeUtils;
 
 	private static Object selectionMutex = new Object();
 	
-	public SelectionDelegate(boolean selected, CyNetwork network, NetworkSelectionManager manager, GeneMania plugin,
+	public SelectionDelegate(boolean selected, CyNetwork network, SessionManager manager, GeneMania plugin,
 			CytoscapeUtils cytoscapeUtils) {
 		this.selected = selected;
 		this.network = network;

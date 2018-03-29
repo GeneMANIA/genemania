@@ -46,7 +46,7 @@ import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 import org.genemania.plugin.view.util.UiUtils;
@@ -221,10 +221,10 @@ public class ManiaResultsPanel extends JPanel {
 		Organism organism = result.getOrganism();
 		organismLabel.setText("<html><i>" + organism.getAlias() + "</i> (" + organism.getDescription() + ")</html>");
 		
-		NetworkSelectionManager selectionManager = plugin.getNetworkSelectionManager();
-		geneListener = selectionManager.createGeneListSelectionListener(genePanel, options);
-		networkListener = selectionManager.createNetworkListSelectionListener(networkPanel, options);
-		functionListener = selectionManager.createFunctionListSelectionListener(functionPanel, result);
+		SessionManager sessionManager = plugin.getSessionManager();
+		geneListener = sessionManager.createGeneListSelectionListener(genePanel, options);
+		networkListener = sessionManager.createNetworkListSelectionListener(networkPanel, options);
+		functionListener = sessionManager.createFunctionListSelectionListener(functionPanel, result);
 		
 		genePanel.applyOptions(options);
 		genePanel.addSelectionListener(geneListener);

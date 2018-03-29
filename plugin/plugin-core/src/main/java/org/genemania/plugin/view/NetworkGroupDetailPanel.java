@@ -38,7 +38,7 @@ import org.genemania.plugin.Strings;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 import org.genemania.plugin.view.components.ToggleDetailPanel;
 import org.genemania.plugin.view.util.UiUtils;
@@ -73,7 +73,7 @@ public class NetworkGroupDetailPanel extends ToggleDetailPanel<Group<?, ?>> {
 		this.data = plugin.getDataSetManager().getDataSet();
 
 		networksPanel = new NetworkInfoPanel(data, group, groupInfoPanel, networkUtils, uiUtils, options);
-		NetworkSelectionManager manager = plugin.getNetworkSelectionManager();
+		SessionManager manager = plugin.getSessionManager();
 		networksPanel.addSelectionListener(manager.createNetworkSelectionListener());
 		
 		Color textColor = group.hasInteractions() ? SystemColor.textText : SystemColor.textInactiveText;

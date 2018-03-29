@@ -42,7 +42,7 @@ import org.genemania.plugin.view.NetworkChangeListener;
 import org.genemania.plugin.view.NetworkGroupDetailPanel;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 
-public abstract class AbstractNetworkSelectionManager implements NetworkSelectionManager {
+public abstract class AbstractSessionManager implements SessionManager {
 	
 	protected final Map<Long, ViewState> networkOptions;
 	protected final CytoscapeUtils cytoscapeUtils;
@@ -51,7 +51,7 @@ public abstract class AbstractNetworkSelectionManager implements NetworkSelectio
 	protected Long selectedNetworkId;
 	protected boolean selectionListenerEnabled;
 
-	public AbstractNetworkSelectionManager(CytoscapeUtils cytoscapeUtils) {
+	public AbstractSessionManager(CytoscapeUtils cytoscapeUtils) {
 	    this.cytoscapeUtils = cytoscapeUtils;
 	    
 	    networkOptions = new HashMap<>();
@@ -402,5 +402,7 @@ public abstract class AbstractNetworkSelectionManager implements NetworkSelectio
 		
 		if (networkOptions.size() == 0)
 			plugin.hideResults();
+		
+		cytoscapeUtils.removeSavedSessionState(network.getSUID());
 	}
 }
