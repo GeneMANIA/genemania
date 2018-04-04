@@ -31,6 +31,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
+import javax.swing.UIManager;
 
 import org.genemania.domain.Gene;
 import org.genemania.plugin.NetworkUtils;
@@ -63,7 +64,9 @@ public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
 		this.score = score;
 		this.isQueryGene = isQueryGene;
 		
-		setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, Color.white));
+		final Color fg = UIManager.getColor("Table.background");
+		
+		setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, fg));
 		
 		setLayout(new GridBagLayout());
 		String name = networkUtils.getGeneLabel(gene);
@@ -90,11 +93,11 @@ public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
 		descriptionLabel.setFont(getFont());
 		descriptionLabel.setVisible(false);
 		descriptionLabel.setOpaque(true);
-		descriptionLabel.setBackground(Color.white);
+		descriptionLabel.setBackground(fg);
 		uiUtils.makeSmall(descriptionLabel);
 		add(descriptionLabel, new GridBagConstraints(1, 1, 2, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		
-		fillerPanel = uiUtils.createFillerPanel(Color.white);
+		fillerPanel = uiUtils.createFillerPanel(fg);
 		fillerPanel.setVisible(false);
 		add(fillerPanel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 	}
@@ -123,11 +126,10 @@ public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
 	@Override
 	public Dimension getMinimumSize() {
 		Dimension size = super.getMinimumSize();
-		if (descriptionLabel.isVisible()) {
-			return new Dimension(Math.max(MINIMUM_WIDTH_HINT, size.width), size.height);
-		} else {
-			return size;
-		}
+
+		return descriptionLabel.isVisible() ?
+				new Dimension(Math.max(MINIMUM_WIDTH_HINT, size.width), size.height)
+				: size;
 	}
 
 	public String getGeneName() {

@@ -80,36 +80,42 @@ public class ViewStateImpl implements ViewStateBuilder, Serializable {
 	private void addGroups(SearchResult result) {
 		{
 			Map<InteractionNetwork, Double> weights = result.getNetworkWeights();
+			
 			for (InteractionNetworkGroup model : result.getInteractionNetworkGroups().values()) {
 				Collection<Network<InteractionNetwork>> networks = new ArrayList<>();
+				
 				for (InteractionNetwork network : model.getInteractionNetworks()) {
 					Double weight = weights.get(network);
-					if (weight == null) {
+					
+					if (weight == null)
 						continue;
-					}
+					
 					networks.add(new InteractionNetworkImpl(network, weight));
 				}
 				
 				InteractionNetworkGroupImpl group = new InteractionNetworkGroupImpl(model, networks);
 				groupsByName.put(model.getName(), group);
 				
-				for (Network<?> network : group.getNetworks()) {
+				for (Network<?> network : group.getNetworks())
 					groupsByNetwork.put(network, group);
-				}
 			}
 		}
 		{
 			Map<Attribute, Double> weights = result.getAttributeWeights();
+			
 			if (weights != null) {
 				Map<AttributeGroup, Collection<Network<Attribute>>> networksByGroup = new HashMap<>();
+				
 				for (Entry<Attribute, Double> entry : weights.entrySet()) {
 					Attribute attribute = entry.getKey();
 					AttributeGroup group = result.getAttributeGroup(attribute.getId());
 					Collection<Network<Attribute>> networks = networksByGroup.get(group);
+					
 					if (networks == null) {
 						networks = new ArrayList<>();
 						networksByGroup.put(group,  networks);
 					}
+					
 					networks.add(new ResultAttributeNetworkImpl(attribute, entry.getValue()));
 				}
 				
@@ -117,9 +123,9 @@ public class ViewStateImpl implements ViewStateBuilder, Serializable {
 					ResultAttributeGroupImpl group = new ResultAttributeGroupImpl(entry.getKey(), entry.getValue());
 					groupsByName.put(group.getName(), group);
 					
-					for (Network<?> network : group.getNetworks()) {
+					for (Network<?> network : group.getNetworks())
 						groupsByNetwork.put(network, group);
-					}
+					
 					setEnabled(group, true);
 				}
 				
@@ -134,18 +140,17 @@ public class ViewStateImpl implements ViewStateBuilder, Serializable {
 	
 	@Override
 	public void setEnabled(Group<?, ?> group, boolean enabled) {
-		if (enabled) {
+		if (enabled)
 			enabledGroups.add(group);
-		} else {
+		else
 			enabledGroups.remove(group);
-		}
 	}
 	
 	@Override
 	public void setGeneHighlighted(String name, boolean highlighted) {
-		if (name == null) {
+		if (name == null)
 			return;
-		}
+		
 		if (highlighted) {
 			highlightedNodes.add(name);
 			mostRecentNode = name;
@@ -165,11 +170,10 @@ public class ViewStateImpl implements ViewStateBuilder, Serializable {
 	}
 
 	public void setNetworkHighlighted(Network<?> network, boolean highlighted) {
-		if (highlighted) {
+		if (highlighted)
 			highlightedNetworks.add(network);
-		} else {
+		else
 			highlightedNetworks.remove(network);
-		}
 	}
 	
 	@Override
@@ -225,19 +229,15 @@ public class ViewStateImpl implements ViewStateBuilder, Serializable {
 	@Override
 	public Set<Network<?>> getNetworksByEdge(String edgeId) {
 		Set<Network<?>> networks = networksByEdge.get(edgeId);
-		if (networks == null) {
-			return Collections.emptySet();
-		}
-		return Collections.unmodifiableSet(networks);
+		
+		return networks == null ? Collections.emptySet() : Collections.unmodifiableSet(networks);
 	}
 	
 	@Override
 	public Set<Network<?>> getNetworksByNode(String nodeId) {
 		Set<Network<?>> networks = networksByNode.get(nodeId);
-		if (networks == null) {
-			return Collections.emptySet();
-		}
-		return Collections.unmodifiableSet(networks);
+		
+		return networks == null ? Collections.emptySet() : Collections.unmodifiableSet(networks);
 	}
 
 	@Override
@@ -253,14 +253,16 @@ public class ViewStateImpl implements ViewStateBuilder, Serializable {
 	@Override
 	public void addEdge(Group<?, ?> group, String edgeId) {
 		Set<String> edgeIds = edgeCache.get(group);
+		
 		if (edgeIds == null) {
 			edgeIds = new HashSet<>();
 			edgeCache.put(group, edgeIds);
 		}
+		
 		edgeIds.add(edgeId);
-		if (group != null) {
+		
+		if (group != null)
 			addEdge(null, edgeId);
-		}
 	}
 
 	@Override
@@ -271,20 +273,24 @@ public class ViewStateImpl implements ViewStateBuilder, Serializable {
 	@Override
 	public void addSourceNetworkForEdge(String edgeId, Network<?> network) {
 		Set<Network<?>> networks = networksByEdge.get(edgeId);
+		
 		if (networks == null) {
 			networks = new HashSet<>();
 			networksByEdge.put(edgeId, networks);
 		}
+		
 		networks.add(network);
 	}
 	
 	@Override
 	public void addSourceNetworkForNode(String nodeId, Network<?> network) {
 		Set<Network<?>> networks = networksByNode.get(nodeId);
+		
 		if (networks == null) {
 			networks = new HashSet<>();
 			networksByNode.put(nodeId, networks);
 		}
+		
 		networks.add(network);
 	}
 	
