@@ -18,13 +18,16 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 
-public abstract class AbstractGroup<G, N> implements Group<G, N> {
+public abstract class AbstractGroup<G, N> implements Group<G, N>, Serializable {
+	
+	private static final long serialVersionUID = 6384924282374322312L;
 	
 	private Collection<Network<N>> networks;
 	private boolean hasInteractions;
@@ -34,7 +37,8 @@ public abstract class AbstractGroup<G, N> implements Group<G, N> {
 	}
 	
 	protected AbstractGroup(Collection<Network<N>> networks) {
-		this.networks = new ArrayList<>(networks);
+		this();
+		setNetworks(networks);
 		hasInteractions = hasInteractions(networks);
 	}
 	

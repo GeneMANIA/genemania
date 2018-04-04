@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 import org.genemania.domain.Attribute;
 import org.genemania.domain.AttributeGroup;
@@ -44,9 +43,8 @@ public class ViewStateImpl implements ViewStateBuilder, Serializable {
 	
 	private static final long serialVersionUID = -7700156200747619009L;
 	
-	private final transient Map<Group<?, ?>, Set<String>> edgeCache;
-	private final transient Map<String, Long> nodeCache;
-	
+	private final Map<Group<?, ?>, Set<String>> edgeCache;
+	private final Map<String, Long> nodeCache;
 	private final Map<String, Set<Network<?>>> networksByEdge;
 	private final Map<String, Set<Network<?>>> networksByNode;
 	private final Set<Group<?, ?>> enabledGroups;
@@ -62,7 +60,7 @@ public class ViewStateImpl implements ViewStateBuilder, Serializable {
 	
 	public ViewStateImpl() {
 		edgeCache = new HashMap<>();
-		nodeCache = new WeakHashMap<>();
+		nodeCache = new HashMap<>();
 		enabledGroups = new HashSet<>();
 		highlightedGroups = new HashSet<>();
 		highlightedNetworks = new HashSet<>();

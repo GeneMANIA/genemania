@@ -18,10 +18,14 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
+
 import org.genemania.plugin.model.Network;
 
-public abstract class AbstractNetwork<T> implements Network<T> {
+public abstract class AbstractNetwork<T> implements Network<T>, Serializable {
 
+	private static final long serialVersionUID = 6582415294149681941L;
+	
 	protected double weight;
 	protected T model;
 
