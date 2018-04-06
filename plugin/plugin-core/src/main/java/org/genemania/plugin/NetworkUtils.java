@@ -584,7 +584,16 @@ public class NetworkUtils {
 			config.setCombiningMethod(params.getWeighting());
 			config.setGeneSearchLimit(params.getResultsSize());
 			config.setAttributeSearchLimit(params.getAttributeResultsSize());
-			config.setSearchQuery(params.getGenes().stream().collect(Collectors.toMap(g -> g.getNode().getId(), g -> g)));
+			config.setSearchQuery(params.getGenes().stream().collect(
+					Collectors.toMap(
+							g -> g.getNode().getId(),
+							g -> g,
+							(g1, g2) -> {
+								// If two genes have same node id, just use the second one
+								// (usually happens when two or more query genes are synonyms)
+								return g2;
+							}
+					)));
 		}
 		
 		Collection<ResultInteractionNetworkGroup> resNetGroups = res.getResultNetworkGroups();
