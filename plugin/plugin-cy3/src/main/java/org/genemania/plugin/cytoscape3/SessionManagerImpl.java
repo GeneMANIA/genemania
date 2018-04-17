@@ -77,7 +77,8 @@ public class SessionManagerImpl extends AbstractSessionManager
 	
 	@Override
 	public void handleEvent(SessionAboutToBeSavedEvent evt) {
-		cytoscapeUtils.saveSessionState(new HashMap<>(networkOptions));
+		if (sessionIsActuallySaving())
+			cytoscapeUtils.saveSessionState(new HashMap<>(networkOptions));
 	}
 	
 	@Override
@@ -87,7 +88,8 @@ public class SessionManagerImpl extends AbstractSessionManager
 
 	@Override
 	public void handleEvent(SessionSavedEvent e) {
-		cytoscapeUtils.clearSavedSessionState();
+		if (sessionIsActuallySaving())
+			cytoscapeUtils.clearSavedSessionState();
 	}
 	
 	@Override
@@ -280,5 +282,21 @@ public class SessionManagerImpl extends AbstractSessionManager
 		}
 		
 		return null;
+	}
+	
+	private boolean sessionIsActuallySaving() {
+		// Hackey fix for bug with STRING app installed
+		// https://github.com/BaderLab/AutoAnnotateApp/issues/102
+		StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+		
+		for (StackTraceElement frame : stack) {
+			String className = frame.getClassName();
+			
+			if (className.startsWith("org.cytoscape.task.")
+					&& (className.endsWith(".SaveSessionTask") || className.endsWith(".SaveSessionAsTask")))
+				return true;
+		}
+		
+		return false;
 	}
 }
