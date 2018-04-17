@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout.ParallelGroup;
@@ -53,14 +52,11 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JRootPane;
 import javax.swing.JSlider;
-import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
@@ -584,36 +580,6 @@ public class UiUtils {
 		
 		if (currentSize.width < minSize.width)
 			currentSize.width = minSize.width;
-	}
-	
-	@SuppressWarnings("serial")
-	public void makeSmall(final JComponent... components) {
-		if (components == null || components.length == 0)
-			return;
-
-		for (JComponent c : components) {
-			if (isAquaLAF()) {
-				c.putClientProperty("JComponent.sizeVariant", "small");
-			} else {
-				if (c.getFont() != null)
-					c.setFont(c.getFont().deriveFont(getSmallFontSize()));
-			}
-
-			if (c instanceof JList) {
-				((JList<?>) c).setCellRenderer(new DefaultListCellRenderer() {
-					@Override
-					public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-							boolean isSelected, boolean cellHasFocus) {
-						super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-						setFont(getFont().deriveFont(getSmallFontSize()));
-
-						return this;
-					}
-				});
-			} else if (c instanceof JMenuItem || c instanceof JSpinner) {
-				c.setFont(c.getFont().deriveFont(getSmallFontSize()));
-			}
-		}
 	}
 	
 	@SuppressWarnings("unchecked")

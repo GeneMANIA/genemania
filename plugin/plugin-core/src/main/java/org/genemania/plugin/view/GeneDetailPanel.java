@@ -19,6 +19,8 @@
 
 package org.genemania.plugin.view;
 
+import static org.cytoscape.util.swing.LookAndFeelUtil.makeSmall;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -72,10 +74,10 @@ public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
 		String name = networkUtils.getGeneLabel(gene);
 		JLabel nameLabel = new JLabel(name);
 		nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD));
-		uiUtils.makeSmall(nameLabel);
+		makeSmall(nameLabel);
 		
 		expander = createToggleButton();
-		uiUtils.makeSmall(expander);
+		makeSmall(expander);
 		
 		add(expander, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, EXPANDER_PADDING, 0, EXPANDER_PADDING), 0, 0));
 		add(nameLabel, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
@@ -85,7 +87,7 @@ public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
 		} else {
 			JLabel scoreLabel = new JLabel(String.format("%.2f", score * 100d)); //$NON-NLS-1$
 			add(scoreLabel, new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-			uiUtils.makeSmall(scoreLabel);
+			makeSmall(scoreLabel);
 		}
 		
 		String description = networkUtils.buildGeneDescription(gene);
@@ -94,7 +96,7 @@ public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
 		descriptionLabel.setVisible(false);
 		descriptionLabel.setOpaque(true);
 		descriptionLabel.setBackground(fg);
-		uiUtils.makeSmall(descriptionLabel);
+		makeSmall(descriptionLabel);
 		add(descriptionLabel, new GridBagConstraints(1, 1, 2, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		
 		fillerPanel = uiUtils.createFillerPanel(fg);

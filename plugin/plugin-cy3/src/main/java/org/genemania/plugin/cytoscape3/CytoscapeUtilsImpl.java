@@ -707,7 +707,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 					row.set(NETWORK_SUID_ATTRIBUTE, netId);
 					row.set(STATE_ATTRIBUTE, hex);
 		        } catch (Exception ex) {
-		        		System.out.println(ex);
+		        		ex.printStackTrace();
 		            LogUtils.log(getClass(), ex);
 		        }
 			}
@@ -744,7 +744,7 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 							if (options != null)
 								states.put(network, options);
 				        } catch (Exception ex) {
-				        		System.out.println(ex);
+				        		ex.printStackTrace();
 				            LogUtils.log(getClass(), ex);
 				        }
 					}

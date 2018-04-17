@@ -32,6 +32,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
+import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
@@ -100,7 +101,7 @@ public class NetworkGroupDetailPanel extends ToggleDetailPanel<Group<?, ?>> {
 		
 		expander = createToggleButton();
 		
-		uiUtils.makeSmall(nameLabel, scoreLabel, toggleBox, expander);
+		LookAndFeelUtil.makeSmall(nameLabel, scoreLabel, toggleBox, expander);
 
 		add(expander, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, EXPANDER_PADDING, 0, EXPANDER_PADDING), 0, 0));
 		add(toggleBox, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
