@@ -45,7 +45,7 @@ import okhttp3.Response;
 public class LoadRemoteNetworksTask extends AbstractTask {
 
 	// TODO Make it a CyProperty?
-	protected static final String URL = "http://genemania.org/json/network_groups";
+	protected static final String URL = "http://api.genemania.org/json/network_groups";
 	private static final String TAG = "network_groups";
 	
 	private Map<Integer, Collection<InteractionNetworkGroup>> networkGroups = new HashMap<>();

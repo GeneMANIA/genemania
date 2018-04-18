@@ -237,7 +237,7 @@ public class CyActivator extends AbstractCyActivator {
 					"      {\n" + 
 					"        \"symbol\": \"ybcN\",\n" + 
 					"        \"queryGene\": true,\n" + 
-					"        \"querySymbol\": \"ybcN\",\n" + 
+					"        \"queryTerm\": \"ybcN\",\n" + 
 					"        \"description\": \"DLP12 prophage; putative protein\",\n" + 
 					"        \"score\": 0.6959143703846894\n" + 
 					"      },\n" + 

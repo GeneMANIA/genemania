@@ -544,8 +544,8 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 	private class RunGeneManiaTask extends AbstractTask implements ObservableTask {
 
 		// TODO Make it a CyProperty?
-		private static final String SEARCH_URL = "http://genemania.org/json/search_results";
-		private static final String VERSION_URL = "http://genemania.org/json/version";
+		private static final String SEARCH_URL = "http://api.genemania.org/json/search_results";
+		private static final String VERSION_URL = "http://api.genemania.org/json/version";
 		
 		private final String SEARCH_TAG = "search";
 		private final String VERSION_TAG = "version";
@@ -829,7 +829,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 						jsonGene.addProperty("queryGene", queryGene != null);
 						
 						if (queryGene != null)
-							jsonGene.addProperty("querySymbol", queryGene.getSymbol());
+							jsonGene.addProperty("queryTerm", queryGene.getSymbol());
 						
 						if (gene.getNode() != null && gene.getNode().getGeneData() != null)
 							jsonGene.addProperty("description", gene.getNode().getGeneData().getDescription());

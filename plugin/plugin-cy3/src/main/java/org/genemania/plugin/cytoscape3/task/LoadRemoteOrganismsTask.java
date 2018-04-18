@@ -44,7 +44,7 @@ import okhttp3.Response;
 public class LoadRemoteOrganismsTask extends AbstractTask {
 
 	// TODO Make it a CyProperty?
-	protected static final String URL = "http://genemania.org/json/organisms";
+	protected static final String URL = "http://api.genemania.org/json/organisms";
 	private static final String TAG = "organisms";
 	
 	private Set<Organism> organisms = new LinkedHashSet<>();
