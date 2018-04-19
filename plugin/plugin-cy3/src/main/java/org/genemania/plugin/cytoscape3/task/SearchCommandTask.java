@@ -192,10 +192,12 @@ public class SearchCommandTask extends AbstractTask {
 		if (cancelled)
 			return;
 		
+		String queryFileError = queryFile != null && !queryFile.exists() ? "Query file does not exist. " : "";
+		
 		if (query.getOrganism() == null)
-			throw new RuntimeException("Please specify a valid organism.");
+			throw new RuntimeException(queryFileError + "Please specify a valid organism.");
 		if (query.getGenes() == null || query.getGenes().isEmpty())
-			throw new RuntimeException("Please enter one or more genes.");
+			throw new RuntimeException(queryFileError + "Please enter one or more genes.");
 		if (offline && !SimpleSearchTaskFactory.hasValidGenes(query.getOrganism(), query.getGenes(), plugin))
 			throw new RuntimeException("Please specify a set of valid gene names and try again.");
 			
@@ -254,10 +256,7 @@ public class SearchCommandTask extends AbstractTask {
 		Query query = null;
 		
 		// If queryFile is passed, try to parse it first
-		if (queryFile != null) {
-			if (!queryFile.exists())
-				throw new RuntimeException("Query file does not exist.");
-			
+		if (queryFile != null && queryFile.exists()) {
 			DataSet data = plugin.getDataSetManager().getDataSet();
 			
 			if (data == null) {
