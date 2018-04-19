@@ -149,9 +149,9 @@ public class QueryRunner extends AbstractPluginDataApp {
 			fMania = new Mania2(fCache);
 
 			if (fInputFormat == null) {
-				fQueryParser = new TabDelimitedQueryParser();
+				fQueryParser = new TabDelimitedQueryParser(fData);
 			} else if ("flat".equals(fInputFormat)) { //$NON-NLS-1$
-				fQueryParser = new TabDelimitedQueryParser();
+				fQueryParser = new TabDelimitedQueryParser(fData);
 			} else {
 				throw new ApplicationException(String.format("Unrecognized input format: %s", fInputFormat)); //$NON-NLS-1$
 			}
@@ -331,7 +331,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 		Reader reader = new InputStreamReader(new FileInputStream(filename), "UTF-8"); //$NON-NLS-1$
 		
 		try {
-			query = fQueryParser.parse(fData, reader, new IQueryErrorHandler() {
+			query = fQueryParser.parse(reader, new IQueryErrorHandler() {
 				public void handleUnrecognizedGene(String gene) {
 					System.err.println(String.format("WARNING: Unrecognized gene \"%s\"", gene)); //$NON-NLS-1$
 				}

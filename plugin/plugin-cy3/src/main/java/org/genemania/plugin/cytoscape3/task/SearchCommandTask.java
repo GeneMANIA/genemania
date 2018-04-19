@@ -152,8 +152,7 @@ public class SearchCommandTask extends AbstractTask {
 					+ "It accepts two file formats (plain text and JSON), "
 					+ "which are the same ones you can download from http://genemania.org/ after executing a search. "
 					+ "If this argument is passed, the other ones are not necessary, as the query file should contain all of them. "
-					+ "However, if any other arguments are also passed, they overwrite the ones parsed from the query file. "
-					+ "This option is only supported by the offline search.",
+					+ "However, if any other arguments are also passed, they overwrite the ones parsed from the query file.",
 			exampleStringValue = "/Users/johndoe/Downloads/genemania-parameters.json",
 			context = "nogui"
 	)
@@ -292,7 +291,11 @@ public class SearchCommandTask extends AbstractTask {
 				}
 			};
 			
-			IQueryParser[] parsers = new IQueryParser[] { new JsonQueryParser(), new WebsiteQueryParser() };
+			Set<Organism> remoteOrganisms = organismManager.getRemoteOrganisms();
+			
+			JsonQueryParser jsonParser = offline ? new JsonQueryParser(data) : new JsonQueryParser(remoteOrganisms);
+			WebsiteQueryParser websiteParser = offline ? new WebsiteQueryParser(data): new WebsiteQueryParser(remoteOrganisms);
+			IQueryParser[] parsers = new IQueryParser[] { jsonParser, websiteParser };
 			
 			for (IQueryParser parser : parsers) {
 				try {
@@ -301,7 +304,7 @@ public class SearchCommandTask extends AbstractTask {
 					
 					// TODO: Assume UTF-8 for now
 					Reader reader = new InputStreamReader(new FileInputStream(queryFile), "UTF-8"); //$NON-NLS-1$
-					query = parser.parse(data, reader, handler);
+					query = parser.parse(reader, handler);
 					break;
 				} catch (Exception e) {
 					System.out.println(e);

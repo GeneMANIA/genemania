@@ -66,8 +66,8 @@ public abstract class AbstractPluginApp {
 	}
 	
 	protected Organism parseOrganism(DataSet data, String name) throws DataStoreException {
-		TabDelimitedQueryParser parser = new TabDelimitedQueryParser();
-		return parser.parseOrganism(data, name);
+		TabDelimitedQueryParser parser = new TabDelimitedQueryParser(data);
+		return parser.parseOrganism(name);
 	}
 
 	static DataSetManager createDataSetManager() {

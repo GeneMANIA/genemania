@@ -891,12 +891,12 @@ public class LocalSearchDialog extends JDialog {
 	}
 	
 	protected Query parseQuery(DataSet data, File file, IQueryErrorHandler handler) throws ApplicationException {
-		IQueryParser[] parsers = new IQueryParser[] { new JsonQueryParser(), new WebsiteQueryParser() };
+		IQueryParser[] parsers = new IQueryParser[] { new JsonQueryParser(data), new WebsiteQueryParser(data) };
 		for (IQueryParser parser : parsers) {
 			try {
 				// TODO: Assume UTF-8 for now
 				Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8"); //$NON-NLS-1$
-				return parser.parse(data, reader, handler);
+				return parser.parse(reader, handler);
 			} catch (Exception e) {
 			}
 		}

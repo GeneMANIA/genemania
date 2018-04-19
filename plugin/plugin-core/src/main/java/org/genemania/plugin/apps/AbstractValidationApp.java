@@ -45,6 +45,7 @@ import org.xml.sax.SAXException;
 
 @SuppressWarnings("nls")
 public class AbstractValidationApp extends AbstractPluginDataApp {
+	
 	@Option(name = "--organism", required = true, usage = "organism name")
 	protected String fOrganismName;
 	
@@ -124,7 +125,7 @@ public class AbstractValidationApp extends AbstractPluginDataApp {
 	}
 
 	protected Collection<Group<?, ?>> parseNetworks(String networkData, String excludeData, Organism organism) {
-	    TabDelimitedQueryParser parser = new TabDelimitedQueryParser();
+	    TabDelimitedQueryParser parser = new TabDelimitedQueryParser(fData);
 	    
 	    AttributeMediator attributeMediator = fData.getMediatorProvider().getAttributeMediator();
 		Collection<Group<?, ?>> networks = parser.parseNetworks(networkData, organism, ",", fErrorHandler, attributeMediator);
