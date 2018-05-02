@@ -30,14 +30,14 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
 
 **Notes:**
  * Short UI build summary :
-  * Install Node.js and npm
+  * Install Node.js v6 and npm
   * `cd website-ui`
   * `npm run website`
  * The `website-ui` contains the frontend interface for the website.  Naturally, JavaScript is used for the UI and the build process, so the build process here differs from the previous Java projects.  The `website` should pull in the latest UI by calling the appropriate `website-ui` target &mdash; that way, the website always automatically gets the latest UI on each build.
  * The website UI assumes a local development environment, unless deployed to the `website` Java project.  For local development, the UI assumes the website server resides at `http://localhost:8080/genemania`.  You can configure this in `js/debug/debug.js`.
 
 **Requirements:**
- 1. Node.js & npm
+ 1. Node.js v6 & npm
  1. Gulp: `sudo npm install -g gulp`
  1. NB: you must `npm install` before using `gulp`
 
