@@ -5,20 +5,13 @@
         console.log('Log (`' + category + '`, `' + action + '`' + ( label != null ? ', `' + label + '`' : '' ) + ')');
       }
 
-      var evt = {
-        eventCategory: category,
-        eventAction: action
-      };
-
-      if( _.isNumber( label ) && Math.round( label ) === label ){
-        evt.eventValue = label;
-      } else if( label != null ){
-        evt.eventLabel = '' + label;
+      if( _.isNumber( label ) ){ // ga doesn't accept doubles
+        label = Math.round(label);
       }
 
       setTimeout(function(){
         try {
-          ga('send', 'event', evt);
+          ga('send', 'event', category, action, label);
         } catch( err ){}
       }, 0);
     },
