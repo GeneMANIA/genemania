@@ -222,7 +222,23 @@ public class CyActivator extends AbstractCyActivator {
 			p.setProperty(COMMAND, "search");
 			p.setProperty(COMMAND_NAMESPACE, "genemania");
 			p.setProperty(COMMAND_DESCRIPTION, "Searches GeneMANIA");
-			p.setProperty(COMMAND_LONG_DESCRIPTION, "Finds related genes from a locally installed data set (i.e. offline search) or by querying the GeneMANIA server (i.e. online search).");
+			p.setProperty(COMMAND_LONG_DESCRIPTION,
+					"Finds related genes from a locally installed data set (i.e. offline search) "
+					+ "or by querying the GeneMANIA server (i.e. online search)."
+					+ '\n' + '\n'
+					+ "Please remember that, if you want to search a large number of genes "
+					+ "(e.g. more than 1000 total query and resultant genes), "
+					+ "you should probably set the ```offline``` argument to ```true```, "
+					+ "otherwise the performance may be very poor or the GeneMANIA server may not "
+					+ "be able to handle the large number of total nodes/edges at all. "
+					+ "In this case, make sure the required organism data sets have been downloaded/installed "
+					+ "before executing this command in offline mode."
+					+ '\n' + '\n'
+					+ "Also be aware that if you have any concerns about data privacy you should always use the offline mode."
+					+ '\n' + '\n'
+					+ "[GeneMANIA Help]: http://pages.genemania.org/help/ \"GeneMANIA Help & Docs\"" + '\n'
+					+ "For more information, please visit [GeneMANIA Help]."
+			);
 			p.setProperty(COMMAND_SUPPORTS_JSON, "true");
 			p.setProperty(COMMAND_EXAMPLE_JSON,
 					"{\n" + 
