@@ -543,10 +543,6 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 	
 	private class RunGeneManiaTask extends AbstractTask implements ObservableTask {
 
-		// TODO Make it a CyProperty?
-		private static final String SEARCH_URL = "http://api.genemania.org/json/search_results";
-		private static final String VERSION_URL = "http://api.genemania.org/json/version";
-		
 		private final String SEARCH_TAG = "search";
 		private final String VERSION_TAG = "version";
 		
@@ -668,9 +664,11 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				
 				progress.setProgress(++stage);
 				
+				String url = cytoscapeUtils.getPreference(GeneMania.SEARCH_API_URL);
+				
 				RequestBody body = RequestBody.create(JSON, jsonReq);
 				Request request = new Request.Builder()
-						.url(SEARCH_URL)
+						.url(url)
 						.post(body)
 						.tag(SEARCH_TAG)
 						.build();
@@ -751,8 +749,10 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 		}
 		
 		private void updateWebDataVersion() throws Exception {
+			String url = cytoscapeUtils.getPreference(GeneMania.VERSION_API_URL);
+			
 			Request request = new Request.Builder()
-					.url(VERSION_URL)
+					.url(url)
 					.get()
 					.tag(VERSION_TAG)
 					.build();

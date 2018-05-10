@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.cytoscape.model.CyColumn;
@@ -147,7 +146,15 @@ public interface CytoscapeUtils {
 
 	void handleNetworkPostProcessing(CyNetwork network);
 
-	Properties getGlobalProperties();
+	String getSessionProperty(String key);
+
+	void setSessionProperty(String key, String value);
+
+	void removeSessionProperty(String key);
+	
+	String getPreference(String key);
+	
+	void setPreference(String key, String value);
 
 	Set<CyEdge> getSelectedEdges(CyNetwork network);
 
@@ -192,5 +199,5 @@ public interface CytoscapeUtils {
 	void clearSavedSessionState();
 	
 	CyServiceRegistrar getServiceRegistrar();
-	
+
 }

@@ -24,6 +24,8 @@ import java.util.Set;
 
 import org.cytoscape.work.TaskMonitor;
 import org.genemania.domain.Organism;
+import org.genemania.plugin.cytoscape.CytoscapeUtils;
+import org.genemania.plugin.cytoscape.NullCytoscapeUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -34,13 +36,15 @@ public class LoadOrganismsTaskTest {
 	
 	@Mock
 	private TaskMonitor taskMonitor;
+	private CytoscapeUtils cytoscapeUtils;
 	
 	private LoadRemoteOrganismsTask task;
 	private OkHttpClient httpClient = new OkHttpClient();
 	
 	@Before
 	public void setUp() {
-		task = new LoadRemoteOrganismsTask(httpClient);
+		cytoscapeUtils = new NullCytoscapeUtils();
+		task = new LoadRemoteOrganismsTask(httpClient, cytoscapeUtils);
 	}
 	
 	@Test

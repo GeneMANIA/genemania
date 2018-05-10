@@ -47,8 +47,8 @@ import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyTableFactory;
 import org.cytoscape.model.CyTableManager;
 import org.cytoscape.model.events.RowsSetListener;
+import org.cytoscape.property.AbstractConfigDirPropsReader;
 import org.cytoscape.property.CyProperty;
-import org.cytoscape.property.SimpleCyProperty;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.visualize.ApplyPreferredLayoutTaskFactory;
@@ -64,6 +64,7 @@ import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.undo.UndoSupport;
 import org.genemania.plugin.FileUtils;
+import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape3.actions.AboutAction;
@@ -114,6 +115,13 @@ public class CyActivator extends AbstractCyActivator {
 
 		closeAppPanels();
 		
+		{
+			PropsReader propsReader = new PropsReader();
+			Properties props = new Properties();
+			props.setProperty("cyPropertyName", GeneMania.APP_CYPROPERTY_NAME);
+			registerService(bc, propsReader, CyProperty.class, props);
+		}
+		
 		UiUtils uiUtils = new UiUtils(iconManager);
 		FileUtils fileUtils = new CyFileUtils(streamUtil);
 		NetworkUtils networkUtils = new NetworkUtils();
@@ -134,14 +142,9 @@ public class CyActivator extends AbstractCyActivator {
 		DefaultDataSetFactory luceneDataSetFactory = new DefaultDataSetFactory(dataSetManager, uiUtils, fileUtils,
 				cytoscapeUtils, taskDispatcher);
 
-		SimpleCyProperty<Properties> properties = new SimpleCyProperty<>("org.genemania", new Properties(),
-				Properties.class, CyProperty.SavePolicy.SESSION_FILE);
-		registerService(bc, properties, CyProperty.class);
-		
-		SessionManagerImpl selectionManager = new SessionManagerImpl(cytoscapeUtils, taskDispatcher,
-				properties);
+		SessionManagerImpl selectionManager = new SessionManagerImpl(cytoscapeUtils, taskDispatcher);
 		GeneManiaImpl geneMania = new GeneManiaImpl(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils,
-				taskDispatcher, swingApplication, serviceRegistrar, selectionManager, properties);
+				taskDispatcher, swingApplication, serviceRegistrar, selectionManager);
 		selectionManager.setGeneMania(geneMania);
 		registerAllServices(bc, selectionManager);
 		geneMania.startUp();
@@ -207,7 +210,7 @@ public class CyActivator extends AbstractCyActivator {
 		registerServiceListener(bc, dataSetManager::addDataSetFactory, dataSetManager::removeDataSetFactory,
 				IDataSetFactory.class);
 		
-		OrganismManager organismManager = new OrganismManager(geneMania, serviceRegistrar);
+		OrganismManager organismManager = new OrganismManager(geneMania, cytoscapeUtils, serviceRegistrar);
 		
 		{
 			SimpleSearchTaskFactory factory = new SimpleSearchTaskFactory(geneMania, controller,
@@ -509,5 +512,12 @@ public class CyActivator extends AbstractCyActivator {
 		// Then dispose dialogs
 		if (retrieveRelatedGenesAction != null)
 			retrieveRelatedGenesAction.getDelegate().getDialog().dispose();
+	}
+	
+	private class PropsReader extends AbstractConfigDirPropsReader {
+		
+		PropsReader() {
+			super(GeneMania.APP_CYPROPERTY_NAME, "genemania.props", CyProperty.SavePolicy.CONFIG_DIR);
+		}
 	}
 }

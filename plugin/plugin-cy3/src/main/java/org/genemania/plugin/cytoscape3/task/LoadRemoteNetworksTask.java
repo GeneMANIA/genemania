@@ -29,7 +29,9 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskMonitor.Level;
 import org.genemania.domain.InteractionNetworkGroup;
+import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.LogUtils;
+import org.genemania.plugin.cytoscape.CytoscapeUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -44,19 +46,19 @@ import okhttp3.Response;
  */
 public class LoadRemoteNetworksTask extends AbstractTask {
 
-	// TODO Make it a CyProperty?
-	protected static final String URL = "http://api.genemania.org/json/network_groups";
 	private static final String TAG = "network_groups";
 	
 	private Map<Integer, Collection<InteractionNetworkGroup>> networkGroups = new HashMap<>();
 	private String errorMessage;
 	
 	private final OkHttpClient httpClient; // Avoid creating several instances
+	private final CytoscapeUtils cytoscapeUtils;
 	
 	private final Logger logger = Logger.getLogger(CyUserLog.NAME);
 
-	public LoadRemoteNetworksTask(OkHttpClient httpClient) {
+	public LoadRemoteNetworksTask(OkHttpClient httpClient, CytoscapeUtils cytoscapeUtils) {
 		this.httpClient = httpClient;
+		this.cytoscapeUtils = cytoscapeUtils;
 	}
 	
 	@Override
@@ -64,9 +66,11 @@ public class LoadRemoteNetworksTask extends AbstractTask {
 		tm.setTitle("GeneMANIA");
 		tm.setStatusMessage("Loading networks from server...");
 		
+		String url = cytoscapeUtils.getPreference(GeneMania.NETWORKS_API_URL);
+		
 		try {
 			Request request = new Request.Builder()
-					.url(URL)
+					.url(url)
 					.get()
 					.tag(TAG)
 					.build();

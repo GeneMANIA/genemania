@@ -68,6 +68,7 @@ import org.cytoscape.model.CyTableManager;
 import org.cytoscape.model.events.RowSetRecord;
 import org.cytoscape.model.events.RowsSetEvent;
 import org.cytoscape.model.events.RowsSetListener;
+import org.cytoscape.property.CyProperty;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.visualize.ApplyPreferredLayoutTaskFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
@@ -131,7 +132,12 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	Map<CyTable, Reference<CyNetwork>> networksByNodeTable;
 	Map<CyTable, Reference<CyNetwork>> networksByEdgeTable;
 	
+	private final Properties sessionProperties = new Properties();
+	
 	private final Object selectionMutex = new Object();
+	private final Object propsMutex = new Object();
+	private final Object prefsMutex = new Object();
+	
 	private SelectionHandler selectionHandler;
 	private final CyEventHelper eventHelper;
 	private final CyServiceRegistrar serviceRegistrar;
@@ -239,6 +245,60 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 	@Override
 	public CyServiceRegistrar getServiceRegistrar() {
 		return serviceRegistrar;
+	}
+	
+	@Override
+	public String getSessionProperty(String key) {
+		synchronized (propsMutex) {
+			return sessionProperties.getProperty(key);
+		}
+	}
+	
+	@Override
+	public void setSessionProperty(String key, String value) {
+		synchronized (propsMutex) {
+			sessionProperties.setProperty(key, value);
+		}
+	}
+	
+	@Override
+	public void removeSessionProperty(String key) {
+		synchronized (propsMutex) {
+			sessionProperties.remove(key);
+		}
+	}
+	
+	@Override
+	public String getPreference(String key) {
+		synchronized (prefsMutex) {
+			CyProperty<Properties> prefs = getPreferences();
+			
+			return prefs != null ? prefs.getProperties().getProperty(key) : null;
+		}
+	}
+	
+	@Override
+	public void setPreference(String key, String value) {
+		synchronized (prefsMutex) {
+			CyProperty<Properties> prefs = getPreferences();
+			
+			if (prefs != null)
+				prefs.getProperties().setProperty(key, value);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private CyProperty<Properties> getPreferences() {
+		CyProperty<Properties> cyProps = null;
+		
+		try {
+			cyProps = serviceRegistrar.getService(CyProperty.class,
+					"(cyPropertyName=" + GeneMania.APP_CYPROPERTY_NAME + ")");
+		} catch (Exception e) {
+			// Ignore...
+		}
+		
+		return cyProps;
 	}
 	
 	@Override
@@ -437,10 +497,6 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 		}
 	}
 
-	public Properties getGlobalProperties() {
-		return new Properties();
-	}
-	
 	@Override
 	public Set<CyEdge> getSelectedEdges(CyNetwork network) {
 		Set<CyEdge> results = new HashSet<>();

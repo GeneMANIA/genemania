@@ -28,7 +28,9 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskMonitor.Level;
 import org.genemania.domain.Organism;
+import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.LogUtils;
+import org.genemania.plugin.cytoscape.CytoscapeUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -43,19 +45,19 @@ import okhttp3.Response;
  */
 public class LoadRemoteOrganismsTask extends AbstractTask {
 
-	// TODO Make it a CyProperty?
-	protected static final String URL = "http://api.genemania.org/json/organisms";
 	private static final String TAG = "organisms";
 	
 	private Set<Organism> organisms = new LinkedHashSet<>();
 	private String errorMessage;
 	
 	private final OkHttpClient httpClient; // Avoid creating several instances
+	private final CytoscapeUtils cytoscapeUtils;
 	
 	private final Logger logger = Logger.getLogger(CyUserLog.NAME);
 
-	public LoadRemoteOrganismsTask(OkHttpClient httpClient) {
+	public LoadRemoteOrganismsTask(OkHttpClient httpClient, CytoscapeUtils cytoscapeUtils) {
 		this.httpClient = httpClient;
+		this.cytoscapeUtils = cytoscapeUtils;
 	}
 	
 	@Override
@@ -63,9 +65,11 @@ public class LoadRemoteOrganismsTask extends AbstractTask {
 		tm.setTitle("GeneMANIA");
 		tm.setStatusMessage("Loading organisms from server...");
 		
+		String url = cytoscapeUtils.getPreference(GeneMania.ORGANISMS_API_URL);
+		
 		try {
 			Request request = new Request.Builder()
-					.url(URL)
+					.url(url)
 					.get()
 					.tag(TAG)
 					.build();

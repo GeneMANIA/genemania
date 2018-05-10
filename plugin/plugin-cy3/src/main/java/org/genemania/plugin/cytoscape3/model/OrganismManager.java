@@ -34,6 +34,7 @@ import org.genemania.exception.DataStoreException;
 import org.genemania.mediator.OrganismMediator;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.LogUtils;
+import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape3.task.LoadRemoteNetworksTask;
 import org.genemania.plugin.cytoscape3.task.LoadRemoteOrganismsTask;
 import org.genemania.plugin.data.DataSet;
@@ -52,6 +53,7 @@ public class OrganismManager {
 	private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 	
 	private final GeneMania plugin;
+	private final CytoscapeUtils cytoscapeUtils;
 	private final CyServiceRegistrar serviceRegistrar;
 	
 	private final OkHttpClient httpClient = new OkHttpClient(); // Avoid creating several instances
@@ -59,8 +61,9 @@ public class OrganismManager {
 	private final Object lock = new Object();
 	public Object get;
 
-	public OrganismManager(GeneMania plugin, CyServiceRegistrar serviceRegistrar) {
+	public OrganismManager(GeneMania plugin, CytoscapeUtils cytoscapeUtils, CyServiceRegistrar serviceRegistrar) {
 		this.plugin = plugin;
+		this.cytoscapeUtils = cytoscapeUtils;
 		this.serviceRegistrar = serviceRegistrar;
 		
 		DataSetManager dataSetManager = plugin.getDataSetManager();
@@ -124,8 +127,8 @@ public class OrganismManager {
 	}
 	
 	public void loadRemoteOrganisms() {
-		LoadRemoteOrganismsTask task1 = new LoadRemoteOrganismsTask(httpClient);
-		LoadRemoteNetworksTask task2 = new LoadRemoteNetworksTask(httpClient);
+		LoadRemoteOrganismsTask task1 = new LoadRemoteOrganismsTask(httpClient, cytoscapeUtils);
+		LoadRemoteNetworksTask task2 = new LoadRemoteNetworksTask(httpClient, cytoscapeUtils);
 		
 		DialogTaskManager taskManager = serviceRegistrar.getService(DialogTaskManager.class);
 		taskManager.execute(new TaskIterator(task1, task2), new TaskObserver() {

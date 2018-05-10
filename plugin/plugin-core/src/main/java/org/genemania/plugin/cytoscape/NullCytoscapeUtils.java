@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.cytoscape.model.CyColumn;
@@ -114,11 +113,6 @@ public class NullCytoscapeUtils implements CytoscapeUtils {
 
 	@Override
 	public void handleNetworkPostProcessing(CyNetwork network) {
-	}
-
-	@Override
-	public Properties getGlobalProperties() {
-		return null;
 	}
 
 	@Override
@@ -229,5 +223,27 @@ public class NullCytoscapeUtils implements CytoscapeUtils {
 
 	@Override
 	public void clearSavedSessionState() {
+	}
+
+	@Override
+	public String getSessionProperty(String key) {
+		return null;
+	}
+
+	@Override
+	public void setSessionProperty(String key, String value) {
+	}
+
+	@Override
+	public void removeSessionProperty(String key) {
+	}
+
+	@Override
+	public String getPreference(String key) {
+		return null;
+	}
+
+	@Override
+	public void setPreference(String key, String value) {
 	}
 }

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,7 +16,6 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
-import org.cytoscape.property.CyProperty;
 import org.cytoscape.session.events.SessionAboutToBeSavedEvent;
 import org.cytoscape.session.events.SessionAboutToBeSavedListener;
 import org.cytoscape.session.events.SessionLoadedEvent;
@@ -47,18 +45,14 @@ public class SessionManagerImpl extends AbstractSessionManager
 		SessionSavedListener, SessionSaveCancelledListener, SessionLoadedListener {
 
 	private TaskDispatcher taskDispatcher;
-	private CyProperty<Properties> properties;
 	
 	private ExecutorService sessionLoadExecutor = Executors.newSingleThreadExecutor();
 
-	public SessionManagerImpl(
-			CytoscapeUtils cytoscapeUtils,
-			TaskDispatcher taskDispatcher,
-			CyProperty<Properties> properties
+	public SessionManagerImpl(CytoscapeUtils cytoscapeUtils, TaskDispatcher taskDispatcher
+
 	) {
 		super(cytoscapeUtils);
 		this.taskDispatcher = taskDispatcher;
-		this.properties = properties;
 	}
 
 	@Override
@@ -97,11 +91,11 @@ public class SessionManagerImpl extends AbstractSessionManager
 		// Don't want this to run on the same thread as the session load progress dialog 
 		// because there is risk of a UI deadlock between modal dialogs.
 		sessionLoadExecutor.submit(() -> {
-			String path = (String) properties.getProperties().get(GeneMania.DATA_SOURCE_PATH_PROPERTY);
+			String path = cytoscapeUtils.getSessionProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY);
 			final File dataSourcePath;
 			
 			if (path == null) {
-				String version = findVersion(evt.getLoadedSession().getNetworks());
+				String version = findLocalDataVersion(evt.getLoadedSession().getNetworks());
 				dataSourcePath = new File("gmdata-" + version);
 			} else {
 				dataSourcePath = new File(path);
@@ -273,11 +267,11 @@ public class SessionManagerImpl extends AbstractSessionManager
 		};		
 	}
 
-	private String findVersion(Set<CyNetwork> networks) {
+	private String findLocalDataVersion(Set<CyNetwork> networks) {
 		for (CyNetwork net : networks) {
 			String version = cytoscapeUtils.getDataVersion(net);
 			
-			if (version != null)
+			if (version != null && !version.endsWith(CytoscapeUtils.WEB_VERSION_TAG))
 				return version;
 		}
 		

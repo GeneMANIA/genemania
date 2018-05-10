@@ -24,7 +24,6 @@ import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanel;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.property.CyProperty;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.genemania.plugin.AbstractGeneMania;
 import org.genemania.plugin.FileUtils;
@@ -58,8 +57,7 @@ public class GeneManiaImpl extends AbstractGeneMania {
 			TaskDispatcher taskDispatcher,
 			CySwingApplication application,
 			CyServiceRegistrar serviceRegistrar,
-			SessionManager selectionManager,
-			CyProperty<Properties> properties
+			SessionManager selectionManager
 	) {
 		super(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils, taskDispatcher, selectionManager);
 		this.serviceRegistrar = serviceRegistrar;
@@ -70,13 +68,10 @@ public class GeneManiaImpl extends AbstractGeneMania {
 		dataSetManager.addDataSetChangeListener(new DataSetChangeListener() {
 			@Override
 			public void dataSetChanged(DataSet dataSet, ProgressReporter progress) {
-				Properties properties2 = properties.getProperties();
-				if (dataSet == null) {
-					properties2.remove(GeneMania.DATA_SOURCE_PATH_PROPERTY);
-					return;
-				} else {
-					properties2.setProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY, dataSet.getBasePath());
-				}
+				if (dataSet == null)
+					cytoscapeUtils.removeSessionProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY);
+				else
+					cytoscapeUtils.setSessionProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY, dataSet.getBasePath());
 			}
 		});
 	}
