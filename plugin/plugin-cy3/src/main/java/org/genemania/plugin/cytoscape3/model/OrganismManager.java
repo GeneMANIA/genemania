@@ -23,6 +23,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.FinishStatus;
 import org.cytoscape.work.ObservableTask;
@@ -99,6 +100,13 @@ public class OrganismManager {
 	}
 	
 	public Set<Organism> getLocalOrganisms() {
+		if (localOrganisms.isEmpty()) {
+			DataSetManager dataSetManager = plugin.getDataSetManager();
+			
+			if (dataSetManager.getDataSet() == null) // Lazy load local organisms
+				initLocalData();
+		}
+		
 		return new LinkedHashSet<>(localOrganisms);
 	}
 	
@@ -183,10 +191,10 @@ public class OrganismManager {
 		});
 	}
 	
-//	private void initLocalData() {
-//		if (plugin.getDataSetManager().getDataSet() == null)
-//			plugin.initializeData(serviceRegistrar.getService(CySwingApplication.class).getJFrame(), true);
-//	}
+	private void initLocalData() {
+		if (plugin.getDataSetManager().getDataSet() == null)
+			plugin.initializeData(serviceRegistrar.getService(CySwingApplication.class).getJFrame(), true);
+	}
 	
 	private void setLocalData(final DataSet data) {
 		try {
