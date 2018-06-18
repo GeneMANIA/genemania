@@ -2,3 +2,4 @@ api.organisms.url = http://api.genemania.org/json/organisms
 api.networks.url = http://api.genemania.org/json/network_groups
 api.version.url = http://api.genemania.org/json/version
 api.search.url = http://api.genemania.org/json/search_results
+organisms.cache.expires = 24

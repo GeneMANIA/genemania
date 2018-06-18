@@ -20,9 +20,23 @@ package org.genemania.plugin.cytoscape3.model;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.cytoscape.application.CyApplicationConfiguration;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.FinishStatus;
@@ -45,6 +59,9 @@ import okhttp3.OkHttpClient;
 
 public class OrganismManager {
 
+	private static final String ORGANISMS_SER = "organisms.ser";
+	private static final String CACHE_EXPIRES = "organisms.cache.expires"; // in HOURS, 0 or less means no cache
+	
 	private boolean initialized;
 	private boolean offline;
 	private Set<Organism> localOrganisms = new LinkedHashSet<>();
@@ -135,6 +152,100 @@ public class OrganismManager {
 	}
 	
 	public void loadRemoteOrganisms() {
+		// First try to load them from local cache
+		loadRemoteOrganismsFromCache();
+		
+		if (remoteOrganisms.isEmpty()) // No valid cache -- Load from the server
+			loadRemoteOrganismsFromServer();
+	}
+
+	private void initLocalData() {
+		if (plugin.getDataSetManager().getDataSet() == null)
+			plugin.initializeData(serviceRegistrar.getService(CySwingApplication.class).getJFrame(), true);
+	}
+	
+	private void setLocalData(final DataSet data) {
+		try {
+			Set<Organism> oldValue = new LinkedHashSet<>(localOrganisms);
+
+			OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
+			Set<Organism> newValue = new LinkedHashSet<>(mediator.getAllOrganisms());
+
+			synchronized (lock) {
+				localOrganisms.clear();
+				localOrganisms.addAll(newValue);
+			}
+
+			if (isOffline())
+				propertyChangeSupport.firePropertyChange("organisms", oldValue, newValue);
+		} catch (DataStoreException e) {
+			LogUtils.log(getClass(), e);
+		}
+    }
+	
+	private void saveRemoteOrganismToCache() {
+		if (remoteOrganisms.isEmpty())
+			return;
+		
+		File dir = getAppDir();
+		
+		if (dir != null) {
+			File file = new File(dir, ORGANISMS_SER);
+			
+			try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+				ObjectOutputStream oos = new ObjectOutputStream(out);
+				oos.writeObject(remoteOrganisms);
+			} catch (final Exception e) {
+				LogUtils.log(this.getClass(), e);
+			}
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void loadRemoteOrganismsFromCache() {
+		remoteOrganisms.clear();
+		
+		final long expires = getCacheExpiresValue();
+		
+		if (expires <= 0)
+			return; // Ignore cache!
+		
+		File dir = getAppDir();
+		
+		if (dir != null) {
+			File file = new File(dir, ORGANISMS_SER);
+			
+			try {
+				if (!file.exists() || !file.canRead())
+					return;
+				
+				Path path = Paths.get(file.getAbsolutePath());
+				BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+				
+				if (System.currentTimeMillis() - attr.lastModifiedTime().toMillis() > TimeUnit.HOURS.toMillis(expires))
+					return; // Cache is too old
+			} catch (final Exception e) {
+				LogUtils.log(this.getClass(), e);
+			}
+			
+			Set<Organism> newValue = null;
+			
+			try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
+				ObjectInputStream ois = new ObjectInputStream(in);
+				newValue = (Set<Organism>) ois.readObject();
+			} catch (final Exception e) {
+				LogUtils.log(this.getClass(), e);
+			}
+			
+			if (newValue != null && !newValue.isEmpty()) {
+				remoteOrganisms.addAll(newValue);
+				initialized = true;
+				propertyChangeSupport.firePropertyChange("organisms", Collections.emptySet(), newValue);
+			}
+		}
+	}
+	
+	private void loadRemoteOrganismsFromServer() {
 		LoadRemoteOrganismsTask task1 = new LoadRemoteOrganismsTask(httpClient, cytoscapeUtils);
 		LoadRemoteNetworksTask task2 = new LoadRemoteNetworksTask(httpClient, cytoscapeUtils);
 		
@@ -186,32 +297,43 @@ public class OrganismManager {
 				if (finishStatus == FinishStatus.getSucceeded() && loadRemoteOrganismsErrorMessage == null)
 					propertyChangeSupport.firePropertyChange("organisms", oldValue, newValue);
 				else
-					propertyChangeSupport.firePropertyChange("loadRemoteOrganismsException", null, loadRemoteOrganismsErrorMessage);	
+					propertyChangeSupport.firePropertyChange("loadRemoteOrganismsException", null, loadRemoteOrganismsErrorMessage);
+				
+				final long expires = getCacheExpiresValue();
+				
+				if (expires > -1) // -1 means "don't even create cache"
+					new Thread(() -> saveRemoteOrganismToCache()).start();
 			}
 		});
 	}
 	
-	private void initLocalData() {
-		if (plugin.getDataSetManager().getDataSet() == null)
-			plugin.initializeData(serviceRegistrar.getService(CySwingApplication.class).getJFrame(), true);
-	}
-	
-	private void setLocalData(final DataSet data) {
+	private long getCacheExpiresValue() {
 		try {
-			Set<Organism> oldValue = new LinkedHashSet<>(localOrganisms);
-
-			OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
-			Set<Organism> newValue = new LinkedHashSet<>(mediator.getAllOrganisms());
-
-			synchronized (lock) {
-				localOrganisms.clear();
-				localOrganisms.addAll(newValue);
-			}
-
-			if (isOffline())
-				propertyChangeSupport.firePropertyChange("organisms", oldValue, newValue);
-		} catch (DataStoreException e) {
+			String value = cytoscapeUtils.getPreference(CACHE_EXPIRES);
+			
+			if (value != null)
+				return Long.parseLong(value);
+		} catch (Exception e) {
 			LogUtils.log(getClass(), e);
 		}
-    }
+		
+		return 0;
+	}
+	
+	private File getAppDir() {
+		CyApplicationConfiguration appConfig = serviceRegistrar.getService(CyApplicationConfiguration.class);
+		
+		try {
+			final File appDir = appConfig.getAppConfigurationDirectoryLocation(this.getClass());
+			
+			if (appDir != null) {
+				if (appDir.exists() || appDir.mkdir())
+					return appDir;
+			}
+		} catch (final Exception e) {
+			LogUtils.log(this.getClass(), e);
+		}
+		
+		return null;
+	}
 }
