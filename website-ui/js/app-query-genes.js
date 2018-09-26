@@ -26,7 +26,7 @@ function( util ){ return function( Query ){
 
   qfn.removeGenes = function( genes ){
     var self = this;
-    
+
     genes = _.isArray(genes) ? genes : [genes];
 
     self.settingGenes = true;
@@ -169,7 +169,6 @@ function( util ){ return function( Query ){
         organism: this.organism.id,
         genes: txt
       })
-        .cancellable()
 
         .then(function( t ){
           self.validatingGenes = false;
@@ -198,7 +197,7 @@ function( util ){ return function( Query ){
         })
       ;
     } else {
-      p = Promise.resolve().cancellable().then(function(){
+      p = Promise.resolve().then(function(){
         self.validatingGenes = false;
         self.geneValidations = [];
         self.geneSpellchecks = '';

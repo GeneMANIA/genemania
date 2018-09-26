@@ -223,10 +223,6 @@ var config = {
       });
     };
 
-    if( config.debug ){
-      Promise.longStackTraces(); // enable long stack traces in bluebird for debugging
-    }
-
     if( !config.debug ){
       config.service.baseUrl = config.service.baseUrlProd;
     }

@@ -126,7 +126,7 @@ function( util, Result, io, ngCy ){ return function( Query ){
   qfn.searchOrCancel = function(){
     var query = this;
 
-    if( query.result && query.result.cancellable() ){
+    if( query.result ){
       query.result.cancel();
     } else {
       query.search();

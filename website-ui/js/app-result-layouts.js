@@ -120,7 +120,7 @@ function( util ){ return function( Result ){
           resolve();
         }, 0);
       });
-    }).cancellable();
+    });
   };
 
   rfn.circleLayout = function(options){

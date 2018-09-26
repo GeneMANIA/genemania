@@ -100,7 +100,7 @@ function( $http, util, $$user ){
         oReq.open( 'POST', config.service.baseUrl + 'search_results', true );
         oReq.setRequestHeader('Content-Type', 'application/json');
         oReq.send( JSON.stringify(opts) );
-      }).cancellable().then(function( result ){
+      }).then(function( result ){
         if( result.error ){
           return Promise.reject( result.error );
         };

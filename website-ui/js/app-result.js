@@ -45,7 +45,7 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
 
     self.searching = true;
 
-    return self.searchPromise = Promise.resolve().cancellable().then(function(){
+    return self.searchPromise = Promise.resolve().then(function(){
       var netIds = [];
       for( var i = 0; i < q.networks.length; i++ ){
         var net = q.networks[i];
