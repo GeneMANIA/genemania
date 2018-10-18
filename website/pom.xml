@@ -16,8 +16,8 @@
 	<properties>
 		<minification.extension>.release.min</minification.extension>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>4.0.6.RELEASE</spring.version>
-		<jackson.version>1.9.13</jackson.version>
+        <spring.version>4.3.17.RELEASE</spring.version>
+		<jackson.version>2.9.7</jackson.version>
 	</properties>
 	<pluginRepositories>
 		<pluginRepository>
@@ -74,26 +74,6 @@
 		  <groupId>org.tuckey</groupId>
 		  <artifactId>urlrewritefilter</artifactId>
 		  <version>4.0.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		<dependency>
-		   <groupId>org.codehaus.castor</groupId>
-		   <artifactId>castor-xml</artifactId>
-		   <version>1.3.3</version>
-		</dependency>
-		<dependency>
-		   <groupId>org.codehaus.castor</groupId>
-		   <artifactId>castor-core</artifactId>
-		   <version>1.3.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>

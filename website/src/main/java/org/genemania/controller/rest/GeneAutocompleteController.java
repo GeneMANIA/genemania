@@ -8,7 +8,7 @@ import org.genemania.exception.ApplicationException;
 import org.genemania.service.GeneService;
 import org.genemania.service.GeneService.AutocompleteResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

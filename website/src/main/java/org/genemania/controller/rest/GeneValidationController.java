@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,14 +51,14 @@ public class GeneValidationController {
 	private OrganismService organismService;
 
 	@Autowired
-	private MappingJacksonHttpMessageConverter httpConverter;
+	private MappingJackson2HttpMessageConverter httpConverter;
 
-	public MappingJacksonHttpMessageConverter getHttpConverter() {
+	public MappingJackson2HttpMessageConverter getHttpConverter() {
 		return httpConverter;
 	}
 
 	public void setHttpConverter(
-			MappingJacksonHttpMessageConverter httpConverter) {
+			MappingJackson2HttpMessageConverter httpConverter) {
 		this.httpConverter = httpConverter;
 	}
 
@@ -124,7 +123,7 @@ public class GeneValidationController {
 
 	/**
 	 * Validates a list of genes separated by newlines
-	 * 
+	 *
 	 * @param organismId
 	 *            the organism to validate gene names against
 	 * @param geneLines

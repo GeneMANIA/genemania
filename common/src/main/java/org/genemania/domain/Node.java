@@ -26,7 +26,7 @@ import java.util.Collection;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.codehaus.jackson.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Node
@@ -100,5 +100,5 @@ public class Node implements java.io.Serializable {
         return new ToStringBuilder(this).appendSuper(super.toString()).append("id", getId()).append("name", getName())
                 .toString();
     }
-    
+
 }

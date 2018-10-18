@@ -27,7 +27,7 @@ import org.genemania.type.CombiningMethod;
 import org.genemania.type.SearchResultsErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,7 +58,7 @@ public class SearchResultsController {
 	AttributeGroupService attributeGroupService;
 
 	@Autowired
-	private MappingJacksonHttpMessageConverter httpConverter;
+	private MappingJackson2HttpMessageConverter httpConverter;
 
 	// search req obj from web (could be xml, json, etc)
 	public static class SearchRequest {
@@ -336,11 +336,11 @@ public class SearchResultsController {
 
 	}
 
-	public MappingJacksonHttpMessageConverter getHttpConverter() {
+	public MappingJackson2HttpMessageConverter getHttpConverter() {
 		return httpConverter;
 	}
 
-	public void setHttpConverter(MappingJacksonHttpMessageConverter httpConverter) {
+	public void setHttpConverter(MappingJackson2HttpMessageConverter httpConverter) {
 		this.httpConverter = httpConverter;
 	}
 

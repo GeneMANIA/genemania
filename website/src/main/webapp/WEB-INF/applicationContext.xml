@@ -35,7 +35,7 @@
     </bean>
 
 	<bean id="httpConverter"
-        class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+        class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
     </bean>
 
 	<!-- i18n -->
@@ -89,7 +89,7 @@
 	</bean>
 
 	<!-- Service definitions -->
-	
+
 	<bean id="versionService" class="org.genemania.service.impl.VersionServiceImpl">
 		<property name="appVersion" ref="appVersion" />
 		<property name="statsService" ref="statsService" />
@@ -98,7 +98,7 @@
 	<bean id="attributeService" class="org.genemania.service.impl.AttributeServiceImpl">
 		<property name="attributeDao" ref="attributeDao" />
 	</bean>
-	
+
 	<bean id="attributeGroupService" class="org.genemania.service.impl.AttributeGroupServiceImpl">
 		<property name="attributeGroupDao" ref="attributeGroupDao" />
 	</bean>
@@ -187,7 +187,7 @@
         <property name="messageExpirationMillis" value="${messageExpirationMillis}" />
 	</bean>
 	-->
-	
+
 	<!-- new, integrated worker config -->
 	<bean id="engineConnector" class="org.genemania.connector.SyncWorkerConnector">
 		<property name="organismDao" ref="organismDao" />
@@ -200,7 +200,7 @@
 
 	<!-- EhCache library setup -->
 	<bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="WEB-INF/ehcache.xml"/>
-	
+
 	<cache:annotation-driven cache-manager="cacheManager" />
 
 	<!-- should be last -->

@@ -7,16 +7,16 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.genemania.controller.rest.GeneValidationController.ValidationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 public class RequestParamsReader<Params> {
 
 	@Autowired
-	private MappingJacksonHttpMessageConverter httpConverter;
+	private MappingJackson2HttpMessageConverter httpConverter;
 
 	/**
 	 * Reads the parameters into the specified parameters object
-	 * 
+	 *
 	 * @param req
 	 *            The HTTP request containing either name=value&name2=value2
 	 *            pairs or a JSON body
@@ -40,7 +40,7 @@ public class RequestParamsReader<Params> {
 		} else { // assume form params
 
 			// TODO use jackson to convert by constructing a json from the params
-			
+
 			Enumeration<String> paramNames = req.getParameterNames();
 			while (paramNames.hasMoreElements()) {
 				String paramName = paramNames.nextElement();
@@ -61,12 +61,12 @@ public class RequestParamsReader<Params> {
 		}
 	}
 
-	public MappingJacksonHttpMessageConverter getHttpConverter() {
+	public MappingJackson2HttpMessageConverter getHttpConverter() {
 		return httpConverter;
 	}
 
 	public void setHttpConverter(
-			MappingJacksonHttpMessageConverter httpConverter) {
+			MappingJackson2HttpMessageConverter httpConverter) {
 		this.httpConverter = httpConverter;
 	}
 
