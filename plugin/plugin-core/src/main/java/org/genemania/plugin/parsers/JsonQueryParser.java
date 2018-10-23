@@ -26,10 +26,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.MappingJsonFactory;
 import org.genemania.domain.InteractionNetwork;
 import org.genemania.domain.InteractionNetworkGroup;
 import org.genemania.domain.Organism;
@@ -43,6 +39,11 @@ import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.model.impl.InteractionNetworkImpl;
 import org.genemania.type.ScoringMethod;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
 
 public class JsonQueryParser extends AbstractQueryParser {
 	
@@ -68,10 +69,10 @@ public class JsonQueryParser extends AbstractQueryParser {
 		}
 		
 		try {
-			Organism organism = parseOrganism(root.get("organism").getTextValue()); //$NON-NLS-1$
+			Organism organism = parseOrganism(root.get("organism").textValue()); //$NON-NLS-1$
 			query.setOrganism(organism);
-			query.setCombiningMethod(parseCombiningMethod(root.get("selectedWeighting").getTextValue(), query, handler)); //$NON-NLS-1$
-			query.setGeneLimit(root.get("numberOfResultGenes").getIntValue()); //$NON-NLS-1$
+			query.setCombiningMethod(parseCombiningMethod(root.get("selectedWeighting").textValue(), query, handler)); //$NON-NLS-1$
+			query.setGeneLimit(root.get("numberOfResultGenes").intValue()); //$NON-NLS-1$
 			query.setGenes(parseGenes(root.get("genes"))); //$NON-NLS-1$
 			query.setGroups(parseNetworks(root.get("networks"), organism)); //$NON-NLS-1$
 			query.setScoringMethod(ScoringMethod.DISCRIMINANT);
@@ -91,7 +92,7 @@ public class JsonQueryParser extends AbstractQueryParser {
 		else
 			allGroups = organism.getInteractionNetworkGroups();
 		
-		for (String groupName : new OneUseIterable<>(root.getFieldNames())) {
+		for (String groupName : new OneUseIterable<>(root.fieldNames())) {
 			InteractionNetworkGroup targetGroup = null;
 			
 			for (InteractionNetworkGroup group : allGroups) {
@@ -106,8 +107,8 @@ public class JsonQueryParser extends AbstractQueryParser {
 			
 			List<Network<InteractionNetwork>> networks = new ArrayList<>();
 			
-			for (JsonNode node : new OneUseIterable<>(root.get(groupName).getElements())) {
-				String networkName = node.getTextValue();
+			for (JsonNode node : new OneUseIterable<>(root.get(groupName).elements())) {
+				String networkName = node.textValue();
 				
 				for (InteractionNetwork network : targetGroup.getInteractionNetworks()) {
 					if (network.getName().equalsIgnoreCase(networkName))
@@ -125,8 +126,8 @@ public class JsonQueryParser extends AbstractQueryParser {
 	private List<String> parseGenes(JsonNode root) {
 		List<String> genes = new ArrayList<>();
 		
-		for (JsonNode node : new OneUseIterable<>(root.getElements()))
-			genes.add(node.getTextValue());
+		for (JsonNode node : new OneUseIterable<>(root.elements()))
+			genes.add(node.textValue());
 		
 		return genes;
 	}

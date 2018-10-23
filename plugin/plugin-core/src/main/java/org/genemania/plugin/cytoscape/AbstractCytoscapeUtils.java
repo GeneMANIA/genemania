@@ -30,9 +30,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.MappingJsonFactory;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
@@ -58,6 +55,10 @@ import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
 
 public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	

@@ -29,10 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.MappingJsonFactory;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
@@ -63,6 +59,11 @@ import org.genemania.plugin.selection.SessionManager;
 import org.genemania.type.CombiningMethod;
 import org.genemania.util.ChildProgressReporter;
 import org.genemania.util.ProgressReporter;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
 
 public class ResultReconstructor {
 	
@@ -292,7 +293,7 @@ public class ResultReconstructor {
 		JsonParser parser = factory.createJsonParser(rawAnnotations);
 		JsonNode root = parser.readValueAsTree();
 		
-		for (JsonNode node : new OneUseIterable<JsonNode>(root.getElements())) {
+		for (JsonNode node : new OneUseIterable<JsonNode>(root.elements())) {
 			AnnotationEntry entry = new AnnotationEntry(node);
 			annotationsByCategory.put(entry.getName(), entry);
 		}
@@ -460,10 +461,10 @@ public class ResultReconstructor {
 		JsonParser parser = factory.createJsonParser(rawNetworks);
 		JsonNode root = parser.readValueAsTree();
 		
-		for (JsonNode node : new OneUseIterable<JsonNode>(root.getElements())) {
-			String groupName = node.get("group").getTextValue(); //$NON-NLS-1$
-			String name = node.get("name").getTextValue(); //$NON-NLS-1$
-			double weight = node.get("weight").getDoubleValue(); //$NON-NLS-1$
+		for (JsonNode node : new OneUseIterable<JsonNode>(root.elements())) {
+			String groupName = node.get("group").textValue(); //$NON-NLS-1$
+			String name = node.get("name").textValue(); //$NON-NLS-1$
+			double weight = node.get("weight").doubleValue(); //$NON-NLS-1$
 			InteractionNetwork network = allNetworksByName.get(String.format("%s|%s", groupName, name)); //$NON-NLS-1$
 			
 			if (network == null) // TODO: Keep track of networks that are no longer available

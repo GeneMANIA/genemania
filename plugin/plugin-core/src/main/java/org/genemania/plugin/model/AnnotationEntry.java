@@ -21,9 +21,10 @@ package org.genemania.plugin.model;
 
 import java.io.Serializable;
 
-import org.codehaus.jackson.JsonNode;
 import org.genemania.domain.OntologyCategory;
 import org.genemania.dto.OntologyCategoryDto;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class AnnotationEntry implements Serializable {
 	
@@ -44,11 +45,11 @@ public class AnnotationEntry implements Serializable {
 	}
 	
 	public AnnotationEntry(JsonNode node) {
-		name = node.get("name").getTextValue(); //$NON-NLS-1$
-		description = node.get("description").getTextValue(); //$NON-NLS-1$
-		qValue = node.get("qValue").getDoubleValue(); //$NON-NLS-1$
-		sampleOccurrences = node.get("sample").getIntValue(); //$NON-NLS-1$
-		totalOccurrences = node.get("total").getIntValue(); //$NON-NLS-1$
+		name = node.get("name").textValue(); //$NON-NLS-1$
+		description = node.get("description").textValue(); //$NON-NLS-1$
+		qValue = node.get("qValue").doubleValue(); //$NON-NLS-1$
+		sampleOccurrences = node.get("sample").intValue(); //$NON-NLS-1$
+		totalOccurrences = node.get("total").intValue(); //$NON-NLS-1$
 	}
 	
 	public String getName() {
