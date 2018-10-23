@@ -30,6 +30,7 @@ import org.genemania.domain.GeneNamingSource;
 import org.genemania.domain.Node;
 
 public class RankedGeneProvider implements IGeneProvider {
+	
 	protected final Map<Long, Integer> rankings;
 	private final Comparator<Gene> comparator;
 

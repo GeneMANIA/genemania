@@ -24,7 +24,7 @@ import java.util.Collection;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -37,8 +37,7 @@ public class Organism implements java.io.Serializable {
 	private long id;
 	private String name;
 	private String description;
-	private Collection<InteractionNetworkGroup> interactionNetworkGroups = new ArrayList<InteractionNetworkGroup>(
-			0);
+	private Collection<InteractionNetworkGroup> interactionNetworkGroups = new ArrayList<InteractionNetworkGroup>(0);
 	private String alias;
 	private Ontology ontology;
 	private long taxonomyId;
@@ -51,9 +50,14 @@ public class Organism implements java.io.Serializable {
 		this.name = name;
 	}
 
-	public Organism(String name, String description,
+	public Organism(
+			String name,
+			String description,
 			Collection<InteractionNetworkGroup> interactionNetworkGroups,
-			String alias, Ontology ontology, long taxonomyId) {
+			String alias,
+			Ontology ontology,
+			long taxonomyId
+	) {
 		this.name = name;
 		this.description = description;
 		this.interactionNetworkGroups = interactionNetworkGroups;
@@ -91,8 +95,7 @@ public class Organism implements java.io.Serializable {
 		return this.interactionNetworkGroups;
 	}
 
-	public void setInteractionNetworkGroups(
-			Collection<InteractionNetworkGroup> interactionNetworkGroups) {
+	public void setInteractionNetworkGroups(Collection<InteractionNetworkGroup> interactionNetworkGroups) {
 		this.interactionNetworkGroups = interactionNetworkGroups;
 	}
 
@@ -147,8 +150,7 @@ public class Organism implements java.io.Serializable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).appendSuper(super.toString())
-				.append("id", getId()).append("name", getName()).toString();
+		// Don't change this or you will break Cytoscape Commands!
+		return getName();
 	}
-
 }

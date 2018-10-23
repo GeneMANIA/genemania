@@ -19,11 +19,16 @@
 
 package org.genemania.plugin.model;
 
+import java.io.Serializable;
+
 import org.codehaus.jackson.JsonNode;
 import org.genemania.domain.OntologyCategory;
 import org.genemania.dto.OntologyCategoryDto;
 
-public class AnnotationEntry {
+public class AnnotationEntry implements Serializable {
+	
+	private static final long serialVersionUID = -1170134838167969091L;
+	
 	private final String name;
 	private final String description;
 	private final double qValue;

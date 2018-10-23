@@ -18,42 +18,58 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 
-public abstract class AbstractGroup<G, N> implements Group<G, N> {
+public abstract class AbstractGroup<G, N> implements Group<G, N>, Serializable {
+	
+	private static final long serialVersionUID = 6384924282374322312L;
+	
 	private Collection<Network<N>> networks;
 	private boolean hasInteractions;
 
-	public AbstractGroup(Collection<Network<N>> networks) {
-		this.networks = new ArrayList<Network<N>>(networks);
+	protected AbstractGroup() {
+		networks = new ArrayList<>();
+	}
+	
+	protected AbstractGroup(Collection<Network<N>> networks) {
+		this();
+		setNetworks(networks);
 		hasInteractions = hasInteractions(networks);
 	}
 	
 	@Override
 	public Collection<Network<N>> getNetworks() {
-		return networks;
+		return new ArrayList<>(networks);
 	}
 	
+	public void setNetworks(Collection<Network<N>> networks) {
+		this.networks.clear();
+		
+		if (networks != null)
+			this.networks.addAll(networks);
+	}
 	
 	@Override
 	public double getWeight() {
 		double weight = 0;
-		for (Network<N> network : networks) {
+		
+		for (Network<N> network : networks)
 			weight += network.getWeight();
-		}
+		
 		return weight;
 	}
 	
 	private boolean hasInteractions(Collection<Network<N>> networks) {
 		for (Network<N> network : networks) {
-			if (network.hasInteractions()) {
+			if (network.hasInteractions())
 				return true;
-			}
 		}
+		
 		return false;
 	}
 
@@ -61,15 +77,16 @@ public abstract class AbstractGroup<G, N> implements Group<G, N> {
 	public boolean hasInteractions() {
 		return hasInteractions;
 	}
-
+	
 	@Override
 	public Group<G, N> filter(Collection<Network<?>> filter) {
-		Collection<Network<N>> filtered = new ArrayList<Network<N>>();
+		Collection<Network<N>> filtered = new ArrayList<>();
+		
 		for (Network<N> network : networks) {
-			if (filter.contains(network)) {
+			if (filter.contains(network))
 				filtered.add(network);
-			}
 		}
+		
 		return create(filtered);
 	}
 	

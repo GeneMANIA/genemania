@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.controllers;
 
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ import org.genemania.plugin.model.AttributeEntry;
 
 public class AttributesController {
 	public List<AttributeEntry> createModel() {
-		List<AttributeEntry> model = new ArrayList<AttributeEntry>();
+		List<AttributeEntry> model = new ArrayList<>();
 		model.add(new AttributeEntry(Strings.attributesDialogAuthors_label, CytoscapeUtils.AUTHORS));
 		model.add(new AttributeEntry(Strings.attributesDialogInteractions_label, CytoscapeUtils.INTERACTION_COUNT));
 		model.add(new AttributeEntry(Strings.attributesDialogPubmedId_label, CytoscapeUtils.PUBMED_ID));

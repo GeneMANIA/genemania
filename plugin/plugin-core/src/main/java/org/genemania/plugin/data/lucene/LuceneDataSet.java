@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.data.lucene;
 
 import java.io.File;
@@ -120,10 +119,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class LuceneDataSet<NETWORK, NODE, EDGE> extends DataSet {
+public class LuceneDataSet extends DataSet {
+	
 	private static final String METADATA_SHORT_NAME = "short_name"; //$NON-NLS-1$
 	private static final String METADATA_COMMON_NAME = "common_name"; //$NON-NLS-1$
-	private static final Colour DEFAULT_COLOUR = new Colour(0xd0d0d0);
 	
 	private Searcher searcher;
 	
@@ -134,10 +133,18 @@ public class LuceneDataSet<NETWORK, NODE, EDGE> extends DataSet {
 	private final DataSetManager dataSetManager;
 	private final UiUtils uiUtils;
 	private final FileUtils fileUtils;
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 	private final TaskDispatcher taskDispatcher;
 
-	public LuceneDataSet(File path, Node root, DataSetManager dataSetManager, UiUtils uiUtils, FileUtils fileUtils, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, TaskDispatcher taskDispatcher) throws SAXException {
+	public LuceneDataSet(
+			File path,
+			Node root,
+			DataSetManager dataSetManager,
+			UiUtils uiUtils,
+			FileUtils fileUtils,
+			CytoscapeUtils cytoscapeUtils,
+			TaskDispatcher taskDispatcher
+	) throws SAXException {
 		super(path, root);
 		setHeadless(uiUtils == null);
 		this.dataSetManager = dataSetManager;
@@ -155,7 +162,8 @@ public class LuceneDataSet<NETWORK, NODE, EDGE> extends DataSet {
 		}
 	}
 	
-	public LuceneDataSet(File path, Node root, FileUtils fileUtils, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, TaskDispatcher taskDispatcher) throws SAXException {
+	public LuceneDataSet(File path, Node root, FileUtils fileUtils, CytoscapeUtils cytoscapeUtils,
+			TaskDispatcher taskDispatcher) throws SAXException {
 		this(path, root, null, null, fileUtils, cytoscapeUtils, taskDispatcher);
 	}
 	
@@ -164,7 +172,7 @@ public class LuceneDataSet<NETWORK, NODE, EDGE> extends DataSet {
 	}
 	
 	private Searcher createSearcher(String indexPath) throws IOException {
-		ArrayList<Searcher> searchers = new ArrayList<Searcher>();
+		ArrayList<Searcher> searchers = new ArrayList<>();
 		
 		File indices = new File(indexPath);
 		for (File file : indices.listFiles()) {
@@ -276,7 +284,7 @@ public class LuceneDataSet<NETWORK, NODE, EDGE> extends DataSet {
 		if (isHeadless()) {
 			return new Configuration(this);
 		} else {
-			return new LuceneConfiguration<NETWORK, NODE, EDGE>(this, dataSetManager, uiUtils, fileUtils, cytoscapeUtils, taskDispatcher);
+			return new LuceneConfiguration(this, dataSetManager, uiUtils, fileUtils, cytoscapeUtils, taskDispatcher);
 		}
 	}
 	
@@ -616,10 +624,8 @@ public class LuceneDataSet<NETWORK, NODE, EDGE> extends DataSet {
 	@Override
 	public Colour getColor(String code) {
 		String color = getFieldByValue(LuceneMediator.GROUP_CODE, code, LuceneMediator.GROUP_COLOUR);
-		if (color != null) {
-			return new Colour(Integer.parseInt(color, 16));
-		}
-		return DEFAULT_COLOUR;
+		
+		return color != null ? new Colour(Integer.parseInt(color, 16)) : null;
 	}
 
 	@Override

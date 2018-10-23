@@ -45,6 +45,7 @@ import org.genemania.plugin.task.GeneManiaTask;
 import org.genemania.plugin.task.TaskDispatcher;
 
 public class ImportedDataController {
+	
 	private final DataSetManager dataSetManager;
 	private final TaskDispatcher taskDispatcher;
 

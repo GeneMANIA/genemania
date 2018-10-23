@@ -19,14 +19,12 @@
 
 package org.genemania.plugin.view.components;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.JToggleButton;
 
 import org.genemania.plugin.view.util.UiUtils;
 
 public abstract class ToggleDetailPanel<T> extends BaseDetailPanel<T> {
+	
 	private static final long serialVersionUID = 1L;
 	protected static final int EXPANDER_PADDING = 5;
 	private final UiUtils uiUtils;
@@ -42,11 +40,8 @@ public abstract class ToggleDetailPanel<T> extends BaseDetailPanel<T> {
 	
 	public JToggleButton createToggleButton() {
 		final JToggleButton expandButton = uiUtils.createToggleButton();
-		expandButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				doShowDetails(expandButton.isSelected(), 1);
-			}
-		});
+		expandButton.addActionListener(e -> doShowDetails(expandButton.isSelected(), 1));
+		
 		return expandButton;
 	}
 }

@@ -30,6 +30,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.genemania.domain.GeneNamingSource;
 import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.LogUtils;
@@ -42,9 +45,6 @@ import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.proxies.EdgeProxy;
-import org.genemania.plugin.proxies.NetworkProxy;
-import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.plugin.report.CytoscapeTextReportExporter;
 import org.genemania.plugin.report.ManiaReport;
 import org.genemania.plugin.report.TextReportExporter;
@@ -52,16 +52,16 @@ import org.genemania.plugin.view.AttributesDialog;
 import org.genemania.plugin.view.util.FileSelectionMode;
 import org.genemania.plugin.view.util.UiUtils;
 
-public class ManiaResultsController<NETWORK, NODE, EDGE> {
+public class ManiaResultsController {
 	
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 	private final DataSetManager dataSetManager;
 	private final NetworkUtils networkUtils;
 	private final UiUtils uiUtils;
 
 	public ManiaResultsController(
 			final DataSetManager dataSetManager,
-			final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			final CytoscapeUtils cytoscapeUtils,
 			final UiUtils uiUtils,
 			final NetworkUtils networkUtils
 	) {
@@ -71,7 +71,7 @@ public class ManiaResultsController<NETWORK, NODE, EDGE> {
 		this.networkUtils = networkUtils;
 	}
 	
-	public void showAttributesDialog(NETWORK cyNetwork, ViewState options) {		
+	public void showAttributesDialog(CyNetwork cyNetwork, ViewState options) {		
 		final AttributesDialog dialog =
 				new AttributesDialog(cytoscapeUtils.getFrame(), new AttributesController(), uiUtils);
 		dialog.setLocationRelativeTo(cytoscapeUtils.getFrame());
@@ -82,26 +82,28 @@ public class ManiaResultsController<NETWORK, NODE, EDGE> {
 	
 	public void exportReport(Component parent, ViewState viewState) throws ApplicationException {
 		SearchResult options = viewState.getSearchResult();
-		Set<String> extensions = new HashSet<String>();
+		Set<String> extensions = new HashSet<>();
 		extensions.add("txt"); //$NON-NLS-1$
 		String date = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date());
 		date = date.replace(":", "-").replace("/", "-"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
 		String filename = String.format("GeneMANIA-Report-%s-%s.txt", options.getOrganism().getName(), date); //$NON-NLS-1$
 		File initialFile = new File(filename);
 		File file = uiUtils.getFile(parent, Strings.maniaResultsPanelExport_title, initialFile, Strings.maniaResultsPanelExportFile_description, extensions, FileSelectionMode.SAVE_FILE);
-		if (file == null) {
+		
+		if (file == null)
 			return;
-		}
+		
 		try {
 			FileOutputStream stream = new FileOutputStream(file);
+			
 			try {
 				DataSet data = dataSetManager.getDataSet();
 				List<GeneNamingSource> preferences = Collections.emptyList();
 				IGeneProvider provider = new RankedGeneProviderWithUniprotHack(data.getAllNamingSources(), preferences);
 				TextReportExporter exporter = new CytoscapeTextReportExporter(provider, networkUtils);
-				ManiaReport report = new ManiaReport(viewState, data );
+				ManiaReport report = new ManiaReport(viewState, data);
 				exporter.export(report, stream);
-					stream.flush();
+				stream.flush();
 			} finally {
 				stream.close();
 			}
@@ -111,40 +113,44 @@ public class ManiaResultsController<NETWORK, NODE, EDGE> {
 	}
 
 	public void computeHighlightedNetworks(ViewState options) {
-		Set<Network<?>> highlightedNetworks = new HashSet<Network<?>>();
+		Set<Network<?>> highlightedNetworks = new HashSet<>();
 		// Compute affected networks
-		NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
-		if (cyNetwork == null) {
-			return;
-		}
+		CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
 		
-		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-		Set<EDGE> selectedEdges = networkProxy.getSelectedEdges();
-		for (EDGE edge : selectedEdges) {
-			EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, cyNetwork);
-			Set<Network<?>> networks = options.getNetworksByEdge(edgeProxy.getIdentifier());
-			for (Network<?> network : networks) {
+		if (cyNetwork == null)
+			return;
+		
+		Set<CyEdge> selectedEdges = cytoscapeUtils.getSelectedEdges(cyNetwork);
+		
+		for (CyEdge edge : selectedEdges) {
+			Set<Network<?>> networks = options.getNetworksByEdge(
+					cytoscapeUtils.getIdentifier(cyNetwork, edge));
+			
+			for (Network<?> network : networks)
 				highlightedNetworks.add(network);
-			}
 		}
 
-		Set<NODE> selectedNodes = networkProxy.getSelectedNodes();
-		for (NODE node : selectedNodes) {
-			NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
-			Set<Network<?>> networks = options.getNetworksByNode(nodeProxy.getIdentifier());
-			for (Network<?> network : networks) {
+		Set<CyNode> selectedNodes = cytoscapeUtils.getSelectedNodes(cyNetwork);
+		
+		for (CyNode node : selectedNodes) {
+			Set<Network<?>> networks = options.getNetworksByNode(
+					cytoscapeUtils.getIdentifier(cyNetwork, node));
+			
+			for (Network<?> network : networks)
 				highlightedNetworks.add(network);
-			}
 		}
 
 		// Compute affected groups while highlighting affected networks
-		Set<Group<?, ?>> groups = new HashSet<Group<?, ?>>();
+		Set<Group<?, ?>> groups = new HashSet<>();
 		options.clearHighlightedNetworks();
+		
 		for (Network<?> network : highlightedNetworks) {
 			groups.add(options.getGroup(network));
 			options.setNetworkHighlighted(network, true);
 		}
+		
 		options.clearHighlightedGroups();
+		
 		// Highlight affected groups
 		for (Group<?, ?> group : groups) {
 			options.setGroupHighlighted(group, true);

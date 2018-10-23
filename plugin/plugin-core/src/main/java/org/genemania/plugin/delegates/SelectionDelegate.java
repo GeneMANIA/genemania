@@ -18,23 +18,25 @@
  */
 package org.genemania.plugin.delegates;
 
+import org.cytoscape.model.CyNetwork;
 import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 
-public class SelectionDelegate<NETWORK, NODE, EDGE> implements Delegate {
+public class SelectionDelegate implements Delegate {
 
 	protected final boolean selected;
-	protected NETWORK network;
-	protected final NetworkSelectionManager<NETWORK, NODE, EDGE> manager;
-	private final GeneMania<NETWORK, NODE, EDGE> plugin;
-	protected final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	protected CyNetwork network;
+	protected final SessionManager manager;
+	private final GeneMania plugin;
+	protected final CytoscapeUtils cytoscapeUtils;
 
 	private static Object selectionMutex = new Object();
 	
-	public SelectionDelegate(boolean selected, NETWORK network, NetworkSelectionManager<NETWORK, NODE, EDGE> manager, GeneMania<NETWORK, NODE, EDGE> plugin, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils) {
+	public SelectionDelegate(boolean selected, CyNetwork network, SessionManager manager, GeneMania plugin,
+			CytoscapeUtils cytoscapeUtils) {
 		this.selected = selected;
 		this.network = network;
 		this.manager = manager;
@@ -45,14 +47,13 @@ public class SelectionDelegate<NETWORK, NODE, EDGE> implements Delegate {
 	@Override
 	public void invoke() throws ApplicationException {
 		synchronized (selectionMutex) {
-			if (!manager.isSelectionListenerEnabled()) {
+			if (!manager.isSelectionListenerEnabled())
 				return;
-			}
 			
 			ViewState options = manager.getNetworkConfiguration(network);
-			if (options == null) {
+			
+			if (options == null)
 				return;
-			}
 			
 			handleSelection(options);
 			

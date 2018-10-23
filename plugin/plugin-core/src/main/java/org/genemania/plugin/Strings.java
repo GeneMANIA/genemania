@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin;
 
 import java.util.ResourceBundle;
@@ -24,6 +23,7 @@ import java.util.ResourceBundle;
 import org.genemania.AbstractStrings;
 
 public class Strings extends AbstractStrings {
+	
 	private static ResourceBundle resources;
 	
 	static {
@@ -31,6 +31,8 @@ public class Strings extends AbstractStrings {
 	}
 	
 	public static String retrieveRelatedGenes_menuLabel;
+	public static String retrieveRelatedGenesDialog_title;
+	
 	public static String maniaResults_menuLabel;
 	public static String maniaResults_menuLabel2;
 	public static String maniaResults_title;
@@ -147,9 +149,7 @@ public class Strings extends AbstractStrings {
 	public static String geneDetailPanelDescription_label;
 	public static String geneDetailPanelDescription2_label;
 	public static String tableModelInvalidColumn_error;
-	public static String maniaResultsPanelNetworkOptions_label;
 	public static String maniaResultsPanelNetworkTab_label;
-	public static String maniaResultsPanelGeneOptions_label;
 	public static String maniaResultsPanelGeneTab_label;
 	public static String maniaResultsPanelFunctionTab_label;
 	public static String maniaResultsPanelMergeNetworksButton_label;
@@ -184,7 +184,6 @@ public class Strings extends AbstractStrings {
 	public static String retrieveRelatedGenesClearGenesButton_label;
 	public static String retrieveRelatedGenesNetworkPanel_label;
 	public static String retrieveRelatedGenesNetworkPanel_tooltip;
-	public static String retrieveRelatedGenesNetworkPanelSelection_label;
 	public static String retrieveRelatedGenes_label;
 	public static String retrieveRelatedGenes_label2;
 	public static String retrieveRelatedGenes_label3;
@@ -280,6 +279,10 @@ public class Strings extends AbstractStrings {
 	public static String reportSource_label;
 	public static String reportTags_label;
 	
+	public static String selectAllButton_label;
+	public static String selectNoneButton_label;
+	public static String selectDefaultButton_label;
+	
 	public static String attributesDialog_title;
 	public static String attributesDialog_description;
 	public static String attributesDialogAddButton_label;
@@ -295,8 +298,6 @@ public class Strings extends AbstractStrings {
 	public static String attributesDialogTags_label;
 	public static String attributesDialogTitle_label;
 	public static String attributesDialogUrl_label;
-	public static String attributesDialogSelectAllButton_label;
-	public static String attributesDialogSelectNoneButton_label;
 	
 	public static String maniaResultsAttributesButton_label;
 	

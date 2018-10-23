@@ -16,15 +16,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.parsers;
 
 import java.io.IOException;
 import java.io.Reader;
 
 import org.genemania.plugin.apps.IQueryErrorHandler;
-import org.genemania.plugin.data.DataSet;
 
 public interface IQueryParser {
-	Query parse(DataSet data, Reader reader, IQueryErrorHandler handler) throws IOException;
+	
+	Query parse(Reader reader, IQueryErrorHandler handler) throws IOException;
 }

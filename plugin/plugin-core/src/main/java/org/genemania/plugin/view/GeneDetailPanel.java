@@ -19,6 +19,8 @@
 
 package org.genemania.plugin.view;
 
+import static org.cytoscape.util.swing.LookAndFeelUtil.makeSmall;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -31,6 +33,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
+import javax.swing.UIManager;
 
 import org.genemania.domain.Gene;
 import org.genemania.plugin.NetworkUtils;
@@ -38,6 +41,7 @@ import org.genemania.plugin.view.components.ToggleDetailPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
+	
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -62,14 +66,19 @@ public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
 		this.score = score;
 		this.isQueryGene = isQueryGene;
 		
-		setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, Color.white));
+		final Color fg = UIManager.getColor("Table.background");
+		
+		setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, fg));
 		
 		setLayout(new GridBagLayout());
 		String name = networkUtils.getGeneLabel(gene);
 		JLabel nameLabel = new JLabel(name);
 		nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD));
+		makeSmall(nameLabel);
 		
 		expander = createToggleButton();
+		makeSmall(expander);
+		
 		add(expander, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, EXPANDER_PADDING, 0, EXPANDER_PADDING), 0, 0));
 		add(nameLabel, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 
@@ -78,6 +87,7 @@ public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
 		} else {
 			JLabel scoreLabel = new JLabel(String.format("%.2f", score * 100d)); //$NON-NLS-1$
 			add(scoreLabel, new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+			makeSmall(scoreLabel);
 		}
 		
 		String description = networkUtils.buildGeneDescription(gene);
@@ -85,10 +95,11 @@ public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
 		descriptionLabel.setFont(getFont());
 		descriptionLabel.setVisible(false);
 		descriptionLabel.setOpaque(true);
-		descriptionLabel.setBackground(Color.white);
+		descriptionLabel.setBackground(fg);
+		makeSmall(descriptionLabel);
 		add(descriptionLabel, new GridBagConstraints(1, 1, 2, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		
-		fillerPanel = uiUtils.createFillerPanel(Color.white);
+		fillerPanel = uiUtils.createFillerPanel(fg);
 		fillerPanel.setVisible(false);
 		add(fillerPanel, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 	}
@@ -117,11 +128,10 @@ public class GeneDetailPanel extends ToggleDetailPanel<Gene> {
 	@Override
 	public Dimension getMinimumSize() {
 		Dimension size = super.getMinimumSize();
-		if (descriptionLabel.isVisible()) {
-			return new Dimension(Math.max(MINIMUM_WIDTH_HINT, size.width), size.height);
-		} else {
-			return size;
-		}
+
+		return descriptionLabel.isVisible() ?
+				new Dimension(Math.max(MINIMUM_WIDTH_HINT, size.width), size.height)
+				: size;
 	}
 
 	public String getGeneName() {

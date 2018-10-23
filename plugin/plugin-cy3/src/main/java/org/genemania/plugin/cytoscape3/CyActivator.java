@@ -18,6 +18,12 @@
  */
 package org.genemania.plugin.cytoscape3;
 
+import static org.cytoscape.work.ServiceProperties.COMMAND;
+import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
+import static org.cytoscape.work.ServiceProperties.COMMAND_EXAMPLE_JSON;
+import static org.cytoscape.work.ServiceProperties.COMMAND_LONG_DESCRIPTION;
+import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
+import static org.cytoscape.work.ServiceProperties.COMMAND_SUPPORTS_JSON;
 import static org.cytoscape.work.ServiceProperties.INSERT_SEPARATOR_AFTER;
 import static org.cytoscape.work.ServiceProperties.INSERT_SEPARATOR_BEFORE;
 import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
@@ -33,19 +39,20 @@ import org.cytoscape.application.swing.CyAction;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanel;
 import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.io.util.StreamUtil;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTableFactory;
+import org.cytoscape.model.CyTableManager;
 import org.cytoscape.model.events.RowsSetListener;
+import org.cytoscape.property.AbstractConfigDirPropsReader;
 import org.cytoscape.property.CyProperty;
-import org.cytoscape.property.SimpleCyProperty;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.visualize.ApplyPreferredLayoutTaskFactory;
+import org.cytoscape.util.swing.IconManager;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -53,16 +60,24 @@ import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
+import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.undo.UndoSupport;
 import org.genemania.plugin.FileUtils;
+import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
+import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape3.actions.AboutAction;
 import org.genemania.plugin.cytoscape3.actions.CheckForUpdatesAction;
 import org.genemania.plugin.cytoscape3.actions.DownloadDataSetAction;
 import org.genemania.plugin.cytoscape3.actions.RetrieveRelatedGenesAction;
 import org.genemania.plugin.cytoscape3.actions.SwitchDataSetAction;
+import org.genemania.plugin.cytoscape3.controllers.RetrieveRelatedGenesControllerImpl;
 import org.genemania.plugin.cytoscape3.layout.GeneManiaFDLayout;
+import org.genemania.plugin.cytoscape3.model.OrganismManager;
+import org.genemania.plugin.cytoscape3.task.ListOrganismsCommandTaskFactory;
+import org.genemania.plugin.cytoscape3.task.SearchCommandTaskFactory;
+import org.genemania.plugin.cytoscape3.task.SimpleSearchTaskFactory;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.data.IDataSetFactory;
 import org.genemania.plugin.view.util.UiUtils;
@@ -70,122 +85,387 @@ import org.osgi.framework.BundleContext;
 
 public class CyActivator extends AbstractCyActivator {
 	
-	private CySwingApplication cySwingApplicationRef;
-	private CyServiceRegistrar cyServiceRegistrarRef;
+	private CySwingApplication swingApplication;
+	private CyServiceRegistrar serviceRegistrar;
 	private RetrieveRelatedGenesAction retrieveRelatedGenesAction;
 	
-	public CyActivator() {
-		super();
-	}
-
 	@Override
 	public void start(BundleContext bc) {
-		cyServiceRegistrarRef = getService(bc, CyServiceRegistrar.class);
-		cySwingApplicationRef = getService(bc, CySwingApplication.class);
-		CyApplicationManager cyApplicationManagerRef = getService(bc, CyApplicationManager.class);
-		CyNetworkManager cyNetworkManagerRef = getService(bc, CyNetworkManager.class);
-		CyNetworkFactory cyNetworkFactoryRef = getService(bc, CyNetworkFactory.class);
-		CyNetworkViewManager cyNetworkViewManagerRef = getService(bc, CyNetworkViewManager.class);
-		CyNetworkViewFactory cyNetworkViewFactoryRef = getService(bc, CyNetworkViewFactory.class);
-		VisualMappingManager visualMappingManagerRef = getService(bc, VisualMappingManager.class);
-		VisualStyleFactory visualStyleFactoryRef = getService(bc, VisualStyleFactory.class);
-		VisualMappingFunctionFactory discreteMappingFunctionFactoryRef = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=discrete)");
-		VisualMappingFunctionFactory passthroughMappingFunctionFactoryRef = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=passthrough)");
-		VisualMappingFunctionFactory continuousMappingFunctionFactoryRef = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
-		TaskManager<?, ?> taskManagerRef = getService(bc, TaskManager.class);
+		serviceRegistrar = getService(bc, CyServiceRegistrar.class);
+		swingApplication = getService(bc, CySwingApplication.class);
+		CyApplicationManager applicationManager = getService(bc, CyApplicationManager.class);
+		CyNetworkManager networkManager = getService(bc, CyNetworkManager.class);
+		CyNetworkFactory networkFactory = getService(bc, CyNetworkFactory.class);
+		CyNetworkViewManager networkViewManager = getService(bc, CyNetworkViewManager.class);
+		CyNetworkViewFactory networkViewFactory = getService(bc, CyNetworkViewFactory.class);
+		CyTableManager tableManager = getService(bc, CyTableManager.class);
+		CyTableFactory tableFactory = getService(bc, CyTableFactory.class);
+		VisualMappingManager visualMappingManager = getService(bc, VisualMappingManager.class);
+		VisualStyleFactory visualStyleFactory = getService(bc, VisualStyleFactory.class);
+		VisualMappingFunctionFactory discreteMappingFactory = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=discrete)");
+		VisualMappingFunctionFactory passthroughMappingFactory = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=passthrough)");
+		VisualMappingFunctionFactory continuousMappingFactory = getService(bc, VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
+		TaskManager<?, ?> taskManager = getService(bc, TaskManager.class);
 		ApplyPreferredLayoutTaskFactory applyPreferredLayoutTaskFactory = getService(bc, ApplyPreferredLayoutTaskFactory.class);
-		CyEventHelper cyEventHelperRef = getService(bc, CyEventHelper.class);
-		UndoSupport undoSupportRef = getService(bc, UndoSupport.class);
+		CyEventHelper eventHelper = getService(bc, CyEventHelper.class);
+		UndoSupport undoSupport = getService(bc, UndoSupport.class);
 		RenderingEngineManager renderingEngineManager = getService(bc, RenderingEngineManager.class);
 		StreamUtil streamUtil = getService(bc, StreamUtil.class);
+		IconManager iconManager = getService(bc, IconManager.class);
 
 		closeAppPanels();
 		
-		UiUtils uiUtils = new UiUtils();
+		{
+			PropsReader propsReader = new PropsReader();
+			Properties props = new Properties();
+			props.setProperty("cyPropertyName", GeneMania.APP_CYPROPERTY_NAME);
+			registerService(bc, propsReader, CyProperty.class, props);
+		}
+		
+		UiUtils uiUtils = new UiUtils(iconManager);
 		FileUtils fileUtils = new CyFileUtils(streamUtil);
 		NetworkUtils networkUtils = new NetworkUtils();
 		CytoscapeUtilsImpl cytoscapeUtils = new CytoscapeUtilsImpl(
-				networkUtils, cySwingApplicationRef, cyApplicationManagerRef,
-				cyNetworkManagerRef, cyNetworkViewManagerRef,
-				cyNetworkFactoryRef, cyNetworkViewFactoryRef,
-				visualStyleFactoryRef, visualMappingManagerRef,
-				discreteMappingFunctionFactoryRef,
-				passthroughMappingFunctionFactoryRef,
-				continuousMappingFunctionFactoryRef,
-				taskManagerRef, cyEventHelperRef, applyPreferredLayoutTaskFactory, renderingEngineManager,
-				cyServiceRegistrarRef);
+				networkUtils, swingApplication, applicationManager,
+				tableManager, tableFactory,
+				networkManager, networkViewManager,
+				networkFactory, networkViewFactory,
+				visualStyleFactory, visualMappingManager,
+				discreteMappingFactory,
+				passthroughMappingFactory,
+				continuousMappingFactory,
+				taskManager, eventHelper,
+				applyPreferredLayoutTaskFactory, renderingEngineManager,
+				serviceRegistrar);
 		DataSetManager dataSetManager = new DataSetManager();
 		OsgiTaskDispatcher taskDispatcher = new OsgiTaskDispatcher(uiUtils);
-		DefaultDataSetFactory<CyNetwork, CyNode, CyEdge> luceneDataSetFactory = new DefaultDataSetFactory<CyNetwork, CyNode, CyEdge>(
-				dataSetManager, uiUtils, fileUtils, cytoscapeUtils,
-				taskDispatcher);
-		
-		SimpleCyProperty<Properties> properties = new SimpleCyProperty<Properties>("org.genemania", new Properties(), Properties.class, CyProperty.SavePolicy.SESSION_FILE);
-		registerService(bc, properties, CyProperty.class, new Properties());
-		
-		NetworkSelectionManagerImpl selectionManager = new NetworkSelectionManagerImpl(cytoscapeUtils, taskDispatcher, properties);
-		GeneManiaImpl geneMania = new GeneManiaImpl(dataSetManager,
-				cytoscapeUtils, uiUtils, fileUtils, networkUtils,
-				taskDispatcher, cySwingApplicationRef, cyServiceRegistrarRef,
-				selectionManager, properties);
+		DefaultDataSetFactory luceneDataSetFactory = new DefaultDataSetFactory(dataSetManager, uiUtils, fileUtils,
+				cytoscapeUtils, taskDispatcher);
+
+		SessionManagerImpl selectionManager = new SessionManagerImpl(cytoscapeUtils, taskDispatcher);
+		GeneManiaImpl geneMania = new GeneManiaImpl(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils,
+				taskDispatcher, swingApplication, serviceRegistrar, selectionManager);
 		selectionManager.setGeneMania(geneMania);
-		registerAllServices(bc, selectionManager, new Properties());
+		registerAllServices(bc, selectionManager);
 		geneMania.startUp();
 		
-		GeneManiaFDLayout fdLayout = new GeneManiaFDLayout(undoSupportRef);
+		GeneManiaFDLayout fdLayout = new GeneManiaFDLayout(undoSupport);
 		registerLayoutAlgorithms(bc, fdLayout);
-
-		Map<String, String> serviceProperties;
 		
-		serviceProperties = new HashMap<String, String>();
-		serviceProperties.put("inMenuBar", "true");
-		serviceProperties.put("preferredMenu", "Apps.GeneMANIA");
-		serviceProperties.put(MENU_GRAVITY, "1.0");
-		serviceProperties.put(INSERT_SEPARATOR_AFTER, "true");
-		retrieveRelatedGenesAction = new RetrieveRelatedGenesAction(
-				serviceProperties, cyApplicationManagerRef, geneMania,
-				cytoscapeUtils, networkUtils, uiUtils, fileUtils,
-				taskDispatcher, cyNetworkViewManagerRef);
+		RetrieveRelatedGenesController controller =
+				new RetrieveRelatedGenesControllerImpl(geneMania, cytoscapeUtils, networkUtils, taskDispatcher);
 
-		serviceProperties = new HashMap<String, String>();
-		serviceProperties.put("inMenuBar", "true");
-		serviceProperties.put("preferredMenu", "Apps.GeneMANIA");
-		serviceProperties.put(MENU_GRAVITY, "2.0");
-		DownloadDataSetAction downloadDataSetAction = new DownloadDataSetAction(
-				serviceProperties, cyApplicationManagerRef, geneMania, cyNetworkViewManagerRef);
-
-		serviceProperties = new HashMap<String, String>();
-		serviceProperties.put("inMenuBar", "true");
-		serviceProperties.put("preferredMenu", "Apps.GeneMANIA");
-		serviceProperties.put(MENU_GRAVITY, "3.0");
-		SwitchDataSetAction switchDataSetAction = new SwitchDataSetAction(
-				serviceProperties, cyApplicationManagerRef, geneMania, cyNetworkViewManagerRef);
-
-		serviceProperties = new HashMap<String, String>();
-		serviceProperties.put("inMenuBar", "true");
-		serviceProperties.put("preferredMenu", "Apps.GeneMANIA");
-		serviceProperties.put(MENU_GRAVITY, "4.0");
-		CheckForUpdatesAction checkForUpdatesAction = new CheckForUpdatesAction(
-				serviceProperties, cyApplicationManagerRef, geneMania, cyNetworkViewManagerRef);
-
-
-		serviceProperties = new HashMap<String, String>();
-		serviceProperties.put("inMenuBar", "true");
-		serviceProperties.put("preferredMenu", "Apps.GeneMANIA");
-		serviceProperties.put(MENU_GRAVITY, "5.0");
-		serviceProperties.put(INSERT_SEPARATOR_BEFORE, "true");
-		AboutAction aboutAction = new AboutAction(serviceProperties,
-				cyApplicationManagerRef, cySwingApplicationRef, uiUtils, cyNetworkViewManagerRef);
+		Map<String, String> props;
+		{
+			props = new HashMap<>();
+			props.put("inMenuBar", "true");
+			props.put("preferredMenu", "Apps.GeneMANIA");
+			props.put(MENU_GRAVITY, "1.0");
+			props.put(INSERT_SEPARATOR_AFTER, "true");
+			retrieveRelatedGenesAction = new RetrieveRelatedGenesAction(props, applicationManager, geneMania,
+					controller, cytoscapeUtils, networkUtils, uiUtils, fileUtils, taskDispatcher, networkViewManager);
+			registerService(bc, retrieveRelatedGenesAction, CyAction.class);
+		}
+		{
+			props = new HashMap<>();
+			props.put("inMenuBar", "true");
+			props.put("preferredMenu", "Apps.GeneMANIA");
+			props.put(MENU_GRAVITY, "2.0");
+			DownloadDataSetAction action = new DownloadDataSetAction(props, applicationManager, geneMania,
+					networkViewManager);
+			registerService(bc, action, CyAction.class);
+		}
+		{
+			props = new HashMap<>();
+			props.put("inMenuBar", "true");
+			props.put("preferredMenu", "Apps.GeneMANIA");
+			props.put(MENU_GRAVITY, "3.0");
+			SwitchDataSetAction action = new SwitchDataSetAction(props, applicationManager, geneMania,
+					networkViewManager);
+			registerService(bc, action, CyAction.class);
+		}
+		{
+			props = new HashMap<>();
+			props.put("inMenuBar", "true");
+			props.put("preferredMenu", "Apps.GeneMANIA");
+			props.put(MENU_GRAVITY, "4.0");
+			CheckForUpdatesAction action = new CheckForUpdatesAction(props, applicationManager, geneMania,
+					networkViewManager);
+			registerService(bc, action, CyAction.class);
+		}
+		{
+			props = new HashMap<>();
+			props.put("inMenuBar", "true");
+			props.put("preferredMenu", "Apps.GeneMANIA");
+			props.put(MENU_GRAVITY, "5.0");
+			props.put(INSERT_SEPARATOR_BEFORE, "true");
+			AboutAction action = new AboutAction(props, applicationManager, swingApplication, uiUtils,
+					networkViewManager);
+			registerService(bc, action, CyAction.class);
+		}
 		
-		registerService(bc, retrieveRelatedGenesAction, CyAction.class, new Properties());
-		registerService(bc, downloadDataSetAction, CyAction.class, new Properties());
-		registerService(bc, switchDataSetAction, CyAction.class, new Properties());
-		registerService(bc, checkForUpdatesAction, CyAction.class, new Properties());
-		registerService(bc, cytoscapeUtils, RowsSetListener.class, new Properties());
-		registerService(bc, luceneDataSetFactory, IDataSetFactory.class, new Properties());
-		registerService(bc, aboutAction, CyAction.class, new Properties());
+		registerService(bc, cytoscapeUtils, RowsSetListener.class);
+		registerService(bc, luceneDataSetFactory, IDataSetFactory.class);
 
-		registerServiceListener(bc, dataSetManager, "addDataSetFactory", "removeDataSetFactory", IDataSetFactory.class);
+		registerServiceListener(bc, dataSetManager::addDataSetFactory, dataSetManager::removeDataSetFactory,
+				IDataSetFactory.class);
+		
+		OrganismManager organismManager = new OrganismManager(geneMania, cytoscapeUtils, serviceRegistrar);
+		
+		{
+			SimpleSearchTaskFactory factory = new SimpleSearchTaskFactory(geneMania, controller,
+					retrieveRelatedGenesAction, organismManager, networkUtils, uiUtils, cytoscapeUtils,
+					serviceRegistrar);
+			registerService(bc, factory, NetworkSearchTaskFactory.class);
+		}
+		{
+			SearchCommandTaskFactory factory = new SearchCommandTaskFactory(geneMania, controller,
+					organismManager, cytoscapeUtils);
+			Properties p = new Properties();
+			p.setProperty(COMMAND, "search");
+			p.setProperty(COMMAND_NAMESPACE, "genemania");
+			p.setProperty(COMMAND_DESCRIPTION, "Searches GeneMANIA");
+			p.setProperty(COMMAND_LONG_DESCRIPTION,
+					"Finds related genes from a locally installed data set (i.e. offline search) "
+					+ "or by querying the GeneMANIA server (i.e. online search)."
+					+ '\n' + '\n'
+					+ "Please remember that, if you want to search a large number of genes "
+					+ "(e.g. more than 1000 total query and resultant genes), "
+					+ "you should probably set the ```offline``` argument to ```true```, "
+					+ "otherwise the performance may be very poor or the GeneMANIA server may not "
+					+ "be able to handle the large number of total nodes/edges at all. "
+					+ "In this case, make sure the required organism data sets have been downloaded/installed "
+					+ "before executing this command in offline mode."
+					+ '\n' + '\n'
+					+ "Also be aware that if you have any concerns about data privacy you should always use the offline mode."
+					+ '\n' + '\n'
+					+ "[GeneMANIA Help]: http://pages.genemania.org/help/ \"GeneMANIA Help & Docs\"" + '\n'
+					+ "For more information, please visit [GeneMANIA Help]."
+			);
+			p.setProperty(COMMAND_SUPPORTS_JSON, "true");
+			p.setProperty(COMMAND_EXAMPLE_JSON,
+					"{\n" + 
+					"    \"organism\": {\n" + 
+					"      \"taxonomyId\": 83333,\n" + 
+					"      \"scientificName\": \"Escherichia coli\",\n" + 
+					"      \"abbreviatedName\": \"E. coli\",\n" + 
+					"      \"commonName\": \"escherichia coli\"\n" + 
+					"    },\n" + 
+					"    \"combiningMethod\": \"AUTOMATIC_SELECT\",\n" + 
+					"    \"genes\": [\n" + 
+					"      {\n" + 
+					"        \"symbol\": \"ybcN\",\n" + 
+					"        \"queryGene\": true,\n" + 
+					"        \"queryTerm\": \"ybcN\",\n" + 
+					"        \"description\": \"DLP12 prophage; putative protein\",\n" + 
+					"        \"score\": 0.6959143703846894\n" + 
+					"      },\n" + 
+					"      {\n" + 
+					"        \"symbol\": \"ninE\",\n" + 
+					"        \"queryGene\": false,\n" + 
+					"        \"description\": \"DLP12 prophage; conserved protein\",\n" + 
+					"        \"score\": 0.009407267625495375\n" + 
+					"      },\n" + 
+					"      {\n" + 
+					"        \"symbol\": \"ylcG\",\n" + 
+					"        \"queryGene\": false,\n" + 
+					"        \"description\": \"expressed protein, DLP12 prophage\",\n" + 
+					"        \"score\": 0.009310159553433284\n" + 
+					"      }\n" + 
+					"    ],\n" + 
+					"    \"network\": 5908\n" + 
+					"}"
+			);
+			registerService(bc, factory, TaskFactory.class, p);
+		}
+		{
+			ListOrganismsCommandTaskFactory factory = new ListOrganismsCommandTaskFactory(organismManager);
+			Properties p = new Properties();
+			p.setProperty(COMMAND, "organisms");
+			p.setProperty(COMMAND_NAMESPACE, "genemania");
+			p.setProperty(COMMAND_DESCRIPTION, "Lists supported GeneMANIA organisms and interaction networks");
+			p.setProperty(COMMAND_LONG_DESCRIPTION, "Lists all available organisms--and their interaction networks--that have been installed or are supported for online searches.");
+			p.setProperty(COMMAND_SUPPORTS_JSON, "true");
+			p.setProperty(COMMAND_EXAMPLE_JSON,
+					"{\n" + 
+					"    \"organisms\": [\n" + 
+					"      {\n" + 
+					"        \"taxonomyId\": 3702,\n" + 
+					"        \"scientificName\": \"Arabidopsis thaliana\",\n" + 
+					"        \"abbreviatedName\": \"A. thaliana\",\n" + 
+					"        \"commonName\": \"arabidopsis\",\n" + 
+					"        \"interactionNetworkGroups\": [\n" + 
+					"          {\n" + 
+					"            \"code\": \"spd\",\n" + 
+					"            \"name\": \"Shared protein domains\",\n" + 
+					"            \"description\": \"\",\n" + 
+					"            \"interactionNetworks\": [\n" + 
+					"              {\n" + 
+					"                \"id\": 55,\n" + 
+					"                \"name\": \"Lee-Rhee-2010 Shared protein domains\",\n" + 
+					"                \"description\": \"\",\n" + 
+					"                \"metadata\": {\n" + 
+					"                  \"id\": 55,\n" + 
+					"                  \"source\": \"SUPPLEMENTARY_MATERIAL\",\n" + 
+					"                  \"reference\": \"\",\n" + 
+					"                  \"pubmedId\": \"20118918\",\n" + 
+					"                  \"authors\": \"Lee,Rhee\",\n" + 
+					"                  \"publicationName\": \"Nat Biotechnol\",\n" + 
+					"                  \"yearPublished\": \"2010.0\",\n" + 
+					"                  \"processingDescription\": \"Direct interaction\",\n" + 
+					"                  \"networkType\": \"Shared protein domains\",\n" + 
+					"                  \"alias\": \"\",\n" + 
+					"                  \"interactionCount\": 50665,\n" + 
+					"                  \"dynamicRange\": \"\",\n" + 
+					"                  \"edgeWeightDistribution\": \"\",\n" + 
+					"                  \"accessStats\": 0,\n" + 
+					"                  \"comment\": \"\",\n" + 
+					"                  \"other\": \"\",\n" + 
+					"                  \"title\": \"Rational association of genes with traits using a genome-scale gene network for Arabidopsis thaliana.\",\n" + 
+					"                  \"url\": \"http://www.ncbi.nlm.nih.gov/pubmed/20118918\",\n" + 
+					"                  \"sourceUrl\": \"\"\n" + 
+					"                },\n" + 
+					"                \"defaultSelected\": true\n" + 
+					"              },\n" + 
+					"              {\n" + 
+					"                \"id\": 74,\n" + 
+					"                \"name\": \"INTERPRO\",\n" + 
+					"                \"description\": \"\",\n" + 
+					"                \"metadata\": {\n" + 
+					"                  \"id\": 74,\n" + 
+					"                  \"source\": \"INTERPRO\",\n" + 
+					"                  \"reference\": \"\",\n" + 
+					"                  \"pubmedId\": \"0\",\n" + 
+					"                  \"authors\": \"\",\n" + 
+					"                  \"publicationName\": \"\",\n" + 
+					"                  \"yearPublished\": \"\",\n" + 
+					"                  \"processingDescription\": \"sharedneighbour\",\n" + 
+					"                  \"networkType\": \"Shared protein domains\",\n" + 
+					"                  \"alias\": \"\",\n" + 
+					"                  \"interactionCount\": 743516,\n" + 
+					"                  \"dynamicRange\": \"\",\n" + 
+					"                  \"edgeWeightDistribution\": \"\",\n" + 
+					"                  \"accessStats\": 0,\n" + 
+					"                  \"comment\": \"\",\n" + 
+					"                  \"other\": \"\",\n" + 
+					"                  \"title\": \"\",\n" + 
+					"                  \"url\": \"\",\n" + 
+					"                  \"sourceUrl\": \"http://www.ebi.ac.uk/interpro/\"\n" + 
+					"                },\n" + 
+					"                \"defaultSelected\": true\n" + 
+					"              }\n" + 
+					"            ]\n" + 
+					"          },\n" + 
+					"          {\n" + 
+					"            \"code\": \"coexp\",\n" + 
+					"            \"name\": \"Co-expression\",\n" + 
+					"            \"description\": \"\",\n" + 
+					"            \"interactionNetworks\": [\n" + 
+					"              {\n" + 
+					"                \"id\": 164,\n" + 
+					"                \"name\": \"Adrian-Bergmann-2015\",\n" + 
+					"                \"description\": \"\",\n" + 
+					"                \"metadata\": {\n" + 
+					"                  \"id\": 164,\n" + 
+					"                  \"source\": \"GEO\",\n" + 
+					"                  \"reference\": \"GSE58855\",\n" + 
+					"                  \"pubmedId\": \"25850675\",\n" + 
+					"                  \"authors\": \"Adrian,Bergmann\",\n" + 
+					"                  \"publicationName\": \"Dev Cell\",\n" + 
+					"                  \"yearPublished\": \"2015.0\",\n" + 
+					"                  \"processingDescription\": \"Pearson correlation\",\n" + 
+					"                  \"networkType\": \"Co-expression\",\n" + 
+					"                  \"alias\": \"\",\n" + 
+					"                  \"interactionCount\": 486602,\n" + 
+					"                  \"dynamicRange\": \"\",\n" + 
+					"                  \"edgeWeightDistribution\": \"\",\n" + 
+					"                  \"accessStats\": 0,\n" + 
+					"                  \"comment\": \"\",\n" + 
+					"                  \"other\": \"\",\n" + 
+					"                  \"title\": \"Transcriptome dynamics of the stomatal lineage: birth, amplification, and termination of a self-renewing population.\",\n" + 
+					"                  \"url\": \"http://www.ncbi.nlm.nih.gov/pubmed/25850675\",\n" + 
+					"                  \"sourceUrl\": \"http://www.ncbi.nlm.nih.gov/projects/geo/query/acc.cgi?acc=GSE58855\"\n" + 
+					"                },\n" + 
+					"                \"defaultSelected\": false\n" + 
+					"              }\n" + 
+					"            ]\n" + 
+					"          }\n" + 
+					"        ]\n" + 
+					"      },\n" + 
+					"      {\n" + 
+					"        \"taxonomyId\": 6239,\n" + 
+					"        \"scientificName\": \"Caenorhabditis elegans\",\n" + 
+					"        \"abbreviatedName\": \"C. elegans\",\n" + 
+					"        \"commonName\": \"worm\",\n" + 
+					"        \"interactionNetworkGroups\": [\n" + 
+					"          {\n" + 
+					"            \"code\": \"predict\",\n" + 
+					"            \"name\": \"Predicted\",\n" + 
+					"            \"description\": \"\",\n" + 
+					"            \"interactionNetworks\": [\n" + 
+					"              {\n" + 
+					"                \"id\": 429,\n" + 
+					"                \"name\": \"I2D-BIND-Fly2Worm\",\n" + 
+					"                \"description\": \"\",\n" + 
+					"                \"metadata\": {\n" + 
+					"                  \"id\": 429,\n" + 
+					"                  \"source\": \"I2D\",\n" + 
+					"                  \"reference\": \"\",\n" + 
+					"                  \"pubmedId\": \"10871269\",\n" + 
+					"                  \"authors\": \"Bader,Hogue\",\n" + 
+					"                  \"publicationName\": \"Bioinformatics\",\n" + 
+					"                  \"yearPublished\": \"2000.0\",\n" + 
+					"                  \"processingDescription\": \"Direct interaction\",\n" + 
+					"                  \"networkType\": \"Predicted\",\n" + 
+					"                  \"alias\": \"\",\n" + 
+					"                  \"interactionCount\": 380,\n" + 
+					"                  \"dynamicRange\": \"\",\n" + 
+					"                  \"edgeWeightDistribution\": \"\",\n" + 
+					"                  \"accessStats\": 0,\n" + 
+					"                  \"comment\": \"\",\n" + 
+					"                  \"other\": \"\",\n" + 
+					"                  \"title\": \"BIND--a data specification for storing and describing biomolecular interactions, molecular complexes and pathways.\",\n" + 
+					"                  \"url\": \"http://www.ncbi.nlm.nih.gov/pubmed/10871269\",\n" + 
+					"                  \"sourceUrl\": \"http://ophid.utoronto.ca/\"\n" + 
+					"                },\n" + 
+					"                \"defaultSelected\": true\n" + 
+					"              },\n" + 
+					"              {\n" + 
+					"                \"id\": 408,\n" + 
+					"                \"name\": \"I2D-BIND-Human2Worm\",\n" + 
+					"                \"description\": \"\",\n" + 
+					"                \"metadata\": {\n" + 
+					"                  \"id\": 408,\n" + 
+					"                  \"source\": \"I2D\",\n" + 
+					"                  \"reference\": \"\",\n" + 
+					"                  \"pubmedId\": \"10871269\",\n" + 
+					"                  \"authors\": \"Bader,Hogue\",\n" + 
+					"                  \"publicationName\": \"Bioinformatics\",\n" + 
+					"                  \"yearPublished\": \"2000.0\",\n" + 
+					"                  \"processingDescription\": \"Direct interaction\",\n" + 
+					"                  \"networkType\": \"Predicted\",\n" + 
+					"                  \"alias\": \"\",\n" + 
+					"                  \"interactionCount\": 257,\n" + 
+					"                  \"dynamicRange\": \"\",\n" + 
+					"                  \"edgeWeightDistribution\": \"\",\n" + 
+					"                  \"accessStats\": 0,\n" + 
+					"                  \"comment\": \"\",\n" + 
+					"                  \"other\": \"\",\n" + 
+					"                  \"title\": \"BIND--a data specification for storing and describing biomolecular interactions, molecular complexes and pathways.\",\n" + 
+					"                  \"url\": \"http://www.ncbi.nlm.nih.gov/pubmed/10871269\",\n" + 
+					"                  \"sourceUrl\": \"http://ophid.utoronto.ca/\"\n" + 
+					"                },\n" + 
+					"                \"defaultSelected\": true\n" + 
+					"              }\n" + 
+					"            ]\n" + 
+					"          }\n" + 
+					"        ]\n" + 
+					"      }\n" + 
+					"    ]\n" + 
+					"}"
+			);
+			registerService(bc, factory, TaskFactory.class, p);
+		}
 	}
 	
 	@Override
@@ -212,7 +492,7 @@ public class CyActivator extends AbstractCyActivator {
 	
 	private void closeAppPanels() {
 		// First, unregister result panels...
-		final CytoPanel resPanel = cySwingApplicationRef.getCytoPanel(CytoPanelName.EAST);
+		final CytoPanel resPanel = swingApplication.getCytoPanel(CytoPanelName.EAST);
 		
 		if (resPanel != null) {
 			int count = resPanel.getCytoPanelComponentCount();
@@ -223,7 +503,7 @@ public class CyActivator extends AbstractCyActivator {
 					
 					// Compare the class names to also get panels that may have been left by old versions of GeneMANIA
 					if (comp.getClass().getName().equals(ManiaResultsCytoPanelComponent.class.getName()))
-						cyServiceRegistrarRef.unregisterAllServices(comp);
+						serviceRegistrar.unregisterAllServices(comp);
 				}
 			} catch (Exception e) {
 			}
@@ -232,5 +512,12 @@ public class CyActivator extends AbstractCyActivator {
 		// Then dispose dialogs
 		if (retrieveRelatedGenesAction != null)
 			retrieveRelatedGenesAction.getDelegate().getDialog().dispose();
+	}
+	
+	private class PropsReader extends AbstractConfigDirPropsReader {
+		
+		PropsReader() {
+			super(GeneMania.APP_CYPROPERTY_NAME, "genemania.props", CyProperty.SavePolicy.CONFIG_DIR);
+		}
 	}
 }

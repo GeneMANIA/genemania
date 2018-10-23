@@ -21,7 +21,9 @@ package org.genemania.plugin.task;
 
 import org.genemania.util.ProgressReporter;
 
+@Deprecated
 public abstract class GeneManiaTask {
+	
 	private final String title;
 	protected ProgressReporter progress;
 	private Throwable lastError;

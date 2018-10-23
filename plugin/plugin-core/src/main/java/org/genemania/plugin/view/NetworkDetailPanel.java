@@ -32,6 +32,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
+import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
 import org.genemania.plugin.data.DataSet;
@@ -54,7 +55,13 @@ public class NetworkDetailPanel extends ToggleDetailPanel<Network<?>> {
 	private int barYOffset = -1;
 	private JLabel nameLabel;
 	
-	public NetworkDetailPanel(Network<?> network, Group<?, ?> group, NetworkUtils networkUtils, UiUtils uiUtils, DataSet data) {
+	public NetworkDetailPanel(
+			Network<?> network,
+			Group<?, ?> group,
+			NetworkUtils networkUtils,
+			UiUtils uiUtils,
+			DataSet data
+	) {
 		super(uiUtils);
 		this.networkUtils = networkUtils;
 		this.network = network;
@@ -86,6 +93,8 @@ public class NetworkDetailPanel extends ToggleDetailPanel<Network<?>> {
 		descriptionLabel.setVisible(false);
 		descriptionLabel.setForeground(textColor);
 		add(descriptionLabel, new GridBagConstraints(1, 1, 2, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+	
+		LookAndFeelUtil.makeSmall(nameLabel, scoreLabel, expander, descriptionLabel);
 	}
 
 	@Override

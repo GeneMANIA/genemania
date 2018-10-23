@@ -25,16 +25,8 @@
 package org.genemania.dto;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
 
-import org.apache.commons.lang.StringUtils;
-import org.genemania.domain.Gene;
-import org.genemania.domain.InteractionNetwork;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
 import org.genemania.util.ProgressReporter;

@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.genemania</groupId>
         <artifactId>plugin-parent</artifactId>
-        <version>3.4.1</version>
+        <version>3.5.0</version>
         <relativePath>..</relativePath>
     </parent>
 
@@ -13,6 +13,38 @@
     <name>${project.groupId}:${project.artifactId}</name>
 
     <dependencies>
+		<!-- Cytoscape -->
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>model-api</artifactId>
+            <version>${cy3.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>swing-application-api</artifactId>
+            <version>${cy3.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>swing-util-api</artifactId>
+            <version>${cy3.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>application-api</artifactId>
+            <version>${cy3.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>io-api</artifactId>
+            <version>${cy3.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Third Party -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>

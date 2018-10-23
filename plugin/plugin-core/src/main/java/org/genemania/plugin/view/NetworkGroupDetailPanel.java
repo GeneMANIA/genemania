@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.view;
 
 import java.awt.Color;
@@ -33,19 +32,20 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
+import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 import org.genemania.plugin.view.components.ToggleDetailPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
-public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPanel<Group<?, ?>> {
+public class NetworkGroupDetailPanel extends ToggleDetailPanel<Group<?, ?>> {
 	
 	private final Group<?, ?> group;
 	private final NetworkInfoPanel networksPanel;
@@ -60,8 +60,8 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 
 	public NetworkGroupDetailPanel(
 			final Group<?, ?> group,
-			final NetworkGroupInfoPanel<NETWORK, NODE, EDGE> groupInfoPanel,
-			final GeneMania<NETWORK, NODE, EDGE> plugin,
+			final NetworkGroupInfoPanel groupInfoPanel,
+			final GeneMania plugin,
 			final NetworkUtils networkUtils,
 			final UiUtils uiUtils,
 			final boolean enabledByDefault,
@@ -73,8 +73,8 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 		this.networkUtils = networkUtils;
 		this.data = plugin.getDataSetManager().getDataSet();
 
-		networksPanel = new NetworkInfoPanel(data, group, groupInfoPanel, networkUtils, uiUtils, plugin, options);
-		NetworkSelectionManager<NETWORK, NODE, EDGE> manager = plugin.getNetworkSelectionManager();
+		networksPanel = new NetworkInfoPanel(data, group, groupInfoPanel, networkUtils, uiUtils, options);
+		SessionManager manager = plugin.getSessionManager();
 		networksPanel.addSelectionListener(manager.createNetworkSelectionListener());
 		
 		Color textColor = group.hasInteractions() ? SystemColor.textText : SystemColor.textInactiveText;
@@ -100,6 +100,8 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 		}
 		
 		expander = createToggleButton();
+		
+		LookAndFeelUtil.makeSmall(nameLabel, scoreLabel, toggleBox, expander);
 
 		add(expander, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, EXPANDER_PADDING, 0, EXPANDER_PADDING), 0, 0));
 		add(toggleBox, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
@@ -120,6 +122,7 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 		Color color = networkUtils.getNetworkColor(data, group);
 		g.setColor(color);
 		int width = (int) ((getWidth() - barXOffset) * getWeight() / 100d);
+		
 		for (int y = 0; y < 3; y++) {
 			int yOffset = barYOffset - y - 2;
 			g.drawLine(barXOffset, yOffset, width + barXOffset, yOffset);
@@ -154,19 +157,20 @@ public class NetworkGroupDetailPanel<NETWORK, NODE, EDGE> extends ToggleDetailPa
 		}
 		
 		for (Component component : networksPanel.getComponents()) {
-			if (!(component instanceof NetworkDetailPanel)) {
+			if (!(component instanceof NetworkDetailPanel))
 				continue;
-			}
+			
 			NetworkDetailPanel panel = (NetworkDetailPanel) component;
 			panel.showDetails(show, depth - 1);
 		}
+		
 		invalidate();
 	}
 
 	public void setItemEnabled(boolean enabled) {
-		if (!getEnabled() && enabled) {
+		if (!getEnabled() && enabled)
 			return;
-		}
+		
 		toggleBox.setSelected(enabled);
 	}
 

@@ -24,10 +24,6 @@ import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanel;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
-import org.cytoscape.property.CyProperty;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.genemania.plugin.AbstractGeneMania;
 import org.genemania.plugin.FileUtils;
@@ -38,12 +34,12 @@ import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetChangeListener;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.util.ProgressReporter;
 
-public class GeneManiaImpl extends AbstractGeneMania<CyNetwork, CyNode, CyEdge> {
+public class GeneManiaImpl extends AbstractGeneMania {
 
 	private CyServiceRegistrar serviceRegistrar;
 	private CySwingApplication application;
@@ -54,15 +50,14 @@ public class GeneManiaImpl extends AbstractGeneMania<CyNetwork, CyNode, CyEdge> 
 
 	public GeneManiaImpl(
 			DataSetManager dataSetManager,
-			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils,
+			CytoscapeUtils cytoscapeUtils,
 			UiUtils uiUtils,
 			FileUtils fileUtils,
 			NetworkUtils networkUtils,
 			TaskDispatcher taskDispatcher,
 			CySwingApplication application,
 			CyServiceRegistrar serviceRegistrar,
-			NetworkSelectionManager<CyNetwork, CyNode, CyEdge> selectionManager,
-			final CyProperty<Properties> properties
+			SessionManager selectionManager
 	) {
 		super(dataSetManager, cytoscapeUtils, uiUtils, fileUtils, networkUtils, taskDispatcher, selectionManager);
 		this.serviceRegistrar = serviceRegistrar;
@@ -73,13 +68,10 @@ public class GeneManiaImpl extends AbstractGeneMania<CyNetwork, CyNode, CyEdge> 
 		dataSetManager.addDataSetChangeListener(new DataSetChangeListener() {
 			@Override
 			public void dataSetChanged(DataSet dataSet, ProgressReporter progress) {
-				Properties properties2 = properties.getProperties();
-				if (dataSet == null) {
-					properties2.remove(GeneMania.DATA_SOURCE_PATH_PROPERTY);
-					return;
-				} else {
-					properties2.setProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY, dataSet.getBasePath());
-				}
+				if (dataSet == null)
+					cytoscapeUtils.removeSessionProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY);
+				else
+					cytoscapeUtils.setSessionProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY, dataSet.getBasePath());
 			}
 		});
 	}

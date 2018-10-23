@@ -23,6 +23,7 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.util.Comparator;
 
+import org.cytoscape.model.CyNetwork;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
@@ -30,21 +31,26 @@ import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.selection.SelectionEvent;
 import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.view.components.ToggleInfoPanel;
 import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
-public class NetworkGroupInfoPanel<NETWORK, NODE, EDGE> extends ToggleInfoPanel<Group<?, ?>, NetworkGroupDetailPanel<NETWORK, NODE, EDGE>> {
+public class NetworkGroupInfoPanel extends ToggleInfoPanel<Group<?, ?>, NetworkGroupDetailPanel> {
 	
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
-	private final GeneMania<NETWORK, NODE, EDGE> plugin;
+	private final CytoscapeUtils cytoscapeUtils;
+	private final GeneMania plugin;
 	private final NetworkUtils networkUtils;
 	private SelectionListener<Group<?, ?>> selectionListener;
 
-	public NetworkGroupInfoPanel(GeneMania<NETWORK, NODE, EDGE> plugin, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, NetworkUtils networkUtils, UiUtils uiUtils) {
+	public NetworkGroupInfoPanel(
+			GeneMania plugin,
+			CytoscapeUtils cytoscapeUtils,
+			NetworkUtils networkUtils,
+			UiUtils uiUtils
+	) {
 		super(uiUtils);
 		this.plugin = plugin;
 		this.cytoscapeUtils = cytoscapeUtils;
@@ -54,23 +60,22 @@ public class NetworkGroupInfoPanel<NETWORK, NODE, EDGE> extends ToggleInfoPanel<
 	@Override
 	public void applyOptions(final ViewState options) {
 		removeAll();
-		if (selectionListener != null) {
+		
+		if (selectionListener != null)
 			removeSelectionListener(selectionListener);
-		}
 
 		selectionListener = new SelectionListener<Group<?, ?>>() {
 			public void selectionChanged(SelectionEvent<Group<?, ?>> event) {
 				// Only handle deselections
-				if (event.selected) {
+				if (event.selected)
 					return;
-				}
 				
 				for (Group<?, ?> group : event.items) {
-					for (Network<?> network : group.getNetworks()) {
+					for (Network<?> network : group.getNetworks())
 						options.setNetworkHighlighted(network, false);
-					}
 				}
-				for (NetworkGroupDetailPanel<NETWORK, NODE, EDGE> panel : dataModel) {
+				
+				for (NetworkGroupDetailPanel panel : dataModel) {
 					panel.getNetworkInfoPanel().updateSelection(options);
 				}
 			}
@@ -79,19 +84,20 @@ public class NetworkGroupInfoPanel<NETWORK, NODE, EDGE> extends ToggleInfoPanel<
 		addSelectionListener(selectionListener);
 		
 		int index = 0;
-		NETWORK network = cytoscapeUtils.getCurrentNetwork();
+		CyNetwork network = cytoscapeUtils.getCurrentNetwork();
+		
 		for (Group<?, ?> group : options.getAllGroups()) {
-			if (group.getWeight() == 0) {
+			if (group.getWeight() == 0)
 				continue;
-			}
 			
 			boolean enabledByDefault = options.isEnabled(group);
-			NetworkGroupDetailPanel<NETWORK, NODE, EDGE> panel = new NetworkGroupDetailPanel<NETWORK, NODE, EDGE>(group, this, plugin, networkUtils, uiUtils, enabledByDefault, options);
+			NetworkGroupDetailPanel panel = new NetworkGroupDetailPanel(group, this, plugin, networkUtils, uiUtils, enabledByDefault, options);
 			addDetailPanel(panel, index);
 			index++;
 			
 			cytoscapeUtils.setHighlight(options, group, network, enabledByDefault);
 		}
+		
 		add(uiUtils.createFillerPanel(), new GridBagConstraints(0, index, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 		
 		sort(1, true);
@@ -100,16 +106,16 @@ public class NetworkGroupInfoPanel<NETWORK, NODE, EDGE> extends ToggleInfoPanel<
 	
 	@Override
 	public void updateSelection(ViewState options) {
-		final NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
+		final CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
 		
 		if (cyNetwork == null)
 			return;
 		
 		int totalEnabled = 0;
-		NetworkGroupDetailPanel<NETWORK, NODE, EDGE> mostRecent = null;
+		NetworkGroupDetailPanel mostRecent = null;
 		final Group<?, ?> mostRecentGroup = options.getMostRecentGroup();
 		
-		for (NetworkGroupDetailPanel<NETWORK, NODE, EDGE> panel : dataModel) {
+		for (NetworkGroupDetailPanel panel : dataModel) {
 			final Group<?, ?> group = panel.getSubject();
 			final boolean enabled = options.isGroupHighlighted(group);
 			
@@ -137,34 +143,34 @@ public class NetworkGroupInfoPanel<NETWORK, NODE, EDGE> extends ToggleInfoPanel<
 	}
 
 	@Override
-	protected void setAllEnabled(boolean enabled) {
-		for (NetworkGroupDetailPanel<NETWORK, NODE, EDGE> panel : dataModel) {
+	public void setAllEnabled(boolean enabled) {
+		for (NetworkGroupDetailPanel panel : dataModel) {
 			panel.setItemEnabled(enabled);
 		}
 
-		NETWORK cyNetwork = cytoscapeUtils.getCurrentNetwork();
-		NetworkSelectionManager<NETWORK, NODE, EDGE> selectionManager = plugin.getNetworkSelectionManager();
-		ViewState options = selectionManager.getNetworkConfiguration(cyNetwork);
+		CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
+		SessionManager sessionManager = plugin.getSessionManager();
+		ViewState options = sessionManager.getNetworkConfiguration(cyNetwork);
 		cytoscapeUtils.setHighlight(options, null, cyNetwork, enabled);
 	}
 
 	@Override
-	protected Comparator<NetworkGroupDetailPanel<NETWORK, NODE, EDGE>> getComparator(final int column, Boolean descending) {
-		if (descending == null) {
+	protected Comparator<NetworkGroupDetailPanel> getComparator(final int column, Boolean descending) {
+		if (descending == null)
 			isDescending = !isDescending;
-		} else {
+		else
 			isDescending = descending;
-		}
 		
-		return new Comparator<NetworkGroupDetailPanel<NETWORK, NODE, EDGE>>() {
-			public int compare(NetworkGroupDetailPanel<NETWORK, NODE, EDGE> o1, NetworkGroupDetailPanel<NETWORK, NODE, EDGE> o2) {
+		return new Comparator<NetworkGroupDetailPanel>() {
+			@Override
+			public int compare(NetworkGroupDetailPanel o1, NetworkGroupDetailPanel o2) {
 				switch (column) {
-				case 0:
-					return o1.getSubject().getName().compareTo(o2.getSubject().getName()) * (isDescending ? -1 : 1);
-				case 1:
-					return Double.compare(o1.getWeight(), o2.getWeight()) * (isDescending ? -1 : 1);
-				default:
-					throw new RuntimeException(String.format(Strings.tableModelInvalidColumn_error, column));
+					case 0:
+						return o1.getSubject().getName().compareTo(o2.getSubject().getName()) * (isDescending ? -1 : 1);
+					case 1:
+						return Double.compare(o1.getWeight(), o2.getWeight()) * (isDescending ? -1 : 1);
+					default:
+						throw new RuntimeException(String.format(Strings.tableModelInvalidColumn_error, column));
 				}
 			}
 		};
@@ -174,7 +180,7 @@ public class NetworkGroupInfoPanel<NETWORK, NODE, EDGE> extends ToggleInfoPanel<
 	public void sort(int column, Boolean descending) {
 		super.sort(column, descending);
 
-		for (NetworkGroupDetailPanel<NETWORK, NODE, EDGE> panel : dataModel) {
+		for (NetworkGroupDetailPanel panel : dataModel) {
 			panel.getNetworkInfoPanel().sort(column, descending);
 		}
 	}

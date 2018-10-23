@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin;
 
 import java.io.IOException;
@@ -26,6 +25,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 public class Metadata {
+	
 	private final Properties configProperties;
 
 	public Metadata() {

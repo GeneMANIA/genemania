@@ -19,117 +19,86 @@
 
 package org.genemania.plugin.parsers;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Collection;
 import java.util.List;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.MappingJsonFactory;
-import org.genemania.domain.AttributeGroup;
 import org.genemania.domain.Organism;
 import org.genemania.plugin.model.Group;
 import org.genemania.type.CombiningMethod;
 import org.genemania.type.ScoringMethod;
 
 public final class Query {
-	private Organism fOrganism;
-	private List<String> fGenes;
-	private Collection<Group<?, ?>> fNetworks;
-	private int fGeneLimit;
-	private CombiningMethod fCombiningMethod;
-	private ScoringMethod fScoringMethod;
-	private Collection<Long> fNodes;
-	private Collection<AttributeGroup> fAttributes;
-	private int fAttributeLimit;
+	
+	private Organism organism;
+	private List<String> genes;
+	private Collection<Group<?, ?>> groups;
+	private int geneLimit;
+	private CombiningMethod combiningMethod;
+	private ScoringMethod scoringMethod;
+	private Collection<Long> nodes;
+	private int attributeLimit;
 	
 	public Organism getOrganism() {
-		return fOrganism;
+		return organism;
 	}
 	
 	public List<String> getGenes() {
-		return fGenes;
+		return genes;
 	}
 	
-	public Collection<Group<?, ?>> getNetworks() {
-		return fNetworks;
-	}
-	
-	public Collection<AttributeGroup> getAttributes() {
-		return fAttributes;
+	public Collection<Group<?, ?>> getGroups() {
+		return groups;
 	}
 	
 	public int getGeneLimit() {
-		return fGeneLimit;
+		return geneLimit;
 	}
 	
 	public int getAttributeLimit() {
-		return fAttributeLimit;
+		return attributeLimit;
 	}
 	
 	public CombiningMethod getCombiningMethod() {
-		return fCombiningMethod;
+		return combiningMethod;
 	}
 	
 	public ScoringMethod getScoringMethod() {
-		return fScoringMethod;
+		return scoringMethod;
 	}
 	
 	public Collection<Long> getNodes() {
-		return fNodes;
+		return nodes;
 	}
 	
 	public void setOrganism(Organism organism) {
-		fOrganism = organism;
+		this.organism = organism;
 	}
 	
 	public void setGenes(List<String> genes) {
-		fGenes = genes;
+		this.genes = genes;
 	}
 	
-	public void setNetworks(Collection<Group<?, ?>> groups) {
-		fNetworks = groups;
-	}
-	
-	public void setAttributes(Collection<AttributeGroup> attributes) {
-		fAttributes = attributes;
+	public void setGroups(Collection<Group<?, ?>> groups) {
+		this.groups = groups;
 	}
 	
 	public void setGeneLimit(int limit) {
-		fGeneLimit = limit;
+		this.geneLimit = limit;
 	}
 	
 	public void setAttributeLimit(int limit) {
-		fAttributeLimit = limit;
+		this.attributeLimit = limit;
 	}
 	
 	public void setCombiningMethod(CombiningMethod method) {
-		fCombiningMethod = method;
+		this.combiningMethod = method;
 	}
 	
 	public void setScoringMethod(ScoringMethod method) {
-		fScoringMethod = method;
+		this.scoringMethod = method;
 	}
 	
 	public void setNodes(Collection<Long> nodes) {
-		fNodes = nodes;
-	}
-	
-	public String toJson() throws IOException {
-		StringWriter writer = new StringWriter();
-		JsonFactory jsonFactory = new MappingJsonFactory();
-		try {
-			JsonGenerator generator = jsonFactory.createJsonGenerator(writer);
-			generator.writeStartObject();
-			try {
-			} finally {
-				generator.writeEndObject();
-			}
-			return writer.toString();
-		} catch (JsonGenerationException e) {
-			throw new IOException(e.getMessage());
-		}
+		this.nodes = nodes;
 	}
 }

@@ -21,6 +21,7 @@ package org.genemania.plugin.completion;
 
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
+import static org.cytoscape.util.swing.LookAndFeelUtil.makeSmall;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -28,8 +29,6 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.SystemColor;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
@@ -57,10 +56,13 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultEditorKit;
 
@@ -81,10 +83,9 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.util.ProgressReporter;
 
+@SuppressWarnings("serial")
 public class CompletionPanel extends JPanel {
 	
-	private static final long serialVersionUID = 1L;
-
 	private static final String GENE_HINT = Strings.completionPanelGeneHint_label;
 	private static final Color PROPOSAL_BG_COLOR = Color.WHITE;
 
@@ -120,7 +121,12 @@ public class CompletionPanel extends JPanel {
 
 	private final TaskDispatcher taskDispatcher;
 	
-	public CompletionPanel(int autoTriggerThreshold, NetworkUtils networkUtils, UiUtils uiUtils, TaskDispatcher taskDispatcher) {
+	public CompletionPanel(
+			int autoTriggerThreshold,
+			NetworkUtils networkUtils,
+			UiUtils uiUtils,
+			TaskDispatcher taskDispatcher
+	) {
 		this.networkUtils = networkUtils;
 		this.uiUtils = uiUtils;
 		this.taskDispatcher = taskDispatcher;
@@ -268,6 +274,7 @@ public class CompletionPanel extends JPanel {
 	private JLabel getStatusLabel() {
 		if (statusLabel == null) {
 			statusLabel = new JLabel();
+			makeSmall(statusLabel);
 		}
 		
 		return statusLabel;
@@ -343,6 +350,8 @@ public class CompletionPanel extends JPanel {
 					restoreCaret();
 				}
 			});
+			
+			makeSmall(textField);
 		}
 		
 		return textField;
@@ -353,6 +362,21 @@ public class CompletionPanel extends JPanel {
 			resultTable = createTable(resultModel);
 			resultTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			
+			final TableCellRenderer defHeaderRenderer = resultTable.getTableHeader().getDefaultRenderer();
+			
+			resultTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
+				@Override
+				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+						boolean hasFocus, int row, int column) {
+					Component c = defHeaderRenderer.getTableCellRendererComponent(table, value, isSelected,
+							hasFocus, row, column);
+					c.setForeground(table.isEnabled() ? 
+							this.getForeground() : UIManager.getColor("Label.disabledForeground"));
+					
+					return c;
+				}
+			});
+			
 			resultTable.addFocusListener(new FocusListener() {
 				@Override
 				public void focusGained(FocusEvent e) {
@@ -362,6 +386,8 @@ public class CompletionPanel extends JPanel {
 				public void focusLost(FocusEvent e) {
 				}
 			});
+			
+			makeSmall(resultTable);
 		}
 		
 		return resultTable;
@@ -415,6 +441,8 @@ public class CompletionPanel extends JPanel {
 					handleFocusLost(event);
 				}
 			});
+			
+			makeSmall(proposalTable);
 		}
 		
 		return proposalTable;
@@ -423,21 +451,17 @@ public class CompletionPanel extends JPanel {
 	private void createMenu() {
 		JPopupMenu contextMenu = new JPopupMenu();
 		JMenuItem pasteMenu = new JMenuItem(Strings.paste_menuLabel);
-		pasteMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				getTextField().requestFocus();
-				new DefaultEditorKit.PasteAction().actionPerformed(event);
-			}
+		pasteMenu.addActionListener(evt -> {
+			getTextField().requestFocus();
+			new DefaultEditorKit.PasteAction().actionPerformed(evt);
 		});
 		contextMenu.add(pasteMenu);
 		getTextField().setComponentPopupMenu(contextMenu);
 	}
 
 	public void handleParentMoved() {
-		if (getProposalDialog().isVisible()) {
+		if (getProposalDialog().isVisible())
 			popUpBelow(getTextField());
-		}
 	}
 
 	void restoreCaret() {
@@ -515,7 +539,6 @@ public class CompletionPanel extends JPanel {
 		}
 	}
 	
-	@SuppressWarnings("serial")
 	private JTable createTable(TableModel model) {
 		JTable table = new JTable(model) {
 			@Override
@@ -600,15 +623,16 @@ public class CompletionPanel extends JPanel {
 		getTextField().setTransferHandler(new CompletionTransferHandler(provider, new CompletionConsumer() {
 			List<String> completions = new ArrayList<String>();
 			
+			@Override
 			public void consume(String completion) {
 				completions.add(completion);
 			}
-
+			@Override
 			public void finish() {
 				validateGene(completions);
 				completions.clear();
 			}
-
+			@Override
 			public void tooManyCompletions() {
 			}
 		}, networkUtils, uiUtils, taskDispatcher));

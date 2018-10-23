@@ -18,6 +18,7 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import org.genemania.domain.AttributeGroup;
@@ -25,17 +26,22 @@ import org.genemania.plugin.Strings;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 
-public class QueryAttributeGroupImpl extends AbstractGroup<Object, AttributeGroup> {
+public class QueryAttributeGroupImpl extends AbstractGroup<Object, AttributeGroup> implements Serializable {
 
-	private Object group = new Object();
+	private static final long serialVersionUID = 3052213207734641283L;
+	
+	private Object model = new Object();
 
+	public QueryAttributeGroupImpl() {
+	}
+	
 	public QueryAttributeGroupImpl(Collection<Network<AttributeGroup>> networks) {
 		super(networks);
 	}
 
 	@Override
 	public Object getModel() {
-		return group;
+		return model;
 	}
 
 	@Override

@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.model;
 
 import java.util.Comparator;
@@ -24,6 +23,7 @@ import java.util.Comparator;
 import org.genemania.plugin.formatters.IObjectFormatter;
 
 public class ModelElement<T> implements Comparable<ModelElement<T>> {
+	
 	private final T item;
 	private final Comparator<T> comparator;
 	private final IObjectFormatter<T> formatter;
@@ -40,12 +40,10 @@ public class ModelElement<T> implements Comparable<ModelElement<T>> {
 	
 	@Override
 	public String toString() {
-		if (formatter == null) {
-			return item.toString();
-		}
-		return formatter.format(item);
+		return formatter == null ? item.toString() : formatter.format(item);
 	}
 
+	@Override
 	public int compareTo(ModelElement<T> o) {
 		return comparator.compare(item, o.getItem());
 	}

@@ -50,8 +50,9 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.xml.sax.SAXException;
 
 public class DataAdmin extends AbstractPluginApp {
+	
 	@Argument
-	protected List<String> fArguments = new ArrayList<String>();
+	protected List<String> fArguments = new ArrayList<>();
 
 	protected List<String> getArguments() {
 		return fArguments;
@@ -127,7 +128,7 @@ public class DataAdmin extends AbstractPluginApp {
 		protected List<String> fArguments;
 		protected DataSetManager fManager;
 		protected FileUtils fFileUtils;
-		protected LuceneDataSet<?, ?, ?> fData;
+		protected LuceneDataSet fData;
 		protected String fName;
 		protected ProgressReporter fProgress;
 		
@@ -262,7 +263,7 @@ public class DataAdmin extends AbstractPluginApp {
 		public void run() {
 			String path = fArguments.get(1); 
 			try {
-				fData = (LuceneDataSet<?, ?, ?>) fManager.open(new File(path));
+				fData = (LuceneDataSet) fManager.open(new File(path));
 				List<DataDescriptor> available = null;
 				
 				try {
@@ -343,7 +344,7 @@ public class DataAdmin extends AbstractPluginApp {
 			validateDataSet(file);
 
 			try {
-				fData = (LuceneDataSet<?, ?, ?>) fManager.open(file);
+				fData = (LuceneDataSet) fManager.open(file);
 				List<DataDescriptor> available = null;
 				
 				try {
@@ -428,7 +429,7 @@ public class DataAdmin extends AbstractPluginApp {
 			validateDataSet(file);
 
 			try {
-				fData = (LuceneDataSet<?, ?, ?>) fManager.open(file);
+				fData = (LuceneDataSet) fManager.open(file);
 				List<DataDescriptor> installed = fData.getInstalledDataDescriptors();
 				for (int i = 2; i < fArguments.size(); i++) {
 					String id = fArguments.get(i);

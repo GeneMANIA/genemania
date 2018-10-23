@@ -20,24 +20,28 @@ package org.genemania.plugin.cytoscape;
 
 import java.awt.Color;
 import java.awt.Frame;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
+import org.cytoscape.model.CyColumn;
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyIdentifiable;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.genemania.domain.Node;
 import org.genemania.plugin.GeneMania;
-import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
-import org.genemania.plugin.proxies.EdgeProxy;
-import org.genemania.plugin.proxies.NetworkProxy;
-import org.genemania.plugin.proxies.NodeProxy;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
+import org.genemania.util.ProgressReporter;
 
-public interface CytoscapeUtils<NETWORK, NODE, EDGE> {
+public interface CytoscapeUtils {
 	
 	static final String LOG_SCORE_ATTRIBUTE = "log score"; //$NON-NLS-1$
 	static final String SCORE_ATTRIBUTE = "score"; //$NON-NLS-1$
@@ -48,6 +52,7 @@ public interface CytoscapeUtils<NETWORK, NODE, EDGE> {
 	static final String NODE_TYPE_QUERY = "query"; //$NON-NLS-1$
 	static final String NODE_TYPE_ATTRIBUTE_NODE = "attribute"; //$NON-NLS-1$
 	static final String GENE_NAME_ATTRIBUTE = "gene name"; //$NON-NLS-1$
+	static final String QUERY_TERM_ATTRIBUTE = "query term"; //$NON-NLS-1$
 	static final String SYNONYMS_ATTRIBUTE = "synonyms"; //$NON-NLS-1$
 	static final String RANK_ATTRIBUTE = "rank"; //$NON-NLS-1$
 	static final String TYPE_ATTRIBUTE = "type"; //$NON-NLS-1$
@@ -67,6 +72,11 @@ public interface CytoscapeUtils<NETWORK, NODE, EDGE> {
 	static final String ANNOTATIONS_ATTRIBUTE = "annotations"; //$NON-NLS-1$
 	static final String ATTRIBUTE_NAME_ATTRIBUTE = "attribute name"; //$NON-NLS-1$
 	
+	static final String GENEMANIA_VIEWS_TABLE = "GeneMANIA.Views"; //$NON-NLS-1$
+	static final String GENEMANIA_VIEWS_PK_ATTRIBUTE = "ID"; //$NON-NLS-1$
+	static final String NETWORK_SUID_ATTRIBUTE = "Network.SUID"; //$NON-NLS-1$
+	static final String STATE_ATTRIBUTE = "State"; //$NON-NLS-1$
+	
 	static final String URL = "url"; //$NON-NLS-1$
 	static final String TITLE = "title"; //$NON-NLS-1$
 	static final String TAGS = "tags"; //$NON-NLS-1$
@@ -79,47 +89,115 @@ public interface CytoscapeUtils<NETWORK, NODE, EDGE> {
 	static final String INTERACTION_COUNT = "interactionCount"; //$NON-NLS-1$
 	static final String AUTHORS = "authors"; //$NON-NLS-1$
 	
+	static final String WEB_VERSION_TAG = "-web";
+	
 	static final Color QUERY_COLOR = new Color(0, 0, 0);
 	static final Color RESULT_COLOR = new Color(159, 159, 159);
+	static final Color DEFAULT_NETWORK_COLOUR = new Color(0xd0d0d0);
 	
-	void expandAttributes(NETWORK cyNetwork, ViewState options,
-			List<String> attributes);
+	/** To be used by the online search, when offline data might not have been installed. */
+	@SuppressWarnings("serial")
+	static final Map<String, Color> NETWORK_COLORS = new HashMap<String, Color>() {{
+		put("Shared protein domains", new Color(218, 212, 162));
+		put("Predicted", new Color(246, 195, 132));
+		put("Genetic Interactions", new Color(144, 225, 144));
+		put("Co-localization", new Color(160, 179, 220));
+		put("Pathway", new Color(155, 216, 222));
+		put("Co-expression", new Color(208, 183, 213));
+		put("Physical Interactions", new Color(234, 162, 162));
+		put("Other", new Color(187, 187, 187));
+	}};
 
-	NODE getNode(NETWORK network, Node node, String preferredSymbol);
+	void expandAttributes(CyNetwork cyNetwork, ViewState options, List<String> attributes);
 
-	void registerSelectionListener(NETWORK cyNetwork, NetworkSelectionManager<NETWORK, NODE, EDGE> manager, GeneMania<NETWORK, NODE, EDGE> plugin);
+	CyNode getNode(CyNetwork network, Node node, String preferredSymbol);
 
-	void performLayout(NETWORK network);
+	void registerSelectionListener(CyNetwork cyNetwork, SessionManager manager, GeneMania plugin);
 
-	void applyVisualization(NETWORK network,
-			Map<Long, Double> filterGeneScores,
-			Map<String, Color> computeColors, double[] extrema);
+	void performLayout(CyNetwork network);
 
-	NETWORK createNetwork(DataSet data, String nextNetworkName, SearchResult result, ViewStateBuilder options,
+	void applyVisualization(CyNetwork network, Map<Long, Double> filterGeneScores, Map<String, Color> netColors,
+			double[] extrema);
+
+	CyNetwork createNetwork(String nextNetworkName, String dataVersion, SearchResult result, ViewStateBuilder options,
 			EdgeAttributeProvider provider);
 
-	void setHighlight(ViewState config, Group<?, ?> group,
-			NETWORK network, boolean selected);
+	void setHighlight(ViewState config, Group<?, ?> group, CyNetwork network, boolean selected);
 
-	void setHighlighted(ViewState options, NETWORK cyNetwork, boolean highlighted);
-	
-	NETWORK getCurrentNetwork();
-	
+	void setHighlighted(ViewState options, CyNetwork network, boolean highlighted);
+
+	CyNetwork getCurrentNetwork();
+
 	void repaint();
 
-	void updateVisualStyles(NETWORK network);
-	
-	void maximize(NETWORK network);
+	void updateVisualStyles(CyNetwork network);
+
+	void maximize(CyNetwork network);
 
 	Frame getFrame();
 
-	Set<NETWORK> getNetworks();
+	Set<CyNetwork> getNetworks();
 	
-	NetworkProxy<NETWORK, NODE, EDGE> getNetworkProxy(NETWORK network);
-	NodeProxy<NODE> getNodeProxy(NODE node, NETWORK network);
-	EdgeProxy<EDGE, NODE> getEdgeProxy(EDGE edge, NETWORK network);
+	CyNetwork getNetwork(long suid);
 	
-	void handleNetworkPostProcessing(NETWORK network);
+	boolean isGeneManiaNetwork(CyNetwork network);
+	
+	String getDataVersion(CyNetwork cyNetwork);
 
-	Properties getGlobalProperties();
+	void handleNetworkPostProcessing(CyNetwork network);
+
+	String getSessionProperty(String key);
+
+	void setSessionProperty(String key, String value);
+
+	void removeSessionProperty(String key);
+	
+	String getPreference(String key);
+	
+	void setPreference(String key, String value);
+
+	Set<CyEdge> getSelectedEdges(CyNetwork network);
+
+	Set<CyNode> getSelectedNodes(CyNetwork network);
+
+	String getTitle(CyNetwork network);
+
+	void setSelectedEdge(CyNetwork network, CyEdge edge, boolean selected);
+
+	void setSelectedEdges(CyNetwork network, Collection<CyEdge> edges, boolean selected);
+
+	void setSelectedNode(CyNetwork network, CyNode node, boolean selected);
+
+	void setSelectedNodes(CyNetwork network, Collection<CyNode> nodes, boolean selected);
+
+	void unselectAllEdges(CyNetwork network);
+
+	void unselectAllNodes(CyNetwork network);
+
+	Collection<String> getNodeAttributeNames(CyNetwork network);
+
+	Collection<String> getEdgeAttributeNames(CyNetwork network);
+
+	Collection<String> getNames(Collection<CyColumn> columns, CyNetwork network);
+
+	Collection<CyNode> getNeighbours(CyNode node, CyNetwork network);
+
+	String getIdentifier(CyNetwork network, CyIdentifiable entry);
+
+	<U> U getAttribute(CyNetwork network, CyIdentifiable entry, String name, Class<U> type);
+
+	<U> void setAttribute(CyNetwork network, CyIdentifiable entry, String name, U value);
+
+	Class<?> getAttributeType(CyNetwork network, CyIdentifiable entry, String name);
+	
+	void saveSessionState(Map<Long, ViewState> states);
+	
+	Map<CyNetwork, ViewState> restoreSessionState(ProgressReporter progress);
+	
+	void removeSavedSessionState(Long networkId);
+	
+	void clearSavedSessionState();
+	
+	CyServiceRegistrar getServiceRegistrar();
+
 }

@@ -19,6 +19,9 @@
 package org.genemania.plugin.cytoscape3;
 
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static org.genemania.plugin.view.util.IconUtil.GENEMANIA_LOGO;
+import static org.genemania.plugin.view.util.IconUtil.GENEMANIA_LOGO_COLOR;
+import static org.genemania.plugin.view.util.IconUtil.getIconFont;
 
 import java.awt.Component;
 
@@ -28,9 +31,6 @@ import javax.swing.JPanel;
 
 import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
@@ -38,26 +38,27 @@ import org.genemania.plugin.controllers.ManiaResultsController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.view.ManiaResultsPanel;
+import org.genemania.plugin.view.util.TextIcon;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelComponent2 {
 
 	private static final long serialVersionUID = 1L;
 	
-	ManiaResultsPanel<CyNetwork, CyNode, CyEdge> panel;
+	ManiaResultsPanel panel;
 
+	private final Icon compIcon = new TextIcon(GENEMANIA_LOGO, getIconFont(16.0f), GENEMANIA_LOGO_COLOR, 16, 16);
+	
 	public ManiaResultsCytoPanelComponent(
 			DataSetManager dataSetManager,
-			GeneMania<CyNetwork, CyNode, CyEdge> plugin,
-			CytoscapeUtils<CyNetwork, CyNode, CyEdge> cytoscapeUtils,
+			GeneMania plugin,
+			CytoscapeUtils cytoscapeUtils,
 			UiUtils uiUtils,
 			NetworkUtils networkUtils
 	) {
-		ManiaResultsController<CyNetwork, CyNode, CyEdge> controller = 
-				new ManiaResultsController<CyNetwork, CyNode, CyEdge>(dataSetManager, cytoscapeUtils, uiUtils,
-						networkUtils);
-		this.panel = new ManiaResultsPanel<CyNetwork, CyNode, CyEdge>(controller, plugin, cytoscapeUtils, networkUtils,
-				uiUtils);
+		ManiaResultsController controller = new ManiaResultsController(dataSetManager, cytoscapeUtils, uiUtils,
+				networkUtils);
+		this.panel = new ManiaResultsPanel(controller, plugin, cytoscapeUtils, networkUtils, uiUtils);
 		
 		setOpaque(!uiUtils.isAquaLAF());
 		
@@ -74,7 +75,7 @@ public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelC
 		);
 	}
 
-	public ManiaResultsPanel<CyNetwork, CyNode, CyEdge> getPanel() {
+	public ManiaResultsPanel getPanel() {
 		return panel;
 	}
 	
@@ -90,7 +91,7 @@ public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelC
 
 	@Override
 	public Icon getIcon() {
-		return null;
+		return compIcon;
 	}
 
 	@Override

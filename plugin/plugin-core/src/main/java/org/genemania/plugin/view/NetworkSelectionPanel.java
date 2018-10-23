@@ -16,8 +16,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.view;
+
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+import static org.cytoscape.util.swing.LookAndFeelUtil.isAquaLAF;
+import static org.cytoscape.util.swing.LookAndFeelUtil.makeSmall;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -40,6 +45,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
@@ -57,7 +65,7 @@ import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.SelectionEvent;
 import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.view.components.BaseInfoPanel;
-import org.genemania.plugin.view.components.ScrollablePanel;
+import org.genemania.plugin.view.util.ScrollablePanel;
 import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
@@ -66,6 +74,11 @@ public class NetworkSelectionPanel extends JPanel {
 	private final JSplitPane pane;
 	private final JPanel leftPanel;
 	private final JPanel middlePanel;
+	
+	private JButton selectAllNetworksButton;
+	private JButton deselectAllNetworksButton;
+	private JButton selectDefaultNetworksButton;
+	
 	private final Map<Group<?, ?>, GroupModel> models;
 	private final Map<Network<?>, JCheckBox> networkSelections;
 	private final List<SelectionListener<Object>> selectionListeners;
@@ -77,10 +90,9 @@ public class NetworkSelectionPanel extends JPanel {
 		this.uiUtils = uiUtils;
 		
 		setOpaque(false);
-		models = new HashMap<Group<?, ?>, GroupModel>();
-		networkSelections = new HashMap<Network<?>, JCheckBox>();
-		selectionListeners = new ArrayList<SelectionListener<Object>>();
-		setLayout(new GridBagLayout());
+		models = new HashMap<>();
+		networkSelections = new HashMap<>();
+		selectionListeners = new ArrayList<>();
 		
 		leftPanel = uiUtils.createJPanel();
 		leftPanel.setLayout(new GridBagLayout());
@@ -101,7 +113,44 @@ public class NetworkSelectionPanel extends JPanel {
 		pane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftScrollPane, rightScrollPane);
 		pane.setBorder(BorderFactory.createEmptyBorder());
 		
-		add(pane, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		final GroupLayout layout = new GroupLayout(this);
+        setLayout(layout);
+		layout.setAutoCreateGaps(uiUtils.isWinLAF());
+		layout.setAutoCreateContainerGaps(false);
+		
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING, true)
+				.addComponent(pane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addGroup(Alignment.TRAILING, layout.createSequentialGroup()
+						.addComponent(getSelectAllNetworksButton())
+						.addComponent(getDeselectAllNetworksButton())
+						.addComponent(getSelectDefaultNetworksButton())
+				)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(pane, DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
+				.addGroup(layout.createParallelGroup(Alignment.CENTER, false)
+						.addComponent(getSelectAllNetworksButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+						.addComponent(getDeselectAllNetworksButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+						.addComponent(getSelectDefaultNetworksButton(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
+				)
+		);
+		
+		uiUtils.equalizeSize(getSelectAllNetworksButton(), getDeselectAllNetworksButton(),
+				getSelectDefaultNetworksButton());
+		
+		if (isAquaLAF()) {
+			getSelectAllNetworksButton().putClientProperty("JButton.buttonType", "gradient");
+			getDeselectAllNetworksButton().putClientProperty("JButton.buttonType", "gradient");
+			getSelectDefaultNetworksButton().putClientProperty("JButton.buttonType", "gradient");
+		}
+	}
+	
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		getSelectAllNetworksButton().setEnabled(enabled);
+		getDeselectAllNetworksButton().setEnabled(enabled);
+		getSelectDefaultNetworksButton().setEnabled(enabled);
 	}
 	
 	private void showNetworks(Group<?, ?> group) {
@@ -109,9 +158,10 @@ public class NetworkSelectionPanel extends JPanel {
 			model.networkPanel.setVisible(false);
 			model.groupPanel.setBackground(BaseInfoPanel.defaultBackground);
 		}
-		if (group == null) {
+		
+		if (group == null)
 			return;
-		}
+		
 		GroupModel model = models.get(group);
 		NetworkListPanel networkPanel = model.networkPanel;
 		networkPanel.setVisible(true);
@@ -126,6 +176,7 @@ public class NetworkSelectionPanel extends JPanel {
 		networkSelections.clear();
 		
 		int index = 0;
+		
 		for (final Group<?, ?> group : groups) {
 			final JCheckBox checkBox = uiUtils.createCheckBox();
 			final JLabel label = new JLabel();
@@ -137,7 +188,7 @@ public class NetworkSelectionPanel extends JPanel {
 
 			leftPanel.add(groupPanel, new GridBagConstraints(0, index, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 
-			final List<Network<?>> sortedNetworks = new ArrayList<Network<?>>(group.getNetworks());
+			final List<Network<?>> sortedNetworks = new ArrayList<>(group.getNetworks());
 			Collections.sort(sortedNetworks, networkUtils.getNetworkComparator());
 			
 			label.addMouseListener(createMouseListener(group));
@@ -165,6 +216,8 @@ public class NetworkSelectionPanel extends JPanel {
 			
 			middlePanel.add(panel, new GridBagConstraints(0, index, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 			index++;
+			
+			makeSmall(checkBox, label);
 		}
 		leftPanel.add(uiUtils.createFillerPanel(), new GridBagConstraints(0, index, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 		middlePanel.add(uiUtils.createFillerPanel(), new GridBagConstraints(0, index, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
@@ -188,8 +241,8 @@ public class NetworkSelectionPanel extends JPanel {
 	private void handleGroupCheckBoxAction(JCheckBox groupCheckBox, Collection<Network<?>> networks) {
 		// If all networks are currently selected, they'll be deselected.
 		// Otherwise, all networks will be selected.
-		
 		int totalSelected = 0;
+		
 		for (Network<?> network : networks) {
 			JCheckBox checkBox = networkSelections.get(network);
 			if (checkBox.isSelected()) {
@@ -208,7 +261,8 @@ public class NetworkSelectionPanel extends JPanel {
 	
 	private void notifyListeners() {
 		// Create a very coarse-grained selection event... no details
-		SelectionEvent<Object> event = new SelectionEvent<Object>(null, true);
+		SelectionEvent<Object> event = new SelectionEvent<>(null, true);
+		
 		for (SelectionListener<Object> listener : selectionListeners) {
 			listener.selectionChanged(event);
 		}
@@ -226,11 +280,12 @@ public class NetworkSelectionPanel extends JPanel {
 	private void validateSelection(JLabel label, Group group) {
 		int selected = 0;
 		Collection<Network> networks = (Collection<Network>) group.getNetworks();
+		
 		for (Network<?> network : networks) {
-			if (networkSelections.get(network).isSelected()) {
+			if (networkSelections.get(network).isSelected())
 				selected++;
-			}
 		}
+		
 		GroupModel model = models.get(group);
 		model.checkBox.setSelected(selected > 0);
 		label.setText(String.format(Strings.detailedSelection_label, group.getName(), selected, networks.size()));
@@ -247,39 +302,43 @@ public class NetworkSelectionPanel extends JPanel {
 	}
 	
 	public Collection<Network<?>> getSelection() {
-		HashSet<Network<?>> selection = new HashSet<Network<?>>();
+		HashSet<Network<?>> selection = new HashSet<>();
+		
 		for (Entry<Network<?>, JCheckBox> entry : networkSelections.entrySet()) {
-			if (entry.getValue().isSelected()) {
+			if (entry.getValue().isSelected())
 				selection.add(entry.getKey());
-			}
 		}
+		
 		return selection;
 	}
 	
 	public int getSelectionCount() {
 		int count = 0;
+		
 		for (Entry<Network<?>, JCheckBox> entry : networkSelections.entrySet()) {
-			if (entry.getValue().isSelected()) {
+			if (entry.getValue().isSelected())
 				count++;
-			}
 		}
+		
 		return count;
 	}
 	
 	public Collection<Group<?, ?>> getSelectedGroups() {
-		Set<Group<?, ?>> groups = new HashSet<Group<?, ?>>();
+		Set<Group<?, ?>> groups = new HashSet<>();
+		
 		for (Group<?, ?> group : models.keySet()) {
 			boolean shouldAddGroup = false;
-			Collection<Network<?>> networks = new ArrayList<Network<?>>();
+			Collection<Network<?>> networks = new ArrayList<>();
+			
 			for (Network<?> network : group.getNetworks()) {
 				if (networkSelections.get(network).isSelected()) {
 					networks.add(network);
 					shouldAddGroup = true;
 				}
 			}
-			if (shouldAddGroup) {
+			
+			if (shouldAddGroup)
 				groups.add(group.filter(networks));
-			}
 		}
 		return groups;
 	}
@@ -287,10 +346,11 @@ public class NetworkSelectionPanel extends JPanel {
 	public void selectAllNetworks(boolean selected) {
 		for (Entry<Network<?>, JCheckBox> entry : networkSelections.entrySet()) {
 			JCheckBox checkBox = entry.getValue();
-			if (checkBox.isSelected() != selected) {
+			
+			if (checkBox.isSelected() != selected)
 				checkBox.setSelected(selected);
-			}
 		}
+		
 		synchronizeGroupCheckBoxState();
 	}
 
@@ -307,15 +367,54 @@ public class NetworkSelectionPanel extends JPanel {
 			Network<?> network = entry.getKey();
 			JCheckBox checkBox = entry.getValue();
 			boolean selected = network.isDefaultSelected();
-			if (checkBox.isSelected() != selected) {
+			
+			if (checkBox.isSelected() != selected)
 				checkBox.setSelected(selected);
-			}
 		}
+		
 		synchronizeGroupCheckBoxState();
 	}
 	
+	private JButton getSelectAllNetworksButton() {
+		if (selectAllNetworksButton == null) {
+			selectAllNetworksButton = new JButton(Strings.selectAllButton_label);
+			selectAllNetworksButton.addActionListener(evt -> {
+				selectAllNetworks(true);
+				notifyListeners();
+	        });
+			makeSmall(selectAllNetworksButton);
+		}
+		
+		return selectAllNetworksButton;
+	}
+	
+	private JButton getDeselectAllNetworksButton() {
+		if (deselectAllNetworksButton == null) {
+			deselectAllNetworksButton = new JButton(Strings.selectNoneButton_label);
+			deselectAllNetworksButton.addActionListener(evt -> {
+				selectAllNetworks(false);
+				notifyListeners();
+	        });
+			makeSmall(deselectAllNetworksButton);
+		}
+		
+		return deselectAllNetworksButton;
+	}
+	
+	private JButton getSelectDefaultNetworksButton() {
+		if (selectDefaultNetworksButton == null) {
+			selectDefaultNetworksButton = new JButton(Strings.selectDefaultButton_label);
+			selectDefaultNetworksButton.addActionListener(evt -> {
+				selectDefaultNetworks();
+				notifyListeners();
+	        });
+			makeSmall(selectDefaultNetworksButton);
+		}
+		
+		return selectDefaultNetworksButton;
+	}
+	
 	class NetworkListPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
 		
 		Map<Network<?>, JPanel> networkPanels;
 
@@ -323,9 +422,10 @@ public class NetworkSelectionPanel extends JPanel {
 		
 		public NetworkListPanel(Group<?, ?> group, Collection<Network<?>> networks, ActionListener listener) {
 			setOpaque(false);
-			networkPanels = new HashMap<Network<?>, JPanel>();
+			networkPanels = new HashMap<>();
 			setLayout(new GridBagLayout());
 			int index = 0;
+			
 			for (final Network<?> network : networks) {
 				JCheckBox checkBox = uiUtils.createCheckBox();
 				checkBox.setSelected(network.isDefaultSelected());
@@ -338,6 +438,8 @@ public class NetworkSelectionPanel extends JPanel {
 						selectedNetwork = network;
 					}
 				});
+				
+				makeSmall(checkBox, label);
 				
 				NetworkDetailPanel panel = new NetworkDetailPanel(checkBox, label, network, group);
 				add(panel, new GridBagConstraints(0, index, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0 , 0));
@@ -354,6 +456,7 @@ public class NetworkSelectionPanel extends JPanel {
 	}
 	
 	class GroupModel {
+		
 		JCheckBox checkBox;
 		JLabel label;
 		JPanel groupPanel;
@@ -368,6 +471,7 @@ public class NetworkSelectionPanel extends JPanel {
 	}
 
 	class NetworkDetailPanel extends JPanel {
+		
 		private JEditorPane descriptionLabel;
 
 		public NetworkDetailPanel(JCheckBox checkBox, JLabel label, Network<?> network, Group<?, ?> group) {
@@ -406,18 +510,21 @@ public class NetworkSelectionPanel extends JPanel {
 	
 	public void setSelection(Query query) {
 		selectAllNetworks(false);
-		for (Group<?, ?> group : query.getNetworks()) {
+		
+		for (Group<?, ?> group : query.getGroups()) {
 			for (Network<?> network : group.getNetworks()) {
 				for (Entry<Network<?>, JCheckBox> entry : networkSelections.entrySet()) {
 					Network<?> otherNetwork = entry.getKey();
-					if (!network.equals(otherNetwork)) {
+					
+					if (!network.equals(otherNetwork))
 						continue;
-					}
+					
 					JCheckBox checkBox = entry.getValue();
 					checkBox.setSelected(true);
 				}
 			}
 		}
+		
 		synchronizeGroupCheckBoxState();
 	}
 }

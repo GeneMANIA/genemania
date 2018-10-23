@@ -18,6 +18,7 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -26,69 +27,93 @@ import org.genemania.domain.InteractionNetworkGroup;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 
-public class InteractionNetworkGroupImpl extends AbstractGroup<InteractionNetworkGroup, InteractionNetwork> {
-	private InteractionNetworkGroup group;
-
-	public InteractionNetworkGroupImpl(InteractionNetworkGroup group) {
-		super(extractNetworks(group));
-		this.group = group;
+public class InteractionNetworkGroupImpl extends AbstractGroup<InteractionNetworkGroup, InteractionNetwork>
+		implements Serializable {
+	
+	private static final long serialVersionUID = -4047182091791765891L;
+	
+	private InteractionNetworkGroup model;
+	
+	public InteractionNetworkGroupImpl() {
+	}
+	
+	public InteractionNetworkGroupImpl(InteractionNetworkGroup model) {
+		super(extractNetworks(model));
+		this.model = model;
 	}
 	
 	private static Collection<Network<InteractionNetwork>> extractNetworks(InteractionNetworkGroup group) {
-		Collection<Network<InteractionNetwork>> result = new ArrayList<Network<InteractionNetwork>>();
-		for (InteractionNetwork network : group.getInteractionNetworks()) {
-			result.add(new InteractionNetworkImpl(network, 0));
+		Collection<Network<InteractionNetwork>> result = new ArrayList<>();
+		Collection<InteractionNetwork> interactionNetworks = group.getInteractionNetworks();
+		
+		if (interactionNetworks != null) {
+			for (InteractionNetwork network : interactionNetworks)
+				result.add(new InteractionNetworkImpl(network, 0));
 		}
+		
 		return result;
 	}
 
 	public InteractionNetworkGroupImpl(InteractionNetworkGroup group, Collection<Network<InteractionNetwork>> networks) {
 		super(networks);
-		this.group = group;
+		this.model = group;
 	}
 
 	@Override
 	public InteractionNetworkGroup getModel() {
-		return group;
+		return model;
 	}
 	
 	@Override
 	public String getName() {
-		return group.getName();
+		return model.getName();
 	}
 	
 	@Override
 	public String getCode() {
-		return group.getCode();
-	}
-
-	@Override
-	public boolean equals(Object other) {
-		if (!(other instanceof InteractionNetworkGroupImpl)) {
-			return false;
-		}
-		return ((InteractionNetworkGroupImpl) other).getModel().getId() == group.getId();
-	}
-	
-	@Override
-	public int hashCode() {
-		return (int) (group.getId() % Integer.MAX_VALUE);
+		return model.getCode();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T, S> Group<T, S> adapt(Class<T> groupType, Class<S> networkType) {
-		if (!groupType.equals(InteractionNetworkGroup.class)) {
+		if (!groupType.equals(InteractionNetworkGroup.class))
 			return null;
-		}
-		if (!networkType.equals(InteractionNetwork.class)) {
+		
+		if (!networkType.equals(InteractionNetwork.class))
 			return null;
-		}
+		
 		return (Group<T, S>) this;
 	}
 	
 	@Override
 	protected Group<InteractionNetworkGroup, InteractionNetwork> create(Collection<Network<InteractionNetwork>> networks) {
-		return new InteractionNetworkGroupImpl(group, networks);
+		return new InteractionNetworkGroupImpl(model, networks);
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 3;
+		int result = 5;
+		result = prime * result + ((model == null) ? 0 : (int) (model.getId() ^ (model.getId() >>> 32)));
+		
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof InteractionNetworkGroupImpl))
+			return false;
+		
+		InteractionNetworkGroupImpl other = (InteractionNetworkGroupImpl) obj;
+		
+		if (model == null || other.model == null)
+			return false;
+		
+		return model.getId() == other.model.getId();
 	}
 }

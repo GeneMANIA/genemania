@@ -33,6 +33,9 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.Attribute;
 import org.genemania.domain.AttributeGroup;
@@ -44,7 +47,6 @@ import org.genemania.domain.Node;
 import org.genemania.domain.Organism;
 import org.genemania.exception.DataStoreException;
 import org.genemania.mediator.AttributeMediator;
-import org.genemania.mediator.OrganismMediator;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.OneUseIterable;
 import org.genemania.plugin.Strings;
@@ -57,20 +59,18 @@ import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.model.ViewStateBuilder;
 import org.genemania.plugin.model.impl.SearchResultImpl;
 import org.genemania.plugin.model.impl.ViewStateImpl;
-import org.genemania.plugin.proxies.EdgeProxy;
-import org.genemania.plugin.proxies.NetworkProxy;
-import org.genemania.plugin.proxies.NodeProxy;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.type.CombiningMethod;
 import org.genemania.util.ChildProgressReporter;
 import org.genemania.util.ProgressReporter;
 
-public class ResultReconstructor<NETWORK, NODE, EDGE> {
+public class ResultReconstructor {
+	
 	private final DataSet data;
 	private final Set<String> unrecognizedNodes;
 	private final Set<String> unrecognizedAnnotations;
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
-	private final GeneMania<NETWORK, NODE, EDGE> plugin;
+	private final CytoscapeUtils cytoscapeUtils;
+	private final GeneMania plugin;
 	private String version;
 	
 	private final Map<Node, String> nodeIds;
@@ -81,21 +81,21 @@ public class ResultReconstructor<NETWORK, NODE, EDGE> {
 	
 	private final Map<String, Node> nodeCache;
 
-	public ResultReconstructor(DataSet data, GeneMania<NETWORK, NODE, EDGE> plugin, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils) {
+	public ResultReconstructor(DataSet data, GeneMania plugin, CytoscapeUtils cytoscapeUtils) {
 		this.data = data;
 		this.plugin = plugin;
 		this.cytoscapeUtils = cytoscapeUtils;
 		
-		unrecognizedNodes = new HashSet<String>();
-		unrecognizedAnnotations = new HashSet<String>();
+		unrecognizedNodes = new HashSet<>();
+		unrecognizedAnnotations = new HashSet<>();
 		
-		nodeIds = new HashMap<Node, String>();
-		enabledGroups = new HashSet<InteractionNetworkGroup>();
-		sourceNetworksByEdgeId = new HashMap<String, Set<Object>>();
-		sourceNetworksByNodeId = new HashMap<String, Set<Object>>();
-		edgeIdsByGroup = new HashMap<String, Set<String>>();
+		nodeIds = new HashMap<>();
+		enabledGroups = new HashSet<>();
+		sourceNetworksByEdgeId = new HashMap<>();
+		sourceNetworksByNodeId = new HashMap<>();
+		edgeIdsByGroup = new HashMap<>();
 		
-		nodeCache = new HashMap<String, Node>();
+		nodeCache = new HashMap<>();
 	}
 	
 	public Set<String> getUnrecognizedNodes() {
@@ -108,91 +108,83 @@ public class ResultReconstructor<NETWORK, NODE, EDGE> {
 	
 	void addEdgeIdForGroup(String name, String edgeId) {
 		Set<String> edgeIds = edgeIdsByGroup.get(name);
+		
 		if (edgeIds == null) {
-			edgeIds = new HashSet<String>();
+			edgeIds = new HashSet<>();
 			edgeIdsByGroup.put(name, edgeIds);
 		}
+		
 		edgeIds.add(edgeId);
 	}
 
 	void addSourceNetworkForNode(String nodeId, Object network) {
 		Set<Object> networks = sourceNetworksByNodeId.get(nodeId);
+		
 		if (networks == null) {
-			networks = new HashSet<Object>();
+			networks = new HashSet<>();
 			sourceNetworksByNodeId.put(nodeId, networks);
 		}
+		
 		networks.add(network);
 	}
 	
 	void addSourceNetworkForEdge(String edgeId, Object network) {
 		Set<Object> networks = sourceNetworksByEdgeId.get(edgeId);
+		
 		if (networks == null) {
-			networks = new HashSet<Object>();
+			networks = new HashSet<>();
 			sourceNetworksByEdgeId.put(edgeId, networks);
 		}
+		
 		networks.add(network);
 	}
 	
-	Organism reconstructOrganism(NETWORK network) throws DataStoreException {
-		NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(network);
-		String organismName = proxy.getAttribute(CytoscapeUtils.ORGANISM_NAME_ATTRIBUTE, String.class);
-		if (organismName == null) {
-			return null;
-		}
-		OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
-		for (Organism organism : mediator.getAllOrganisms()) {
-			if (organismName.equals(organism.getName())) {
-				return organism;
-			}
-		}
-		return null;
-	}
-
-	public ViewState reconstructCache(NETWORK cyNetwork, ProgressReporter progress) throws DataStoreException, IOException {
+	public ViewState reconstructCache(CyNetwork cyNetwork, ProgressReporter progress)
+			throws DataStoreException, IOException {
 		progress.setStatus(Strings.resultReconstructor_status);
 		int currentProgress = 0;
 		progress.setMaximumProgress(6);
 		progress.setProgress(currentProgress);
 		
 		// Check data version
-		NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-		String dataVersion = proxy.getAttribute(CytoscapeUtils.DATA_VERSION_ATTRIBUTE, String.class);
-		if (dataVersion == null) {
-			return null;
-		}
-		version = dataVersion;
+		String dataVersion = cytoscapeUtils.getDataVersion(cyNetwork);
 		
-		if (!dataVersion.equals(data.getVersion().toString())) {
+		if (dataVersion == null)
 			return null;
-		}
+		
+		version = dataVersion;
+		boolean isWeb = dataVersion.endsWith(CytoscapeUtils.WEB_VERSION_TAG);
+		
+		if (isWeb || !dataVersion.equals(data.getVersion().toString()))
+			return null;
 		
 		// Locate organism
-		Organism targetOrganism = reconstructOrganism(cyNetwork);
-		if (targetOrganism == null) {
+		final Organism organism = reconstructOrganism(cyNetwork);
+		
+		if (organism == null)
 			return null;
-		}
 
 		SearchResultBuilder builder = new SearchResultImpl();
-		builder.setOrganism(targetOrganism);
+		builder.setOrganism(organism);
 		builder.setCombiningMethod(reconstructCombiningMethod(cyNetwork));
 		builder.setGeneSearchLimit(reconstructGeneSearchLimit(cyNetwork));
 		builder.setAttributeSearchLimit(reconstructAttributeSearchLimit(cyNetwork));
 		progress.setProgress(++currentProgress);
 		
 		ChildProgressReporter childProgress = new ChildProgressReporter(progress);
-		reconstructNodeCache(builder, cyNetwork, targetOrganism, childProgress);
+		reconstructNodeCache(builder, cyNetwork, organism, childProgress);
 		childProgress.close();
 		
 		childProgress = new ChildProgressReporter(progress);
-		reconstructNetworkCache(builder, cyNetwork, targetOrganism, childProgress);
+		reconstructNetworkCache(builder, cyNetwork, organism, childProgress);
 		childProgress.close();
 		
 		childProgress = new ChildProgressReporter(progress);
-		reconstructEnrichmentCache(builder, cyNetwork, targetOrganism, childProgress);
+		reconstructEnrichmentCache(builder, cyNetwork, organism, childProgress);
 		childProgress.close();
 		
 		childProgress = new ChildProgressReporter(progress);
-		reconstructAttributeCache(builder, cyNetwork, targetOrganism, childProgress);
+		reconstructAttributeCache(builder, cyNetwork, organism, childProgress);
 		childProgress.close();
 		
 		ViewStateBuilder viewStateBuilder = new ViewStateImpl(builder);
@@ -200,10 +192,27 @@ public class ResultReconstructor<NETWORK, NODE, EDGE> {
 		reconstructViewState(viewStateBuilder, childProgress);
 		childProgress.close();
 		
-		NetworkSelectionManager<NETWORK, NODE, EDGE> manager = plugin.getNetworkSelectionManager();
+		SessionManager manager = plugin.getSessionManager();
 		cytoscapeUtils.registerSelectionListener(cyNetwork, manager, plugin);
 
 		return viewStateBuilder.build();
+	}
+	
+	private Organism reconstructOrganism(CyNetwork network) throws DataStoreException {
+		String organismName = cytoscapeUtils.getAttribute(network, network, CytoscapeUtils.ORGANISM_NAME_ATTRIBUTE,
+				String.class);
+		
+		if (organismName == null)
+			return null;
+		
+		Collection<Organism> allOrganisms = data.getMediatorProvider().getOrganismMediator().getAllOrganisms();
+	
+		for (Organism organism : allOrganisms) {
+			if (organismName.equals(organism.getName()))
+				return organism;
+		}
+		
+		return null;
 	}
 
 	private void reconstructViewState(ViewStateBuilder builder, ProgressReporter progress) {
@@ -218,8 +227,9 @@ public class ResultReconstructor<NETWORK, NODE, EDGE> {
 		progress.setMaximumProgress(maximum);
 		
 		int count = 0;
+		
 		for (Entry<Node, String> entry : nodeIds.entrySet()) {
-			builder.addNode(entry.getKey(),  entry.getValue());
+			builder.addNode(entry.getKey(), entry.getValue());
 			progress.setProgress(++count);
 		}
 		
@@ -229,11 +239,13 @@ public class ResultReconstructor<NETWORK, NODE, EDGE> {
 			progress.setProgress(++count);
 		}
 
-		Map<Object, Network<?>> networksByModel = new HashMap<Object, Network<?>>();
+		Map<Object, Network<?>> networksByModel = new HashMap<>();
+		
 		for (Group<?, ?> group : builder.getAllGroups()) {
 			for (Network<?> network : group.getNetworks()) {
 				networksByModel.put(network.getModel(), network);
 			}
+			
 			progress.setProgress(++count);
 		}
 		
@@ -242,6 +254,7 @@ public class ResultReconstructor<NETWORK, NODE, EDGE> {
 				Network<?> network = networksByModel.get(model);
 				builder.addSourceNetworkForEdge(entry.getKey(), network);
 			}
+			
 			progress.setProgress(++count);
 		}
 		
@@ -250,94 +263,107 @@ public class ResultReconstructor<NETWORK, NODE, EDGE> {
 				Network<?> network = networksByModel.get(model);
 				builder.addSourceNetworkForNode(entry.getKey(), network);
 			}
+			
 			progress.setProgress(++count);
 		}
 
 		for (Entry<String, Set<String>> entry : edgeIdsByGroup.entrySet()) {
 			Group<?, ?> group = builder.getGroup(entry.getKey());
-			for (String edgeId : entry.getValue()) {
+			
+			for (String edgeId : entry.getValue())
 				builder.addEdge(group, edgeId);
-			}
+			
 			progress.setProgress(++count);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private void reconstructEnrichmentCache(SearchResultBuilder builder, NETWORK cyNetwork, Organism targetOrganism, ProgressReporter progress) throws IOException {
+	private void reconstructEnrichmentCache(SearchResultBuilder builder, CyNetwork cyNetwork, Organism targetOrganism,
+			ProgressReporter progress) throws IOException {
 		progress.setDescription(Strings.resultReconstructorEnrichmentCache_description);
-		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-		String rawAnnotations = networkProxy.getAttribute(CytoscapeUtils.ANNOTATIONS_ATTRIBUTE, String.class);
-		if (rawAnnotations == null) {
-			return;
-		}
+		String rawAnnotations = cytoscapeUtils.getAttribute(cyNetwork, cyNetwork, CytoscapeUtils.ANNOTATIONS_ATTRIBUTE, String.class);
 		
-		Map<Long, Collection<AnnotationEntry>> annotationsByNode = new HashMap<Long, Collection<AnnotationEntry>>();
-		Map<String, AnnotationEntry> annotationsByCategory = new HashMap<String, AnnotationEntry>();
+		if (rawAnnotations == null)
+			return;
+		
+		Map<Long, Collection<AnnotationEntry>> annotationsByNode = new HashMap<>();
+		Map<String, AnnotationEntry> annotationsByCategory = new HashMap<>();
 		JsonFactory factory = new MappingJsonFactory();
 		JsonParser parser = factory.createJsonParser(rawAnnotations);
 		JsonNode root = parser.readValueAsTree();
+		
 		for (JsonNode node : new OneUseIterable<JsonNode>(root.getElements())) {
 			AnnotationEntry entry = new AnnotationEntry(node);
 			annotationsByCategory.put(entry.getName(), entry);
 		}
 		
 		GeneCompletionProvider2 completionProvider = data.getCompletionProvider(targetOrganism);
-		for (NODE node : networkProxy.getNodes()) {
-			NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(node, cyNetwork);
-			String symbol = nodeProxy.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
-			if (symbol == null) {
+		
+		for (CyNode node : cyNetwork.getNodeList()) {
+			String symbol = cytoscapeUtils.getAttribute(cyNetwork, node, CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
+			
+			if (symbol == null)
 				continue;
-			}
+			
 			Gene gene = completionProvider.getGene(symbol);
+			
 			if (gene == null) {
 				unrecognizedNodes.add(symbol);
 				continue;
 			}
+			
 			long nodeId = gene.getNode().getId();			
-			List<String> annotations = nodeProxy.getAttribute(CytoscapeUtils.ANNOTATION_ID_ATTRIBUTE, List.class);
-			if (annotations == null) {
+			List<String> annotations = cytoscapeUtils.getAttribute(cyNetwork, node, CytoscapeUtils.ANNOTATION_ID_ATTRIBUTE, List.class);
+			
+			if (annotations == null)
 				continue;
-			}
+			
 			for (String annotation : annotations) {
 				AnnotationEntry entry = annotationsByCategory.get(annotation);
+
 				if (entry == null) {
 					unrecognizedAnnotations.add(annotation);
 					continue;
 				}
+
 				Collection<AnnotationEntry> entries = annotationsByNode.get(nodeId);
+				
 				if (entries == null) {
-					entries = new HashSet<AnnotationEntry>();
+					entries = new HashSet<>();
 					annotationsByNode.put(nodeId, entries);
 				}
+				
 				entries.add(entry);
 			}
 		}
+		
 		builder.setEnrichment(annotationsByNode);
 	}
 
-	private void reconstructNetworkCache(SearchResultBuilder builder, NETWORK cyNetwork, Organism organism, ProgressReporter progress) throws IOException {
+	private void reconstructNetworkCache(SearchResultBuilder builder, CyNetwork cyNetwork, Organism organism,
+			ProgressReporter progress) throws IOException {
 		progress.setDescription(Strings.resultReconstructorNetworkCache_description);
 		// Reconstruct edge and network group cache
-		Map<Long, InteractionNetworkGroup> allGroupsByNetwork = new HashMap<Long, InteractionNetworkGroup>();
-		Map<String, InteractionNetworkGroup> allGroupsByName = new HashMap<String, InteractionNetworkGroup>();
-		Map<String, InteractionNetwork> allNetworksByName = new HashMap<String, InteractionNetwork>();
+		Map<Long, InteractionNetworkGroup> allGroupsByNetwork = new HashMap<>();
+		Map<String, InteractionNetworkGroup> allGroupsByName = new HashMap<>();
+		Map<String, InteractionNetwork> allNetworksByName = new HashMap<>();
 		
 		Collection<InteractionNetworkGroup> groups = organism.getInteractionNetworkGroups();
+		
 		for (InteractionNetworkGroup group : groups) {
 			for (InteractionNetwork network2 : (Collection<InteractionNetwork>) group.getInteractionNetworks()) {
 				allNetworksByName.put(String.format("%s|%s", group.getName(), network2.getName()), network2); //$NON-NLS-1$
 				allGroupsByNetwork.put(network2.getId(), group);
 			}
-			// Remove all networks from group; populate later with only
-			// relevant networks.
-			group.setInteractionNetworks(new HashSet<InteractionNetwork>());
 			
+			// Remove all networks from group; populate later with only relevant networks.
+			group.setInteractionNetworks(new HashSet<>());
 			allGroupsByName.put(group.getName(), group);
 		}
 		
 		Map<InteractionNetwork, Double> networkWeights = reconstructNetworkWeights(cyNetwork, allNetworksByName);
 		Map<InteractionNetwork, Collection<Interaction>> allInteractions = reconstructSourceNetworks(builder, organism, cyNetwork, allNetworksByName, allGroupsByName, progress);
-		Map<Long, InteractionNetworkGroup> groupsByNetwork = new HashMap<Long, InteractionNetworkGroup>();
+		Map<Long, InteractionNetworkGroup> groupsByNetwork = new HashMap<>();
 		
 		// Link interactions to model
 		for (InteractionNetwork network : networkWeights.keySet()) {
@@ -360,90 +386,102 @@ public class ResultReconstructor<NETWORK, NODE, EDGE> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Map<InteractionNetwork, Collection<Interaction>> reconstructSourceNetworks(SearchResultBuilder builder, Organism organism, NETWORK cyNetwork, Map<String, InteractionNetwork> allNetworksByName, Map<String, InteractionNetworkGroup> allGroupsByName, ProgressReporter progress) {
+	private Map<InteractionNetwork, Collection<Interaction>> reconstructSourceNetworks(SearchResultBuilder builder,
+			Organism organism, CyNetwork cyNetwork, Map<String, InteractionNetwork> allNetworksByName,
+			Map<String, InteractionNetworkGroup> allGroupsByName, ProgressReporter progress) {
 		progress.setDescription(Strings.resultReconstructorSourceNetworks_description);
-		Map<InteractionNetwork, Collection<Interaction>> allInteractions = new HashMap<InteractionNetwork, Collection<Interaction>>();
-		Map<Long, Node> allNodes = new HashMap<Long, Node>();
+		Map<InteractionNetwork, Collection<Interaction>> allInteractions = new HashMap<>();
+		Map<Long, Node> allNodes = new HashMap<>();
 		
 		GeneCompletionProvider2 completionProvider = data.getCompletionProvider(organism);
-		NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-		Collection<EDGE> edges = networkProxy.getEdges();
+		Collection<CyEdge> edges = cyNetwork.getEdgeList();
 		progress.setMaximumProgress(edges.size());
 		int count = 0;
-		for (EDGE cyEdge : edges) {
+		
+		for (CyEdge cyEdge : edges) {
 			progress.setProgress(++count);
-			EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(cyEdge, cyNetwork);
-			String groupName = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
+			String groupName = cytoscapeUtils.getAttribute(cyNetwork, cyEdge, CytoscapeUtils.NETWORK_GROUP_NAME_ATTRIBUTE, String.class);
 			InteractionNetworkGroup group = allGroupsByName.get(groupName);
-			if (group == null) {
+			
+			if (group == null)
 				continue;
-			}
+			
 			enabledGroups.add(group);
 			
-			List<String> sourceNetworks = edgeProxy.getAttribute(CytoscapeUtils.NETWORK_NAMES_ATTRIBUTE, List.class);
-			List<Double> networkWeights = edgeProxy.getAttribute(CytoscapeUtils.RAW_WEIGHTS_ATTRIBUTE, List.class);
-			if (sourceNetworks == null || networkWeights == null) {
+			List<String> sourceNetworks = cytoscapeUtils.getAttribute(cyNetwork, cyEdge, CytoscapeUtils.NETWORK_NAMES_ATTRIBUTE, List.class);
+			List<Double> networkWeights = cytoscapeUtils.getAttribute(cyNetwork, cyEdge, CytoscapeUtils.RAW_WEIGHTS_ATTRIBUTE, List.class);
+			
+			if (sourceNetworks == null || networkWeights == null)
 				continue;
-			}
-			String edgeId = edgeProxy.getIdentifier();
+			
+			String edgeId = cytoscapeUtils.getIdentifier(cyNetwork, cyEdge);
+			
 			for (int i = 0; i < sourceNetworks.size(); i++) {
 				String name = sourceNetworks.get(i);
 				double weight = networkWeights.get(i);
-				
 				InteractionNetwork key = allNetworksByName.get(String.format("%s|%s", groupName, name)); //$NON-NLS-1$
+				
 				if (key != null) {
 					Interaction interaction = new Interaction();
-					Node fromNode = getNode(cyNetwork, allNodes, edgeProxy.getSource(), completionProvider);
-					Node toNode = getNode(cyNetwork, allNodes, edgeProxy.getTarget(), completionProvider);
-					if (fromNode == null || toNode == null) {
+					Node fromNode = getNode(cyNetwork, allNodes, cyEdge.getSource(), completionProvider);
+					Node toNode = getNode(cyNetwork, allNodes, cyEdge.getTarget(), completionProvider);
+					
+					if (fromNode == null || toNode == null) 
 						continue;
-					}
+					
 					interaction.setFromNode(fromNode);
 					interaction.setToNode(toNode);
 					
 					interaction.setWeight((float) weight);
 					Collection<Interaction> interactions = allInteractions.get(key);
+					
 					if (interactions == null) {
-						interactions = new HashSet<Interaction>();
+						interactions = new HashSet<>();
 						allInteractions.put(key, interactions);
 					}
-					interactions.add(interaction);
 					
+					interactions.add(interaction);
 					addSourceNetworkForEdge(edgeId, key);
 				}
 			}
+			
 			addEdgeIdForGroup(group.getName(), edgeId);
 		}
+		
 		return allInteractions;
 	}
 
-	private Map<InteractionNetwork, Double> reconstructNetworkWeights(NETWORK cyNetwork, Map<String, InteractionNetwork> allNetworksByName) throws IOException {
-		HashMap<InteractionNetwork, Double> weights = new HashMap<InteractionNetwork, Double>();
-		NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-		String rawNetworks = proxy.getAttribute(CytoscapeUtils.NETWORKS_ATTRIBUTE, String.class);
+	private Map<InteractionNetwork, Double> reconstructNetworkWeights(CyNetwork cyNetwork,
+			Map<String, InteractionNetwork> allNetworksByName) throws IOException {
+		HashMap<InteractionNetwork, Double> weights = new HashMap<>();
+		String rawNetworks = cytoscapeUtils.getAttribute(cyNetwork, cyNetwork, CytoscapeUtils.NETWORKS_ATTRIBUTE, String.class);
 		
 		JsonFactory factory = new MappingJsonFactory();
 		JsonParser parser = factory.createJsonParser(rawNetworks);
 		JsonNode root = parser.readValueAsTree();
+		
 		for (JsonNode node : new OneUseIterable<JsonNode>(root.getElements())) {
 			String groupName = node.get("group").getTextValue(); //$NON-NLS-1$
 			String name = node.get("name").getTextValue(); //$NON-NLS-1$
 			double weight = node.get("weight").getDoubleValue(); //$NON-NLS-1$
 			InteractionNetwork network = allNetworksByName.get(String.format("%s|%s", groupName, name)); //$NON-NLS-1$
-			if (network == null) {
-				// TODO: Keep track of networks that are no longer available
+			
+			if (network == null) // TODO: Keep track of networks that are no longer available
 				continue;
-			}
+			
 			weights.put(network, weight);
 		}
+		
 		return weights;
 	}
 
-	private void reconstructAttributeCache(SearchResultBuilder builder, NETWORK cyNetwork, Organism organism, ProgressReporter progress) {
+	private void reconstructAttributeCache(SearchResultBuilder builder, CyNetwork cyNetwork, Organism organism,
+			ProgressReporter progress) {
 		progress.setDescription(Strings.resultReconstructorAttributeCache_description);
-		Map<String, Attribute> attributesByName = new HashMap<String, Attribute>();
-		Map<Long, AttributeGroup> groupsByAttribute = new HashMap<Long, AttributeGroup>();
+		Map<String, Attribute> attributesByName = new HashMap<>();
+		Map<Long, AttributeGroup> groupsByAttribute = new HashMap<>();
 		AttributeMediator mediator = data.getMediatorProvider().getAttributeMediator();
+		
 		for (AttributeGroup group : mediator.findAttributeGroupsByOrganism(organism.getId())) {
 			for (Attribute attribute : mediator.findAttributesByGroup(organism.getId(), group.getId())) {
 				attributesByName.put(attribute.getName(), attribute);
@@ -451,64 +489,65 @@ public class ResultReconstructor<NETWORK, NODE, EDGE> {
 				groupsByAttribute.put(id, group);
 			}
 		}
+		
 		builder.setGroupsByAttribute(groupsByAttribute);
 		
-		Map<Long, Collection<Attribute>> attributesByNode = new HashMap<Long, Collection<Attribute>>();
-		Map<Attribute, Double> weights = new HashMap<Attribute, Double>();
+		Map<Long, Collection<Attribute>> attributesByNode = new HashMap<>();
+		Map<Attribute, Double> weights = new HashMap<>();
 		
 		GeneCompletionProvider2 completionProvider = data.getCompletionProvider(organism);
 
 		// Find each attribute node...
-		NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-		for (NODE cyNode : proxy.getNodes()) {
-			NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(cyNode, cyNetwork);
-			String type = nodeProxy.getAttribute(CytoscapeUtils.NODE_TYPE_ATTRIBUTE, String.class);
-			if (!CytoscapeUtils.NODE_TYPE_ATTRIBUTE_NODE.equals(type)) {
-				continue;
-			}
-			String name = nodeProxy.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
-			Double weight = nodeProxy.getAttribute(CytoscapeUtils.SCORE_ATTRIBUTE, Double.class);
+		for (CyNode cyNode : cyNetwork.getNodeList()) {
+			String type = cytoscapeUtils.getAttribute(cyNetwork, cyNode, CytoscapeUtils.NODE_TYPE_ATTRIBUTE, String.class);
 			
-			Attribute attribute = attributesByName.get(name);
-			if (attribute == null) {
+			if (!CytoscapeUtils.NODE_TYPE_ATTRIBUTE_NODE.equals(type))
 				continue;
-			}
+			
+			String name = cytoscapeUtils.getAttribute(cyNetwork, cyNode, CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
+			Double weight = cytoscapeUtils.getAttribute(cyNetwork, cyNode, CytoscapeUtils.SCORE_ATTRIBUTE, Double.class);
+			Attribute attribute = attributesByName.get(name);
+			
+			if (attribute == null)
+				continue;
+			
 			weights.put(attribute, weight);
 			
 			// ...and track down its neighbours.
-			for (NODE cyNode2 : proxy.getNeighbours(cyNode)) {
-				NodeProxy<NODE> nodeProxy2 = cytoscapeUtils.getNodeProxy(cyNode2, cyNetwork);
-				String symbol = nodeProxy2.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
+			for (CyNode cyNode2 : cytoscapeUtils.getNeighbours(cyNode, cyNetwork)) {
+				String symbol = cytoscapeUtils.getAttribute(cyNetwork, cyNode2, CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
 				
-				if (symbol == null) {
+				if (symbol == null)
 					continue;
-				}
+				
 				Gene gene = completionProvider.getGene(symbol);
-				if (gene == null) {
+				
+				if (gene == null)
 					continue;
-				}
 				
 				long nodeId = gene.getNode().getId();
 				Collection<Attribute> attributes = attributesByNode.get(nodeId);
+				
 				if (attributes == null) {
-					attributes = new HashSet<Attribute>();
+					attributes = new HashSet<>();
 					attributesByNode.put(nodeId, attributes);
 				}
+				
 				attributes.add(attribute);
 			}
 			
-			addSourceNetworkForNode(nodeProxy.getIdentifier(), attribute);
+			addSourceNetworkForNode(cytoscapeUtils.getIdentifier(cyNetwork, cyNode), attribute);
 		}
 		
 		// Find each attribute edge
-		for (EDGE cyEdge : proxy.getEdges()) {
-			EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(cyEdge, cyNetwork);
-			String name = edgeProxy.getAttribute(CytoscapeUtils.ATTRIBUTE_NAME_ATTRIBUTE, String.class);
+		for (CyEdge cyEdge : cyNetwork.getEdgeList()) {
+			String name = cytoscapeUtils.getAttribute(cyNetwork, cyEdge, CytoscapeUtils.ATTRIBUTE_NAME_ATTRIBUTE, String.class);
 			Attribute attribute = attributesByName.get(name);
-			if (attribute == null) {
+			
+			if (attribute == null)
 				continue;
-			}
-			String edgeId = edgeProxy.getIdentifier();
+			
+			String edgeId = cytoscapeUtils.getIdentifier(cyNetwork, cyEdge);
 			AttributeGroup group = builder.getAttributeGroup(attribute.getId());
 			addSourceNetworkForEdge(edgeId, attribute);
 			addEdgeIdForGroup(group.getName(), edgeId);
@@ -518,95 +557,105 @@ public class ResultReconstructor<NETWORK, NODE, EDGE> {
 		builder.setAttributeWeights(weights);
 	}
 
-	private void reconstructNodeCache(SearchResultBuilder resultBuilder, NETWORK cyNetwork, Organism organism, ProgressReporter progress) {
+	private void reconstructNodeCache(SearchResultBuilder resultBuilder, CyNetwork cyNetwork, Organism organism, ProgressReporter progress) {
 		progress.setDescription(Strings.resultReconstructorNodeCache_description);
 		// Reconstruct node cache
-		Map<Gene, Double> geneScores = new HashMap<Gene, Double>();
-		Map<Long, Gene> queryGenes = new HashMap<Long, Gene>();
+		Map<Gene, Double> geneScores = new HashMap<>();
+		Map<Long, Gene> queryGenes = new HashMap<>();
 	
 		GeneCompletionProvider2 completionProvider = data.getCompletionProvider(organism);
-		NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-		Collection<NODE> nodes = proxy.getNodes();
+		Collection<CyNode> nodes = cyNetwork.getNodeList();
 		progress.setMaximumProgress(nodes.size());
 		int count = 0;
-		for (NODE cyNode : nodes) {
+		
+		for (CyNode cyNode : nodes) {
 			progress.setProgress(++count);
-			NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(cyNode, cyNetwork);
-			String symbol = nodeProxy.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
-			if (symbol == null) {
+			String symbol = cytoscapeUtils.getAttribute(cyNetwork, cyNode, CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
+			
+			if (symbol == null)
 				continue;
-			}
+			
 			Gene gene = completionProvider.getGene(symbol);
+			
 			if (gene == null) {
 				unrecognizedNodes.add(symbol);
 				continue;
 			}
-			Double score = nodeProxy.getAttribute(CytoscapeUtils.SCORE_ATTRIBUTE, Double.class);
+			
+			Double score = cytoscapeUtils.getAttribute(cyNetwork, cyNode, CytoscapeUtils.SCORE_ATTRIBUTE, Double.class);
+			
 			if (score == null) {
 				unrecognizedNodes.add(symbol);
 				continue;
 			}
+			
 			geneScores.put(gene, score);
-			String type = nodeProxy.getAttribute(CytoscapeUtils.NODE_TYPE_ATTRIBUTE, String.class);
+			String type = cytoscapeUtils.getAttribute(cyNetwork, cyNode, CytoscapeUtils.NODE_TYPE_ATTRIBUTE, String.class);
 			Node node = gene.getNode();
+			
 			if (type == null) {
 				unrecognizedNodes.add(symbol);
 				continue;
 			}
-			if (CytoscapeUtils.NODE_TYPE_QUERY.equals(type)) {
+			
+			if (CytoscapeUtils.NODE_TYPE_QUERY.equals(type))
 				queryGenes.put(node.getId(), gene);
-			}
-			nodeIds.put(node, nodeProxy.getIdentifier());
+			
+			nodeIds.put(node, cytoscapeUtils.getIdentifier(cyNetwork, cyNode));
 		}
+		
 		resultBuilder.setGeneScores(geneScores);
 		resultBuilder.setSearchQuery(queryGenes);
 	}
 
-	private CombiningMethod reconstructCombiningMethod(NETWORK cyNetwork) {
-		NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-		String combiningMethod = proxy.getAttribute(CytoscapeUtils.COMBINING_METHOD_ATTRIBUTE, String.class);
-		if (combiningMethod == null) {
+	private CombiningMethod reconstructCombiningMethod(CyNetwork cyNetwork) {
+		String combiningMethod = cytoscapeUtils.getAttribute(cyNetwork, cyNetwork, CytoscapeUtils.COMBINING_METHOD_ATTRIBUTE, String.class);
+		
+		if (combiningMethod == null)
 			return null;
-		}
+		
 		return CombiningMethod.fromCode(combiningMethod);		
 	}
 	
-	private int reconstructGeneSearchLimit(NETWORK cyNetwork) {
-		NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-		return proxy.getAttribute(CytoscapeUtils.GENE_SEARCH_LIMIT_ATTRIBUTE, Integer.class);
+	private int reconstructGeneSearchLimit(CyNetwork cyNetwork) {
+		return cytoscapeUtils.getAttribute(cyNetwork, cyNetwork, CytoscapeUtils.GENE_SEARCH_LIMIT_ATTRIBUTE, Integer.class);
 	}
 
-	private int reconstructAttributeSearchLimit(NETWORK cyNetwork) {
-		NetworkProxy<NETWORK, NODE, EDGE> proxy = cytoscapeUtils.getNetworkProxy(cyNetwork);
-		return proxy.getAttribute(CytoscapeUtils.ATTRIBUTE_SEARCH_LIMIT_ATTRIBUTE, Integer.class);
+	private int reconstructAttributeSearchLimit(CyNetwork cyNetwork) {
+		return cytoscapeUtils.getAttribute(cyNetwork, cyNetwork, CytoscapeUtils.ATTRIBUTE_SEARCH_LIMIT_ATTRIBUTE, Integer.class);
 	}
 
-	Node getNode(NETWORK network, Map<Long, Node> allNodes, NODE source, GeneCompletionProvider2 completionProvider) {
-		NodeProxy<NODE> proxy = cytoscapeUtils.getNodeProxy(source, network);
-		String symbol = proxy.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
-		if (symbol == null) {
+	Node getNode(CyNetwork network, Map<Long, Node> allNodes, CyNode source, GeneCompletionProvider2 completionProvider) {
+		String symbol = cytoscapeUtils.getAttribute(network, source, CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
+		
+		if (symbol == null)
 			return null;
-		}
+		
 		Node node = nodeCache.get(symbol);
-		if (node != null) {
+		
+		if (node != null)
 			return node;
-		}
 		
 		Long nodeId = completionProvider.getNodeId(symbol);
-		if (nodeId == null) {
+		
+		if (nodeId == null)
 			return null;
-		}
+		
 		node = allNodes.get(nodeId);
+		
 		if (node != null) {
 			nodeCache.put(symbol, node);
 			return node;
 		}
+		
 		Gene gene = completionProvider.getGene(symbol);
-		if (gene == null) {
+		
+		if (gene == null)
 			return null;
-		}
+		
 		node = gene.getNode();
 		nodeCache.put(symbol, node);
+		
 		return node;
 	}
 }

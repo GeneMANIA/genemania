@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.data.lucene.view;
 
 import java.awt.BorderLayout;
@@ -34,19 +33,19 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.util.UiUtils;
 
 @SuppressWarnings("serial")
-public class LuceneConfigPanel<NETWORK, NODE, EDGE> extends JPanel {
+public class LuceneConfigPanel extends JPanel {
 	
 	private final ImportedDataPanel importedDataPanel;
 	private final DataSetManager dataSetManager;
-	private final ImportCyNetworkPanel<NETWORK, NODE, EDGE> importCyNetworkPanel;
-	private final NetManiaPanel<NETWORK, NODE, EDGE> netManiaPanel;
+	private final ImportCyNetworkPanel importCyNetworkPanel;
+	private final NetManiaPanel netManiaPanel;
 	
 	public LuceneConfigPanel(
-			final LuceneDataSet<NETWORK, NODE, EDGE> data,
+			final LuceneDataSet data,
 			final DataSetManager dataSetManager,
 			final UiUtils uiUtils,
 			final FileUtils fileUtils,
-			final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			final CytoscapeUtils cytoscapeUtils,
 			final TaskDispatcher taskDispatcher
 	) {
 		if (uiUtils.isAquaLAF())
@@ -54,9 +53,9 @@ public class LuceneConfigPanel<NETWORK, NODE, EDGE> extends JPanel {
 		
 		this.dataSetManager = dataSetManager;
 		
-		netManiaPanel = new NetManiaPanel<NETWORK, NODE, EDGE>(dataSetManager, uiUtils, taskDispatcher);
+		netManiaPanel = new NetManiaPanel(dataSetManager, uiUtils, taskDispatcher);
 		importedDataPanel = new ImportedDataPanel(dataSetManager, uiUtils, fileUtils, taskDispatcher);
-		importCyNetworkPanel = new ImportCyNetworkPanel<NETWORK, NODE, EDGE>(dataSetManager, uiUtils, cytoscapeUtils, taskDispatcher);
+		importCyNetworkPanel = new ImportCyNetworkPanel(dataSetManager, uiUtils, cytoscapeUtils, taskDispatcher);
 		
 		addComponments();
 		validate();

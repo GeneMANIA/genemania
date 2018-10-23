@@ -45,6 +45,7 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.util.ChildProgressReporter;
 
 public class ImportOrganismController {
+	
 	private final DataSetManager dataSetManager;
 	private final TaskDispatcher taskDispatcher;
 
@@ -99,7 +100,6 @@ public class ImportOrganismController {
 		};
 	}
 
-	@SuppressWarnings("rawtypes")
 	public void deleteOrganisms(Frame parent, final LuceneDataSet data, final DynamicTableModel<Organism> installedModel, final int[] selection) {
 		GeneManiaTask task = new GeneManiaTask(Strings.importOrganismDelete_title) {
 			@Override

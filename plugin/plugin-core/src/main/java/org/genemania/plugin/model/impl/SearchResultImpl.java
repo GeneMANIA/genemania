@@ -18,10 +18,10 @@
  */
 package org.genemania.plugin.model.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,7 +39,10 @@ import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.SearchResultBuilder;
 import org.genemania.type.CombiningMethod;
 
-public class SearchResultImpl implements SearchResultBuilder {
+public class SearchResultImpl implements SearchResultBuilder, Serializable {
+	
+	private static final long serialVersionUID = -5723132964169233141L;
+	
 	private Organism organism;
 	private Map<Long, Gene> queryGenes;
 	private Map<Long, InteractionNetworkGroup> groupsByNetwork;
@@ -115,11 +118,10 @@ public class SearchResultImpl implements SearchResultBuilder {
 	@Override
 	public List<AnnotationEntry> getEnrichmentSummary() {
 		List<AnnotationEntry> result = new ArrayList<AnnotationEntry>(categories.values());
-		Collections.sort(result, new Comparator<AnnotationEntry>() {
-			public int compare(AnnotationEntry o1, AnnotationEntry o2) {
-				return Double.compare(o1.getQValue(), o2.getQValue());
-			}
+		Collections.sort(result, (AnnotationEntry o1, AnnotationEntry o2) -> {
+			return Double.compare(o1.getQValue(), o2.getQValue());
 		});
+		
 		return result;
 	}
 	

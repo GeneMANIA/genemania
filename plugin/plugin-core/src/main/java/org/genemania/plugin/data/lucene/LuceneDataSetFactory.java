@@ -30,15 +30,16 @@ import org.genemania.plugin.view.util.UiUtils;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-public class LuceneDataSetFactory<NETWORK, NODE, EDGE> implements IDataSetFactory {
+public class LuceneDataSetFactory implements IDataSetFactory {
 
 	private final DataSetManager dataSetManager;
 	private final UiUtils uiUtils;
 	private final FileUtils fileUtils;
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 	private final TaskDispatcher taskDispatcher;
 
-	public LuceneDataSetFactory(DataSetManager dataSetManager, UiUtils uiUtils, FileUtils fileUtils, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils, TaskDispatcher taskDispatcher) {
+	public LuceneDataSetFactory(DataSetManager dataSetManager, UiUtils uiUtils, FileUtils fileUtils,
+			CytoscapeUtils cytoscapeUtils, TaskDispatcher taskDispatcher) {
 		this.dataSetManager = dataSetManager;
 		this.uiUtils = uiUtils;
 		this.fileUtils = fileUtils;
@@ -48,12 +49,11 @@ public class LuceneDataSetFactory<NETWORK, NODE, EDGE> implements IDataSetFactor
 	
 	@Override
 	public DataSet create(File path, Node documentRoot) throws SAXException {
-		return new LuceneDataSet<NETWORK, NODE, EDGE>(path, documentRoot, dataSetManager, uiUtils, fileUtils, cytoscapeUtils, taskDispatcher);
+		return new LuceneDataSet(path, documentRoot, dataSetManager, uiUtils, fileUtils, cytoscapeUtils, taskDispatcher);
 	}
 
 	@Override
 	public String getId() {
 		return "org.genemania.data.lucene.LuceneDataSet"; //$NON-NLS-1$
 	}
-
 }

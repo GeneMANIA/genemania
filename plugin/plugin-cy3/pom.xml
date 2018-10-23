@@ -3,17 +3,15 @@
 	<parent>
         <groupId>org.genemania</groupId>
         <artifactId>plugin-parent</artifactId>
-        <version>3.4.1</version>
+        <version>3.5.0</version>
         <relativePath>..</relativePath>
 	</parent>
     <properties>
 		<bundle.symbolicName>org.genemania.plugin-impl</bundle.symbolicName>
 		<bundle.namespace>org.genemania.plugin.cytoscape3</bundle.namespace>
-		<cy3.version>3.3.0</cy3.version>
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<maven-pax-plugin.version>1.5</maven-pax-plugin.version>
-		<maven-bundle-plugin.version>2.3.4</maven-bundle-plugin.version>
-		<maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
+		<maven-bundle-plugin.version>3.0.0</maven-bundle-plugin.version>
 	</properties>
 
     <modelVersion>4.0.0</modelVersion>
@@ -21,100 +19,119 @@
     <packaging>bundle</packaging>
 
 	<name>GeneMANIA Cytoscape App</name>
-    <repositories>
-        <repository>
-            <id>genemania_maven_repo</id>
-            <name>GeneMANIA Maven Project Repository</name>
-            <url>http://genemania.org/mvn/</url>
-        </repository>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven</name>
-            <url>http://download.java.net/maven/2/</url>
-            <layout>default</layout>
-        </repository>
-		<repository>
-			<id>cytoscape_thirdparty</id>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<name>Wrapped Third Party Libraries</name>
-            <url>http://code.cytoscape.org/nexus/content/repositories/thirdparty/</url>
-		</repository>
-		<repository>
-			<id>releases</id>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<name>Internal Releases</name>
-            <url>http://code.cytoscape.org/nexus/content/repositories/releases/</url>
-		</repository>
-		<repository>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<id>snapshots</id>
-			<name>Internal Snapshots</name>
-            <url>http://code.cytoscape.org/nexus/content/repositories/snapshots/</url>
-		</repository>
-    </repositories>
+    
     <dependencies>
+     	<!-- GeneMANIA -->
         <dependency>
             <groupId>org.genemania</groupId>
             <artifactId>plugin-distribution</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- Cytoscape -->
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>model-api</artifactId>
             <version>${cy3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>swing-application-api</artifactId>
             <version>${cy3.version}</version>
+             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>swing-util-api</artifactId>
+            <version>${cy3.version}</version>
+             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>application-api</artifactId>
             <version>${cy3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>layout-api</artifactId>
             <version>${cy3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>service-api</artifactId>
             <version>${cy3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>io-api</artifactId>
             <version>${cy3.version}</version>
+            <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>util-api</artifactId>
+            <version>${cy3.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Third Party -->
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <version>${osgi.api.version}</version>
         </dependency>
+        <!-- Rest -->
+        <dependency>
+		  <groupId>com.squareup.okhttp3</groupId>
+		  <artifactId>okhttp</artifactId>
+		  <version>3.10.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okio</groupId>
+			<artifactId>okio</artifactId>
+			<version>1.14.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.2</version>
+		</dependency>
+		<!-- Unit Tests -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.10.19</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit-addons</groupId>
+			<artifactId>junit-addons</artifactId>
+			<version>1.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+            <groupId>uispec4j</groupId>
+            <artifactId>uispec4j</artifactId>
+            <version>2.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
+    			<plugin>
+				<!-- To prevent maven from corrupting .TTF files -->
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<nonFilteredFileExtensions>
+						<nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.ops4j</groupId>
 				<artifactId>maven-pax-plugin</artifactId>
@@ -131,7 +148,11 @@
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${cytoscapeVersion}</Bundle-Version>
 						<Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
-						<Embed-Dependency>plugin-distribution;inline=true</Embed-Dependency>
+						<Embed-Dependency>
+							okhttp,okio,gson,
+							plugin-distribution;inline=true
+						</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
 						<Private-Package>${bundle.namespace}.*</Private-Package>
 						<Export-Package>!${bundle.namespace}.*;version="${cytoscapeVersion}"</Export-Package>
 						<Import-Package>*;resolution:=optional</Import-Package>
@@ -141,8 +162,9 @@
 				</configuration>
 			</plugin>
             <plugin>
-                <groupId>com.mycila.maven-license-plugin</groupId>
-                <artifactId>maven-license-plugin</artifactId>
+                <groupId>com.mycila</groupId>
+		        <artifactId>license-maven-plugin</artifactId>
+		        <version>3.0</version>
                 <configuration>
                     <header>src/etc/header.txt</header>
                     <strictCheck>true</strictCheck>
@@ -152,6 +174,25 @@
                         <include>src/**/*.sh</include>
                     </includes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <configuration>
+                            <target>
+                                <!-- Will run build.xml in same folder -->
+                                <ant dir="./" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <pluginManagement>

@@ -16,13 +16,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.view.util;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FileDialog;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Image;
@@ -31,6 +31,8 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URL;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -54,6 +56,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JRootPane;
+import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
@@ -72,6 +75,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.cytoscape.util.swing.IconManager;
 import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.Strings;
 import org.genemania.plugin.SystemUtils;
@@ -94,12 +98,22 @@ public class UiUtils {
 	public static final float INFO_FONT_SIZE = 11.0f;
 	public static final float AQUA_TITLED_BORDER_FONT_SIZE = 11.0f;
 	
+	private final float AQUA_SMALL_FONT_SIZE;
+	
 	private final ImageCache images;
 	private final IconManager iconManager;
 	
-	public UiUtils() {
+	public UiUtils(IconManager iconManager) {
+		this.iconManager = iconManager;
 		images = new ImageCache();
-		iconManager = new IconManager();
+		
+		if (isAquaLAF()) {
+			JLabel lbl = new JLabel();
+			lbl.putClientProperty("JComponent.sizeVariant", "small");
+			AQUA_SMALL_FONT_SIZE = lbl.getFont().getSize2D();
+		} else {
+			AQUA_SMALL_FONT_SIZE = 11.0f;
+		}
 	}
 	
 	public JEditorPane createLinkEnabledEditorPane(final Component parent, String text) {
@@ -118,9 +132,8 @@ public class UiUtils {
 	}
 	
 	public JEditorPane createLinkEnabledEditorPane(final Component parent, String text, URL baseUrl) {
-		if (baseUrl != null) {
+		if (baseUrl != null)
 			text = filter(text, baseUrl);
-		}
 		
 		JEditorPane pane = createEditorPane(text);
 		HyperlinkListener linkListener = new HyperlinkListener() {
@@ -143,7 +156,7 @@ public class UiUtils {
 		Pattern pattern = Pattern.compile("\\@\\{(.+?)\\}"); //$NON-NLS-1$
 		Matcher matcher = pattern.matcher(text);
 		
-		Set<String> keys = new HashSet<String>();
+		Set<String> keys = new HashSet<>();
 		int offset = 0;
 		while (matcher.find(offset)) {
 			String key = matcher.group(1);
@@ -180,9 +193,25 @@ public class UiUtils {
 	public JLabel createIconLabel(final String code, final float size, final Color color) {
 		final JLabel label = new JLabel(code);
 		label.setFont(iconManager.getIconFont(size));
-		label.setForeground(color);
+		
+		if (color != null)
+			label.setForeground(color);
 		
 		return label;
+	}
+	
+	public JButton createIconButton(final String code, final float size) {
+		return createIconButton(code, size, null);
+	}
+	
+	public JButton createIconButton(final String code, final float size, final Color color) {
+		final JButton button = new JButton(code);
+		button.setFont(iconManager.getIconFont(size));
+		
+		if (color != null)
+			button.setForeground(color);
+		
+		return button;
 	}
 	
 	private Icon getIcon(String id) {
@@ -551,6 +580,39 @@ public class UiUtils {
 		
 		if (currentSize.width < minSize.width)
 			currentSize.width = minSize.width;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void makeLabelsSmall(JSlider slider) {
+		// Change the slider's label sizes -- only works if it's done after the slider has been added to
+		// its parent container and had its UI assigned
+		final Font tickFont = slider.getFont().deriveFont(getSmallFontSize());
+		final Dictionary<Integer, JLabel> labelTable = slider.getLabelTable();
+		
+		for (Enumeration<Integer> enumeration = labelTable.keys(); enumeration.hasMoreElements();) {
+			int k = enumeration.nextElement();
+			final JLabel label = labelTable.get(k);
+			label.setFont(tickFont); // Updates the font size
+			label.setSize(label.getPreferredSize()); // Updates the label size and slider layout
+		}
+	}
+	
+	/**
+	 * @return The standard small font size for the current Look and feel.
+	 */
+	public float getSmallFontSize() {
+		// Aqua (Mac OS X):
+		if (isAquaLAF())
+			return AQUA_SMALL_FONT_SIZE;
+		
+		// Windows or Nimbus:
+		final Font font = UIManager.getFont("Label.font");
+		final float regular = font == null ? 13.0f : font.getSize2D();
+		float small = Math.round(regular * .84f);
+		small = Math.max(11.0f, small); // Must not be smaller than 11
+		small = Math.min(regular, small); // Must not  be larger than the regular font size
+		
+		return small;
 	}
 	
 	public boolean isMacOSX() {

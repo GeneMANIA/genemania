@@ -54,13 +54,13 @@ import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.view.components.WrappedOptionPane;
 import org.genemania.plugin.view.util.UiUtils;
 
-public class LuceneConfiguration<NETWORK, NODE, EDGE> extends Configuration {
+public class LuceneConfiguration extends Configuration {
 
 	private JDialog dialog;
 	private final DataSetManager dataSetManager;
 	private final UiUtils uiUtils;
 	private final FileUtils fileUtils;
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 	private final TaskDispatcher taskDispatcher;
 
 	public LuceneConfiguration(
@@ -68,7 +68,7 @@ public class LuceneConfiguration<NETWORK, NODE, EDGE> extends Configuration {
 			final DataSetManager dataSetManager,
 			final UiUtils uiUtils,
 			final FileUtils fileUtils,
-			final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils,
+			final CytoscapeUtils cytoscapeUtils,
 			final TaskDispatcher taskDispatcher
 	) {
 		super(data);
@@ -85,7 +85,7 @@ public class LuceneConfiguration<NETWORK, NODE, EDGE> extends Configuration {
 	}
 	
 	@Override
-	@SuppressWarnings({ "unchecked", "serial" })
+	@SuppressWarnings("serial")
 	public void showUi(Window parent) {
 		if (parent instanceof Frame) {
 			dialog = new JDialog((Frame) parent, true);
@@ -95,8 +95,8 @@ public class LuceneConfiguration<NETWORK, NODE, EDGE> extends Configuration {
 			return;
 		}
 		
-		final LuceneConfigPanel<NETWORK, NODE, EDGE> configPanel = new LuceneConfigPanel<NETWORK, NODE, EDGE>(
-				(LuceneDataSet<NETWORK, NODE, EDGE>) data,
+		final LuceneConfigPanel configPanel = new LuceneConfigPanel(
+				(LuceneDataSet) data,
 				dataSetManager,
 				uiUtils,
 				fileUtils,

@@ -16,7 +16,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package org.genemania.plugin.data.lucene.view;
 
 import java.io.PrintWriter;
@@ -26,57 +25,59 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.genemania.data.normalizer.NormalizationResult;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
-import org.genemania.plugin.proxies.EdgeProxy;
-import org.genemania.plugin.proxies.NetworkProxy;
-import org.genemania.plugin.proxies.NodeProxy;
 import org.genemania.util.ProgressReporter;
 
-public class CyNetworkImporter<NETWORK, NODE, EDGE> {
+public class CyNetworkImporter {
 	
-	private final CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils;
+	private final CytoscapeUtils cytoscapeUtils;
 
-	public CyNetworkImporter(CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils) {
+	public CyNetworkImporter(CytoscapeUtils cytoscapeUtils) {
 		this.cytoscapeUtils = cytoscapeUtils;
 	}
 	
-	public void process(NETWORK network, String idAttribute, String weightAttribute, Writer output, ProgressReporter progress) {
+	public void process(CyNetwork network, String idAttribute, String weightAttribute, Writer output,
+			ProgressReporter progress) {
 		PrintWriter writer = new PrintWriter(output);
 		
 		try {
 			Context context = new Context();
-			NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(network);
-			Collection<EDGE> edges = networkProxy.getEdges();
+			Collection<CyEdge> edges = network.getEdgeList();
 			progress.setMaximumProgress(edges.size());
-			for (EDGE edge : edges) {
-				if (progress.isCanceled()) {
+			
+			for (CyEdge edge : edges) {
+				if (progress.isCanceled())
 					return;
-				}
+				
 				progress.setProgress(context.totalInteractions);
 				context.totalInteractions++;
 				
-				EdgeProxy<EDGE, NODE> edgeProxy = cytoscapeUtils.getEdgeProxy(edge, network);
-				String sourceSymbol = getSymbol(cytoscapeUtils.getNodeProxy(edgeProxy.getSource(), network), idAttribute);
-				String targetSymbol = getSymbol(cytoscapeUtils.getNodeProxy(edgeProxy.getTarget(), network), idAttribute);
+				String sourceSymbol = getSymbol(edge.getSource(), network, idAttribute);
+				String targetSymbol = getSymbol(edge.getTarget(), network, idAttribute);
+				
 				if (sourceSymbol == null || targetSymbol == null) {
 					context.droppedInteractions++;
 					continue;
 				}
 				
 				Double weight = null;
+				
 				if (weightAttribute != null) {
-					Object rawValue = edgeProxy.getAttribute(weightAttribute, Object.class);
+					Object rawValue = cytoscapeUtils.getAttribute(network, edge, weightAttribute, Object.class);
+					
 					if (!(rawValue instanceof Double) && !(rawValue instanceof Integer)) {
 						context.droppedInteractions++;
 						continue;
 					}
 	
-					if (rawValue instanceof Double) {
+					if (rawValue instanceof Double)
 						weight = (Double) rawValue;
-					} else {
+					else
 						weight = ((Integer) rawValue).doubleValue();
-					}
 				}
 				
 				if (weightAttribute != null) {
@@ -92,30 +93,33 @@ public class CyNetworkImporter<NETWORK, NODE, EDGE> {
 		}
 	}
 	
-	public void process(NETWORK network, String idAttribute, List<String> expressionAttributes, Writer output, ProgressReporter progress) {
+	public void process(CyNetwork network, String idAttribute, List<String> expressionAttributes, Writer output,
+			ProgressReporter progress) {
 		PrintWriter writer = new PrintWriter(output);
+		
 		try {
 			writer.print("IDENTIFIER"); //$NON-NLS-1$
+			
 			for (String attribute : expressionAttributes) {
 				writer.print("\t"); //$NON-NLS-1$
 				writer.print(attribute);
 			}
+			
 			writer.println();
 			
 			Context context = new Context();
-			
-			NetworkProxy<NETWORK, NODE, EDGE> networkProxy = cytoscapeUtils.getNetworkProxy(network);
-			Collection<NODE> nodes = networkProxy.getNodes();
+			Collection<CyNode> nodes = network.getNodeList();
 			progress.setMaximumProgress(nodes.size());
-			for (NODE node : nodes) {
-				if (progress.isCanceled()) {
+			
+			for (CyNode node : nodes) {
+				if (progress.isCanceled())
 					return;
-				}
+				
 				progress.setProgress(context.totalInteractions);
 				context.totalInteractions++;
 				
-				NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(node, network);
-				String symbol = getSymbol(nodeProxy, idAttribute);
+				String symbol = getSymbol(node, network, idAttribute);
+				
 				if (symbol == null) {
 					context.droppedInteractions++;
 					continue;
@@ -126,18 +130,20 @@ public class CyNetworkImporter<NETWORK, NODE, EDGE> {
 				
 				for (String attribute : expressionAttributes) {
 					Double value = null;
-					Class<?> type = nodeProxy.getAttributeType(attribute);
-					Object rawValue = nodeProxy.getAttribute(attribute, type);
-					if (rawValue instanceof Integer) {
+					Class<?> type = cytoscapeUtils.getAttributeType(network, node, attribute);
+					Object rawValue = cytoscapeUtils.getAttribute(network, node, attribute, type);
+					
+					if (rawValue instanceof Integer)
 						value = ((Integer) rawValue).doubleValue();
-					} else if (rawValue instanceof Double) {
+					else if (rawValue instanceof Double)
 						value = (Double) rawValue;
-					}
-					if (value != null) {
+					
+					if (value != null)
 						writer.print(value);
-					}
+					
 					writer.print("\t"); //$NON-NLS-1$
 				}
+				
 				writer.println();
 			}
 		} finally {
@@ -145,20 +151,20 @@ public class CyNetworkImporter<NETWORK, NODE, EDGE> {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	private String getSymbol(NodeProxy<NODE> nodeProxy, String idAttribute) {
-		Class<?> type = nodeProxy.getAttributeType(idAttribute);
-		Object value = nodeProxy.getAttribute(idAttribute, type);
-		if (value instanceof String) {
-			return nodeProxy.getAttribute(idAttribute, String.class);
-		}
+	private String getSymbol(CyNode node, CyNetwork network, String idAttribute) {
+		Class<?> type = cytoscapeUtils.getAttributeType(network, node, idAttribute);
+		Object value = cytoscapeUtils.getAttribute(network, node, idAttribute, type);
+		
+		if (value instanceof String)
+			return cytoscapeUtils.getAttribute(network, node, idAttribute, String.class);
+		
 		if (value instanceof List) {
-			for (Object item : (List) value) {
-				if (item instanceof String) {
+			for (Object item : (List<?>) value) {
+				if (item instanceof String)
 					return (String) item;
-				}
 			}
 		}
+		
 		return null;
 	}
 
@@ -170,20 +176,22 @@ public class CyNetworkImporter<NETWORK, NODE, EDGE> {
 		return result;
 	}
 
-	public NormalizationResult normalize(NETWORK network, String idAttribute, List<String> expressionAttributes, Writer writer, ProgressReporter progress) {
+	public NormalizationResult normalize(CyNetwork network, String idAttribute, List<String> expressionAttributes,
+			Writer writer, ProgressReporter progress) {
 		Context context = new Context();
 		return createResult(context);
 	}
 	
 	static class Context {
+		
 		public int droppedInteractions;
 		public int totalInteractions;
 		public Set<String> invalidSymbols;
 		public Set<String> conflictingSymbols;
 		
 		public Context() {
-			invalidSymbols = new HashSet<String>();
-			conflictingSymbols = new HashSet<String>();
+			invalidSymbols = new HashSet<>();
+			conflictingSymbols = new HashSet<>();
 		}
 	}
 }

@@ -25,6 +25,7 @@ import org.genemania.plugin.view.AboutDialog;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class AboutDelegate implements Delegate {
+	
 	private final UiUtils uiUtils;
 	private final Frame parent;
 	private final URL resourceBaseUrl;

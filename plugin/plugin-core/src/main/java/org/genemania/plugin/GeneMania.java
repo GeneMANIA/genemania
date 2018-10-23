@@ -24,30 +24,46 @@ import java.io.File;
 import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.util.ProgressReporter;
 
-public interface GeneMania<NETWORK, NODE, EDGE> {
+public interface GeneMania {
+	
 	public static final String SCHEMA_VERSION = "1.1"; //$NON-NLS-1$
 	public static final String DEFAULT_NAMESPACE = "user"; //$NON-NLS-1$
 
 	public static final String DATA_SOURCE_PATH_PROPERTY = "genemania.datasource"; //$NON-NLS-1$
 	public static final String SETTINGS_PROPERTY = "genemania.plugin.settings"; //$NON-NLS-1$
 	
+	public static final String APP_CYPROPERTY_NAME = "GeneMANIA";
+	
+	public static final String ORGANISMS_API_URL = "api.organisms.url"; //$NON-NLS-1$
+	public static final String NETWORKS_API_URL = "api.networks.url"; //$NON-NLS-1$
+	public static final String VERSION_API_URL = "api.version.url"; //$NON-NLS-1$
+	public static final String SEARCH_API_URL = "api.search.url"; //$NON-NLS-1$
+	
 	void showResults();
+
 	void hideResults();
 
-	NetworkSelectionManager<NETWORK, NODE, EDGE> getNetworkSelectionManager();
+	SessionManager getSessionManager();
+
 	DataSetManager getDataSetManager();
 
 	boolean initializeData(ProgressReporter progress, boolean reportErrors) throws ApplicationException;
+
 	void initializeData(Window parent, boolean reportErrors);
-	void loadDataSet(File path, ProgressReporter progress, boolean promptToUpdate, boolean reportErrors) throws ApplicationException;
+
+	void loadDataSet(File path, ProgressReporter progress, boolean promptToUpdate, boolean reportErrors)
+			throws ApplicationException;
 
 	void applyOptions(ViewState options);
+
 	void updateSelection(ViewState options);
-	
+
 	void handleCheck();
+
 	void handleDownload();
+
 	void handleSwitch();
 }

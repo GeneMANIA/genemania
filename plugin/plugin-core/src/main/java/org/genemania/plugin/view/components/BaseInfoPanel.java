@@ -23,7 +23,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.SystemColor;
 import java.util.ArrayList;
@@ -32,29 +31,22 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkEvent.EventType;
-import javax.swing.event.HyperlinkListener;
 
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.selection.SelectionEvent;
 import org.genemania.plugin.selection.SelectionListener;
 import org.genemania.plugin.view.util.UiUtils;
 
+@SuppressWarnings("serial")
 public abstract class BaseInfoPanel<U, T extends BaseDetailPanel<U>> extends JPanel implements Scrollable {
-	private static final long serialVersionUID = 1L;
-
+	
 	public static final Color selectedBackground;
 	public static final Color defaultBackground;
-	protected static final Pattern sortPattern = Pattern.compile("#sort-(\\d+)([+-])?"); //$NON-NLS-1$
 	
 	static {
 		selectedBackground = new Color(222, 234, 252);
@@ -73,24 +65,26 @@ public abstract class BaseInfoPanel<U, T extends BaseDetailPanel<U>> extends JPa
 	public BaseInfoPanel(UiUtils uiUtils) {
 		this.uiUtils = uiUtils;
 		setOpaque(false);
-		selectionListeners = new ArrayList<SelectionListener<U>>();
-		dataModel = new ArrayList<T>();
-		displayModel = new ArrayList<T>();
+		selectionListeners = new ArrayList<>();
+		dataModel = new ArrayList<>();
+		displayModel = new ArrayList<>();
 		layout = new GridBagLayout();
 		setLayout(layout);
 		isDescending = true;
 	}
 	
 	public void clearSelection() {
-		Set<U> deselected = new HashSet<U>();
+		Set<U> deselected = new HashSet<>();
+		
 		for (T panel : dataModel) {
-			if (!panel.getSelected()) {
+			if (!panel.getSelected())
 				continue;
-			}
+			
 			panel.setSelected(false);
 			deselected.add(panel.getSubject());
 		}
-		SelectionEvent<U> event = new SelectionEvent<U>(deselected, false);
+		
+		SelectionEvent<U> event = new SelectionEvent<>(deselected, false);
 		notifyListeners(event);
 	}
 	
@@ -100,25 +94,30 @@ public abstract class BaseInfoPanel<U, T extends BaseDetailPanel<U>> extends JPa
 		}
 	}
 
+	@Override
 	public Dimension getPreferredScrollableViewportSize() {
 		return getPreferredSize();
 	}
 
+	@Override
 	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-		if (orientation == SwingConstants.HORIZONTAL) {
+		if (orientation == SwingConstants.HORIZONTAL)
 			return (int) visibleRect.getWidth();
-		}
+		
 		return (int) visibleRect.getHeight();
 	}
 
+	@Override
 	public boolean getScrollableTracksViewportHeight() {
 		return false;
 	}
 
+	@Override
 	public boolean getScrollableTracksViewportWidth() {
 		return true;
 	}
 
+	@Override
 	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
 		return 4;
 	}
@@ -127,10 +126,11 @@ public abstract class BaseInfoPanel<U, T extends BaseDetailPanel<U>> extends JPa
 		for (int i = 0; i < displayModel.size(); i++) {
 			T panel = displayModel.get(i);
 			Rectangle rectangle = panel.getVisibleRect();
-			if (rectangle.height > 0) {
+			
+			if (rectangle.height > 0)
 				return i;
-			}
 		}
+		
 		return -1;
 	}
 	
@@ -143,13 +143,11 @@ public abstract class BaseInfoPanel<U, T extends BaseDetailPanel<U>> extends JPa
 	}
 	
 	protected void ensureVisible(final T panel) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				Rectangle bounds = panel.getBounds();
-				bounds.x = 0;
-				bounds.y = 0;
-				panel.scrollRectToVisible(bounds);
-			}
+		SwingUtilities.invokeLater(() -> {
+			Rectangle bounds = panel.getBounds();
+			bounds.x = 0;
+			bounds.y = 0;
+			panel.scrollRectToVisible(bounds);
 		});
 	}
 
@@ -162,53 +160,8 @@ public abstract class BaseInfoPanel<U, T extends BaseDetailPanel<U>> extends JPa
 	public abstract void updateSelection(ViewState options);
 	public abstract void applyOptions(ViewState options);
 	protected abstract void addDetailPanel(T panel, final int panelIndex);
-	protected abstract void setAllEnabled(boolean enabled);
+	public abstract void setAllEnabled(boolean enabled);
 
-	public JPanel createExpanderPanel(String contents) {
-		JPanel panel = uiUtils.createJPanel();
-		panel.setLayout(new GridBagLayout());
-		JEditorPane expanders = uiUtils.createEditorPane(contents);
-		expanders.addHyperlinkListener(new HyperlinkListener() {
-			public void hyperlinkUpdate(HyperlinkEvent e) {
-				if (e.getEventType() != EventType.ACTIVATED) {
-					return;
-				}
-				String reference = e.getDescription();
-				if ("#ex-all".equals(reference)) { //$NON-NLS-1$
-					showDetails(true, -1);
-				} else if ("#ex-top".equals(reference)) { //$NON-NLS-1$
-					showDetails(false, -1);
-					showDetails(true, 0);
-				} else if ("#ex-none".equals(reference)) { //$NON-NLS-1$
-					showDetails(false, -1);
-				} else if ("#en-all".equals(reference)) { //$NON-NLS-1$
-					setAllEnabled(true);
-				} else if ("#en-none".equals(reference)) { //$NON-NLS-1$
-					setAllEnabled(false);
-				} else {
-					Matcher matcher = sortPattern.matcher(reference);
-					if (!matcher.matches()) {
-						return;
-					}
-					int column = Integer.parseInt(matcher.group(1));
-					Boolean descending;
-					String direction = matcher.group(2);
-					if (direction == null) {
-						descending = null;
-					} else if (direction.equals("-")) { //$NON-NLS-1$
-						descending = true;
-					} else {
-						descending = false;
-					}
-					sort(column, descending);
-				}
-			}
-		});
-
-		panel.add(expanders, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0 , 0));
-		return panel;
-	}
-	
 	@Override
 	public void removeAll() {
 		selectionListeners.clear();

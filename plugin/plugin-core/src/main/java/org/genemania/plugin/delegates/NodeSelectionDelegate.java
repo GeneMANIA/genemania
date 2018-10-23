@@ -18,25 +18,33 @@
  */
 package org.genemania.plugin.delegates;
 
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.proxies.NodeProxy;
-import org.genemania.plugin.selection.NetworkSelectionManager;
+import org.genemania.plugin.selection.SessionManager;
 
-public class NodeSelectionDelegate<NETWORK, NODE, EDGE> extends SelectionDelegate<NETWORK, NODE, EDGE> {
-	private final NODE node;
+public class NodeSelectionDelegate extends SelectionDelegate {
+	
+	private final CyNode node;
 
-	public NodeSelectionDelegate(NODE node, boolean selected, NETWORK network, NetworkSelectionManager<NETWORK, NODE, EDGE> manager, GeneMania<NETWORK, NODE, EDGE> plugin, CytoscapeUtils<NETWORK, NODE, EDGE> cytoscapeUtils) {
+	public NodeSelectionDelegate(
+			CyNode node,
+			boolean selected,
+			CyNetwork network,
+			SessionManager manager,
+			GeneMania plugin,
+			CytoscapeUtils cytoscapeUtils
+	) {
 		super(selected, network, manager, plugin, cytoscapeUtils);
 		this.node = node;
 	}
 	
 	@Override
 	protected void handleSelection(ViewState options) throws ApplicationException {
-		NodeProxy<NODE> nodeProxy = cytoscapeUtils.getNodeProxy(node, network);
-		String name = nodeProxy.getAttribute(CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
+		String name = cytoscapeUtils.getAttribute(network, node, CytoscapeUtils.GENE_NAME_ATTRIBUTE, String.class);
 		options.setGeneHighlighted(name, selected);
 	}
 }
