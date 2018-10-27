@@ -19,9 +19,11 @@
 
 package org.genemania.plugin.apps;
 
+import java.awt.font.ImageGraphicAttribute;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,6 +33,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,6 +59,8 @@ import org.genemania.dto.NetworkDto;
 import org.genemania.dto.NodeDto;
 import org.genemania.dto.RelatedGenesEngineRequestDto;
 import org.genemania.dto.RelatedGenesEngineResponseDto;
+import org.genemania.dto.OntologyCategoryDto;
+
 import org.genemania.engine.Constants;
 import org.genemania.engine.Constants.ScoringMethod;
 import org.genemania.engine.Mania2;
@@ -97,7 +102,10 @@ import org.genemania.util.NullProgressReporter;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.spi.BooleanOptionHandler;
 import org.xml.sax.SAXException;
+
+import org.genemania.plugin.report.ManiaReport.GeneEntry;
 
 import no.uib.cipr.matrix.Vector;
 
@@ -127,6 +135,11 @@ public class QueryRunner extends AbstractPluginDataApp {
 	
 	@Option(name = "--ids", usage = "comma-separated list gene identifier types to use in the output")
 	private String fIds;
+	
+	@Option(name = "--netdx-flag", handler=BooleanOptionHandler.class, usage = "boolean value - if true prevents lucene index building to conserve memory and export internal gene-ids; defaults to false")
+	private boolean useNetdxModification = false;
+//	@Option(name = "--netdx-flag", usage = "boolean value - only if passing true prevents lucene index building to conserve memory and export internal gene-ids; defaults to false")
+//	private String netdxModification = "false";
 	
 	private Mania2 fMania;
 	private IQueryParser fQueryParser;
@@ -158,6 +171,11 @@ public class QueryRunner extends AbstractPluginDataApp {
 			
 			IGeneProvider geneProvider = parseIdTypes(fIds);
 			
+			if (useNetdxModification) { //$NON-NLS-1$
+//			 TODO our flag introduced problems - need to remove additional elements from attributes - otherwise we will run it twice - see oldArguments parsing?
+				fQueryHandler = new NetdxQueryHandler(new FlatReportOutputFormatter(fData, geneProvider), fData);
+			} 
+			else 
 			if (fOutputFormat == null) {
 				fQueryHandler = new DefaultQueryHandler(new GeneListOutputFormatter(geneProvider));
 			} else if ("genes".equals(fOutputFormat)) { //$NON-NLS-1$
@@ -243,6 +261,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 		} else {
 			request.setScoringMethod(parseScoringMethod());
 		}
+
 		return request;
 	}
 	
@@ -298,7 +317,93 @@ public class QueryRunner extends AbstractPluginDataApp {
 		request.setNodes(nodes);
 		return request;
 	}
-
+//	
+//	private void writeToFile(String fileName, String stuff) throws IOException {
+////		String str = "Hello";
+//	    FileOutputStream outputStream = new FileOutputStream(fileName);
+//	    byte[] strToBytes = stuff.getBytes();
+//	    outputStream.write(strToBytes);
+//	    outputStream.close();
+//	    return;
+//	}
+//	
+//	
+//	private void writeHMToFile(String fileName, Map<Long, Collection<OntologyCategoryDto>> stuff) throws IOException {
+//		Collection<String> asd = new ArrayList<>();
+//		
+//		try {
+//			File fileTwo=new File(fileName);
+//			FileOutputStream fos=new FileOutputStream(fileTwo);
+//			PrintWriter pw=new PrintWriter(fos);
+//			for(Map.Entry<Long, Collection<OntologyCategoryDto>> m :stuff.entrySet()){
+////	        for(Map.Entry<Long, Collection<OntologyCategoryDto> m :map.entrySet()){
+//				pw.println(String.valueOf(m.getKey()));
+////				pw.println(String.valueOf(m.getKey())+" = "+
+////						String.valueOf( m.getValue().getClass()));
+//			}
+//			
+//			pw.flush();
+//			pw.close();
+//			fos.close();
+//		}catch(Exception e){
+//			System.err.println(e);
+//		}
+//		
+//		return;
+//	}
+//
+//	private void writeCollectionToFile(String fileName, Collection<OntologyCategoryDto> stuff) throws IOException {
+////		Collection<String> asd = new ArrayList<>();
+//		
+//		try {
+//			File fileTwo=new File(fileName);
+//		    FileOutputStream fos=new FileOutputStream(fileTwo);
+//	        PrintWriter pw=new PrintWriter(fos);
+////	        for(Map.Entry<Long, Collection<OntologyCategoryDto>> m :stuff.entrySet()){
+//	        for (OntologyCategoryDto ontologyCategoryDto : stuff) {
+//	        	pw.println(ontologyCategoryDto.toString());
+//			}
+////	        for(Map.Entry<Long, Collection<OntologyCategoryDto> m :map.entrySet()){
+////	        	pw.println(String.valueOf(m.getKey())+" = "+
+////	        			String.valueOf( m.getValue().getClass()));
+////	            pw.println(String.valueOf(m.getKey())+" = "+
+////	            		String.valueOf( m.getValue().getClass()));
+////	        }
+//
+//	        pw.flush();
+//	        pw.close();
+//	        fos.close();
+//	    }catch(Exception e){
+//			System.err.println(e);
+//	    }
+//	    
+//	    return;
+//	}
+//	private SearchResult runAlgorithmNetdx(DataSet data, Query query) throws DataStoreException, ApplicationException {
+//
+//		System.err.println("Starting using runAlgorithmNetdx");
+//		
+//		RelatedGenesEngineRequestDto request = createRequest(query);
+//		RelatedGenesEngineResponseDto response = runQuery(request);
+//		EnrichmentEngineRequestDto enrichmentRequest;
+//		
+//		if ("scores".equals(fOutputFormat)) //$NON-NLS-1$
+//			enrichmentRequest = null;
+//		else
+//			enrichmentRequest = createEnrichmentRequest(query, response);
+//		EnrichmentEngineResponseDto enrichmentResponse = computeEnrichment(enrichmentRequest);
+//
+//		List<String> queryGenes = query.getGenes();
+//		Organism organism = query.getOrganism();
+//		
+//		// let's bypass re-encoding and write network weights to file 
+//		// TODO write to tsv file
+//		
+////		System.err.println("finished writing results - using lucene now");
+//		SearchResult options = fNetworkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data, queryGenes);
+//		return options;
+//	}
+	
 	private SearchResult runAlgorithm(DataSet data, Query query) throws DataStoreException, ApplicationException {
 		RelatedGenesEngineRequestDto request = createRequest(query);
 		RelatedGenesEngineResponseDto response = runQuery(request);
@@ -317,6 +422,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 		
 		return options;
 	}
+	
 
 	private EnrichmentEngineResponseDto computeEnrichment(EnrichmentEngineRequestDto request) throws ApplicationException {
 		return request == null ? null : fMania.computeEnrichment(request);
@@ -381,7 +487,22 @@ public class QueryRunner extends AbstractPluginDataApp {
 		Logger logger = Logger.getLogger("org.genemania"); //$NON-NLS-1$
 		logger.setLevel(Level.ERROR);
 		
-		List<String> arguments = getArguments();
+		List<String> oldArguments = getArguments();
+		List<String> arguments = new ArrayList<>();// = getArguments();
+//		need to remove all "weird" arguments from list
+//		drop arguments that are just "true" and not actual query files - somehow the netDx flag got appended to the list of arguments...
+		
+		if ((oldArguments.size() > 1)) {
+//			only attach query runs that are not just "true" --> usually query files
+			for (String arg : oldArguments) {
+				if (!arg.equals("true")) {
+					arguments.add(arg);
+				}
+			}
+		} else {
+			arguments = oldArguments;
+		}
+		System.err.println(arguments);
 		final Iterator<String> jobQueue = arguments.iterator();
 		List<Thread> threads = new ArrayList<Thread>();
 		long start = System.currentTimeMillis();
@@ -424,7 +545,10 @@ public class QueryRunner extends AbstractPluginDataApp {
 		long duration = System.currentTimeMillis() - start;
 		System.err.println(String.format("Performed %d predictions in %.2fs", arguments.size(), duration / 1000.0)); //$NON-NLS-1$
 	}
+	
 
+	
+	
 	public static void main(String[] args) throws Exception {
 		Logger.getLogger("org.genemania").setLevel(Level.FATAL); //$NON-NLS-1$
 
@@ -510,10 +634,13 @@ public class QueryRunner extends AbstractPluginDataApp {
 		}
 	}
 	
+	
+	
 	interface QueryHandler {
 		void process(Query query, File outputDirectory, String baseName) throws ApplicationException, DataStoreException, IOException;
 	}
 	
+
 	class DefaultQueryHandler implements QueryHandler {
 		IOutputFormatter fFormatter;
 		
@@ -530,6 +657,124 @@ public class QueryRunner extends AbstractPluginDataApp {
 				fFormatter.format(out, viewState);
 			} finally {
 				out.close();
+			}
+		}
+	}
+	
+	class NetdxQueryHandler implements QueryHandler {
+		IOutputFormatter fFormatter;
+		DataSet data;
+		
+		public NetdxQueryHandler(IOutputFormatter formatter, DataSet data) {
+			fFormatter = formatter;
+			this.data = data;
+		}
+		
+		@Override
+		public void process(Query query, File outputDirectory, String baseName) throws ApplicationException, DataStoreException, IOException {
+			SearchResult options = runAlgorithm(data, query);
+			System.err.println("finished computation - writing results");
+			String outPath = "/home/philipp/netDx_mashup/netDxmashup/test/results";
+			String pathPRANK = String.format("%s/PRANK.txt", outPath);
+			
+			RankedGeneProviderWithUniprotHack geneIdProvider = new RankedGeneProviderWithUniprotHack(data.getAllNamingSources(), Collections.emptyList());
+			
+			try {
+				FlatNetDxHandler netDxhandler = new FlatNetDxHandler(pathPRANK, options, fNetworkUtils, geneIdProvider);		
+			} catch (FileNotFoundException e) {
+				System.err.println(e);
+			}
+			
+			ViewState viewState = new ViewStateImpl(options);
+			OutputStream out = new FileOutputStream(String.format("%s%s%s-results.%s", outputDirectory.getPath(), File.separator, baseName, fFormatter.getExtension())); //$NON-NLS-1$
+			try {
+				fFormatter.format(out, viewState);
+			} finally {
+				out.close();
+			}
+		}
+	
+		class FlatNetDxHandler {
+			
+			private List<GeneEntry> genes;
+			private String outfilename;
+			private NetworkUtils fNetworkUtils;
+			private SearchResult options;
+			private Map<Long, Gene> geneCache;
+			private final IGeneProvider geneProvider;
+		
+			public FlatNetDxHandler(String outfilename, SearchResult options, NetworkUtils fNetworkUtils, IGeneProvider geneProvider) throws FileNotFoundException {
+				this.outfilename = outfilename;
+				this.options = options;
+				this.fNetworkUtils = fNetworkUtils;
+				this.genes = this.populateGenes(this.options);
+				this.geneCache = new HashMap<Long, Gene>();
+				this.geneProvider = geneProvider;
+				this.writePRANK();					
+			
+			}
+			
+			
+			private List<GeneEntry> populateGenes(SearchResult options) {
+				List<GeneEntry> result = new ArrayList<GeneEntry>();
+				
+				final Map<Gene, Double> scores = options.getScores();
+				List<Gene> genes = new ArrayList<Gene>(scores.keySet());
+				Collections.sort(genes, new Comparator<Gene>() {
+					public int compare(Gene gene1, Gene gene2) {
+						return scores.get(gene2).compareTo(scores.get(gene1));
+					}
+				});
+				
+				Map<Long, Gene> queryGenes = options.getQueryGenes();
+				for (Gene gene : genes) {
+					double score;
+					if (queryGenes.containsKey(gene.getNode().getId())) {
+						score = Double.MAX_VALUE;
+					} else {
+						score = scores.get(gene) * 100;
+					}
+					result.add(new GeneEntry(gene, score));
+				}
+				return result;
+			}
+			
+			private Gene findGene(Node node, SearchResult options) {
+				long nodeId = node.getId();
+				
+				if (options.isQueryNode(nodeId)) {
+					return options.getGene(node.getId());
+				}
+				
+				Gene gene = geneCache.get(node.getId());
+				if (gene == null) {
+					gene = geneProvider.getGene(node);
+					geneCache.put(node.getId(), gene);
+				}
+				return gene;
+			}
+			
+			
+			private void writePRANK() throws FileNotFoundException {
+				PrintWriter writer = new PrintWriter(new BufferedOutputStream(new FileOutputStream(outfilename)));
+				writer.print("Gene\tScore\tDescription\n"); //$NON-NLS-1$
+				for (GeneEntry entry : this.genes) {
+					Gene gene = findGene(entry.getGene().getNode(), options);
+					writer.print(fNetworkUtils.getGeneLabel(gene));
+					writer.print("\t"); //$NON-NLS-1$
+					
+					double score = entry.getScore();
+					if (score != Double.MAX_VALUE) {
+						writer.print(String.format("%.2f", score)); //$NON-NLS-1$
+					}
+					
+					writer.print("\t"); //$NON-NLS-1$
+					writer.print(gene.getNode().getGeneData().getDescription());
+					writer.print("\n"); //$NON-NLS-1$
+				}
+				writer.print("\n"); //$NON-NLS-1$
+				writer.flush();
+				writer.close();
 			}
 		}
 	}

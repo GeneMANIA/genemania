@@ -45,6 +45,7 @@ public class RelatedGenesEngineRequestDto implements Serializable {
 	CombiningMethod combiningMethod;
 	ScoringMethod scoringMethod;
 	ProgressReporter progressReporter;
+//	boolean useNetdxModification;
 
 	public RelatedGenesEngineRequestDto() {
 	}
@@ -128,4 +129,5 @@ public class RelatedGenesEngineRequestDto implements Serializable {
 	public void setProgressReporter(ProgressReporter progressReporter) {
 		this.progressReporter = progressReporter;
 	}
+
 }

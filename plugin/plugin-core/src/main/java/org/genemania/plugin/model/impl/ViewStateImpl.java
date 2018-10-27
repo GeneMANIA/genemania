@@ -78,59 +78,60 @@ public class ViewStateImpl implements ViewStateBuilder, Serializable {
 	}
 
 	private void addGroups(SearchResult result) {
-		{
-			Map<InteractionNetwork, Double> weights = result.getNetworkWeights();
+//		{
+//			Map<InteractionNetwork, Double> weights = result.getNetworkWeights();
+//			
+//			for (InteractionNetworkGroup model : result.getInteractionNetworkGroups().values()) {
+//				Collection<Network<InteractionNetwork>> networks = new ArrayList<>();
+//				
+//				for (InteractionNetwork network : model.getInteractionNetworks()) {
+//					Double weight = weights.get(network);
+//					
+//					if (weight == null)
+//						continue;
+//					
+//					networks.add(new InteractionNetworkImpl(network, weight));
+//				}
+//				
+//				InteractionNetworkGroupImpl group = new InteractionNetworkGroupImpl(model, networks);
+//				groupsByName.put(model.getName(), group);
+//				
+//				for (Network<?> network : group.getNetworks())
+//					groupsByNetwork.put(network, group);
+//			}
+//		}
+//		TODO what is this syntax here? code duplication and using two {}{} blocks in a single method?
+//		{
+		Map<Attribute, Double> weights = result.getAttributeWeights();
+		
+		if (weights != null) {
+			Map<AttributeGroup, Collection<Network<Attribute>>> networksByGroup = new HashMap<>();
 			
-			for (InteractionNetworkGroup model : result.getInteractionNetworkGroups().values()) {
-				Collection<Network<InteractionNetwork>> networks = new ArrayList<>();
+			for (Entry<Attribute, Double> entry : weights.entrySet()) {
+				Attribute attribute = entry.getKey();
+				AttributeGroup group = result.getAttributeGroup(attribute.getId());
+				Collection<Network<Attribute>> networks = networksByGroup.get(group);
 				
-				for (InteractionNetwork network : model.getInteractionNetworks()) {
-					Double weight = weights.get(network);
-					
-					if (weight == null)
-						continue;
-					
-					networks.add(new InteractionNetworkImpl(network, weight));
+				if (networks == null) {
+					networks = new ArrayList<>();
+					networksByGroup.put(group,  networks);
 				}
 				
-				InteractionNetworkGroupImpl group = new InteractionNetworkGroupImpl(model, networks);
-				groupsByName.put(model.getName(), group);
+				networks.add(new ResultAttributeNetworkImpl(attribute, entry.getValue()));
+			}
+			
+			for (Entry<AttributeGroup, Collection<Network<Attribute>>> entry : networksByGroup.entrySet()) {
+				ResultAttributeGroupImpl group = new ResultAttributeGroupImpl(entry.getKey(), entry.getValue());
+				groupsByName.put(group.getName(), group);
 				
 				for (Network<?> network : group.getNetworks())
 					groupsByNetwork.put(network, group);
+				
+				setEnabled(group, true);
 			}
-		}
-		{
-			Map<Attribute, Double> weights = result.getAttributeWeights();
 			
-			if (weights != null) {
-				Map<AttributeGroup, Collection<Network<Attribute>>> networksByGroup = new HashMap<>();
-				
-				for (Entry<Attribute, Double> entry : weights.entrySet()) {
-					Attribute attribute = entry.getKey();
-					AttributeGroup group = result.getAttributeGroup(attribute.getId());
-					Collection<Network<Attribute>> networks = networksByGroup.get(group);
-					
-					if (networks == null) {
-						networks = new ArrayList<>();
-						networksByGroup.put(group,  networks);
-					}
-					
-					networks.add(new ResultAttributeNetworkImpl(attribute, entry.getValue()));
-				}
-				
-				for (Entry<AttributeGroup, Collection<Network<Attribute>>> entry : networksByGroup.entrySet()) {
-					ResultAttributeGroupImpl group = new ResultAttributeGroupImpl(entry.getKey(), entry.getValue());
-					groupsByName.put(group.getName(), group);
-					
-					for (Network<?> network : group.getNetworks())
-						groupsByNetwork.put(network, group);
-					
-					setEnabled(group, true);
-				}
-				
-			}
 		}
+//		}
 	}
 
 	@Override

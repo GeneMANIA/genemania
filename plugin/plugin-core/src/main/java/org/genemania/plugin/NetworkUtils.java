@@ -538,31 +538,53 @@ public class NetworkUtils {
 			List<String> genes) {
 		SearchResultBuilder config = new SearchResultImpl();
 		
+		System.err.println("Calling createSearchOptions 'offline' ");
+		
 		config.setOrganism(organism);
 		config.setCombiningMethod(request.getCombiningMethod());
 		config.setGeneSearchLimit(request.getLimitResults());
 		config.setAttributeSearchLimit(request.getAttributesLimit());
 		
+		System.err.println("organism= "+organism);
+		System.err.println("combiningMethod= "+request.getCombiningMethod());
+		System.err.println("geneSearchLimit= "+request.getLimitResults());
+		System.err.println("attribute Search Limit = "+ request.getAttributesLimit());
+		
 		GeneCompletionProvider2 geneProvider = data.getCompletionProvider(organism);
 		Map<Long, Gene> queryGenes = computeQueryGenes(genes, geneProvider);
 		config.setSearchQuery(queryGenes);
 		
+		System.err.println("queryGenes=\n"+queryGenes+"\n");
+		
 		Map<Long, InteractionNetworkGroup> groupsByNetwork = computeGroupsByNetwork(response, data);
 		config.setGroups(groupsByNetwork);
 
+		System.err.println("groupsByNetwork=\n"+groupsByNetwork+"\n");
+		
 		IMediatorProvider provider = data.getMediatorProvider();
 		NodeMediator nodeMediator = provider.getNodeMediator();
 		List<NetworkDto> sourceNetworks = response.getNetworks();
-		config.setGeneScores(computeGeneScores(response.getNodes(), queryGenes, organism, nodeMediator));
+		System.err.println("sourceNetworks = \n"+ sourceNetworks + "\n");
+//		TODO addded this temporary variable assignment
+		Map<Gene, Double> geneScores = computeGeneScores(response.getNodes(), queryGenes, organism, nodeMediator);
+		config.setGeneScores(geneScores);
+		System.err.println("geneScores = \n "+ geneScores + "\n");
 		
 		Map<Long, InteractionNetwork> canonicalNetworks = computeCanonicalNetworks(groupsByNetwork);
 		computeSourceInteractions(sourceNetworks, canonicalNetworks, organism, data);
 		
+		System.err.println("updated sourceNetworks = \n" + sourceNetworks + "\n");
+		
 		AttributeMediator attributeMediator = provider.getAttributeMediator();
+		// updates directly in config		
 		computeAttributes(config, organism, response.getAttributes(), response.getNodeToAttributes(), attributeMediator);
 		
-		config.setNetworkWeights(computeNetworkWeights(sourceNetworks, canonicalNetworks, config.getAttributeWeights()));
 		
+		Map<InteractionNetwork, Double> networkWeights = computeNetworkWeights(sourceNetworks, canonicalNetworks, config.getAttributeWeights());
+		System.err.println("networkWeights= \n"+networkWeights+"\n");
+		config.setNetworkWeights(networkWeights);
+		
+//		is usually null --> no need to print 
 		if (enrichmentResponse != null)
 			config.setEnrichment(processAnnotations(enrichmentResponse.getAnnotations(), data));
 		
