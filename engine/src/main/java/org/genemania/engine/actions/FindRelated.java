@@ -107,7 +107,13 @@ public class FindRelated {
                     request.getPositiveNodes(), negativeNodes, posLabelValue, negLabelValue, unLabeledValueProduction);
 
             String goCategory = null;
-
+            
+            // TODO can we directly access the weights and export from here?
+//            we require:
+//            DataCache object
+//            request
+            
+            
             // crunch the numbers
             org.genemania.engine.Constants.CombiningMethod combiningMethod = Constants.convertCombiningMethod(request.getCombiningMethod(), request.getPositiveNodes().size());
             org.genemania.engine.Constants.ScoringMethod scoringMethod = Constants.convertScoringMethod(request.getScoringMethod());

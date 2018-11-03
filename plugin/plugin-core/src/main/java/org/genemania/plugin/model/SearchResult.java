@@ -26,7 +26,9 @@ import org.genemania.domain.Attribute;
 import org.genemania.domain.AttributeGroup;
 import org.genemania.domain.Gene;
 import org.genemania.domain.InteractionNetwork;
+import org.genemania.domain.InteractionNetworkById;
 import org.genemania.domain.InteractionNetworkGroup;
+import org.genemania.domain.InteractionNetworkGroupById;
 import org.genemania.domain.Organism;
 import org.genemania.type.CombiningMethod;
 
@@ -51,10 +53,14 @@ public interface SearchResult {
 	List<AnnotationEntry> getEnrichmentSummary();
 
 	Map<Long, Gene> getQueryGenes();
-
+	
 	InteractionNetworkGroup getInteractionNetworkGroup(long networkId);
-
+	
 	Map<Long, InteractionNetworkGroup> getInteractionNetworkGroups();
+	
+	InteractionNetworkGroupById getInteractionNetworkGroupById(long networkId);
+
+	Map<Long, InteractionNetworkGroupById> getInteractionNetworkGroupsById();
 
 	boolean isQueryNode(long nodeId);
 
