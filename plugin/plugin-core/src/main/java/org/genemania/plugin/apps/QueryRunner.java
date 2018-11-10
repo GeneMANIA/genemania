@@ -181,16 +181,10 @@ public class QueryRunner extends AbstractPluginDataApp {
 			}
 
 			IGeneProvider geneProvider = parseIdTypes(fIds);
-<<<<<<< HEAD
 
 			if (useNetdxModification) { // $NON-NLS-1$
 				// our flag introduced problems - needed to remove additional elements from
 				// attributes - otherwise we will run it twice - see oldArguments parsing?
-=======
-			
-			if (useNetdxModification) { //$NON-NLS-1$
-				// our flag introduced problems - needed to remove additional elements from attributes - otherwise we will run it twice - see oldArguments parsing?
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 				fQueryHandler = new NetdxQueryHandler(new FlatReportOutputFormatter(fData, geneProvider), fData);
 			} else if (fOutputFormat == null) {
 				fQueryHandler = new DefaultQueryHandler(new GeneListOutputFormatter(geneProvider));
@@ -420,7 +414,6 @@ public class QueryRunner extends AbstractPluginDataApp {
 //		SearchResult options = fNetworkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data, queryGenes);
 //		return options;
 //	}
-<<<<<<< HEAD
 	/*
 	 * 2nd implementation using CoreMania as directly as possible
 	 */
@@ -570,19 +563,10 @@ public class QueryRunner extends AbstractPluginDataApp {
 		EnrichmentEngineRequestDto enrichmentRequest;
 
 //		scores - 
-=======
-	
-	private SearchResultImpl runAlgorithmNetDx(DataSet data, Query query) throws DataStoreException, ApplicationException {
-		RelatedGenesEngineRequestDto request = createRequest(query);
-		RelatedGenesEngineResponseDto response = runQuery(request);
-		EnrichmentEngineRequestDto enrichmentRequest;
-		
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 		if ("scores".equals(fOutputFormat)) //$NON-NLS-1$
 			enrichmentRequest = null;
 		else
 			enrichmentRequest = createEnrichmentRequest(query, response);
-<<<<<<< HEAD
 
 		EnrichmentEngineResponseDto enrichmentResponse = computeEnrichment(enrichmentRequest);
 
@@ -591,21 +575,11 @@ public class QueryRunner extends AbstractPluginDataApp {
 
 		// TODO can we improve the speed of the null enrichment - shouldn't we be able
 		// to access the matix?
-=======
-		
-		EnrichmentEngineResponseDto enrichmentResponse = computeEnrichment(enrichmentRequest);
-		
-		List<String> queryGenes = query.getGenes();
-		Organism organism = query.getOrganism();
-		
-		// TODO can we improve the speed of the null enrichment - shouldn't we be able to access the matix?
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 //		System.err.println("\n \t enrichmentRequest="+ enrichmentRequest);
 //		System.err.println("\n \t enrichmentResponse="+ enrichmentResponse);
 //		System.err.println("\n \t queryGenes="+ queryGenes);
 //		System.err.println("\n \t organism="+ organism);
 //		
-<<<<<<< HEAD
 		// TODO can we just return the network weights? - all other options should be in
 		// the query
 		SearchResultImpl options = fNetworkUtils.createSearchOptionsNetdx(organism, request, response,
@@ -614,15 +588,6 @@ public class QueryRunner extends AbstractPluginDataApp {
 		return options;
 	}
 
-=======
-		// TODO can we just return the network weights? - all other options should be in the query
-		SearchResultImpl options = fNetworkUtils.createSearchOptionsNetdx(organism, request, response, enrichmentResponse, data, queryGenes);
-		
-		return options;
-	}
-	
-	
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 	private SearchResult runAlgorithm(DataSet data, Query query) throws DataStoreException, ApplicationException {
 		RelatedGenesEngineRequestDto request = createRequest(query);
 		RelatedGenesEngineResponseDto response = runQuery(request);
@@ -637,16 +602,10 @@ public class QueryRunner extends AbstractPluginDataApp {
 
 		List<String> queryGenes = query.getGenes();
 		Organism organism = query.getOrganism();
-<<<<<<< HEAD
 
 		SearchResult options = fNetworkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data,
 				queryGenes);
 
-=======
-		
-		SearchResult options = fNetworkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data, queryGenes);
-		
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 		return options;
 	}
 
@@ -895,7 +854,6 @@ public class QueryRunner extends AbstractPluginDataApp {
 		}
 
 		@Override
-<<<<<<< HEAD
 		public void process(Query query, File outputDirectory, String baseName)
 				throws ApplicationException, DataStoreException, IOException {
 			// options are still based on Lucene - but we only read in weights from file and
@@ -916,22 +874,6 @@ public class QueryRunner extends AbstractPluginDataApp {
 			try {
 				FlatNetDxHandler netDxhandler = new FlatNetDxHandler(pathPrefixRankFiles, options, fNetworkUtils,
 						geneIdProvider);
-=======
-		public void process(Query query, File outputDirectory, String baseName) throws ApplicationException, DataStoreException, IOException {
-			// options are still based on Lucene - but we only read in weights from file and dont reconstruct networks - i think
-			// computation would require an enrichment request - which we don't make with netDx
-			SearchResultImpl options = runAlgorithmNetDx(data, query);
-			System.err.println("finished computation - writing results");
-			String outPath = outputDirectory.getPath(); // "/home/philipp/netDx_mashup/netDxmashup/test/results";
-			String pathPrefixRankFiles= String.format("%s/%s_", outPath, baseName);
-			
-//			OutputStream out = new FileOutputStream(String.format("%s%s%s-results.%s", outputDirectory.getPath(), File.separator, baseName, fFormatter.getExtension())); //$NON-NLS-1$
-			
-			RankedGeneProviderWithUniprotHack geneIdProvider = new RankedGeneProviderWithUniprotHack(data.getAllNamingSources(), Collections.emptyList());
-			
-			try {
-				FlatNetDxHandler netDxhandler = new FlatNetDxHandler(pathPrefixRankFiles, options, fNetworkUtils, geneIdProvider);		
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 			} catch (FileNotFoundException e) {
 				System.err.println(e);
 			}
@@ -957,14 +899,9 @@ public class QueryRunner extends AbstractPluginDataApp {
 			private SearchResultImpl options;
 			private Map<Long, Gene> geneCache;
 			private final IGeneProvider geneProvider;
-<<<<<<< HEAD
 
 			public FlatNetDxHandler(String outfilePrefix, SearchResultImpl options, NetworkUtils fNetworkUtils,
 					IGeneProvider geneProvider) throws FileNotFoundException {
-=======
-		
-			public FlatNetDxHandler(String outfilePrefix, SearchResultImpl options, NetworkUtils fNetworkUtils, IGeneProvider geneProvider) throws FileNotFoundException {
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 				this.outfilePrefix = outfilePrefix;
 				this.options = options;
 				this.fNetworkUtils = fNetworkUtils;
@@ -973,11 +910,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 				this.geneProvider = geneProvider;
 				this.writePRANK();
 				this.writeNRANK();
-<<<<<<< HEAD
 
-=======
-			
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 			}
 
 			private List<GeneEntry> populateGenes(SearchResult options) {
@@ -1018,11 +951,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 				}
 				return gene;
 			}
-<<<<<<< HEAD
 
-=======
-			
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 //			modified copy of TextReportExporter exportGenes() 
 			private void writePRANK() throws FileNotFoundException {
 				String prankOutfilename = this.outfilePrefix + "PRANK.txt";
@@ -1048,20 +977,12 @@ public class QueryRunner extends AbstractPluginDataApp {
 				writer.close();
 				System.err.println("Finished writing PRANK to " + prankOutfilename);
 			}
-<<<<<<< HEAD
 
 //			modified copy of TextReportExporter exportNetworks()
 			private void writeNRANK() throws FileNotFoundException {
 				Map<Long, Double> networkIdWeightMap = new HashMap<>();
 				for (Map.Entry<InteractionNetworkById, Double> weightEntry : options.getNetworkWeightsById()
 						.entrySet()) {
-=======
-			
-//			modified copy of TextReportExporter exportNetworks()
-			private void writeNRANK() throws FileNotFoundException {
-				Map<Long, Double> networkIdWeightMap = new HashMap<>();
-				for (Map.Entry<InteractionNetworkById, Double> weightEntry : options.getNetworkWeightsById().entrySet()) {
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 					networkIdWeightMap.put(weightEntry.getKey().getId(), weightEntry.getValue());
 				}
 //				Map<Long, Double> oldNetworkIdWeightMap = new HashMap<>();
@@ -1071,15 +992,9 @@ public class QueryRunner extends AbstractPluginDataApp {
 				String nrankOutfilename = this.outfilePrefix + "NRANK.txt";
 				System.err.println("Attempting to write NRANK to " + nrankOutfilename);
 				PrintWriter writer = new PrintWriter(new BufferedOutputStream(new FileOutputStream(nrankOutfilename)));
-<<<<<<< HEAD
 
 //				Group<?, ?> lastGroup = null;
 
-=======
-				
-//				Group<?, ?> lastGroup = null;
-				
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 				writer.print("Network Group"); //$NON-NLS-1$
 				writer.print("\t"); //$NON-NLS-1$
 				writer.print("Network"); //$NON-NLS-1$
@@ -1108,27 +1023,18 @@ public class QueryRunner extends AbstractPluginDataApp {
 				writer.print("\t"); //$NON-NLS-1$
 				writer.print("Tags"); //$NON-NLS-1$
 				writer.print("\n"); //$NON-NLS-1$
-<<<<<<< HEAD
 
-=======
-				
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 //				TODO how do we access the networks in a similar manner to the genes?
 //				options.getInteractionNetworkGroupsById()
 //				ViewState viewState = report.getViewState();
 				for (Map.Entry<String, InteractionNetworkGroupById> entry : options.getGroupsByNameById().entrySet()) {
 					String groupName = entry.getKey();
 					InteractionNetworkGroupById interactionNetworkGroupById = entry.getValue();
-<<<<<<< HEAD
 
-=======
-					
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 					writer.print(groupName); // doesnt really matter as cut away in netWorkTally
 					writer.print("\t\t"); //$NON-NLS-1$
 //					writer.print(String.format("%.2f", interactionNetworkGroupById.getWeight() * 100)); //$NON-NLS-1$ 
 //					Will be cropped by netDx
-<<<<<<< HEAD
 					writer.print(String.format("%.2f", 100.00)); //$NON-NLS-1$
 					writer.print("\n"); //$NON-NLS-1$
 
@@ -1139,28 +1045,13 @@ public class QueryRunner extends AbstractPluginDataApp {
 							.getInteractionNetworks()) {
 						if ((interactionNetwork != null)
 								&& (networkIdWeightMap.get(interactionNetwork.getId()) != null)) {
-=======
-					writer.print(String.format("%.2f", 100.00)); //$NON-NLS-1$ 
-					writer.print("\n"); //$NON-NLS-1$
-					
-					
-//					Now we output network name and weight - interactions too - but is always 0???
-//					Map<InteractionNetworkById, Double> netWorkWeightsById = options.getNetworkWeightsById(); 
-					
-					for (InteractionNetworkById interactionNetwork : interactionNetworkGroupById.getInteractionNetworks()) {
-						if ((interactionNetwork != null) && (networkIdWeightMap.get(interactionNetwork.getId()) !=null )) {
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 //							System.err.println("networkIdWeightMap="+ networkIdWeightMap);
 //							System.err.println("=======================");
 //							System.err.println("old networkIdWeightMap="+ oldNetworkIdWeightMap);
 //							System.err.println("networId="+ interactionNetwork.getId());
 							double weight = networkIdWeightMap.get(interactionNetwork.getId());
 //							System.err.println("weight="+ weight);
-<<<<<<< HEAD
 
-=======
-							
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 //							NetworkMetadata metadata = interactionNetwork.getMetadata();
 //							System.err.println("metadata="+ metadata);
 							writer.print("\t"); //$NON-NLS-1$
@@ -1199,7 +1090,6 @@ public class QueryRunner extends AbstractPluginDataApp {
 								first = false;
 							}
 							writer.print("\n"); //$NON-NLS-1$
-<<<<<<< HEAD
 						}
 					}
 				}
@@ -1207,15 +1097,6 @@ public class QueryRunner extends AbstractPluginDataApp {
 				writer.flush();
 				writer.close();
 				System.err.println("Finished writing NRANK to " + nrankOutfilename);
-=======
-					}
-				}
-			}
-			writer.print("\n"); //$NON-NLS-1$
-			writer.flush();
-			writer.close();
-			System.err.println("Finished writing NRANK to " + nrankOutfilename);
->>>>>>> 959618df24236bd567fae432beed74e73d96e3c6
 			}
 		}
 	}
