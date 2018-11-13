@@ -83,6 +83,7 @@ import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.SearchResultBuilder;
 import org.genemania.plugin.model.impl.SearchResultImpl;
+import org.genemania.plugin.model.impl.SearchResultImplNetDx;
 import org.genemania.util.GeneLinkoutGenerator;
 
 /**
@@ -603,7 +604,61 @@ public class NetworkUtils {
 		
 		return genesByNodeId;
 	}
+	
+	/*
+	 * Used by NetDx for offline result building
+	 */
+	public SearchResultImplNetDx createSearchOptionsNetdx2(Organism organism, RelatedGenesEngineRequestDto request,
+			RelatedGenesEngineResponseDto response, EnrichmentEngineResponseDto enrichmentResponse, DataSet data,
+			List<String> genes, Map<String, Double> networkNameToWeightMap) {
+		SearchResultImplNetDx config = new SearchResultImplNetDx();
+		config.setParsedNetworkWeights(networkNameToWeightMap);
+		GeneCompletionProvider2 geneProvider = data.getCompletionProvider(organism);
+		IMediatorProvider provider = data.getMediatorProvider();
+		NodeMediator nodeMediator = provider.getNodeMediator();
+		// map Ids to raw query genes "compute" - just lookup the ids
+		Map<Long, Gene> queryGenes = computeQueryGenes(genes, geneProvider);
+		config.setSearchQuery(queryGenes);
 
+//		from computeGeneScores offline Search
+		double maxScore = 0;
+//		Map<Long, Double> scores = new HashMap<>();
+		Map<Gene, Double> geneScores = new HashMap<>();
+//		TODO response.getNodes() is null
+//		still null
+		for (NodeDto nodeDto : response.getNodes()) {
+			double score = nodeDto.getScore();
+			maxScore = Math.max(maxScore, score);
+			Long nodeId = nodeDto.getId();
+//			scores.put(nodeId, score);
+			
+			Gene gene = queryGenes.get(nodeId);
+			
+			if (gene == null) {
+				Node node = nodeMediator.getNode(nodeId, organism.getId());
+				gene = getPreferredGene(node);
+			}
+			
+			if (gene == null) {
+				continue;
+			}
+			geneScores.put(gene, score);
+		}
+		
+		// score / maxscore assignment of query genes
+		for (Gene gene : queryGenes.values()) {
+//			if (!geneScores.containsKey(gene.getId()))
+			if (!geneScores.containsKey(gene))
+//				scores.put(gene.getId(), maxScore);
+				geneScores.put(gene, maxScore);
+		}
+		
+		config.setGeneScores(geneScores);
+		return config;
+	}
+
+	
+	
 	/*
 	 * Used by NetDx for offline result building
 	 */

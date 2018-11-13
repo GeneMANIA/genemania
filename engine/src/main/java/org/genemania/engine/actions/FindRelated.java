@@ -108,12 +108,6 @@ public class FindRelated {
 
             String goCategory = null;
             
-            // TODO can we directly access the weights and export from here?
-//            we require:
-//            DataCache object
-//            request
-            
-            
             // crunch the numbers
             org.genemania.engine.Constants.CombiningMethod combiningMethod = Constants.convertCombiningMethod(request.getCombiningMethod(), request.getPositiveNodes().size());
             org.genemania.engine.Constants.ScoringMethod scoringMethod = Constants.convertScoringMethod(request.getScoringMethod());
@@ -754,6 +748,23 @@ public class FindRelated {
         return attributeGroups.size();
     }
 
+//    Getter and setter for private fields 
+    public void setRequestStartTimeMillis(long t) {
+    	this.requestStartTimeMillis = t;
+    }
+    
+    public long getRequestStartTimeMillis() {
+    	return this.requestStartTimeMillis;
+    }
+
+    public void setRequestEndTimeMillis(long t) {
+    	this.requestEndTimeMillis = t;
+    }
+    
+    public long getRequestEndTimeMillis() {
+    	return this.requestEndTimeMillis;
+    }
+    
     /*
      * external callers pass null for namespace instead of explicitly specifying
      * CORE namespace. instead of testing everywhere in engine, make namespace explicit
