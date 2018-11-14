@@ -41,11 +41,8 @@ import org.genemania.domain.Gene;
 import org.genemania.domain.GeneData;
 import org.genemania.domain.GeneNamingSource;
 import org.genemania.domain.Interaction;
-import org.genemania.domain.InteractionByNodeId;
 import org.genemania.domain.InteractionNetwork;
-import org.genemania.domain.InteractionNetworkById;
 import org.genemania.domain.InteractionNetworkGroup;
-import org.genemania.domain.InteractionNetworkGroupById;
 import org.genemania.domain.NetworkMetadata;
 import org.genemania.domain.Node;
 import org.genemania.domain.OntologyCategory;
@@ -466,49 +463,6 @@ public class NetworkUtils {
 		return interactions;
 	}
 	
-	// lets buffer all nodes first - and then load from memory instead of from file with oldLucene	
-	public Collection<InteractionByNodeId> computeCombinedInteractions2(Map<InteractionNetworkById, Collection<InteractionByNodeId>> source) {
-		List<InteractionByNodeId> interactions = new ArrayList<>();
-		Map<Long, Set<Long>> seenNodes = new HashMap<>();
-		
-		//TODO How to get all Nodes? - by reimplementing Interactions to only hold NodeId, 
-		// and the look it up if not yet in the cache
-//		Map<Long, Node> nodeCache = new HashMap<>();
-//		NodeMe
-		
-		for (Collection<InteractionByNodeId> network : source.values()) {
-			for (InteractionByNodeId interaction : network) {
-				
-				
-				long fromId = interaction.getFromNodeId();
-				long toId = interaction.getToNodeId();
-				
-				// Canonicalize our lookup data by ensuring the fromId is
-				// smaller than the toId.
-				if (fromId > toId) {
-					fromId = toId;
-					toId = interaction.getFromNodeId();
-				}
-				
-				Set<Long> toIds = seenNodes.get(fromId);
-				if (toIds == null) {
-					toIds = new HashSet<>();
-					seenNodes.put(fromId, toIds);
-					toIds.add(toId);
-					interactions.add(interaction);
-				} else {
-					if (toIds.contains(toId)) {
-						continue;
-					}
-					toIds.add(toId);
-					interactions.add(interaction);
-				}
-			}
-		}
-		
-		return interactions;
-	}
-	
 	public Map<InteractionNetwork, Double> computeNetworkWeights(List<NetworkDto> networks,
 			Map<Long, InteractionNetwork> canonicalNetworks, Map<Attribute, Double> attributeWeights) {
 		double totalAttributeWeight = 0;
@@ -526,33 +480,6 @@ public class NetworkUtils {
 			
 			if (network == null) {
 				network = new InteractionNetwork();
-				network.setId(networkVo.getId());
-			}
-			
-			networkWeights.put(network, networkVo.getWeight() * scaleFactor);
-		}
-		
-		return networkWeights;
-	}
-	
-	//	Why hash networks, when we can use their ID instead?? Its not like we change their ids - this way we need to keep reloading them
-	public Map<InteractionNetworkById, Double> computeNetworkWeights2(List<NetworkDto> networks,
-			Map<Long, InteractionNetworkById> canonicalNetworks, Map<Attribute, Double> attributeWeights) {
-		double totalAttributeWeight = 0;
-		
-		if (attributeWeights != null) {
-			for (Double weight : attributeWeights.values())
-				totalAttributeWeight += weight;
-		}
-		
-		double scaleFactor = 1 - totalAttributeWeight;
-		Map<InteractionNetworkById, Double> networkWeights = new HashMap<>();
-		
-		for (NetworkDto networkVo : networks) {
-			InteractionNetworkById network = canonicalNetworks.get(networkVo.getId());
-			
-			if (network == null) {
-				network = new InteractionNetworkById();
 				network.setId(networkVo.getId());
 			}
 			
@@ -616,21 +543,18 @@ public class NetworkUtils {
 		GeneCompletionProvider2 geneProvider = data.getCompletionProvider(organism);
 		IMediatorProvider provider = data.getMediatorProvider();
 		NodeMediator nodeMediator = provider.getNodeMediator();
+		
 		// map Ids to raw query genes "compute" - just lookup the ids
 		Map<Long, Gene> queryGenes = computeQueryGenes(genes, geneProvider);
 		config.setSearchQuery(queryGenes);
 
-//		from computeGeneScores offline Search
+		//		from computeGeneScores offline Search
 		double maxScore = 0;
-//		Map<Long, Double> scores = new HashMap<>();
 		Map<Gene, Double> geneScores = new HashMap<>();
-//		TODO response.getNodes() is null
-//		still null
 		for (NodeDto nodeDto : response.getNodes()) {
 			double score = nodeDto.getScore();
 			maxScore = Math.max(maxScore, score);
 			Long nodeId = nodeDto.getId();
-//			scores.put(nodeId, score);
 			
 			Gene gene = queryGenes.get(nodeId);
 			
@@ -647,9 +571,7 @@ public class NetworkUtils {
 		
 		// score / maxscore assignment of query genes
 		for (Gene gene : queryGenes.values()) {
-//			if (!geneScores.containsKey(gene.getId()))
 			if (!geneScores.containsKey(gene))
-//				scores.put(gene.getId(), maxScore);
 				geneScores.put(gene, maxScore);
 		}
 		
@@ -657,155 +579,45 @@ public class NetworkUtils {
 		return config;
 	}
 
-	
-	
-	/*
-	 * Used by NetDx for offline result building
-	 */
-	public SearchResultImpl createSearchOptionsNetdx(Organism organism, RelatedGenesEngineRequestDto request,
-			RelatedGenesEngineResponseDto response, EnrichmentEngineResponseDto enrichmentResponse, DataSet data,
-			List<String> genes) {
-		SearchResultImpl config = new SearchResultImpl();
-		
-		GeneCompletionProvider2 geneProvider = data.getCompletionProvider(organism);
-		IMediatorProvider provider = data.getMediatorProvider();
-		NodeMediator nodeMediator = provider.getNodeMediator();
-		// map Ids to raw query genes "compute" - just lookup the ids
-		Map<Long, Gene> queryGenes = computeQueryGenes(genes, geneProvider);
-		config.setSearchQuery(queryGenes);
-
-//		from computeGeneScores offline Search
-		double maxScore = 0;
-//		Map<Long, Double> scores = new HashMap<>();
-		Map<Gene, Double> geneScores = new HashMap<>();
-		for (NodeDto nodeDto : response.getNodes()) {
-			double score = nodeDto.getScore();
-			maxScore = Math.max(maxScore, score);
-			Long nodeId = nodeDto.getId();
-//			scores.put(nodeId, score);
-			
-			Gene gene = queryGenes.get(nodeId);
-			
-			if (gene == null) {
-				Node node = nodeMediator.getNode(nodeId, organism.getId());
-				gene = getPreferredGene(node);
-			}
-			
-			if (gene == null) {
-				continue;
-			}
-			geneScores.put(gene, score);
-		}
-		
-		// TODO maxscore assignment of query genes
-		for (Gene gene : queryGenes.values()) {
-//			if (!geneScores.containsKey(gene.getId()))
-			if (!geneScores.containsKey(gene))
-//				scores.put(gene.getId(), maxScore);
-				geneScores.put(gene, maxScore);
-		}
-		
-		config.setGeneScores(geneScores);
-		
-
-//		Map<Long, InteractionNetworkGroup> oldGroupsByNetwork = computeGroupsByNetwork(response, data);
-		Map<Long, InteractionNetworkGroupById> groupsByNetwork = computeGroupsByNetwork2(response, data);
-		
-		config.setGroupsById(groupsByNetwork);
-		List<NetworkDto> sourceNetworks = response.getNetworks();
-		// Same calling as before - need to keep building till the end		
-		Map<Long, InteractionNetworkById> canonicalNetworks = computeCanonicalNetworks2(groupsByNetwork);
-//		TODO isnt this overkill to reinstantiate source networks from canonical networks?
-		computeSourceInteractions2(sourceNetworks, canonicalNetworks, organism, data);
-//		
-//		Map<Long, InteractionNetwork> oldCanonicalNetworks = computeCanonicalNetworks(oldGroupsByNetwork);
-		
-		AttributeMediator attributeMediator = provider.getAttributeMediator();
-		// updates directly in config		
-		computeAttributes(config, organism, response.getAttributes(), response.getNodeToAttributes(), attributeMediator);
-		
-//		TODO need to rewrite computeNetworkWeights to new ID implementation
-//		Map<InteractionNetwork, Double> oldNetworkWeights = computeNetworkWeights(sourceNetworks, computeCanonicalNetworks(oldGroupsByNetwork), config.getAttributeWeights());
-		Map<InteractionNetworkById, Double> networkWeights = computeNetworkWeights2(sourceNetworks, canonicalNetworks, config.getAttributeWeights());
-//		TODO networkWeights is what we want - not yet Flat encoded - but holds ID-name + weight mappings 
-		config.setNetworkWeightsById(networkWeights);
-//		config.setNetworkWeights(oldNetworkWeights);
-//		
-//		System.err.println("====================================");
-//		System.err.println("groupsByNetwork = "+ groupsByNetwork);
-//		System.err.println("====================================");
-//		System.err.println("canonicalNetworks = "+ canonicalNetworks);
-//		System.err.println("====================================");
-//		System.err.println("networkWeights = " + networkWeights);
-//		System.err.println("====================================");
-//		System.err.println("geneScores = " + geneScores);
-		return config;
-	}
-	
-	
 	/**
 	 * Used by offline search.
+	 * 
 	 */
 	public SearchResult createSearchOptions(Organism organism, RelatedGenesEngineRequestDto request,
 			RelatedGenesEngineResponseDto response, EnrichmentEngineResponseDto enrichmentResponse, DataSet data,
 			List<String> genes) {
 		SearchResultBuilder config = new SearchResultImpl();
 		
-		System.err.println("Calling createSearchOptions 'offline' ");
-		
 		config.setOrganism(organism);
 		config.setCombiningMethod(request.getCombiningMethod());
 		config.setGeneSearchLimit(request.getLimitResults());
 		config.setAttributeSearchLimit(request.getAttributesLimit());
 		
-//		System.err.println("organism= "+organism);
-//		System.err.println("combiningMethod= "+request.getCombiningMethod());
-//		System.err.println("geneSearchLimit= "+request.getLimitResults());
-//		System.err.println("attribute Search Limit = "+ request.getAttributesLimit());
-//		
-		
 		GeneCompletionProvider2 geneProvider = data.getCompletionProvider(organism);
 		Map<Long, Gene> queryGenes = computeQueryGenes(genes, geneProvider);
 		config.setSearchQuery(queryGenes);
 		
-//		System.err.println("queryGenes=\n"+queryGenes+"\n");
-		
 		Map<Long, InteractionNetworkGroup> groupsByNetwork = computeGroupsByNetwork(response, data);
 		config.setGroups(groupsByNetwork);
 
-//		System.err.println("groupsByNetwork=\n"+groupsByNetwork+"\n");
-		
 		IMediatorProvider provider = data.getMediatorProvider();
 		NodeMediator nodeMediator = provider.getNodeMediator();
 		List<NetworkDto> sourceNetworks = response.getNetworks();
-//		System.err.println("sourceNetworks = \n"+ sourceNetworks + "\n");
-
-		//		TODO addded this temporary variable assignment
-		Map<Gene, Double> geneScores = computeGeneScores(response.getNodes(), queryGenes, organism, nodeMediator);
-		config.setGeneScores(geneScores);
-//		System.err.println("geneScores = \n "+ geneScores + "\n");
-//		TODO Running out of Memory in this call
+		config.setGeneScores(computeGeneScores(response.getNodes(), queryGenes, organism, nodeMediator));
+		
 		Map<Long, InteractionNetwork> canonicalNetworks = computeCanonicalNetworks(groupsByNetwork);
 		computeSourceInteractions(sourceNetworks, canonicalNetworks, organism, data);
 		
-//		System.err.println("updated sourceNetworks = \n" + sourceNetworks + "\n");
-		
 		AttributeMediator attributeMediator = provider.getAttributeMediator();
-		// updates directly in config		
 		computeAttributes(config, organism, response.getAttributes(), response.getNodeToAttributes(), attributeMediator);
 		
+		config.setNetworkWeights(computeNetworkWeights(sourceNetworks, canonicalNetworks, config.getAttributeWeights()));
 		
-		Map<InteractionNetwork, Double> networkWeights = computeNetworkWeights(sourceNetworks, canonicalNetworks, config.getAttributeWeights());
-//		TODO networkWeights is what we want - not yet Flat encoded - but holds ID-name + weight mappings 
-//		System.err.println("networkWeights= \n"+networkWeights+"\n");
-		config.setNetworkWeights(networkWeights);
-		
-//		is usually null --> no need to print 
 		if (enrichmentResponse != null)
 			config.setEnrichment(processAnnotations(enrichmentResponse.getAnnotations(), data));
 		
 		return config.build();
-	}
+}
 	
 	/**
 	 * Used by online search.
@@ -981,35 +793,6 @@ public class NetworkUtils {
 		return groupsByNetwork;
 	}
 	
-
-	public Map<Long, InteractionNetworkGroupById> computeGroupsByNetwork2(RelatedGenesEngineResponseDto response, DataSet data) {
-		Map<Long/*group-id*/, InteractionNetworkGroupById> groups = new HashMap<>();
-		Map<Long/*network-id*/, InteractionNetworkGroupById> groupsByNetwork = new HashMap<>();
-		List<NetworkDto> networks = response.getNetworks();
-		
-		for (NetworkDto network : networks) {
-			long networkId = network.getId();
-			
-//			InteractionNetworkGroup oldGroup = data.getNetworkGroup(networkId);
-//			InteractionNetworkGroupById group = new InteractionNetworkGroupById(data.getNetworkGroup(networkId));
-			InteractionNetworkGroupById group = data.getNetworkGroupById(networkId);
-			
-			if (group == null)
-				continue;
-			
-			InteractionNetworkGroupById canonicalGroup = groups.get(group.getId());
-			
-			if (canonicalGroup == null) {
-				groups.put(group.getId(), group);
-				canonicalGroup = group;
-			}
-			
-			groupsByNetwork.put(networkId, canonicalGroup);
-		}
-		
-		return groupsByNetwork;
-	}
-	
 	public Map<Long, InteractionNetworkGroup> computeGroupsByNetwork(Collection<ResultInteractionNetworkGroup> list) {
 		Map<Long, InteractionNetworkGroup> groups = new HashMap<>();
 		Map<Long, InteractionNetworkGroup> groupsByNetwork = new HashMap<>();
@@ -1042,17 +825,6 @@ public class NetworkUtils {
 		
 		for (InteractionNetworkGroup group : groupsByNetwork.values()) {
 			for (InteractionNetwork network : group.getInteractionNetworks()) {
-				canonicalNetworks.put(network.getId(), network);
-			}
-		}
-		
-		return canonicalNetworks;
-	}
-
-	private Map<Long, InteractionNetworkById> computeCanonicalNetworks2(Map<Long, InteractionNetworkGroupById> groupsByNetwork) {
-		Map<Long, InteractionNetworkById> canonicalNetworks = new HashMap<>();
-		for (InteractionNetworkGroupById group : groupsByNetwork.values()) {
-			for (InteractionNetworkById network : group.getInteractionNetworks()) {
 				canonicalNetworks.put(network.getId(), network);
 			}
 		}
@@ -1245,34 +1017,6 @@ public class NetworkUtils {
 			}
 			
 			network.setInteractions(interactions);
-		}
-	}
-	
-	private void computeSourceInteractions2(List<NetworkDto> networks, Map<Long, InteractionNetworkById> canonicalNetworks,
-			Organism organism, DataSet data) {
-		IMediatorProvider mediatorProvider = data.getMediatorProvider();
-		NodeMediator nodeMediator = mediatorProvider.getNodeMediator();
-		
-		for (NetworkDto networkVo : networks) {
-//			InteractionNetwork network = canonicalNetworks.get(networkVo.getId());
-			InteractionNetworkById network = canonicalNetworks.get(networkVo.getId());
-			
-			if (network == null)
-				continue;
-			
-			List<InteractionByNodeId> interactions = new ArrayList<>();
-			
-//			TODO shouldnt the interactions in the network already be set by the mediator on initialization?
-			if (network.getInteractions().isEmpty()) {
-				for (InteractionDto interactionVo : networkVo.getInteractions()) {
-					Node fromNode = nodeMediator.getNode(interactionVo.getNodeVO1().getId(), organism.getId());
-					Node toNode = nodeMediator.getNode(interactionVo.getNodeVO2().getId(), organism.getId());
-					InteractionByNodeId interaction = new InteractionByNodeId(fromNode, toNode, (float) interactionVo.getWeight(), null);
-					interactions.add(interaction);
-				}
-			
-				network.setInteractions(interactions);
-			}
 		}
 	}
 	

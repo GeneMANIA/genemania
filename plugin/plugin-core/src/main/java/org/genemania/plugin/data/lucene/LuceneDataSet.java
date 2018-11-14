@@ -66,9 +66,7 @@ import org.genemania.data.classification.lucene.LuceneGeneClassifier;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.GeneNamingSource;
 import org.genemania.domain.InteractionNetwork;
-import org.genemania.domain.InteractionNetworkById;
 import org.genemania.domain.InteractionNetworkGroup;
-import org.genemania.domain.InteractionNetworkGroupById;
 import org.genemania.domain.Organism;
 import org.genemania.dto.RemoveNetworkEngineRequestDto;
 import org.genemania.engine.IMania;
@@ -643,22 +641,6 @@ public class LuceneDataSet extends DataSet {
 			return null;
 		}
 		return mediator.createNetworkGroup(document);
-	}
-
-	@Override
-	public InteractionNetworkGroupById getNetworkGroupById(long networkId) {
-		LuceneMediator mediator = new LuceneMediator(searcher, LuceneMediator.createDefaultAnalyzer());
-		String value = getFieldById(LuceneMediator.NETWORK_ID, networkId, LuceneMediator.NETWORK_GROUP_ID);
-		if (value == null) {
-			return null;
-		}
-		long groupId = Long.parseLong(value);
-		Document document = getDocumentById(LuceneMediator.GROUP_ID, groupId);
-		if (document == null) {
-			return null;
-		}
-//		TODO need to add adapter to convert InteractionNetworkGroup to InteractionNetworkGroupById
-		return mediator.createNetworkGroupById(document);
 	}
 	
 	@Override

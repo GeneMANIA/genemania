@@ -47,9 +47,7 @@ import org.apache.log4j.Logger;
 import org.genemania.domain.Gene;
 import org.genemania.domain.GeneNamingSource;
 import org.genemania.domain.InteractionNetwork;
-import org.genemania.domain.InteractionNetworkById;
 import org.genemania.domain.InteractionNetworkGroup;
-import org.genemania.domain.InteractionNetworkGroupById;
 import org.genemania.domain.NetworkMetadata;
 import org.genemania.domain.Node;
 import org.genemania.domain.Tag;
@@ -109,6 +107,7 @@ import org.genemania.plugin.model.impl.SearchResultImplNetDx;
 import org.genemania.plugin.parsers.IQueryParser;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.parsers.TabDelimitedQueryParser;
+import org.genemania.plugin.report.ManiaReport.GeneEntry;
 import org.genemania.type.CombiningMethod;
 import org.genemania.util.NullProgressReporter;
 import org.kohsuke.args4j.CmdLineException;
@@ -116,8 +115,6 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.BooleanOptionHandler;
 import org.xml.sax.SAXException;
-
-import org.genemania.plugin.report.ManiaReport.GeneEntry;
 
 import no.uib.cipr.matrix.Vector;
 
@@ -148,10 +145,8 @@ public class QueryRunner extends AbstractPluginDataApp {
 	@Option(name = "--ids", usage = "comma-separated list gene identifier types to use in the output")
 	private String fIds;
 
-	@Option(name = "--netdx-flag", handler = BooleanOptionHandler.class, usage = "boolean value - if true prevents lucene index building to conserve memory and export internal gene-ids; defaults to false")
+	@Option(name = "--netdx-flag", handler = BooleanOptionHandler.class, usage = "boolean value - if true we're using NetDx specific flat output formats, do a GeneEnrichmentRequest and LabelPropagation using average weights. Also conserve a significant amount of memory in report building; defaults to false")
 	private boolean useNetdxModification = false;
-//	@Option(name = "--netdx-flag", usage = "boolean value - only if passing true prevents lucene index building to conserve memory and export internal gene-ids; defaults to false")
-//	private String netdxModification = "false";
 
 	private Mania2 fMania;
 	private IQueryParser fQueryParser;
@@ -330,117 +325,48 @@ public class QueryRunner extends AbstractPluginDataApp {
 		return request;
 	}
 
-//	
-//	private void writeToFile(String fileName, String stuff) throws IOException {
-////		String str = "Hello";
-//	    FileOutputStream outputStream = new FileOutputStream(fileName);
-//	    byte[] strToBytes = stuff.getBytes();
-//	    outputStream.write(strToBytes);
-//	    outputStream.close();
-//	    return;
-//	}
-//	
-//	
-//	private void writeHMToFile(String fileName, Map<Long, Collection<OntologyCategoryDto>> stuff) throws IOException {
-//		Collection<String> asd = new ArrayList<>();
-//		
-//		try {
-//			File fileTwo=new File(fileName);
-//			FileOutputStream fos=new FileOutputStream(fileTwo);
-//			PrintWriter pw=new PrintWriter(fos);
-//			for(Map.Entry<Long, Collection<OntologyCategoryDto>> m :stuff.entrySet()){
-////	        for(Map.Entry<Long, Collection<OntologyCategoryDto> m :map.entrySet()){
-//				pw.println(String.valueOf(m.getKey()));
-////				pw.println(String.valueOf(m.getKey())+" = "+
-////						String.valueOf( m.getValue().getClass()));
-//			}
-//			
-//			pw.flush();
-//			pw.close();
-//			fos.close();
-//		}catch(Exception e){
-//			System.err.println(e);
-//		}
-//		
-//		return;
-//	}
-//
-//	private void writeCollectionToFile(String fileName, Collection<OntologyCategoryDto> stuff) throws IOException {
-////		Collection<String> asd = new ArrayList<>();
-//		
-//		try {
-//			File fileTwo=new File(fileName);
-//		    FileOutputStream fos=new FileOutputStream(fileTwo);
-//	        PrintWriter pw=new PrintWriter(fos);
-////	        for(Map.Entry<Long, Collection<OntologyCategoryDto>> m :stuff.entrySet()){
-//	        for (OntologyCategoryDto ontologyCategoryDto : stuff) {
-//	        	pw.println(ontologyCategoryDto.toString());
-//			}
-////	        for(Map.Entry<Long, Collection<OntologyCategoryDto> m :map.entrySet()){
-////	        	pw.println(String.valueOf(m.getKey())+" = "+
-////	        			String.valueOf( m.getValue().getClass()));
-////	            pw.println(String.valueOf(m.getKey())+" = "+
-////	            		String.valueOf( m.getValue().getClass()));
-////	        }
-//
-//	        pw.flush();
-//	        pw.close();
-//	        fos.close();
-//	    }catch(Exception e){
-//			System.err.println(e);
-//	    }
-//	    
-//	    return;
-//	}
-//	private SearchResult runAlgorithmNetdx(DataSet data, Query query) throws DataStoreException, ApplicationException {
-//
-//		System.err.println("Starting using runAlgorithmNetdx");
-//		
-//		RelatedGenesEngineRequestDto request = createRequest(query);
-//		RelatedGenesEngineResponseDto response = runQuery(request);
-//		EnrichmentEngineRequestDto enrichmentRequest;
-//		
-//		if ("scores".equals(fOutputFormat)) //$NON-NLS-1$
-//			enrichmentRequest = null;
-//		else
-//			enrichmentRequest = createEnrichmentRequest(query, response);
-//		EnrichmentEngineResponseDto enrichmentResponse = computeEnrichment(enrichmentRequest);
-//
-//		List<String> queryGenes = query.getGenes();
-//		Organism organism = query.getOrganism();
-//		
-//		// let's bypass re-encoding and write network weights to file 
-//		// TODO write to tsv file
-//		
-////		System.err.println("finished writing results - using lucene now");
-//		SearchResult options = fNetworkUtils.createSearchOptions(organism, request, response, enrichmentResponse, data, queryGenes);
-//		return options;
-//	}
+	
 	/*
-	 * 2nd implementation using CoreMania as directly as possible
+	 * Implementation using CoreMania with a minimal amount of Lucene 
 	 */
-	private SearchResultImplNetDx runAlgorithmNetDx2(DataSet data, Query query)
+	private SearchResultImplNetDx runAlgorithmNetDx(DataSet data, Query query)
 			throws DataStoreException, ApplicationException {
 		RelatedGenesEngineRequestDto request = createRequest(query);
 		
-//		TODO runQuery?
 		request.setProgressReporter(NullProgressReporter.instance());
 		
-		
-//		need to create response object to hold data
+//		need to create response object to hold networkWeights
 		RelatedGenesEngineResponseDto response = new RelatedGenesEngineResponseDto();
-		
 		
 		EnrichmentEngineResponseDto enrichmentResponse = new EnrichmentEngineResponseDto();
 // 		outputformat is always flat for netDx
 
 		List<String> queryGenes = query.getGenes();
-//		Organism organism = query.getOrganism();
 
+//		modify and initialize query
 		EnrichmentEngineRequestDto enrichmentRequest = createEnrichmentRequest(query, response);
 
 		CoreMania mania = new CoreMania(fCache);
 		Organism organism = query.getOrganism();
+		
+		Map<String, Double> networkNameToWeightMap = computeNetworkWeights(mania, query, request, organism);
+		
+		// construct the gene labels
+		// use previous result for label propagation
+		FindNetDxRelated findNetDxRelated = new FindNetDxRelated(fCache, request, mania);
+		//		set required fields from first response object
+		RelatedGenesEngineResponseDto response2 = findNetDxRelated.process2();
+		response2.setNetworks(response.getNetworks());
+		
+		// SearchOptions / SearchResultImplNetDx is basically a storage object holding on to our references for usage by FlatNetDxHandler
+		SearchResultImplNetDx options = fNetworkUtils.createSearchOptionsNetdx2(organism, request, response2,
+				enrichmentResponse, data, queryGenes, networkNameToWeightMap);
+		
+		return options;
+	}
+	
+	private Map<String, Double> computeNetworkWeights(CoreMania mania, Query query, RelatedGenesEngineRequestDto request, Organism organism) throws ApplicationException{
+
 		final long organismId = organism.getId();
 		String namespace;
 		if (organismId < 0) {
@@ -448,7 +374,8 @@ public class QueryRunner extends AbstractPluginDataApp {
 		} else {
 			namespace = "CORE";
 		}
-//		implementation in AbstractPluginDataApp or AbstractPluginApp
+		
+		// implementated in parent class AbstractPluginDataApp or AbstractPluginApp
 		Collection<Collection<Long>> networkIds = collapseNetworks(query.getGroups());
 		Collection<Long> attributeGroupIds = collapseAttributeGroups(query.getGroups());
 		int attributeLimit = query.getAttributeLimit();
@@ -456,28 +383,26 @@ public class QueryRunner extends AbstractPluginDataApp {
 		if (fVerbose) {
 			System.err.println("Computing weights...");
 		}
+		
 		// Compute weights
 		Collection<Long> nodes = query.getNodes();
 		ArrayList<Long> negativeNodes = new ArrayList<Long>();
 		double posLabelValue = 1.0;
 		double negLabelValue = -1.0;
 		double unLabeledValueProduction = -1.0;
+		
 		Vector labels = LabelVectorGenerator.createLabelsFromIds(fCache.getNodeIds(organismId), nodes, negativeNodes,
 				posLabelValue, negLabelValue, unLabeledValueProduction);
 		Constants.CombiningMethod combiningMethod = Constants.convertCombiningMethod(query.getCombiningMethod(),
 				nodes.size());
 		mania.computeWeights(namespace, organismId, labels, combiningMethod, networkIds, attributeGroupIds,
 				attributeLimit);
-
-		if (fVerbose) {
-			System.err.println("Computing combined network...");
-		}
-//		 Extract weights
+		
+		//		 Extract weights
 		FeatureWeightMap featureWeights = mania.getFeatureWeights();
 		Map<Long, Double> weightMap = new HashMap<>();
 		
 		List<AttributeDto> attributes = new ArrayList<AttributeDto>();
-		List<NetworkDto> networks = new ArrayList<NetworkDto>();
 		for (Entry<Feature, Double> entry : featureWeights.entrySet()) {
 			Feature feature = entry.getKey();
 			if (featureWeights.get(feature) <= 0d) {
@@ -493,172 +418,40 @@ public class QueryRunner extends AbstractPluginDataApp {
 				attributes.add(attribute);
 				break;
 			case SPARSE_MATRIX:
+				// Case we care about				
 				NetworkDto network = new NetworkDto();
-//				Double scaled_weight = (Math.round(entry.getValue() * 100.0) / 100.0)*100.0;
+				// sclaed weight - factor would otherwise be applied when writing output 				
 				Double scaled_weight = entry.getValue() * 100.0;
 				weightMap.put(feature.getId(), scaled_weight);
-				network.setId(feature.getId());
-				network.setWeight(entry.getValue());
-				networks.add(network);
 				break;
 			case BIAS:
 				// Ignore
 			}
 		}
-//		System.err.println("printNetworks()");
-//		printNetworks(organism.getName());
-		
-//		System.err.println("mania.getFeatureWeights()");
-//		System.err.println(featureWeights);
-//		
-		
-//        System.err.println("networks");
-//        System.err.println(networks);
 
-//		System.err.println(query.getGroups());
-//		System.err.println("query.getGroups()");
-
-//		System.err.println("query.getGroups().getNetworks()");
-		Map<String, Long> networkNameToIdMap = new HashMap<>();
 		Map<String, Double> networkNameToWeightMap = new HashMap<>();
 		Map<Long, String> networkIdToNameMap = new HashMap<>();
 		for (Group<?,?> group : query.getGroups()) {
 			Group<InteractionNetworkGroup, InteractionNetwork> adapted = group.adapt(InteractionNetworkGroup.class, InteractionNetwork.class);
-//			for (InteractionNetwork net : group.getNetworks()) {
 			for (Network<InteractionNetwork> network : adapted.getNetworks()) {
-//				System.err.println("network.getModel().getId()");
-//				System.err.println(network.getModel().getId() + " : " + network.getName());
 				Long netId = network.getModel().getId();
 				String netName = network.getName();
 				networkIdToNameMap.put(netId, netName);
-				networkNameToIdMap.put(netName, netId);
-//				System.err.println();
 			}			
 		}
 		
-//		System.err.println("Network Group\tNetwork Weight");
-//		System.err.println("dummy_group"+"\t"+100.00);
 		for (Collection<Long> ids : networkIds) {
 			for (Long networkId : ids) {
 				String name = networkIdToNameMap.get(networkId);
 				Double weight = weightMap.get(networkId);
 				if (weight != null) {
-//					System.err.println("\t"+networkId+"\t"+name+"\t"+weight);
-//					System.err.println("\t"+name+"\t"+weight);
 					networkNameToWeightMap.put(name, weight);
 				}
 			}
 		}
-		
-//		System.err.println("networkIds");
-//		System.err.println(networkIds);
-
-		// construct the gene labels
-		//		TODO can we use previous results for label propagation? - yep
-		//		from FindRelated.prepareResponse and FindRelated.process()
-//		RelatedGenesEngineResponseDto response = FindRelated.prepareResponse(score, discriminant,
-//                featureWeights, partiallyCombinedKernel, scoreThreshold, scoringMethod, Constants.convertCombiningMethod(combiningMethod));
-//        
-		FindNetDxRelated findRelated = new FindNetDxRelated(fCache, request, mania);
-//		response =
-//		TODO either call findRelated first and then process network weights or get fields from first response object
-		RelatedGenesEngineResponseDto response2 = findRelated.process2();
-		response2.setNetworks(response.getNetworks());
-		
-//		response2
-//		FindRelated findRelated = new FindAllRelated(fCache, request);
-////		ScoringMethod scoringMethod = request.getScoringMethod();
-//		SymMatrix partiallyCombinedKernel = mania.getPartiallyCombinedKernel();
-////        FeatureWeightMap featureWeights = mania.getFeatureWeights();
-//        Vector discriminant = mania.getDiscriminant();
-//        Vector score = findRelated.convertScore(ScoringMethod.DISCRIMINANT, discriminant, partiallyCombinedKernel, labels, posLabelValue, negLabelValue);
-//        
-////        double scoreThreshold = selectScoreThreshold(scoringMethod);
-////        double scoreThreshold = FindRelated.selectScoreThreshold(ScoringMethod.DISCRIMINANT);
-//        double scoreThreshold = Constants.DISCRIMINANT_THRESHOLD;
-//		
-//		NodeIds nodeIds = fCache.getNodeIds(request.getOrganismId());
-//		
-//        List<Integer> indicesForPositiveNodes = nodeIds.getIndicesForIds(request.getPositiveNodes());
-//
-//        // the selection of top nodes does not necessarily have to be by the reported score 
-//        // (weird huh?). For example, for context score we select top nodes by discriminant, but
-//        // for each of these selected nodes we return the context score. 
-//        // but for most scoring method (z-score, discriminant) we select and report using 
-//        // the same scoring system. special case here.
-//        int [] indicesForTopScores = MatrixUtils.getIndicesForTopScores(score, indicesForPositiveNodes, request.getLimitResults(), scoreThreshold);
-//        
-////        if (scoringMethod == ScoringMethod.CONTEXT) {
-////            indicesForTopScores = MatrixUtils.getIndicesForTopScores(discriminant, indicesForPositiveNodes, request.getLimitResults(), scoreThreshold);
-////        }
-////        else {
-////        indicesForTopScores = MatrixUtils.getIndicesForTopScores(score, indicesForPositiveNodes, request.getLimitResults(), scoreThreshold);            
-////        }
-//        
-////        logger.debug(String.format("number of nodes available for return: %d", indicesForTopScores.length));
-//
-////        if (request.getProgressReporter().isCanceled()) {
-////            throw new CancellationException();
-////        }
-//
-//        // source interactions connecting the selected nodes. we don't apply the computed network weights
-//        // so just the raw interaction weights from each network
-////        logger.debug("extracting source interactions");
-////        update response with list of network dto's, and node dto's
-//        findRelated.getSourceInteractions(response, indicesForTopScores, score, featureWeights);
-//  
-//        // while attribute are treated in a manner making them equivalent to networks, users
-//        // consider them to be separate entities, and we report them in a separate structure.
-////        logger.debug("extracting attributes");
-////        set attributes in response object
-//        findRelated.encodeAttributes(response, indicesForTopScores, featureWeights);
-//        
-//        
-//        // for e.g. auto-select combining, we chose an specific combining method based
-//        // on a heuristic. return the actually selected method to the user in
-//        // case they're interested.
-//        response.setCombiningMethodApplied(combiningMethod);
-		
-//		RelatedGenesEngineResponseDto result = fMania.findRelated(request);
-//		SearchResultImplNetDx options = fNetworkUtils.createSearchOptionsNetdx2(organism, request, response,
-		SearchResultImplNetDx options = fNetworkUtils.createSearchOptionsNetdx2(organism, request, response2,
-				enrichmentResponse, data, queryGenes, networkNameToWeightMap);
-		
-//		TODO set some added field in SearchResultImpl
-		return options;
+		return networkNameToWeightMap;
 	}
-
-	private SearchResultImpl runAlgorithmNetDx(DataSet data, Query query)
-			throws DataStoreException, ApplicationException {
-		RelatedGenesEngineRequestDto request = createRequest(query);
-		RelatedGenesEngineResponseDto response = runQuery(request);
-		EnrichmentEngineRequestDto enrichmentRequest;
-
-//		scores - 
-		if ("scores".equals(fOutputFormat)) //$NON-NLS-1$
-			enrichmentRequest = null;
-		else
-			enrichmentRequest = createEnrichmentRequest(query, response);
-
-		EnrichmentEngineResponseDto enrichmentResponse = computeEnrichment(enrichmentRequest);
-
-		List<String> queryGenes = query.getGenes();
-		Organism organism = query.getOrganism();
-
-		// TODO can we improve the speed of the null enrichment - shouldn't we be able
-		// to access the matix?
-//		System.err.println("\n \t enrichmentRequest="+ enrichmentRequest);
-//		System.err.println("\n \t enrichmentResponse="+ enrichmentResponse);
-//		System.err.println("\n \t queryGenes="+ queryGenes);
-//		System.err.println("\n \t organism="+ organism);
-//		
-		// TODO can we just return the network weights? - all other options should be in
-		// the query
-		SearchResultImpl options = fNetworkUtils.createSearchOptionsNetdx(organism, request, response,
-				enrichmentResponse, data, queryGenes);
-
-		return options;
-	}
+	
 
 	private SearchResult runAlgorithm(DataSet data, Query query) throws DataStoreException, ApplicationException {
 		RelatedGenesEngineRequestDto request = createRequest(query);
@@ -844,8 +637,6 @@ public class QueryRunner extends AbstractPluginDataApp {
 			this.mania = precomputedMania;
 		}
 		
-		
-//		@Override
 		public RelatedGenesEngineResponseDto process2() throws ApplicationException {
 	        try {
 	            super.setRequestStartTimeMillis(System.currentTimeMillis());
@@ -859,7 +650,6 @@ public class QueryRunner extends AbstractPluginDataApp {
 	            double posLabelValue = 1.0d;
 	            double negLabelValue = -1.0d;
 	            double unLabeledValueProduction = -1.0d;
-//	            double unLabeledValueValidation = 0.0d;
 
 	            Vector labels = LabelVectorGenerator.createLabelsFromIds(cache2.getNodeIds(request2.getOrganismId()),
 	                    request2.getPositiveNodes(), negativeNodes, posLabelValue, negLabelValue, unLabeledValueProduction);
@@ -872,7 +662,8 @@ public class QueryRunner extends AbstractPluginDataApp {
 
 	            Collection<Collection<Long>> idList = request2.getInteractionNetworks();
 
-	            //	            Our "hack"
+	            // Our "hack"
+	            // Instead of re-computing - we just use getFeatureWeights and getDiscriminant()	            
 	            CoreMania coreMania = mania;
 	            //	            coreMania.compute(safeGetNamespace(), request.getOrganismId(), labels, combiningMethod, idList, request.getAttributeGroups(), request.getAttributesLimit(), goCategory, "average");
 	            SymMatrix partiallyCombinedKernel = coreMania.getPartiallyCombinedKernel();
@@ -883,7 +674,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 	            Vector discriminant = coreMania.getDiscriminant();
 //	            more hacking
 //	            Vector score = super.convertScore(scoringMethod, discriminant, partiallyCombinedKernel, labels, posLabelValue, negLabelValue);
-//	            TODO could bring problems, as we dont rescale discriminant as in original - mark for potential bug source
+//	            TODO could potentially bring problems, as we dont rescale discriminant as in original - mark for potential bug source
 //	            System.err.println("discriminant\n" + discriminant);
 	            Vector score = MatrixUtils.rescale(discriminant);
 	            
@@ -908,11 +699,9 @@ public class QueryRunner extends AbstractPluginDataApp {
 		//		need to ovewrite logging - another private field
 		
 		/*
-		 * write out some query params for later trouble shooting ...
+		 * overwrite logging for query params 
 		 */
-//		@Override
 		private void logQuery() {
-//			logger.info(String.format("findRelated query using combining method %s for organism %d contains %d nodes, %d network groups, %d networks, %d attribute groups, and requests a maximum of %d related nodes using a maximum of %d attributes per group",
 		    logger.info(String.format("findRelated query using combining method %s for organism %d "
 		    		+ "contains %d nodes, %d network groups",
 		            request2.getCombiningMethod(), request2.getOrganismId(), 
@@ -920,26 +709,16 @@ public class QueryRunner extends AbstractPluginDataApp {
 		            request2.getInteractionNetworks().size() ));//, // numRequestNetworks, numRequestAttributeGroups, request.getLimitResults(), request.getAttributesLimit()));
 		}
 		
-//		@Override
 		private void logStart() {
 		    logger.info("processing findRelated() request");
-//		    request2.getProgressReporter().setMaximumProgress(Constants.PROGRESS_COMPLETE);
-//		    request2.getProgressReporter().setStatus(Constants.PROGRESS_START_MESSAGE);
-//		    request2.getProgressReporter().setProgress(Constants.PROGRESS_START);
 		}
 		
-////		@Override
 		private void logPreparingOutputs() {
 		    logger.info("preparing outputs for findRelated() request");
-//		    request2.getProgressReporter().setDescription(Constants.PROGRESS_OUTPUTS_MESSAGE);
-//		    request2.getProgressReporter().setProgress(Constants.PROGRESS_OUTPUTS);
 		}
 		
-//		@Override
 		private void logEnd() {
 		    logger.info("completed processing request"); //, duration = " + Logging.duration(requestStartTimeMillis, requestEndTimeMillis));
-//		    request2.getProgressReporter().setStatus(Constants.PROGRESS_COMPLETE_MESSAGE);
-//		    request2.getProgressReporter().setProgress(Constants.PROGRESS_COMPLETE);
 		}
 		
 		
@@ -1049,8 +828,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 		public void process(Query query, File outputDirectory, String baseName)
 				throws ApplicationException, DataStoreException, IOException {
 			// options are still based on Lucene - 
-			SearchResultImplNetDx options = runAlgorithmNetDx2(data, query);
-//			SearchResultImpl options = runAlgorithmNetDx(data, query);
+			SearchResultImplNetDx options = runAlgorithmNetDx(data, query);
 			System.err.println("finished computation - writing results");
 			String outPath = outputDirectory.getPath(); // "/home/philipp/netDx_mashup/netDxmashup/test/results";
 			String pathPrefixRankFiles = String.format("%s/%s_", outPath, baseName);
@@ -1072,37 +850,24 @@ public class QueryRunner extends AbstractPluginDataApp {
 			private List<GeneEntry> genes;
 			private String outfilePrefix;
 			private NetworkUtils fNetworkUtils;
-			private SearchResultImpl options;
-			private SearchResultImplNetDx options2;
+			private SearchResultImplNetDx options;
 			private Map<Long, Gene> geneCache;
 			private final IGeneProvider geneProvider;
 			
-			public FlatNetDxHandler(String outfilePrefix, SearchResultImpl options, NetworkUtils fNetworkUtils,
+			
+			public FlatNetDxHandler(String outfilePrefix, SearchResultImplNetDx options, NetworkUtils fNetworkUtils,
 					IGeneProvider geneProvider) throws FileNotFoundException {
 				this.outfilePrefix = outfilePrefix;
 				this.options = options;
 				this.fNetworkUtils = fNetworkUtils;
-				this.genes = this.populateGenes(this.options);
+				this.genes = this.populateGenes();
 				this.geneCache = new HashMap<Long, Gene>();
 				this.geneProvider = geneProvider;
 				this.writePRANK();
 				this.writeNRANK();
-				
 			}
 
-			public FlatNetDxHandler(String outfilePrefix, SearchResultImplNetDx options, NetworkUtils fNetworkUtils,
-					IGeneProvider geneProvider) throws FileNotFoundException {
-				this.outfilePrefix = outfilePrefix;
-				this.options2 = options;
-				this.fNetworkUtils = fNetworkUtils;
-				this.genes = this.populateGenes2(this.options2);
-				this.geneCache = new HashMap<Long, Gene>();
-				this.geneProvider = geneProvider;
-				this.writePRANK2();
-				this.writeNRANK2();
-			}
-
-			private List<GeneEntry> populateGenes2(SearchResultImplNetDx options) {
+			private List<GeneEntry> populateGenes() {
 				List<GeneEntry> result = new ArrayList<GeneEntry>();
 				
 				final Map<Gene, Double> scores = options.getScores();
@@ -1127,31 +892,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 				return result;
 			}
 			
-			private List<GeneEntry> populateGenes(SearchResult options) {
-				List<GeneEntry> result = new ArrayList<GeneEntry>();
-
-				final Map<Gene, Double> scores = options.getScores();
-				List<Gene> genes = new ArrayList<Gene>(scores.keySet());
-				Collections.sort(genes, new Comparator<Gene>() {
-					public int compare(Gene gene1, Gene gene2) {
-						return scores.get(gene2).compareTo(scores.get(gene1));
-					}
-				});
-
-				Map<Long, Gene> queryGenes = options.getQueryGenes();
-				for (Gene gene : genes) {
-					double score;
-					if (queryGenes.containsKey(gene.getNode().getId())) {
-						score = Double.MAX_VALUE;
-					} else {
-						score = scores.get(gene) * 100;
-					}
-					result.add(new GeneEntry(gene, score));
-				}
-				return result;
-			}
-			
-			private Gene findGene2(Node node, SearchResultImplNetDx options) {
+			private Gene findGene(Node node, SearchResultImplNetDx options) {
 				long nodeId = node.getId();
 				if (options.isQueryNode(nodeId)) {
 					return options.getGene(node.getId());
@@ -1164,50 +905,10 @@ public class QueryRunner extends AbstractPluginDataApp {
 				}
 				return gene;
 			}
-
-			private Gene findGene(Node node, SearchResult options) {
-				long nodeId = node.getId();
-				if (options.isQueryNode(nodeId)) {
-					return options.getGene(node.getId());
-				}
-
-				Gene gene = geneCache.get(node.getId());
-				if (gene == null) {
-					gene = geneProvider.getGene(node);
-					geneCache.put(node.getId(), gene);
-				}
-				return gene;
-			}
 			
 //			modified copy of TextReportExporter exportGenes() 
-			private void writePRANK2() throws FileNotFoundException {
-				String prankOutfilename = this.outfilePrefix + "PRANK.txt";				
-				System.err.println("Attempting to write PRANK");
-				PrintWriter writer = new PrintWriter(new BufferedOutputStream(new FileOutputStream(prankOutfilename)));
-				writer.print("Gene\tScore\tDescription\n"); //$NON-NLS-1$
-				for (GeneEntry entry : this.genes) {
-					Gene gene = findGene2(entry.getGene().getNode(), options2);
-					writer.print(fNetworkUtils.getGeneLabel(gene));
-					writer.print("\t"); //$NON-NLS-1$
-					
-					double score = entry.getScore();
-					if (score != Double.MAX_VALUE) {
-						writer.print(String.format("%.2f", score)); //$NON-NLS-1$
-					}
-					
-					writer.print("\t"); //$NON-NLS-1$
-					writer.print(gene.getNode().getGeneData().getDescription());
-					writer.print("\n"); //$NON-NLS-1$
-				}
-				writer.print("\n"); //$NON-NLS-1$
-				writer.flush();
-				writer.close();
-				System.err.println("Finished writing PRANK to " + prankOutfilename);
-			}
-
-//			modified copy of TextReportExporter exportGenes() 
 			private void writePRANK() throws FileNotFoundException {
-				String prankOutfilename = this.outfilePrefix + "PRANK.txt";
+				String prankOutfilename = this.outfilePrefix + "PRANK.txt";				
 				System.err.println("Attempting to write PRANK to " + prankOutfilename);
 				PrintWriter writer = new PrintWriter(new BufferedOutputStream(new FileOutputStream(prankOutfilename)));
 				writer.print("Gene\tScore\tDescription\n"); //$NON-NLS-1$
@@ -1215,12 +916,12 @@ public class QueryRunner extends AbstractPluginDataApp {
 					Gene gene = findGene(entry.getGene().getNode(), options);
 					writer.print(fNetworkUtils.getGeneLabel(gene));
 					writer.print("\t"); //$NON-NLS-1$
-
+					
 					double score = entry.getScore();
 					if (score != Double.MAX_VALUE) {
 						writer.print(String.format("%.2f", score)); //$NON-NLS-1$
 					}
-
+					
 					writer.print("\t"); //$NON-NLS-1$
 					writer.print(gene.getNode().getGeneData().getDescription());
 					writer.print("\n"); //$NON-NLS-1$
@@ -1228,13 +929,14 @@ public class QueryRunner extends AbstractPluginDataApp {
 				writer.print("\n"); //$NON-NLS-1$
 				writer.flush();
 				writer.close();
-				System.err.println("Finished writing PRANK to " + prankOutfilename);
+				System.err.println("Finished writing PRANK");
 			}
+			
 
 //			modified copy of TextReportExporter exportNetworks()
-			private void writeNRANK2() throws FileNotFoundException {
+			private void writeNRANK() throws FileNotFoundException {
 //				let's sort by weight from big to small - as previous versions did
-				List<Entry<String, Double>> networkList = new ArrayList<Entry<String, Double>>(options2.getParsedNetworkWeights()
+				List<Entry<String, Double>> networkList = new ArrayList<Entry<String, Double>>(options.getParsedNetworkWeights()
 						.entrySet());
 		        Collections.sort(networkList, new Comparator<Map.Entry<String, Double>>() {
 		            public int compare(Map.Entry<String, Double> o1,
@@ -1243,9 +945,8 @@ public class QueryRunner extends AbstractPluginDataApp {
 		            }
 		        });
 				
-//				Map<Long, Double> networkIdWeightMap = new HashMap<>();
 				String nrankOutfilename = this.outfilePrefix + "NRANK.txt";
-				System.err.println("Attempting to write NRANK");
+				System.err.println("Attempting to write NRANK to " + nrankOutfilename);
 				PrintWriter writer = new PrintWriter(new BufferedOutputStream(new FileOutputStream(nrankOutfilename)));
 				
 				writer.print("#This Report has been generated with a netDx-specific version of GeneMania v3.5.\n"); //$NON-NLS-1$
@@ -1254,249 +955,20 @@ public class QueryRunner extends AbstractPluginDataApp {
 				writer.print("Weight"); //$NON-NLS-1$
 				writer.print("\n"); //$NON-NLS-1$
 				
-//				for (Map.Entry<String, Double> weightEntry : options2.getParsedNetworkWeights()
-//						.entrySet()) {
-//					writer.print(weightEntry.getKey()); //$NON-NLS-1$
 				for (Entry<String, Double> weightEntry : networkList) {
 					writer.print(weightEntry.getKey()); //$NON-NLS-1$
 					writer.print("\t"); //$NON-NLS-1$
 					writer.print(String.format("%.2f", weightEntry.getValue())); //$NON-NLS-1$
 					writer.print("\n"); //$NON-NLS-1$
-//					writer.print(String.format("%.2f", weight * 100)); //$NON-NLS-1$
 //					
-//					networkIdWeightMap.put(weightEntry.getKey().getId(), weightEntry.getValue());
 				}
-//				Map<Long, Double> oldNetworkIdWeightMap = new HashMap<>();
-//				for (Map.Entry<InteractionNetwork, Double> weightEntry : options.getNetworkWeights().entrySet()) {
-//					oldNetworkIdWeightMap.put(weightEntry.getKey().getId(), weightEntry.getValue());
-//				}
-				
-//				Group<?, ?> lastGroup = null;
-//				
-//				writer.print("Network Group"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("Network"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("Weight"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("Title"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("Authors"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("Year"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("Publication"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("PMID"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("URL"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("Processing Method"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("Interactions"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("Source"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("Source URL"); //$NON-NLS-1$
-//				writer.print("\t"); //$NON-NLS-1$
-//				writer.print("Tags"); //$NON-NLS-1$
-//				writer.print("\n"); //$NON-NLS-1$
-//				
-//				TODO how do we access the networks in a similar manner to the genes?
-//				options.getInteractionNetworkGroupsById()
-//				ViewState viewState = report.getViewState();
-	//				for (Map.Entry<String, InteractionNetworkGroupById> entry : options.getGroupsByNameById().entrySet()) {
-	//					String groupName = entry.getKey();
-	//					InteractionNetworkGroupById interactionNetworkGroupById = entry.getValue();
-	//					
-	//					writer.print(groupName); // doesnt really matter as cut away in netWorkTally
-	//					writer.print("\t\t"); //$NON-NLS-1$
-	////					writer.print(String.format("%.2f", interactionNetworkGroupById.getWeight() * 100)); //$NON-NLS-1$ 
-	////					Will be cropped by netDx
-	//					writer.print(String.format("%.2f", 100.00)); //$NON-NLS-1$
-	//					writer.print("\n"); //$NON-NLS-1$
-	//					
-	////					Now we output network name and weight - interactions too - but is always 0???
-	////					Map<InteractionNetworkById, Double> netWorkWeightsById = options.getNetworkWeightsById(); 
-	//					
-	//					for (InteractionNetworkById interactionNetwork : interactionNetworkGroupById
-	//							.getInteractionNetworks()) {
-	//						if ((interactionNetwork != null)
-	//								&& (networkIdWeightMap.get(interactionNetwork.getId()) != null)) {
-	////							System.err.println("networkIdWeightMap="+ networkIdWeightMap);
-	////							System.err.println("=======================");
-	////							System.err.println("old networkIdWeightMap="+ oldNetworkIdWeightMap);
-	////							System.err.println("networId="+ interactionNetwork.getId());
-	//							double weight = networkIdWeightMap.get(interactionNetwork.getId());
-	////							System.err.println("weight="+ weight);
-	//							
-	////							NetworkMetadata metadata = interactionNetwork.getMetadata();
-	////							System.err.println("metadata="+ metadata);
-	//							writer.print("\t"); //$NON-NLS-1$
-	//							writer.print(interactionNetwork.getName());
-	//							writer.print("\t"); //$NON-NLS-1$
-	////							writer.print(String.format("%.2f", interactionNetwork.getWeight() * 100)); //$NON-NLS-1$
-	//							writer.print(String.format("%.2f", weight * 100)); //$NON-NLS-1$
-	//							writer.print("\t"); //$NON-NLS-1$
-	////							writer.print(metadata.getTitle());
-	//							writer.print("\t"); //$NON-NLS-1$
-	////							writer.print(metadata.getAuthors());
-	//							writer.print("\t"); //$NON-NLS-1$
-	////							writer.print(metadata.getYearPublished());
-	//							writer.print("\t"); //$NON-NLS-1$
-	////							writer.print(metadata.getPublicationName());
-	//							writer.print("\t"); //$NON-NLS-1$
-	////							writer.print(metadata.getPubmedId());
-	//							writer.print("\t"); //$NON-NLS-1$
-	////							writer.print(metadata.getUrl());
-	//							writer.print("\t"); //$NON-NLS-1$
-	////							writer.print(metadata.getProcessingDescription());
-	//							writer.print("\t"); //$NON-NLS-1$
-	////							writer.print(metadata.getInteractionCount());
-	//							writer.print(interactionNetwork.getInteractions().size());
-	//							writer.print("\t"); //$NON-NLS-1$
-	////							writer.print(metadata.getSource());
-	//							writer.print("\t"); //$NON-NLS-1$
-	////							writer.print(metadata.getSourceUrl());
-	//							writer.print("\t"); //$NON-NLS-1$
-	//							boolean first = true;
-	//							for (Tag tag : interactionNetwork.getTags()) {
-	//								if (!first) {
-	//									writer.print(","); //$NON-NLS-1$
-	//								}
-	//								writer.print(tag.getName());
-	//								first = false;
-	//							}
-	//							writer.print("\n"); //$NON-NLS-1$
-	//						}
-	//					}
-	//				}
+
 				writer.print("\n"); //$NON-NLS-1$
 				writer.flush();
 				writer.close();
-				System.err.println("Finished writing NRANK to " + nrankOutfilename);
+				System.err.println("Finished writing NRANK");
 			}
-			
-//			modified copy of TextReportExporter exportNetworks()
-			private void writeNRANK() throws FileNotFoundException {
-				Map<Long, Double> networkIdWeightMap = new HashMap<>();
-				for (Map.Entry<InteractionNetworkById, Double> weightEntry : options.getNetworkWeightsById()
-						.entrySet()) {
-					networkIdWeightMap.put(weightEntry.getKey().getId(), weightEntry.getValue());
-				}
-//				Map<Long, Double> oldNetworkIdWeightMap = new HashMap<>();
-//				for (Map.Entry<InteractionNetwork, Double> weightEntry : options.getNetworkWeights().entrySet()) {
-//					oldNetworkIdWeightMap.put(weightEntry.getKey().getId(), weightEntry.getValue());
-//				}
-				String nrankOutfilename = this.outfilePrefix + "NRANK.txt";
-				System.err.println("Attempting to write NRANK to " + nrankOutfilename);
-				PrintWriter writer = new PrintWriter(new BufferedOutputStream(new FileOutputStream(nrankOutfilename)));
 
-//				Group<?, ?> lastGroup = null;
-
-				writer.print("Network Group"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("Network"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("Weight"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("Title"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("Authors"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("Year"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("Publication"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("PMID"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("URL"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("Processing Method"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("Interactions"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("Source"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("Source URL"); //$NON-NLS-1$
-				writer.print("\t"); //$NON-NLS-1$
-				writer.print("Tags"); //$NON-NLS-1$
-				writer.print("\n"); //$NON-NLS-1$
-
-//				TODO how do we access the networks in a similar manner to the genes?
-//				options.getInteractionNetworkGroupsById()
-//				ViewState viewState = report.getViewState();
-				for (Map.Entry<String, InteractionNetworkGroupById> entry : options.getGroupsByNameById().entrySet()) {
-					String groupName = entry.getKey();
-					InteractionNetworkGroupById interactionNetworkGroupById = entry.getValue();
-
-					writer.print(groupName); // doesnt really matter as cut away in netWorkTally
-					writer.print("\t\t"); //$NON-NLS-1$
-//					writer.print(String.format("%.2f", interactionNetworkGroupById.getWeight() * 100)); //$NON-NLS-1$ 
-//					Will be cropped by netDx
-					writer.print(String.format("%.2f", 100.00)); //$NON-NLS-1$
-					writer.print("\n"); //$NON-NLS-1$
-
-//					Now we output network name and weight - interactions too - but is always 0???
-//					Map<InteractionNetworkById, Double> netWorkWeightsById = options.getNetworkWeightsById(); 
-
-					for (InteractionNetworkById interactionNetwork : interactionNetworkGroupById
-							.getInteractionNetworks()) {
-						if ((interactionNetwork != null)
-								&& (networkIdWeightMap.get(interactionNetwork.getId()) != null)) {
-//							System.err.println("networkIdWeightMap="+ networkIdWeightMap);
-//							System.err.println("=======================");
-//							System.err.println("old networkIdWeightMap="+ oldNetworkIdWeightMap);
-//							System.err.println("networId="+ interactionNetwork.getId());
-							double weight = networkIdWeightMap.get(interactionNetwork.getId());
-//							System.err.println("weight="+ weight);
-
-//							NetworkMetadata metadata = interactionNetwork.getMetadata();
-//							System.err.println("metadata="+ metadata);
-							writer.print("\t"); //$NON-NLS-1$
-							writer.print(interactionNetwork.getName());
-							writer.print("\t"); //$NON-NLS-1$
-//							writer.print(String.format("%.2f", interactionNetwork.getWeight() * 100)); //$NON-NLS-1$
-							writer.print(String.format("%.2f", weight * 100)); //$NON-NLS-1$
-							writer.print("\t"); //$NON-NLS-1$
-//							writer.print(metadata.getTitle());
-							writer.print("\t"); //$NON-NLS-1$
-//							writer.print(metadata.getAuthors());
-							writer.print("\t"); //$NON-NLS-1$
-//							writer.print(metadata.getYearPublished());
-							writer.print("\t"); //$NON-NLS-1$
-//							writer.print(metadata.getPublicationName());
-							writer.print("\t"); //$NON-NLS-1$
-//							writer.print(metadata.getPubmedId());
-							writer.print("\t"); //$NON-NLS-1$
-//							writer.print(metadata.getUrl());
-							writer.print("\t"); //$NON-NLS-1$
-//							writer.print(metadata.getProcessingDescription());
-							writer.print("\t"); //$NON-NLS-1$
-//							writer.print(metadata.getInteractionCount());
-							writer.print(interactionNetwork.getInteractions().size());
-							writer.print("\t"); //$NON-NLS-1$
-//							writer.print(metadata.getSource());
-							writer.print("\t"); //$NON-NLS-1$
-//							writer.print(metadata.getSourceUrl());
-							writer.print("\t"); //$NON-NLS-1$
-							boolean first = true;
-							for (Tag tag : interactionNetwork.getTags()) {
-								if (!first) {
-									writer.print(","); //$NON-NLS-1$
-								}
-								writer.print(tag.getName());
-								first = false;
-							}
-							writer.print("\n"); //$NON-NLS-1$
-						}
-					}
-				}
-				writer.print("\n"); //$NON-NLS-1$
-				writer.flush();
-				writer.close();
-				System.err.println("Finished writing NRANK to " + nrankOutfilename);
-			}
 		}
 	}
 

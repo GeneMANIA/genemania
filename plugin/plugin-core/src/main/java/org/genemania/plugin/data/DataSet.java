@@ -36,9 +36,7 @@ import org.genemania.data.classification.IGeneClassifier;
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.GeneNamingSource;
 import org.genemania.domain.InteractionNetwork;
-import org.genemania.domain.InteractionNetworkById;
 import org.genemania.domain.InteractionNetworkGroup;
-import org.genemania.domain.InteractionNetworkGroupById;
 import org.genemania.domain.Organism;
 import org.genemania.engine.cache.IObjectCache;
 import org.genemania.exception.ApplicationException;
@@ -151,7 +149,6 @@ public abstract class DataSet {
 	public abstract GeneCompletionProvider2 getCompletionProvider(Organism organism);
 	public abstract Colour getColor(String code);
 	public abstract InteractionNetworkGroup getNetworkGroup(long networkId);
-	public abstract InteractionNetworkGroupById getNetworkGroupById(long networkId);
 	public abstract List<DataDescriptor> getInstalledDataDescriptors();
 	public abstract List<Long> getNodeIds(long organismId);
 	public abstract List<GeneNamingSource> getAllNamingSources();

@@ -61,7 +61,6 @@ import org.genemania.domain.GeneNamingSource;
 import org.genemania.domain.Interaction;
 import org.genemania.domain.InteractionNetwork;
 import org.genemania.domain.InteractionNetworkGroup;
-import org.genemania.domain.InteractionNetworkGroupById;
 import org.genemania.domain.NetworkMetadata;
 import org.genemania.domain.Node;
 import org.genemania.domain.Ontology;
@@ -601,29 +600,6 @@ public class LuceneMediator {
     	});
     	return result;
     }
-//
-//    protected Collection<InteractionNetworkGroupById> createNetworkGroupsById(long organismId) {
-//        final Set<InteractionNetworkGroupById> result = new HashSet<InteractionNetworkGroupById>();
-//        search(String.format("%s:\"%d\"", LuceneMediator.GROUP_ORGANISM_ID, organismId), new AbstractCollector() {
-//            @Override
-//            public void handleHit(int doc) {
-//                try {
-//                    final Document document = searcher.doc(doc);
-//                    result.add((InteractionNetworkGroupById) Enhancer.create(InteractionNetworkGroupById.class,
-//                            new LazyLoader() {
-//                                public Object loadObject() throws Exception {
-//                                    return createNetworkGroup(document);
-//                                }
-//                            }));
-//                } catch (CorruptIndexException e) {
-//                    log(e);
-//                } catch (IOException e) {
-//                    log(e);
-//                }
-//            }
-//        });
-//        return result;
-//    }
     
     @SuppressWarnings("unchecked")
     public InteractionNetworkGroup createNetworkGroup(Document document) {
@@ -643,26 +619,6 @@ public class LuceneMediator {
     		}
     	}));
     	return group;
-    }
-
-    @SuppressWarnings("unchecked")
-    public InteractionNetworkGroupById createNetworkGroupById(Document document) {
-        final long groupId = Long.parseLong(document.get(LuceneMediator.GROUP_ID));
-        InteractionNetworkGroupById group = new InteractionNetworkGroupById();
-        group.setId(groupId);
-        group.setName(document.get(LuceneMediator.GROUP_NAME));
-        String code = document.get(LuceneMediator.GROUP_CODE);
-        if (code == null) {
-            code = document.get(LuceneMediator.GROUP_DESCRIPTION);
-        }
-        group.setCode(code);
-        group.setDescription(document.get(LuceneMediator.GROUP_DESCRIPTION));
-        group.setInteractionNetworks((Collection<InteractionNetwork>) Enhancer.create(Collection.class, new LazyLoader() {
-            public Object loadObject() throws Exception {
-                return createNetworks(groupId);
-            }
-        }));
-        return group;
     }
 
     protected List<Gene> createGenes(long organismId, List<String> geneSymbols) {
