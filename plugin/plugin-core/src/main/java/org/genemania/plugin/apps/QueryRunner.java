@@ -831,7 +831,8 @@ public class QueryRunner extends AbstractPluginDataApp {
 			SearchResultImplNetDx options = runAlgorithmNetDx(data, query);
 			System.err.println("finished computation - writing results");
 			String outPath = outputDirectory.getPath(); // "/home/philipp/netDx_mashup/netDxmashup/test/results";
-			String pathPrefixRankFiles = String.format("%s/%s_", outPath, baseName);
+//			String pathPrefixRankFiles = String.format("%s/%s_", outPath, baseName);
+			String pathPrefixRankFiles = String.format("%s/%s", outPath, baseName);
 
 //			OutputStream out = new FileOutputStream(String.format("%s%s%s-results.%s", outputDirectory.getPath(), File.separator, baseName, fFormatter.getExtension())); //$NON-NLS-1$
 
@@ -907,10 +908,11 @@ public class QueryRunner extends AbstractPluginDataApp {
 			}
 			
 //			modified copy of TextReportExporter exportGenes() 
-			private void writePRANK() throws FileNotFoundException {
-				String prankOutfilename = this.outfilePrefix + "PRANK.txt";				
-				System.err.println("Attempting to write PRANK to " + prankOutfilename);
+			private void writePRANK() throws FileNotFoundException {				
+				String prankOutfilename = this.outfilePrefix + "-results.report.txt.PRANK";				
+//				System.err.println("Attempting to write PRANK to " + prankOutfilename);
 				PrintWriter writer = new PrintWriter(new BufferedOutputStream(new FileOutputStream(prankOutfilename)));
+				writer.print("#This Report has been generated with a netDx-specific version of GeneMania v3.5.\n"); //$NON-NLS-1$
 				writer.print("Gene\tScore\tDescription\n"); //$NON-NLS-1$
 				for (GeneEntry entry : this.genes) {
 					Gene gene = findGene(entry.getGene().getNode(), options);
@@ -929,7 +931,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 				writer.print("\n"); //$NON-NLS-1$
 				writer.flush();
 				writer.close();
-				System.err.println("Finished writing PRANK");
+//				System.err.println("Finished writing PRANK to " + prankOutfilename);
 			}
 			
 
@@ -945,8 +947,9 @@ public class QueryRunner extends AbstractPluginDataApp {
 		            }
 		        });
 				
-				String nrankOutfilename = this.outfilePrefix + "NRANK.txt";
-				System.err.println("Attempting to write NRANK to " + nrankOutfilename);
+//		        String nrankOutfilename = this.outfilePrefix + "NRANK.txt";
+				String nrankOutfilename = this.outfilePrefix + "-results.report.txt.NRANK";
+//				System.err.println("Attempting to write NRANK to " + nrankOutfilename);
 				PrintWriter writer = new PrintWriter(new BufferedOutputStream(new FileOutputStream(nrankOutfilename)));
 				
 				writer.print("#This Report has been generated with a netDx-specific version of GeneMania v3.5.\n"); //$NON-NLS-1$
@@ -966,7 +969,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 				writer.print("\n"); //$NON-NLS-1$
 				writer.flush();
 				writer.close();
-				System.err.println("Finished writing NRANK");
+//				System.err.println("Finished writing NRANK to " + nrankOutfilename);
 			}
 
 		}
