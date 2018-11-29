@@ -535,7 +535,7 @@ public class NetworkUtils {
 	/*
 	 * Used by NetDx for offline result building
 	 */
-	public SearchResultImplNetDx createSearchOptionsNetdx2(Organism organism, RelatedGenesEngineRequestDto request,
+	public SearchResultImplNetDx createSearchOptionsNetdx(Organism organism, RelatedGenesEngineRequestDto request,
 			RelatedGenesEngineResponseDto response, EnrichmentEngineResponseDto enrichmentResponse, DataSet data,
 			List<String> genes, Map<String, Double> networkNameToWeightMap) {
 		SearchResultImplNetDx config = new SearchResultImplNetDx();

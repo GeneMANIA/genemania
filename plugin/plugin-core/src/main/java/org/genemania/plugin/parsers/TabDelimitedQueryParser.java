@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.ConcurrentModificationException;
 
 import org.genemania.data.normalizer.GeneCompletionProvider2;
 import org.genemania.domain.AttributeGroup;
@@ -71,7 +72,22 @@ public class TabDelimitedQueryParser extends AbstractQueryParser {
 			Query query = new Query();
 			String organismData = in.readLine();
 			String filtered = organismData.toLowerCase();
-			Organism organism = parseOrganism(filtered);
+			Organism organism = null;
+			try {
+				organism = parseOrganism(filtered);	
+			} catch (ConcurrentModificationException e) {
+				// sleep for 500 ms to give the other threads time to finish their business
+				try
+				{
+					Thread.sleep(500);
+					organism = parseOrganism(filtered);
+				}
+				catch(InterruptedException ex)
+				{
+				    Thread.currentThread().interrupt();
+				}
+			} 
+			
 			
 			if (organism == null)
 				throw new IOException(String.format("Cannot find organism: %s", organismData)); //$NON-NLS-1$

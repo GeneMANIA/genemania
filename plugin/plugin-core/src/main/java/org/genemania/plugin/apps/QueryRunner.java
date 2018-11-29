@@ -327,7 +327,8 @@ public class QueryRunner extends AbstractPluginDataApp {
 
 	
 	/*
-	 * Implementation using CoreMania with a minimal amount of Lucene 
+	 * Implementation using CoreMania with a minimal amount of Lucene-mediation
+	 *  computes network weights and label propagation with query and stores result in SearchResultImplNetDx
 	 */
 	private SearchResultImplNetDx runAlgorithmNetDx(DataSet data, Query query)
 			throws DataStoreException, ApplicationException {
@@ -359,7 +360,7 @@ public class QueryRunner extends AbstractPluginDataApp {
 		response2.setNetworks(response.getNetworks());
 		
 		// SearchOptions / SearchResultImplNetDx is basically a storage object holding on to our references for usage by FlatNetDxHandler
-		SearchResultImplNetDx options = fNetworkUtils.createSearchOptionsNetdx2(organism, request, response2,
+		SearchResultImplNetDx options = fNetworkUtils.createSearchOptionsNetdx(organism, request, response2,
 				enrichmentResponse, data, queryGenes, networkNameToWeightMap);
 		
 		return options;
