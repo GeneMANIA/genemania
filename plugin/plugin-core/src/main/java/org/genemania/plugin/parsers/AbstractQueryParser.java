@@ -19,7 +19,7 @@
 
 package org.genemania.plugin.parsers;
 
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.genemania.domain.Organism;
@@ -38,7 +38,8 @@ public abstract class AbstractQueryParser implements IQueryParser {
 	};
 	
 	protected final DataSet data;
-	protected final Set<Organism> organisms = new LinkedHashSet<>();
+//	protected final Set<Organism> organisms = new LinkedHashSet<>(); #  We don't care about insertion order of the organisms into the set - and regularly get ConcurrentModificationExceptions
+	protected final Set<Organism> organisms = new HashSet<>();
 
 	public AbstractQueryParser(Set<Organism> organisms) {
 		this.data = null;

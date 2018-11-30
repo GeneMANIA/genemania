@@ -73,20 +73,21 @@ public class TabDelimitedQueryParser extends AbstractQueryParser {
 			String organismData = in.readLine();
 			String filtered = organismData.toLowerCase();
 			Organism organism = null;
-			try {
-				organism = parseOrganism(filtered);	
-			} catch (ConcurrentModificationException e) {
-				// sleep for 500 ms to give the other threads time to finish their business
-				try
-				{
-					Thread.sleep(500);
-					organism = parseOrganism(filtered);
-				}
-				catch(InterruptedException ex)
-				{
-				    Thread.currentThread().interrupt();
-				}
-			} 
+			organism = parseOrganism(filtered);	
+//			try {
+//				organism = parseOrganism(filtered);	
+//			} catch (ConcurrentModificationException e) {
+//				// sleep for 500 ms to give the other threads time to finish their business
+//				try
+//				{
+//					Thread.sleep(500);
+//					organism = parseOrganism(filtered);
+//				}
+//				catch(InterruptedException ex)
+//				{
+//				    Thread.currentThread().interrupt();
+//				}
+//			} 
 			
 			
 			if (organism == null)
