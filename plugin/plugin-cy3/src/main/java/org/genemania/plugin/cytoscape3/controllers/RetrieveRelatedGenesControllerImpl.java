@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -129,7 +130,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 	private final NetworkUtils networkUtils;
 	private final TaskDispatcher taskDispatcher;
 	
-	private final OkHttpClient httpClient = new OkHttpClient(); // Avoid creating several instances
+	private final OkHttpClient httpClient;
 
 	public RetrieveRelatedGenesControllerImpl(
 			GeneMania plugin,
@@ -141,6 +142,11 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.networkUtils = networkUtils;
 		this.taskDispatcher = taskDispatcher;
+		
+		// Avoid creating several instances
+		httpClient = new OkHttpClient.Builder()
+				.readTimeout(2, TimeUnit.MINUTES)
+				.build();
 	}
 	
 	@Override
