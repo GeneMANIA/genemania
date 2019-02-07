@@ -155,6 +155,8 @@ public interface CytoscapeUtils {
 	String getPreference(String key);
 	
 	void setPreference(String key, String value);
+	
+	void removePreference(String key);
 
 	Set<CyEdge> getSelectedEdges(CyNetwork network);
 

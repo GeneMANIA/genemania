@@ -21,6 +21,7 @@ package org.genemania.plugin.cytoscape3.controllers;
 import java.awt.Color;
 import java.lang.reflect.Type;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,7 +98,6 @@ import org.genemania.plugin.model.impl.QueryAttributeNetworkImpl;
 import org.genemania.plugin.model.impl.ViewStateImpl;
 import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.SessionManager;
-import org.genemania.plugin.task.TaskDispatcher;
 import org.genemania.plugin.util.TaskMonitorProgressReporter;
 import org.genemania.type.CombiningMethod;
 import org.genemania.util.ChildProgressReporter;
@@ -118,6 +118,7 @@ import okhttp3.Response;
 
 public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesController {
 	
+	private static final String READ_TIMEOUT = "search.timeout.seconds";
 	private static final int MIN_CATEGORIES = 10;
 	private static final double Q_VALUE_THRESHOLD = 0.1;
 
@@ -128,25 +129,19 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 	private final CytoscapeUtils cytoscapeUtils;
 	private final GeneMania plugin;
 	private final NetworkUtils networkUtils;
-	private final TaskDispatcher taskDispatcher;
 	
-	private final OkHttpClient httpClient;
+	private OkHttpClient httpClient;
+	
+	private int readTimeout;
 
 	public RetrieveRelatedGenesControllerImpl(
 			GeneMania plugin,
 			CytoscapeUtils cytoscapeUtils,
-			NetworkUtils networkUtils,
-			TaskDispatcher taskDispatcher
+			NetworkUtils networkUtils
 	) {
 		this.plugin = plugin;
 		this.cytoscapeUtils = cytoscapeUtils;
 		this.networkUtils = networkUtils;
-		this.taskDispatcher = taskDispatcher;
-		
-		// Avoid creating several instances
-		httpClient = new OkHttpClient.Builder()
-				.readTimeout(2, TimeUnit.MINUTES)
-				.build();
 	}
 	
 	@Override
@@ -547,6 +542,35 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 		}
 	}
 	
+	private OkHttpClient getHttpClient() {
+		// Avoid creating several instances, but create a new one if the timeout property has changed
+		int newReadTimeout = getReadTimeoutValue();
+		
+		if (httpClient == null || readTimeout != newReadTimeout) {
+			readTimeout = newReadTimeout;
+			
+			httpClient = new OkHttpClient.Builder()
+					.connectTimeout(30, TimeUnit.SECONDS)
+					.readTimeout(readTimeout, TimeUnit.SECONDS)
+					.build();
+		}
+		
+		return httpClient;
+	}
+	
+	private int getReadTimeoutValue() {
+		try {
+			String value = cytoscapeUtils.getPreference(READ_TIMEOUT);
+			
+			if (value != null)
+				return (int) Float.parseFloat(value);
+		} catch (Exception e) {
+			LogUtils.log(getClass(), e);
+		}
+		
+		return 0; // No timeout!
+	}
+	
 	private class RunGeneManiaTask extends AbstractTask implements ObservableTask {
 
 		private final String SEARCH_TAG = "search";
@@ -682,9 +706,14 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				Response response = null;
 				
 				try {
-					response = httpClient.newCall(request).execute();
+					response = getHttpClient().newCall(request).execute();
+				} catch (SocketTimeoutException e) {
+					if (!cancelled)
+						throw new SocketTimeoutException("Read Timeout: "
+								+ "Please try again with fewer genes "
+								+ "or increase the value of the GeneMANIA property '" + READ_TIMEOUT + "'.");
 				} catch (SocketException e) {
-					if (!cancelled) // This SocketException may be fired when
+					if (!cancelled) // This SocketException may be fired
 						throw e;
 				}
 				
@@ -762,7 +791,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 					.get()
 					.tag(VERSION_TAG)
 					.build();
-			Response response = httpClient.newCall(request).execute();
+			Response response = getHttpClient().newCall(request).execute();
 			String json = response.body().string();
 			
 			Gson gson = new Gson();
@@ -870,21 +899,23 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 		public void cancel() {
 			super.cancel();
 			
-			try {
-				List<Call> allCalls = 
-						Stream.concat(
-								httpClient.dispatcher().queuedCalls().stream(),
-								httpClient.dispatcher().runningCalls().stream()
-						).collect(Collectors.toList());
-				
-				for (Call call : allCalls) {
-					Object tag = call.request().tag();
+			if (httpClient != null) {
+				try {
+					List<Call> allCalls = 
+							Stream.concat(
+									httpClient.dispatcher().queuedCalls().stream(),
+									httpClient.dispatcher().runningCalls().stream()
+							).collect(Collectors.toList());
 					
-					if (SEARCH_TAG.equals(tag) || VERSION_TAG.equals(tag))
-						call.cancel();
+					for (Call call : allCalls) {
+						Object tag = call.request().tag();
+						
+						if (SEARCH_TAG.equals(tag) || VERSION_TAG.equals(tag))
+							call.cancel();
+					}
+				} catch (Exception e) {
+					LogUtils.log(getClass(), e);
 				}
-			} catch (Exception e) {
-				LogUtils.log(getClass(), e);
 			}
 		}
 	}

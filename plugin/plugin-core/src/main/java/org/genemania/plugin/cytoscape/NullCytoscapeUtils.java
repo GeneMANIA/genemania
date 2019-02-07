@@ -246,4 +246,8 @@ public class NullCytoscapeUtils implements CytoscapeUtils {
 	@Override
 	public void setPreference(String key, String value) {
 	}
+	
+	@Override
+	public void removePreference(String key) {
+	}
 }

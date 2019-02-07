@@ -60,7 +60,10 @@ import okhttp3.OkHttpClient;
 public class OrganismManager {
 
 	private static final String ORGANISMS_SER = "organisms.ser";
-	private static final String CACHE_EXPIRES = "organisms.cache.expires"; // in HOURS, 0 or less means no cache
+	
+	/** @deprecated **/
+	private static final String OLD_CACHE_EXPIRES = "organisms.cache.expires";
+	private static final String CACHE_EXPIRES = "organisms.cache.expires.hours"; // 0 or less means no cache
 	
 	private boolean initialized;
 	private boolean offline;
@@ -205,7 +208,7 @@ public class OrganismManager {
 	private void loadRemoteOrganismsFromCache() {
 		remoteOrganisms.clear();
 		
-		final long expires = getCacheExpiresValue();
+		final int expires = getCacheExpiresValue();
 		
 		if (expires <= 0)
 			return; // Ignore cache!
@@ -307,12 +310,20 @@ public class OrganismManager {
 		});
 	}
 	
-	private long getCacheExpiresValue() {
+	private int getCacheExpiresValue() {
 		try {
-			String value = cytoscapeUtils.getPreference(CACHE_EXPIRES);
+			// Convert the old property name to the new one, if it exists:
+			String value = cytoscapeUtils.getPreference(OLD_CACHE_EXPIRES);
+			
+			if (value != null) {
+				cytoscapeUtils.setPreference(CACHE_EXPIRES, value);
+				cytoscapeUtils.removePreference(OLD_CACHE_EXPIRES);
+			} else {
+				value = cytoscapeUtils.getPreference(CACHE_EXPIRES);
+			}
 			
 			if (value != null)
-				return Long.parseLong(value);
+				return (int) Float.parseFloat(value);
 		} catch (Exception e) {
 			LogUtils.log(getClass(), e);
 		}

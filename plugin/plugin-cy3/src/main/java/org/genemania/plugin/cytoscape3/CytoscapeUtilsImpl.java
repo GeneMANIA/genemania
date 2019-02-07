@@ -287,6 +287,16 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 		}
 	}
 	
+	@Override
+	public void removePreference(String key) {
+		synchronized (prefsMutex) {
+			CyProperty<Properties> prefs = getPreferences();
+			
+			if (prefs != null)
+				prefs.getProperties().remove(key);
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	private CyProperty<Properties> getPreferences() {
 		CyProperty<Properties> cyProps = null;

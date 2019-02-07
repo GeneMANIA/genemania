@@ -153,7 +153,7 @@ public class CyActivator extends AbstractCyActivator {
 		registerLayoutAlgorithms(bc, fdLayout);
 		
 		RetrieveRelatedGenesController controller =
-				new RetrieveRelatedGenesControllerImpl(geneMania, cytoscapeUtils, networkUtils, taskDispatcher);
+				new RetrieveRelatedGenesControllerImpl(geneMania, cytoscapeUtils, networkUtils);
 
 		Map<String, String> props;
 		{
