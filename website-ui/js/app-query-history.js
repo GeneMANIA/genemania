@@ -108,6 +108,11 @@ function( util, Result, io, ngCy ){ return function( Query ){
   // search using this query, thereby superseding the previous query (i.e. this is current)
   qfn.search = function(){
     var query = this;
+
+    if( query.result && query.result.searching ){
+      return; // then let the existing query continue running...
+    }
+
     var result = query.result = new Result({
       query: query
     });
@@ -120,16 +125,6 @@ function( util, Result, io, ngCy ){ return function( Query ){
 
     if( true || initSplash ){ // always collapse for now
       this.collapseHistory();
-    }
-  };
-
-  qfn.searchOrCancel = function(){
-    var query = this;
-
-    if( query.result ){
-      query.result.cancel();
-    } else {
-      query.search();
     }
   };
 
