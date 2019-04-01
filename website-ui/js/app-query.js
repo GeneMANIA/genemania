@@ -116,7 +116,7 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
 
     if( !qfn.historyInitLoaded ){
       io('queries').read().then(function( qJson ){
-        qfn.historyExpanded = qJson && qJson.history && qJson.history.length > 0;
+        qfn.historyExpanded = qJson && qJson.history && qJson.history.length > 0 && query.result == null;
         qfn.historyInitLoaded = true;
 
         PubSub.publish('query.historyLoaded');
