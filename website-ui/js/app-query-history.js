@@ -53,8 +53,12 @@ function( util, Result, io, ngCy ){ return function( Query ){
 
   };
 
-  qfn.succeed = function( historyEntry ){
+  qfn.succeed = function( historyEntry, updateUrl ){
     var hEnt = historyEntry;
+
+    if( updateUrl === undefined ){
+      updateUrl = true;
+    }
 
     var sameDataVer = this.version.dbVersion === historyEntry.version.dbVersion;
 
@@ -72,6 +76,10 @@ function( util, Result, io, ngCy ){ return function( Query ){
     qfn.splashed = true;
 
     this.collapseHistory();
+
+    if( updateUrl ){
+      newQuery.updateLink();
+    }
 
     PubSub.publish('query.succeed', newQuery);
     PubSub.publish('query.fromHistory', newQuery);
@@ -126,6 +134,14 @@ function( util, Result, io, ngCy ){ return function( Query ){
     if( true || initSplash ){ // always collapse for now
       this.collapseHistory();
     }
+
+    this.updateLink();
+  };
+
+  qfn.clearResult = function(){
+    this.result = null;
+
+    PubSub.publish('query.clearResult', this);
   };
 
   // get search params as new json obj

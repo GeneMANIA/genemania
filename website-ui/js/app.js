@@ -67,10 +67,21 @@ app.controller('SplashCtrl', ['$scope', 'updateScope', 'Query', function( $scope
     updateScope();
   });
 
-  PubSub.promise('query.search').then(function(){
+  var splash = function(){
     $scope.splashed = true;
 
     updateScope();
-  });
+  };
+
+  var unsplash = function(){
+    $scope.splashed = false;
+
+    updateScope();
+  };
+
+  PubSub.subscribe('query.search', splash);
+  PubSub.subscribe('query.succeed', splash);
+
+  PubSub.subscribe('query.clearResult', unsplash);
 
 } ]);

@@ -14,6 +14,20 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
   var lastOrgId;
   var stats;
 
+  window.addEventListener('popstate', function(e){
+    var params = e.state;
+    var updateUrl = false; // it's already updated by pop
+
+    if( params != null ){
+      query.succeed({
+        version: version,
+        params: params
+      }, updateUrl);
+    } else {
+      query.clearResult();
+    }
+  });
+
   // when all resources are pulled in, the query is ready
   Promise.all([
 
@@ -95,8 +109,8 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
       self.maxGenes = +params.maxGenes;
       self.maxAttrs = +params.maxAttrs;
     } else {
-      self.maxGenes = 20;
-      self.maxAttrs = 10;
+      self.maxGenes = config.defaultMaxGenes;
+      self.maxAttrs = config.defaultMaxAttrs;
     }
 
     self.setOrganism( self.organism, false ); // update org related deps
@@ -132,6 +146,15 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
   };
   var q = Query;
   var qfn = q.prototype;
+
+  qfn.areAdvancedOptionsCustomized = function(){
+    return (
+      this.maxAttrs !== config.defaultMaxAttrs
+      || this.maxGenes !== config.defaultMaxGenes
+      || this.weighting.value !== config.networks.defaultWeighting.value
+      || this.networks.some(function(net){ return net.defaultSelected !== net.selected; })
+    );
+  };
 
   // ref some stuff into query
   qfn.weightings = config.networks.weightings; // flat list of weighting types
@@ -294,7 +317,7 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
         }
 
         if( vars.g ){
-          var genes = vars.g.replace(/\|/g, '\n');
+          var genes = vars.g.replace(/\||\/|_/g, '\n');
 
           self.setGenes( genes );
         }
@@ -339,7 +362,7 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
           self.setOrganism( org );
         }
 
-        var genes = genesSpec.replace(/\|/g, '\n').replace(/\//g, '\n');
+        var genes = genesSpec.replace(/\||\/|_/g, '\n');
 
         if( genes ){
           self.setGenes( genes );
@@ -355,6 +378,42 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
       console.error('The permalink could not be parsed');
       console.error( err );
     }
+  };
+
+  qfn.updateLink = function(){
+    var customized = this.areAdvancedOptionsCustomized();
+
+    var queryHistorySupported = window.history != null && window.history.pushState != null;
+
+    var params = this.params();
+
+    var genes = this.geneNames();
+
+    var geneTitleLimit = 3;
+
+    var title =  [
+      genes.slice(0, geneTitleLimit).join(' ') + (genes.length > geneTitleLimit ? '...' : ''),
+      this.organism.name,
+      'GeneMANIA',
+    ].join(' : ');
+
+    var root = tomcatContextPath();
+    var org = this.organism.alias.replace(' ', '-').toLowerCase();
+    var pre = root + (root ? '' : '/') ;
+    var url = pre + 'search/' + org + '/' + genes.join('/');
+
+    if( customized ){
+      url = pre;
+      title += ' advanced search';
+    }
+
+    if( queryHistorySupported ){
+      // angular breaks the proper way to do this
+      // change to angular to make things work properly marked by NGBROKEN comment
+      history.pushState(params, title, url);
+    }
+
+    window.document.title = title;
   };
 
   // inject the individual query submodules
@@ -423,6 +482,7 @@ function( $scope, updateScope, Query ){
   PubSub.subscribe('query.removingNetwork', updateScope);
   PubSub.subscribe('query.addingNetwork', updateScope);
   PubSub.subscribe('query.addNetwork', updateScope);
+  PubSub.subscribe('query.clearResult', updateScope);
 
   PubSub.subscribe('ready', updateScope);
 

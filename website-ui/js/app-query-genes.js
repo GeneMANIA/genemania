@@ -231,5 +231,9 @@ function( util ){ return function( Query ){
     PubSub.publish('query.collapseGenes', this);
   };
 
+  qfn.geneNames = function(){
+    return this.genesText.split('\n').map(function(g){ return g.trim(); });
+  };
+
 
 } } ]);
