@@ -214,11 +214,15 @@ public class Generic2LuceneExporter {
 							exportGene(writer, parts);
 							long nodeId = Long.parseLong(parts[4]);
 							nodes.add(nodeId);
-
-							long namingSourceId = Long.parseLong(parts[3]);
-							if (namingSourceId == entrezNamingSourceId) {
-								externalIds.put(nodeId, parts[1]);
-								externalNamingSourceIds.put(nodeId, namingSourceId);
+							try{	
+								long namingSourceId = Long.parseLong(parts[3]);
+								if (namingSourceId == entrezNamingSourceId) {
+									externalIds.put(nodeId, parts[1]);
+									externalNamingSourceIds.put(nodeId, namingSourceId);
+								}		
+							} catch(NumberFormatException e){
+								System.out.println("Number format error:"+parts[3]+",Nodeid:" +parts[4]+  ",Organismid:" + parts[5]);
+								return true;
 							}
 						}
 						return true;
