@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.cytoscape.util.swing.TextIcon;
+
 public abstract class IconUtil {
 	
 	public static final String GENEMANIA_LOGO = "a";

@@ -34,6 +34,7 @@ import javax.swing.SwingUtilities;
 import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.util.swing.TextIcon;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.FinishStatus;
 import org.cytoscape.work.ObservableTask;
@@ -61,7 +62,6 @@ import org.genemania.plugin.parsers.Query;
 import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.view.components.WrappedOptionPane;
 import org.genemania.plugin.view.util.IconUtil;
-import org.genemania.plugin.view.util.TextIcon;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.type.ScoringMethod;
 

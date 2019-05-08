@@ -85,6 +85,7 @@ import org.cytoscape.application.swing.search.NetworkSearchTaskFactory;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.IconManager;
 import org.cytoscape.util.swing.LookAndFeelUtil;
+import org.cytoscape.util.swing.TextIcon;
 import org.genemania.domain.InteractionNetwork;
 import org.genemania.domain.Organism;
 import org.genemania.plugin.NetworkUtils;
@@ -95,7 +96,6 @@ import org.genemania.plugin.model.impl.InteractionNetworkGroupImpl;
 import org.genemania.plugin.model.impl.WeightingMethod;
 import org.genemania.plugin.view.NetworkSelectionPanel;
 import org.genemania.plugin.view.util.IconUtil;
-import org.genemania.plugin.view.util.TextIcon;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.type.CombiningMethod;
 

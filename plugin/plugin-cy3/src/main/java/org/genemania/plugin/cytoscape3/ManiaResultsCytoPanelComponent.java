@@ -31,6 +31,7 @@ import javax.swing.JPanel;
 
 import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.util.swing.TextIcon;
 import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
@@ -38,7 +39,6 @@ import org.genemania.plugin.controllers.ManiaResultsController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.view.ManiaResultsPanel;
-import org.genemania.plugin.view.util.TextIcon;
 import org.genemania.plugin.view.util.UiUtils;
 
 public class ManiaResultsCytoPanelComponent extends JPanel implements CytoPanelComponent2 {

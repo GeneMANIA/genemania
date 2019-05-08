@@ -182,7 +182,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 	private boolean showDownloadDialog(ProgressReporter progress) throws ApplicationException {
 		final DownloadDialog dialog = new DownloadDialog(
 				taskDispatcher.getTaskDialog(),
-				Strings.default_title,
+				Strings.downloadDialog_title,
 				Strings.dataUpdateDownload_label,
 				dataSetManager,
 				uiUtils,
@@ -384,7 +384,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 			if (paths.size() == 0) {
 				final DownloadDialog dialog = new DownloadDialog(
 						taskDispatcher.getTaskDialog(),
-						Strings.default_title,
+						Strings.downloadDialog_title,
 						Strings.missingData_prompt,
 						dataSetManager,
 						uiUtils,

@@ -301,6 +301,7 @@ public class Strings extends AbstractStrings {
 	
 	public static String maniaResultsAttributesButton_label;
 	
+	public static String downloadDialog_title;
 	public static String downloadDialogDownloadButton_label;
 	public static String downloadDialogCancelButton_label;
 	public static String downloadDialogSelectButton_label;

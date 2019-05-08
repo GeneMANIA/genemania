@@ -91,15 +91,13 @@ public class SessionManagerImpl extends AbstractSessionManager
 		// Don't want this to run on the same thread as the session load progress dialog 
 		// because there is risk of a UI deadlock between modal dialogs.
 		sessionLoadExecutor.submit(() -> {
-			String path = cytoscapeUtils.getSessionProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY);
-			final File dataSourcePath;
+			String version = findLocalDataVersion(evt.getLoadedSession().getNetworks());
 			
-			if (path == null) {
-				String version = findLocalDataVersion(evt.getLoadedSession().getNetworks());
-				dataSourcePath = new File("gmdata-" + version);
-			} else {
-				dataSourcePath = new File(path);
-			}
+			if (version == null)
+				return; // The session does not contain GeneMANIA data, no need to reconstruct the networks.
+			
+			String path = cytoscapeUtils.getSessionProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY);
+			File dataSourcePath = path == null ? new File("gmdata-" + version): new File(path);
 			
 			GeneManiaTask task = new GeneManiaTask(Strings.sessionChangeListener_title) {
 				@Override

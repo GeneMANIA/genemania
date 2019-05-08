@@ -3,7 +3,7 @@
 	<parent>
         <groupId>org.genemania</groupId>
         <artifactId>plugin-parent</artifactId>
-        <version>3.5.1</version>
+        <version>3.5.2</version>
         <relativePath>..</relativePath>
 	</parent>
     <properties>
@@ -113,8 +113,8 @@
 		</dependency>
 		<dependency>
             <groupId>org.uispec4j</groupId>
-            <artifactId>uispec4j</artifactId>
-            <version>2.4</version>
+		    <artifactId>uispec4j</artifactId>
+		    <version>2.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
