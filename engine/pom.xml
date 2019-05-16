@@ -64,7 +64,22 @@
             <artifactId>mtj</artifactId>
             <version>0.9.14d</version>
         </dependency>
-
+	 <dependency>
+	       <groupId>com.googlecode.netlib-java</groupId>
+	       <artifactId>netlib-java</artifactId>
+	 	<version>0.9.3</version>
+	</dependency> 
+	<!-- <dependency>
+  		<groupId>com.github.fommil.netlib</groupId>
+  		<artifactId>all</artifactId>
+  		<version>1.1.2</version>
+  		<type>pom</type>
+	</dependency> -->
+	<dependency>
+		<groupId>net.sourceforge.f2j</groupId>
+		<artifactId>arpack_combined_all</artifactId>
+		<version>0.1</version>
+	</dependency>	
         <dependency>
             <artifactId>opencsv</artifactId>
             <groupId>net.sf.opencsv</groupId>
@@ -115,7 +130,7 @@
                           <goal>install-file</goal>
                       </goals>
                   </execution>
-                  <execution>
+		  <execution>
                       <id>install-external-netlib</id>
                       <phase>clean</phase>
                       <configuration>
@@ -130,7 +145,7 @@
                       <goals>
                           <goal>install-file</goal>
                       </goals>
-                  </execution>
+		  </execution> 
                   <execution>
                       <id>install-external-arpack</id>
                       <phase>clean</phase>
