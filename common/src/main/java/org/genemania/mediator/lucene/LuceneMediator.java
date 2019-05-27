@@ -402,13 +402,16 @@ public class LuceneMediator {
             });
         }
         if (namingSource == null) {
+	    //in the final step of the build it keeps crashing because one of the naming sources is empty
+	    if(!document.get(LuceneMediator.GENE_NAMINGSOURCE_ID).equals("")){
             final long namingSourceId = Long.parseLong(document.get(LuceneMediator.GENE_NAMINGSOURCE_ID));
             namingSource = (GeneNamingSource) Enhancer.create(GeneNamingSource.class, new LazyLoader() {
                 public Object loadObject() throws Exception {
                     return createNamingSource(namingSourceId);
                 }
             });
-        }
+	  }
+	}
         Gene gene = new Gene();
         gene.setId(Long.parseLong(document.get(LuceneMediator.GENE_ID)));
         gene.setSymbol(document.get(LuceneMediator.GENE_SYMBOL));
