@@ -132,6 +132,10 @@ public class NodeDegreeComputer extends AbstractEngineApp {
         Collection<Long> attributeGroupIds = getAllAttributeGroups(organism);
 
         for (long attributeGroupId: attributeGroupIds) {
+		//In the NodeDegreeComputer step it is crashing because it can't find the attribute
+		//files (the attributes files aren't being built until 2 or 3 steps after.)
+		//try and catch the file not found error and move one to see if it will complete
+	    try{	    
             AttributeData groupData = cache.getAttributeData(Data.CORE, organism.getId(), attributeGroupId);
             System.out.println(groupData.getData().toString());
 
@@ -156,6 +160,12 @@ public class NodeDegreeComputer extends AbstractEngineApp {
             }
 
             matrix.multAdd(weights, degreesInOrganism.getData());
+	    } catch (Exception e){
+		System.out.println("Unable to find data cache for given attribute and organism");
+	    	System.out.println("Data core: " + Data.CORE);
+	    	System.out.println("Organism id: " +  organism.getId());
+	    	System.out.println("attributeGroupsId: " + attributeGroupId);
+	    }
         }
     }
 
