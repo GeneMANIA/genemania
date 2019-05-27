@@ -82,8 +82,14 @@ public class AttributeGroups extends Data {
     // TODO: can optimize reverse lookups by maintaining maps
     public int getIndexForAttributeId(long groupId, long attributeId) throws ApplicationException {
         int index = attributeGroups.get(groupId).indexOf(attributeId);
-        if (index < 0) {
-            throw new ApplicationException(String.format("attribute id %d in group %d not found", attributeId, groupId));
+        
+	//This stops the build and creation of attribute files.
+	//Trying to comment out exception being called to see if 
+	//attribute files created with missing mappings work
+	if (index < 0) {
+        	//System.out.println(String.format("attribute id %d in group %d not found",attributeId, groupId));
+		index = 0;
+	     	throw new ApplicationException(String.format("attribute id %d in group %d not found", attributeId, groupId));
         }
         return index;
     }
