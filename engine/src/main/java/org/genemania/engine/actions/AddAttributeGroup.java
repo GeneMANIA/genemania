@@ -154,18 +154,29 @@ public class AddAttributeGroup {
         
         AttributeData attributeData = cache.getAttributeData(request.getNamespace(), request.getOrganismId(), request.getAttributeGroupId());
         NodeIds nodeIds = cache.getNodeIds(request.getOrganismId());
-        AttributeGroups attributeGroups = cache.getAttributeGroups(request.getNamespace(), request.getOrganismId());
+        //System.out.println(nodeIds.getNodeIds().toString());
+	AttributeGroups attributeGroups = cache.getAttributeGroups(request.getNamespace(), request.getOrganismId());
         Matrix data = attributeData.getData();
+
+	//System.out.println(attributeGroups.getKey().toString());
+	//System.out.println(data.getKey().toString());
 
         for (List<Long> assocs: request.getNodeAttributeAssociations()) {
             if (assocs != null && assocs.size() > 1) {
+		    //System.out.println(String.format("length of associations:%d", assocs.size()));
                 long nodeId = assocs.get(0);
                 for (int k=1; k<assocs.size(); k++) {
                     long attributeId = assocs.get(k);
 
+		    //System.out.println(String.format("nodeId: %d, attributeid: %d",nodeId, attributeId));
+
                     int i = nodeIds.getIndexForId(nodeId);
-                    int j = attributeGroups.getIndexForAttributeId(request.getAttributeGroupId(), attributeId);
-                    data.set(i, j, 1);            
+		    try{
+                    	int j = attributeGroups.getIndexForAttributeId(request.getAttributeGroupId(), attributeId);
+                    	data.set(i, j, 1);
+			} catch (Exception e){
+				System.out.println(String.format("Unable to get index for attribute id: %d, (associated with nodeid: %d)",attributeId,nodeId));
+			}		
                 }
             }
          }
