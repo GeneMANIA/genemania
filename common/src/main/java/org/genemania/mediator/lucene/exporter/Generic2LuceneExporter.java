@@ -221,7 +221,8 @@ public class Generic2LuceneExporter {
 									externalNamingSourceIds.put(nodeId, namingSourceId);
 								}		
 							} catch(NumberFormatException e){
-								System.out.println("Number format error:"+parts[3]+",Nodeid:" +parts[4]+  ",Organismid:" + parts[5]);
+								System.out.println("Number format error(missing naming source id):"+parts[3]+",Nodeid:" +parts[4]+  ",Organismid:" + parts[5]);
+								System.out.println("Whole line is:" + line);
 								return true;
 							}
 						}
