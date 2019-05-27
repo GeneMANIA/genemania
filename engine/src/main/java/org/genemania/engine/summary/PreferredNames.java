@@ -62,7 +62,11 @@ public class PreferredNames {
 		HashMap<String, String> map = new HashMap<String, String>();
 		
 		for (Gene gene: genes) {
-			map.put(gene.getNamingSource().getName(), gene.getSymbol());
+			//In drosophila build it crashes in final step because one of the naming sources
+			// is an empty string
+			if(gene.getNamingSource() != null && gene.getNamingSource().getName() != ""){
+				map.put(gene.getNamingSource().getName(), gene.getSymbol());
+			}
 		}
 		
 		for (String source: preferredSources) {
