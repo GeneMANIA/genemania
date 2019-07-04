@@ -54,18 +54,19 @@ public class AttributesSummarizer implements Summarizer {
     }
 
     private void summarizeGroup(AttributeGroup group) throws ApplicationException {
-
         List<Attribute> attributes = dataConnector.getAttributeMediator().findAttributesByGroup(organism.getId(), group.getId());
         AttributeData attributeData = dataConnector.getCache().getAttributeData(Data.CORE, organism.getId(), group.getId());
         Matrix data = attributeData.getData();
 
         Vector sums = data.columnSums();
 
-        for (int attributeIndex=0; attributeIndex < attributes.size(); attributeIndex++) {
-
-            Attribute attribute = attributes.get(attributeIndex);
-            long count = Math.round(sums.get(attributeIndex));
-            attributesReporter.write("" + group.getId(), group.getName(), "" + attribute.getId(), attribute.getName(), "" + count);
+		for (int attributeIndex = 0; attributeIndex < attributes.size(); attributeIndex++) {
+			Attribute attribute = attributes.get(attributeIndex);
+            
+            if (attribute != null) {
+	            long count = (attributeIndex < sums.getSize()) ? Math.round(sums.get(attributeIndex)) : 0;
+	            attributesReporter.write("" + group.getId(), group.getName(), "" + attribute.getId(), attribute.getName(), "" + count);
+            }
         }
     }
 
