@@ -417,6 +417,7 @@
 				<genemaniaMqReplies>gm_replies</genemaniaMqReplies>
 				<sahiTestsWorkingDirectory>${env.HOME}/genemania/qa</sahiTestsWorkingDirectory>
 				<emailRecipient>genemania.local@gmail.com</emailRecipient>
+				<emailPassword>SET_ME_IF_YOU_WANT_EMAIL</emailPassword>
 			</properties>
 		</profile>
 	</profiles>
