@@ -31,9 +31,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.LazyLoader;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
@@ -45,6 +42,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.PhraseQuery;
@@ -52,7 +50,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.genemania.domain.Gene;
@@ -68,6 +65,9 @@ import org.genemania.domain.OntologyCategory;
 import org.genemania.domain.Organism;
 import org.genemania.domain.Statistics;
 import org.genemania.domain.Tag;
+
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.LazyLoader;
 
 public class LuceneMediator {
     private static final String DEFAULT_FIELD                     = "all";
@@ -938,6 +938,7 @@ public class LuceneMediator {
     }
     
     public static boolean indexExists(File path) {
+    	System.out.println("\t.. " + path);
     	try {
     		FSDirectory directory = FSDirectory.open(path);
     		try {
