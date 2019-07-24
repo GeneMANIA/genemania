@@ -408,7 +408,7 @@
 				<genemaniaGeneIndexDir>${env.HOME}/genemania/genemania-data/index</genemaniaGeneIndexDir>
 				<genemaniaDbHost>localhost</genemaniaDbHost>
 				<genemaniaDbName>genemania</genemaniaDbName>
-				<genemaniaGraphCacheDir>${env.HOME}/genemania/apache-tomcat/webapps/genemania/WEB-INF/classes</genemaniaGraphCacheDir>
+				<genemaniaGraphCacheDir>${env.CATALINA_HOME}/genemania/WEB-INF/classes</genemaniaGraphCacheDir>
 				<genemaniaHost>http://localhost:8080/genemania</genemaniaHost>
 				<deployDir>${env.HOME}/genemania/apache-tomcat/webapps/genemania</deployDir>
 				<GA_ACCT_NR>GOOGLE_ANALYTICS_TOKEN_GOES_HERE</GA_ACCT_NR>
