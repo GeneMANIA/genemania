@@ -406,6 +406,7 @@
 			</activation>
 			<properties>
 				<genemaniaGeneIndexDir>${env.HOME}/genemania/genemania-data/index</genemaniaGeneIndexDir>
+				<genemaniaCacheDir>${env.HOME}/genemania/genemania-data/cache</genemaniaCacheDir>
 				<genemaniaDbHost>localhost</genemaniaDbHost>
 				<genemaniaDbName>genemania</genemaniaDbName>
 				<genemaniaGraphCacheDir>${env.CATALINA_HOME}/webapps/genemania/WEB-INF/classes</genemaniaGraphCacheDir>
