@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.genemania.broker;
+package org.genemania.connector;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -40,6 +40,8 @@ import org.genemania.util.BrokerUtils;
 
 public class SyncWorker {
 
+	public static final String APP_VER = "appVer";
+	
 	private static Logger LOG = Logger.getLogger(SyncWorker.class);
 
 	private String appVer;
@@ -82,7 +84,7 @@ public class SyncWorker {
 		// read config data
 		ApplicationConfig config = ApplicationConfig.getInstance();
 
-		appVer = config.getProperty(Constants.CONFIG_PROPERTIES.APP_VER);
+		appVer = config.getProperty(APP_VER);
 		cacheDir = config.getProperty(org.genemania.Constants.CONFIG_PROPERTIES.CACHE_DIR);
 	}
 
@@ -94,10 +96,9 @@ public class SyncWorker {
 
         EnrichmentEngineRequestDto eRequestDto = BrokerUtils.
                 buildEnrichmentRequestFrom(rgRequestDto, rgResponseDto, req.getOntologyId());
-        EnrichmentEngineResponseDto eResponseDto = null;
 
         try {
-        	ret.enrichment = eResponseDto = engine.computeEnrichment(eRequestDto);
+        	ret.enrichment = engine.computeEnrichment(eRequestDto);
         } catch (Exception e) {
             LOG.error("Failed to compute enrichment", e);
         }

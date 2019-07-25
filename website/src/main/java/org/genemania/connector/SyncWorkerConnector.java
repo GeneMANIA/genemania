@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.genemania.broker.SyncWorker;
 import org.genemania.dao.NetworkDao;
 import org.genemania.dao.NodeDao;
 import org.genemania.dao.OrganismDao;

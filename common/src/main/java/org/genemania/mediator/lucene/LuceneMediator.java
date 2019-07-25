@@ -938,7 +938,6 @@ public class LuceneMediator {
     }
     
     public static boolean indexExists(File path) {
-    	System.out.println("\t.. " + path);
     	try {
     		FSDirectory directory = FSDirectory.open(path);
     		try {

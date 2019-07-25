@@ -17,7 +17,6 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
 **Projects:**
  1. `common` : common APIs used amongst the projects
  1. `engine` : the GeneMANIA algorithm engine
- 1. `broker` : for communicating between the website and workers that use the engine
  1. `website` : the website backend (webservices etc)
  1. `adminweb` : the administrative interface for editing data used in the website
  1. `plugin` : the Cytoscape plugin/app

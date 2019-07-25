@@ -174,11 +174,10 @@ public class LuceneConnector {
 
 	// __[private helpers]_____________________________________________________
 	private static Searcher createSearcher(String indexPath) throws IOException {
-		System.out.println("\n(1) createSearcher: " + indexPath);
-		ArrayList<Searcher> searchers = new ArrayList<Searcher>();
+		ArrayList<Searcher> searchers = new ArrayList<>();
 		File indices = new File(indexPath);
 		File[] fileList = indices.listFiles();
-		System.out.println("(2) fileList: " + fileList);
+		
 		if (fileList == null) {
 			throw new IOException(
 					String

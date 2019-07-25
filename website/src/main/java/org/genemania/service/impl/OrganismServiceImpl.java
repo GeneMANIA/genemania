@@ -1,13 +1,11 @@
 package org.genemania.service.impl;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 
 import org.genemania.dao.OrganismDao;
 import org.genemania.domain.Organism;

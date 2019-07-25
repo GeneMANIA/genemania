@@ -13,7 +13,6 @@
     <modules>
         <module>common</module>
         <module>engine</module>
-        <module>broker</module>
         <module>website</module>
         <!-- disabled b/c it can be built separately (and outside of jenkins) <module>plugin</module> -->
         <!-- same <module>adminweb</module> -->
