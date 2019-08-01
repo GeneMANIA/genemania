@@ -34,6 +34,8 @@ import org.genemania.Constants;
 public class ApplicationConfig {
 
 	// __[static]______________________________________________________________
+	private static final String ENV_VAR_PREFIX = "GENEMANIA_";
+	
 	private static Log log = LogFactory.getLog(ApplicationConfig.class);
 	private static ApplicationConfig instance = new ApplicationConfig();
 
@@ -57,6 +59,11 @@ public class ApplicationConfig {
 
 	// __[public interface]____________________________________________________
 	public String getProperty(String key) {
-		return config.getString(key);
+		String val = System.getenv(ENV_VAR_PREFIX + toUnderscore(key));
+		return val != null ? val : config.getString(key);
+	}
+	
+	static String toUnderscore(String camelCase) {
+		return camelCase == null ? null : camelCase.replaceAll("([^_A-Z])([A-Z])", "$1_$2").toUpperCase();
 	}
 }
