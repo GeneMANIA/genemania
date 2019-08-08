@@ -60,6 +60,7 @@ public class ApplicationConfig {
 	// __[public interface]____________________________________________________
 	public String getProperty(String key) {
 		String val = System.getenv(ENV_VAR_PREFIX + toUnderscore(key));
+		log.error("\t . " + ENV_VAR_PREFIX + toUnderscore(key) + " : " + val);
 		return val != null ? val : config.getString(key);
 	}
 	
