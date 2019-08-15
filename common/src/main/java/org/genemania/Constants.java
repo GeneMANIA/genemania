@@ -86,7 +86,6 @@ public class Constants {
 		
 		public static final String LUCENE_INDEX_DIR = "luceneIndexDir";
 		public static final String NETWORK_CACHE_DIR = "networkCacheDir";
-		public static final String GRAPH_CACHE_DIR = "graphCacheDir";
 		public static final String FEEDBACK_FROM = "feedbackFrom";
 		public static final String FEEDBACK_EMAIL_HOST = "feedbackEmailHost";
 		public static final String SPARSIFICATION = "sparsification";
