@@ -212,6 +212,7 @@ public class LuceneDataSet extends DataSet {
 	}
 	
 	class LuceneMediatorProvider implements IMediatorProvider {
+		
 		private GeneMediator geneMediator;
 		private NetworkMediator networkMediator;
 		private NodeMediator nodeMediator;
@@ -219,10 +220,12 @@ public class LuceneDataSet extends DataSet {
 		private OntologyMediator ontologyMediator;
 		private AttributeMediator attributeMediator;
 		
+		@Override
 		public OrganismMediator getOrganismMediator() {
 			return new LuceneOrganismMediator(searcher, analyzer);
 		}
 		
+		@Override
 		public GeneMediator getGeneMediator() {
 			synchronized (this) {
 				if (geneMediator == null) {
@@ -232,6 +235,7 @@ public class LuceneDataSet extends DataSet {
 			return geneMediator;
 		}
 
+		@Override
 		public NetworkMediator getNetworkMediator() {
 			synchronized (this) {
 				if (networkMediator == null) {
@@ -241,6 +245,7 @@ public class LuceneDataSet extends DataSet {
 			return networkMediator;
 		}
 
+		@Override
 		public NodeMediator getNodeMediator() {
 			synchronized (this) {
 				if (nodeMediator == null) {
@@ -250,6 +255,7 @@ public class LuceneDataSet extends DataSet {
 			return nodeMediator;
 		}
 
+		@Override
 		public StatsMediator getStatsMediator() {
 			synchronized (this) {
 				if (statsMediator == null) {
@@ -259,6 +265,7 @@ public class LuceneDataSet extends DataSet {
 			return statsMediator;
 		}
 
+		@Override
 		public OntologyMediator getOntologyMediator() {
 			synchronized (this) {
 				if (ontologyMediator == null) {
@@ -288,8 +295,9 @@ public class LuceneDataSet extends DataSet {
 		}
 	}
 	
+	@Override
 	public List<DataDescriptor> getInstalledDataDescriptors() {
-		List<DataDescriptor> descriptors = new ArrayList<DataDescriptor>();
+		List<DataDescriptor> descriptors = new ArrayList<>();
 		String indexPath = getBasePath();
 		File indices = new File(indexPath);
 		for (File file : indices.listFiles()) {
@@ -344,10 +352,11 @@ public class LuceneDataSet extends DataSet {
 	}
 
 	public Set<Long> getOrganismsForIndex(String name) throws IOException {
-		final Set<Long> organisms = new HashSet<Long>();
+		final Set<Long> organisms = new HashSet<>();
 		String path = String.format("%s%s%s", getBasePath(), File.separator, name); //$NON-NLS-1$
 		FSDirectory directory = FSDirectory.open(new File(path));
 		final IndexSearcher searcher = new IndexSearcher(directory);
+		
 		try {
 			Query query = new TermQuery(new Term(LuceneMediator.TYPE, LuceneMediator.ORGANISM));
 			searcher.search(query, new AbstractCollector() {
@@ -479,6 +488,7 @@ public class LuceneDataSet extends DataSet {
 		} 
 	}
 
+	@Override
 	public void reload(ProgressReporter progress) throws IOException {
 		searcher = createSearcher(getBasePath());
 		if (!validateUserNetworks()) {
@@ -694,9 +704,11 @@ public class LuceneDataSet extends DataSet {
 		return document.get(targetField);
 	}
 
+	@Override
 	public List<Long> getNodeIds(long organismId) {
-		final List<Long> ids = new ArrayList<Long>();
+		final List<Long> ids = new ArrayList<>();
 		TermQuery query = new TermQuery(new Term(LuceneMediator.NODE_ORGANISM_ID, String.valueOf(organismId)));
+		
 		try {
 			searcher.search(query, new AbstractCollector() {
 				@Override
@@ -751,7 +763,7 @@ public class LuceneDataSet extends DataSet {
 	}
 
 	public void deleteOrganism(Organism organism) throws ApplicationException, DataStoreException {
-		Set<Long> organisms = new HashSet<Long>();
+		Set<Long> organisms = new HashSet<>();
 		organisms.add(organism.getId());
 		File cache = new File(getFullPath(CACHE_PATH));
 		deleteCache2(cache, organisms);

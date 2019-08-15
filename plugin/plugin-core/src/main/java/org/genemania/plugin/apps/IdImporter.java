@@ -119,7 +119,6 @@ public class IdImporter extends AbstractPluginApp {
 			} else {
 				fNamespace = Namespace.USER;
 			}
-
 		} catch (SAXException e) {
 			throw new ApplicationException(e);
 		} catch (IOException e) {

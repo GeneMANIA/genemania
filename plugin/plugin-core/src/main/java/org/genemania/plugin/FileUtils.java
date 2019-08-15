@@ -74,35 +74,40 @@ public class FileUtils {
 		outFile.getParentFile().mkdirs();
 		outFile.createNewFile();
 		FileOutputStream output = new FileOutputStream(outFile);
+		
 		try {
 			try {
 				byte[] buffer = new byte[BUFFER_SIZE];
 				int length = input.read(buffer);
 				long totalRead = 0;
+				
 				while (length != -1) {
-					if (progress.isCanceled()) {
+					if (progress.isCanceled())
 						return null;
-					}
+					
 					output.write(buffer, 0, length);
 					totalRead += length;
+					
 					if (totalBytes == -1) {
 						progress.setDescription(String.format(Strings.downloadProgress2_status, totalRead / 1000));
 					} else {
 						progress.setProgress((int) (100.0 * totalRead / totalBytes));
 						progress.setDescription(String.format(Strings.downloadProgress_status, totalRead / 1000, totalBytes / 1000));
 					}
+					
 					length = input.read(buffer);
 				}
 			} finally {
 				output.close();
-				if (progress.isCanceled()) {
+				
+				if (progress.isCanceled())
 					outFile.delete();
-				}
 			}
 		} finally {
 			input.close();
 			progress.setDescription(""); //$NON-NLS-1$
 		}
+		
 		return new File(fullPath);
 	}
 	
@@ -112,10 +117,13 @@ public class FileUtils {
 
 	String determineFileName(URLConnection connection, File basePath) throws IOException {
 		String contentDisposition = connection.getHeaderField("Content-Disposition"); //$NON-NLS-1$
+		
 		if (contentDisposition != null) {
 			int index = contentDisposition.indexOf("filename="); //$NON-NLS-1$
+			
 			if (index > -1) {
 				String fileName = contentDisposition.substring(index + "filename=".length()); //$NON-NLS-1$
+				
 				if (fileName.length() >= 2 && fileName.startsWith("\"") && fileName.endsWith("\"")) { //$NON-NLS-1$ //$NON-NLS-2$
 					fileName = fileName.substring(1, fileName.length() - 1);
 				}
@@ -124,16 +132,19 @@ public class FileUtils {
 				}
 			}
 		}
+		
 		String[] parts = connection.getURL().getPath().split("/"); //$NON-NLS-1$
-		if (parts.length == 0) {
+		
+		if (parts.length == 0)
 			throw new IOException();
-		}
+		
 		return parts[parts.length - 1];
 	}
 	
 	Properties getMetadata(URL url) throws IOException {
 		URLConnection connection = getUrlConnection(url);
 		InputStream metadataStream = connection.getInputStream();
+		
 		try {
 			Properties properties = new Properties();
 			properties.load(metadataStream);
@@ -154,19 +165,20 @@ public class FileUtils {
 		return buffer.toString();
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void unzip(File zipPath, File destination, ProgressReporter progress) throws IOException {
 		Zip64File file = new Zip64File(zipPath);
+		
 		try {
 			int total = file.getFileEntries();
 			progress.setMaximumProgress(100);
 			List<FileEntry> entries = file.getListFileEntries();
 			int processed = 0;
 			progress.setStatus(String.format(Strings.unzip_status, zipPath.getName()));
+			
 			for (FileEntry entry : entries) {
-				if (progress.isCanceled()) {
+				if (progress.isCanceled())
 					return;
-				}
+				
 				processed++;
 				progress.setProgress((int) (100.0 * processed / total));
 				
@@ -175,6 +187,7 @@ public class FileUtils {
 				
 				String entryPath = String.format("%s%s%s", destination.getPath(), File.separator, name); //$NON-NLS-1$
 				File entryFile = new File(entryPath);
+				
 				if (entry.isDirectory()) {
 					entryFile.mkdirs();
 				} else {
@@ -190,16 +203,14 @@ public class FileUtils {
 
 	private void write(File destination, InputStream in) throws IOException {
 		try {
-			FileOutputStream out = new FileOutputStream(destination);
-			try {
+			try (FileOutputStream out = new FileOutputStream(destination)) {
 				byte[] buffer = new byte[BUFFER_SIZE];
 				int length = in.read(buffer, 0, buffer.length);
+				
 				while (length != -1) {
 					out.write(buffer, 0, length);
 					length = in.read(buffer, 0, buffer.length);
 				}
-			} finally {
-				out.close();
 			}
 		} finally {
 			in.close();
@@ -213,9 +224,9 @@ public class FileUtils {
 		}
 		
 		if (path.isDirectory()) {
-			for (File file : path.listFiles()) {
+			for (File file : path.listFiles())
 				delete(file);
-			}
+			
 			path.delete();
 		}
 	}
@@ -230,15 +241,13 @@ public class FileUtils {
 
 	public InputStream getUncompressedStream(File file) throws IOException {
 		try {
-			InputStream stream = new GZIPInputStream(new FileInputStream(file));
-			try {
+			try (InputStream stream = new GZIPInputStream(new FileInputStream(file))) {
 				stream.read();
 				return new GZIPInputStream(new FileInputStream(file));
-			} finally {
-				stream.close();
 			}
 		} catch (IOException e) {
 		}
+		
 		return new FileInputStream(file);
 	}
 	
@@ -248,18 +257,18 @@ public class FileUtils {
 		String url = String.format("%sschema-%s.txt", getDataUrl(), getSchemaVersion()); //$NON-NLS-1$
 		URLConnection connection = getUrlConnection(new URL(url));
 		connection.setUseCaches(false);
-		List<String> dataSets = new ArrayList<String>();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-		try {
+		List<String> dataSets = new ArrayList<>();
+		
+		
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
 			String line = reader.readLine();
+			
 			while (line != null) {
 				dataSets.add(line);
 				line = reader.readLine();
 			}
-			
-		} finally {
-			reader.close();
 		}
+		
 		return dataSets;
 	}
 	
@@ -299,10 +308,12 @@ public class FileUtils {
 	
 	Map<String, String> getDataSetDescriptions(Reader source) throws IOException {
 		Pattern pattern = Pattern.compile("([^#].*?)\\s*=\\s*(.*?)\\s*(#.*)?"); //$NON-NLS-1$
-		Map<String, String> descriptions = new HashMap<String, String>();
+		Map<String, String> descriptions = new HashMap<>();
 		BufferedReader reader = new BufferedReader(source);
+		
 		try {
 			String line = reader.readLine();
+			
 			while (line != null) {
 				Matcher matcher = pattern.matcher(line);
 				if (matcher.matches()) {
@@ -313,6 +324,7 @@ public class FileUtils {
 		} finally {
 			reader.close();
 		}
+		
 		return descriptions;
 	}
 

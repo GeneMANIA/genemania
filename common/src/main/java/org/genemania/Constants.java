@@ -69,7 +69,6 @@ public class Constants {
 		public static final int INVALID_LUCENE_INDEX = 19;
 		public static final int EMPTY_GENE_LIST = 20;
 		public static final int EMPTY_NETWORK_LIST = 21;
-		
 	}
 
 	public class KEYS {
@@ -81,7 +80,6 @@ public class Constants {
 		public static final String USER_NETWORKS_IN_SESSION = "user networks in session";
 		public static final String ORGANISM_USER_NETWORKS_MAP = "organism user networks map";
 		public static final String ORGANISMS_CACHE = "organisms cache";
-		
 	}
 	
 	public class CONFIG_PROPERTIES {

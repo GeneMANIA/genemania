@@ -129,6 +129,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 		return version.getBaseVersion().compareTo(minVersion) >= 0;
 	}
 
+	@Override
 	public void handleCheck() {
 		final boolean[] requiresConfiguration = new boolean[1];
 		GeneManiaTask task = new GeneManiaTask(Strings.dataUpdateCheck_title) {
@@ -141,6 +142,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 		handleConfiguration(requiresConfiguration[0]);
 	}
 
+	@Override
 	public void handleSwitch() {
 		try {
 			chooseDataSet(cytoscapeUtils.getFrame());
@@ -149,6 +151,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 		}
 	}
 
+	@Override
 	public void handleDownload() {
 		final boolean[] requiresConfiguration = new boolean[1];
 		GeneManiaTask task = new GeneManiaTask(Strings.dataUpdateDownload_title) {
@@ -228,13 +231,15 @@ public abstract class AbstractGeneMania implements GeneMania {
 			
 			Pattern pattern = Pattern.compile("gmdata-(.*)"); //$NON-NLS-1$
 			Matcher matcher = pattern.matcher(dataId);
+			
 			if (!matcher.matches()) {
 				// This shouldn't happen...
 				throw new ApplicationException(Strings.checkForUpdates_error);
 			}
-			Version version = Version.parse(matcher.group(1));
 			
+			Version version = Version.parse(matcher.group(1));
 			DataSet dataSet = dataSetManager.getDataSet();
+			
 			if (dataSet == null) {
 				ChildProgressReporter childProgress = new ChildProgressReporter(progress);
 				initializeData(cytoscapeUtils.getFrame(), childProgress, false);
@@ -243,12 +248,15 @@ public abstract class AbstractGeneMania implements GeneMania {
 			
 			// Check if the latest version has been downloaded but not active
 			File latestDataSet = null;
+			
 			for (File path : dataSetManager.getDataSetPaths()) {
 				matcher = pattern.matcher(path.getName());
-				if (!matcher.matches()) {
+				
+				if (!matcher.matches())
 					continue;
-				}
+				
 				Version otherVersion = Version.parse(matcher.group(1));
+				
 				if (version.isEquivalentTo(otherVersion)) {
 					latestDataSet = path;
 					break;
@@ -257,9 +265,10 @@ public abstract class AbstractGeneMania implements GeneMania {
 			
 			if (latestDataSet != null || dataSet != null && dataSet.getVersion().isEquivalentTo(version)) {
 				JOptionPane.showMessageDialog(taskDispatcher.getTaskDialog(), Strings.checkForUpdatesOk_label, Strings.checkForUpdates_title, JOptionPane.INFORMATION_MESSAGE);
-				if (dataSet == null) {
+				
+				if (dataSet == null)
 					loadDataSet(latestDataSet, progress, false, false);
-				}
+				
 				return false;
 			}
 			
@@ -288,9 +297,9 @@ public abstract class AbstractGeneMania implements GeneMania {
 			URL url = new URL(String.format("%s.zip", baseUrl)); //$NON-NLS-1$
 			File dataZipFile = fileUtils.download(url, path, progress);
 			
-			if (dataZipFile == null) {
+			if (dataZipFile == null)
 				return;
-			}
+			
 			File dataPath = unzipDataSet(dataZipFile, progress);
 			dataZipFile.delete();
 			loadDataSet(dataPath, progress, false, true);
@@ -310,7 +319,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 	}
 	
 	public void chooseDataSet(Container parent) throws ApplicationException {
-    	HashSet<String> extensions = new HashSet<String>();
+    	HashSet<String> extensions = new HashSet<>();
     	extensions.add("xml"); //$NON-NLS-1$
     	
 		File dataSourcePath = dataSetManager.getDataSourcePath();

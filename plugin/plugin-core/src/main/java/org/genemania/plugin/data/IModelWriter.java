@@ -28,6 +28,7 @@ import org.genemania.domain.Organism;
 import org.genemania.exception.ApplicationException;
 
 public interface IModelWriter {
+	
 	void addNetwork(InteractionNetwork network, InteractionNetworkGroup group) throws ApplicationException;
 	void addGroup(InteractionNetworkGroup group, Organism organism, String color) throws ApplicationException;
 	void addOrganism(Organism organism) throws ApplicationException;
