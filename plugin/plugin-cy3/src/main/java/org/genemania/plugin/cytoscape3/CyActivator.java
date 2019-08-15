@@ -64,7 +64,6 @@ import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.undo.UndoSupport;
 import org.genemania.plugin.FileUtils;
-import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape3.actions.AboutAction;
@@ -118,12 +117,11 @@ public class CyActivator extends AbstractCyActivator {
 		{
 			PropsReader propsReader = new PropsReader();
 			Properties props = new Properties();
-			props.setProperty("cyPropertyName", GeneMania.APP_CYPROPERTY_NAME);
+			props.setProperty("cyPropertyName", CytoscapeUtilsImpl.APP_CYPROPERTY_NAME);
 			registerService(bc, propsReader, CyProperty.class, props);
 		}
 		
 		UiUtils uiUtils = new UiUtils(iconManager);
-		FileUtils fileUtils = new CyFileUtils(streamUtil);
 		NetworkUtils networkUtils = new NetworkUtils();
 		CytoscapeUtilsImpl cytoscapeUtils = new CytoscapeUtilsImpl(
 				networkUtils, swingApplication, applicationManager,
@@ -137,6 +135,7 @@ public class CyActivator extends AbstractCyActivator {
 				taskManager, eventHelper,
 				applyPreferredLayoutTaskFactory, renderingEngineManager,
 				serviceRegistrar);
+		FileUtils fileUtils = new CyFileUtils(cytoscapeUtils, streamUtil);
 		DataSetManager dataSetManager = new DataSetManager();
 		OsgiTaskDispatcher taskDispatcher = new OsgiTaskDispatcher(uiUtils);
 		DefaultDataSetFactory luceneDataSetFactory = new DefaultDataSetFactory(dataSetManager, uiUtils, fileUtils,
@@ -517,7 +516,7 @@ public class CyActivator extends AbstractCyActivator {
 	private class PropsReader extends AbstractConfigDirPropsReader {
 		
 		PropsReader() {
-			super(GeneMania.APP_CYPROPERTY_NAME, "genemania.props", CyProperty.SavePolicy.CONFIG_DIR);
+			super(CytoscapeUtilsImpl.APP_CYPROPERTY_NAME, "genemania.props", CyProperty.SavePolicy.CONFIG_DIR);
 		}
 	}
 }

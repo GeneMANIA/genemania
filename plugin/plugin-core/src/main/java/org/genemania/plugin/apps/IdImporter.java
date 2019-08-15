@@ -41,7 +41,6 @@ import org.genemania.engine.cache.SynchronizedObjectCache;
 import org.genemania.exception.ApplicationException;
 import org.genemania.exception.DataStoreException;
 import org.genemania.plugin.FileUtils;
-import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.data.IModelWriter;
@@ -92,11 +91,11 @@ public class IdImporter extends AbstractPluginApp {
 
 			if (fDataPath == null) {
 				FileUtils fileUtils = new FileUtils();
-				List<String> dataSets = fileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, GeneMania.SCHEMA_VERSION);
+				List<String> dataSets = fileUtils.getCompatibleDataSets();
 				String latestDataSet = dataSets.get(0);
 				String id = getDataSetId(latestDataSet);
 				
-				String baseUrl = fileUtils.findDataSetBaseUrl(FileUtils.DEFAULT_BASE_URL, id);
+				String baseUrl = fileUtils.findDataSetBaseUrl(id);
 				URL url = new URL(String.format("%s.zip", baseUrl)); //$NON-NLS-1$
 				ProgressReporter progress = NullProgressReporter.instance();
 				File dataZipFile = fileUtils.download(url, new File("."), progress); //$NON-NLS-1$

@@ -53,11 +53,8 @@ import org.xml.sax.SAXException;
 
 public abstract class AbstractGeneMania implements GeneMania {
 	
-	protected static final String SETTINGS_DIRECTORY = "genemania_plugin"; //$NON-NLS-1$
-
-	public static final String RELEASE_VERSION = "releaseVersion"; //$NON-NLS-1$
-	public static final String MIN_DATA_VERSION = "minDataVersion"; //$NON-NLS-1$
-	public static final String BUILD_NUMBER = "buildNumber"; //$NON-NLS-1$
+	private static final String SETTINGS_DIRECTORY = "genemania_plugin"; //$NON-NLS-1$
+	private static final String MIN_DATA_VERSION = "minDataVersion"; //$NON-NLS-1$
 	
 	protected Component rootMenuItem;
 	protected JMenuItem showResultsMenu;
@@ -106,10 +103,6 @@ public abstract class AbstractGeneMania implements GeneMania {
 			settingsDirectory.mkdirs();
 		}
 		return settingsDirectory;
-	}
-	
-	public String getVersion() {
-		return SCHEMA_VERSION;
 	}
 	
 	@Override
@@ -224,10 +217,11 @@ public abstract class AbstractGeneMania implements GeneMania {
 
 	public boolean checkForUpdates(ProgressReporter progress) throws ApplicationException {
 		try {
-			List<String> dataSets = fileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, SCHEMA_VERSION);
-			if (dataSets.size() == 0) {
+			List<String> dataSets = fileUtils.getCompatibleDataSets();
+			
+			if (dataSets.size() == 0)
 				throw new ApplicationException(Strings.checkForUpdates_error);
-			}
+			
 			String url = dataSets.get(0);
 			String[] parts = url.split("/"); //$NON-NLS-1$
 			String dataId = parts[parts.length - 1];
@@ -279,15 +273,18 @@ public abstract class AbstractGeneMania implements GeneMania {
 	public void downloadDataSet(String dataId, final File path, ProgressReporter progress) throws ApplicationException {
 		try {
 			String baseUrl;
+			
 			if (dataId == null) {
-				List<String> dataSets = fileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, SCHEMA_VERSION);
-				if (dataSets.size() == 0) {
+				List<String> dataSets = fileUtils.getCompatibleDataSets();
+				
+				if (dataSets.size() == 0)
 					throw new ApplicationException(Strings.checkForUpdates_error);
-				}
+				
 				baseUrl = dataSets.get(0);
 			} else {
-				baseUrl = fileUtils.findDataSetBaseUrl(FileUtils.DEFAULT_BASE_URL, dataId);
+				baseUrl = fileUtils.findDataSetBaseUrl(dataId);
 			}
+			
 			URL url = new URL(String.format("%s.zip", baseUrl)); //$NON-NLS-1$
 			File dataZipFile = fileUtils.download(url, path, progress);
 			

@@ -64,11 +64,12 @@ public class DownloadController {
 			activeDataId = data.getVersion().toString();
 		}
 		
-		Map<String, String> descriptions = fileUtils.getDataSetDescriptions(FileUtils.DEFAULT_BASE_URL);
-		Map<String, Long> sizes = fileUtils.getDataSetSizes(FileUtils.DEFAULT_BASE_URL);
-		List<String> dataSets = fileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, GeneMania.SCHEMA_VERSION);
-		List<ModelElement> model = new ArrayList<ModelElement>();
-		Map<String, List<ModelElement>> parents = new HashMap<String, List<ModelElement>>();
+		Map<String, String> descriptions = fileUtils.getDataSetDescriptions();
+		Map<String, Long> sizes = fileUtils.getDataSetSizes();
+		List<String> dataSets = fileUtils.getCompatibleDataSets();
+		List<ModelElement> model = new ArrayList<>();
+		Map<String, List<ModelElement>> parents = new HashMap<>();
+		
 		for (String url : dataSets) {
 			Matcher matcher = pattern.matcher(url);
 			if (matcher.matches()) {

@@ -71,7 +71,7 @@ public class LuceneConnector {
 	private LuceneConnector() {
 		try {
 			String indexPath = ApplicationConfig.getInstance().getProperty(
-					Constants.CONFIG_PROPERTIES.GENE_INDEX_DIR);
+					Constants.CONFIG_PROPERTIES.LUCENE_INDEX_DIR);
 			searcher = createSearcher(indexPath);
 			analyzer = LuceneMediator.createDefaultAnalyzer();
 			organismMediator = new LuceneOrganismMediator(searcher, analyzer);

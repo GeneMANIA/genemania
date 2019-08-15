@@ -85,7 +85,7 @@ public class SyncWorker {
 		ApplicationConfig config = ApplicationConfig.getInstance();
 
 		appVer = config.getProperty(APP_VER);
-		cacheDir = config.getProperty(org.genemania.Constants.CONFIG_PROPERTIES.CACHE_DIR);
+		cacheDir = config.getProperty(org.genemania.Constants.CONFIG_PROPERTIES.NETWORK_CACHE_DIR);
 	}
 
 	public SearchResult getRelatedGenes(RelatedGenesWebRequestDto req) throws ApplicationException {

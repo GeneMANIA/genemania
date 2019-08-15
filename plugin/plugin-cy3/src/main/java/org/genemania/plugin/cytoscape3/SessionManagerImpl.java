@@ -25,7 +25,6 @@ import org.cytoscape.session.events.SessionSaveCancelledListener;
 import org.cytoscape.session.events.SessionSavedEvent;
 import org.cytoscape.session.events.SessionSavedListener;
 import org.genemania.domain.Attribute;
-import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.Strings;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape3.delegates.SessionChangeDelegate;
@@ -96,7 +95,7 @@ public class SessionManagerImpl extends AbstractSessionManager
 			if (version == null)
 				return; // The session does not contain GeneMANIA data, no need to reconstruct the networks.
 			
-			String path = cytoscapeUtils.getSessionProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY);
+			String path = cytoscapeUtils.getSessionProperty(CytoscapeUtilsImpl.DATA_SOURCE_PATH_PROPERTY);
 			File dataSourcePath = path == null ? new File("gmdata-" + version): new File(path);
 			
 			GeneManiaTask task = new GeneManiaTask(Strings.sessionChangeListener_title) {

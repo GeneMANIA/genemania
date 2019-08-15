@@ -28,9 +28,9 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskMonitor.Level;
 import org.genemania.domain.Organism;
-import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.LogUtils;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
+import org.genemania.plugin.cytoscape3.CytoscapeUtilsImpl;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -65,7 +65,7 @@ public class LoadRemoteOrganismsTask extends AbstractTask {
 		tm.setTitle("GeneMANIA");
 		tm.setStatusMessage("Loading organisms from server...");
 		
-		String url = cytoscapeUtils.getPreference(GeneMania.ORGANISMS_API_URL);
+		String url = cytoscapeUtils.getPreference(CytoscapeUtilsImpl.ORGANISMS_API_URL);
 		
 		try {
 			Request request = new Request.Builder()

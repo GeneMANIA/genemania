@@ -399,11 +399,11 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<genemaniaGeneIndexDir>${env.HOME}/genemania/genemania-data/lucene_index</genemaniaGeneIndexDir>
-				<genemaniaCacheDir>${env.HOME}/genemania/genemania-data/network_cache</genemaniaCacheDir>
+				<luceneIndexDir>${env.HOME}/genemania/genemania-data/lucene_index</luceneIndexDir>
+				<networkCacheDir>${env.HOME}/genemania/genemania-data/network_cache</networkCacheDir>
 				<genemaniaDbHost>localhost</genemaniaDbHost>
 				<genemaniaDbName>genemania</genemaniaDbName>
-				<genemaniaGraphCacheDir>${env.CATALINA_HOME}/webapps/genemania/WEB-INF/classes</genemaniaGraphCacheDir>
+				<graphCacheDir>${env.CATALINA_HOME}/webapps/genemania/WEB-INF/classes</graphCacheDir>
 				<genemaniaHost>http://localhost:8080/genemania</genemaniaHost>
 				<deployDir>${env.HOME}/genemania/apache-tomcat/webapps/genemania</deployDir>
 				<GA_ACCT_NR>GOOGLE_ANALYTICS_TOKEN_GOES_HERE</GA_ACCT_NR>

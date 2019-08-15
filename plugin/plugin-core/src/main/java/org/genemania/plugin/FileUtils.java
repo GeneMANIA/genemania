@@ -51,10 +51,11 @@ import ch.enterag.utils.zip.Zip64File;
 public class FileUtils {
 	
 	// Old one was http://www.genemania.org/plugin
-	public static final String DEFAULT_BASE_URL = "http://plugin.genemania.org"; //$NON-NLS-1$
+	private static final String DEFAULT_DATA_URL = "http://plugin.genemania.org/data/"; //$NON-NLS-1$
+	private static final String DEFAULT_SCHEMA_VERSION = "1.1"; //$NON-NLS-1$
 	
-	public static final String DESCRIPTION_FILE = "descriptions.txt"; //$NON-NLS-1$
-	public static final String SIZE_FILE = "sizes.txt"; //$NON-NLS-1$
+	private static final String DESCRIPTION_FILE = "descriptions.txt"; //$NON-NLS-1$
+	private static final String SIZE_FILE = "sizes.txt"; //$NON-NLS-1$
 	
 	private static final int BUFFER_SIZE = 1048576;
 	
@@ -241,10 +242,10 @@ public class FileUtils {
 		return new FileInputStream(file);
 	}
 	
-	public List<String> getCompatibleDataSets(String baseUrl, String schemaVersion) throws IOException {
+	public List<String> getCompatibleDataSets() throws IOException {
 		HttpURLConnection.setFollowRedirects(true);
 
-		String url = String.format("%s/data/schema-%s.txt", baseUrl, schemaVersion); //$NON-NLS-1$
+		String url = String.format("%sschema-%s.txt", getDataUrl(), getSchemaVersion()); //$NON-NLS-1$
 		URLConnection connection = getUrlConnection(new URL(url));
 		connection.setUseCaches(false);
 		List<String> dataSets = new ArrayList<String>();
@@ -262,17 +263,17 @@ public class FileUtils {
 		return dataSets;
 	}
 	
-	public String findDataSetBaseUrl(String baseUrl, String dataId) {
-		return String.format("%s/data/gmdata-%s", baseUrl, dataId); //$NON-NLS-1$
+	public String findDataSetBaseUrl(String dataId) {
+		return String.format("%sgmdata-%s", getDataUrl(), dataId); //$NON-NLS-1$
 	}
 	
-	public Map<String, String> getDataSetDescriptions(String baseUrl) throws IOException {
-		return getDataSetProperties(baseUrl, DESCRIPTION_FILE);
+	public Map<String, String> getDataSetDescriptions() throws IOException {
+		return getDataSetProperties(DESCRIPTION_FILE);
 	}
 	
-	public Map<String, Long> getDataSetSizes(String baseUrl) throws IOException {
-		Map<String, String> properties = getDataSetProperties(baseUrl, SIZE_FILE);
-		Map<String, Long> sizes = new HashMap<String, Long>();
+	public Map<String, Long> getDataSetSizes() throws IOException {
+		Map<String, String> properties = getDataSetProperties(SIZE_FILE);
+		Map<String, Long> sizes = new HashMap<>();
 		
 		for (Entry<String, String> entry : properties.entrySet()) {
 			try {
@@ -286,10 +287,10 @@ public class FileUtils {
 		return sizes;
 	}
 	
-	Map<String, String> getDataSetProperties(String baseUrl, String name) throws IOException {
+	Map<String, String> getDataSetProperties(String name) throws IOException {
 		HttpURLConnection.setFollowRedirects(true);
 
-		String url = String.format("%s/data/%s", baseUrl, name); //$NON-NLS-1$
+		String url = String.format("%s%s", getDataUrl(), name); //$NON-NLS-1$
 		URLConnection connection = getUrlConnection(new URL(url));
 		connection.setUseCaches(false);
 		
@@ -324,5 +325,13 @@ public class FileUtils {
 			Logger logger = Logger.getLogger(getClass());
 			logger.error("Unexpected error", e); //$NON-NLS-1$
 		}
+	}
+	
+	protected String getDataUrl() {
+		return DEFAULT_DATA_URL;
+	}
+	
+	protected String getSchemaVersion() {
+		return DEFAULT_SCHEMA_VERSION;
 	}
 }

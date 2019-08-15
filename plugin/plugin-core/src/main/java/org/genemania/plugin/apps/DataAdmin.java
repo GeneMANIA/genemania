@@ -169,9 +169,9 @@ public class DataAdmin extends AbstractPluginApp {
 		@Override
 		public void run() {
 			try {
-				Map<String, String> descriptions = fFileUtils.getDataSetDescriptions(FileUtils.DEFAULT_BASE_URL);
-				Map<String, Long> sizes = fFileUtils.getDataSetSizes(FileUtils.DEFAULT_BASE_URL);
-				List<String> dataSets = fFileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, GeneMania.SCHEMA_VERSION);
+				Map<String, String> descriptions = fFileUtils.getDataSetDescriptions();
+				Map<String, Long> sizes = fFileUtils.getDataSetSizes();
+				List<String> dataSets = fFileUtils.getCompatibleDataSets();
 				
 				System.out.printf("Data Set ID\tTotal Size\tDatabase Version\n"); //$NON-NLS-1$
 				for (String url : dataSets) {
@@ -200,7 +200,7 @@ public class DataAdmin extends AbstractPluginApp {
 		@Override
 		public void run() {
 			try {
-				String baseUrl = fFileUtils.findDataSetBaseUrl(FileUtils.DEFAULT_BASE_URL, fId);
+				String baseUrl = fFileUtils.findDataSetBaseUrl(fId);
 				URL url = new URL(String.format("%s.zip", baseUrl)); //$NON-NLS-1$
 				fProgress.setStatus("Installing..."); //$NON-NLS-1$
 				fProgress.setMaximumProgress(2);
@@ -238,7 +238,8 @@ public class DataAdmin extends AbstractPluginApp {
 					throw new IllegalArgumentException(String.format("Usage: %s data-set-id", fName)); //$NON-NLS-1$
 				}
 				String targetId = fArguments.get(1);
-				List<String> dataSets = fFileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, GeneMania.SCHEMA_VERSION);
+				List<String> dataSets = fFileUtils.getCompatibleDataSets();
+				
 				for (String url : dataSets) {
 					String id = getDataSetId(url);
 					if (targetId.equals(id)) {
