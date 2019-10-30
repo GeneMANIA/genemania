@@ -16,8 +16,8 @@ function( util ){ return function( Result ){
     } else {
       this.expandNetworks();
 
-      if( util.isSmallScreen() && this.query.expanded ){
-        this.query.toggleExpand();
+      if( util.sidebarOverlapsSearch() && this.query.expanded ){
+        this.query.collapse();
       }
     }
 

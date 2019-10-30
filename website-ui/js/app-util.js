@@ -40,6 +40,10 @@ app.factory('util', [ function(){
       var docH = window.innerHeight;
 
       return docW < minW || docH < minH;
+    },
+
+    sidebarOverlapsSearch: function(){
+      return window.innerWidth < 550;
     }
   };
 } ]);

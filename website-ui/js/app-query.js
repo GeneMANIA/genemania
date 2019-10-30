@@ -176,6 +176,12 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
 
   qfn.toggleExpand = function(){
     qfn.expanded = !qfn.expanded;
+
+    var result = this.result;
+
+    if( qfn.expanded && util.sidebarOverlapsSearch() && result && result.networksExpanded ){
+      result.collapseNetworks();
+    }
   };
 
 
