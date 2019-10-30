@@ -15,6 +15,10 @@ function( util ){ return function( Result ){
       this.collapseNetworks();
     } else {
       this.expandNetworks();
+
+      if( util.isSmallScreen() && this.query.expanded ){
+        this.query.toggleExpand();
+      }
     }
 
     PubSub.publish('result.toggleNetworksExpansion', this);
