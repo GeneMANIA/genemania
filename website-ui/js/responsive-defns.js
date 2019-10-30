@@ -51,6 +51,18 @@
     },
 
     {
+      id: 'graph-more-qtip-content',
+      handler: function(){
+        var vp = document.body;
+
+        return [
+          { name: 'max-height', value: vp.clientHeight - 60 + 'px' }
+        ];
+      },
+      after: qtipFix
+    },
+
+    {
       selector: [
         '.query-genes-expander-expanded',
         '.query-genes-expander-expanded .query-genes-validation',

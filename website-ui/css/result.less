@@ -26,20 +26,32 @@
   .generate-rows(@n, (@i + 1));
 }
 
-.save-data-option {
+.graph-more-item {
 	padding: 0.125em 0.25em;
 	border-radius: 0.25em;
 }
 
-.save-data-option + .save-data-option {
+.graph-more-item + .graph-more-item {
 	border-top: 1px solid #666;
 }
 
-.save-data-qtip-content {
-	overflow-y: auto;
-	max-height: 80%;
-	position: relative;
-	padding: 0;
+.save-data-option {
+	padding-left: 2em;
+}
+
+.graph-more-qtip-content {
+	max-width: 18em;
+	overflow: auto;
+}
+
+.graph-more-qtip-content .small {
+	color: #888;
+}
+
+.graph-more-footer {
+	padding: 0.5em 0.75em;
+	color: #aaa;
+	font-size: 0.8em;
 }
 
 .graph-info-qtip-content {
