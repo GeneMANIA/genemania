@@ -3,3 +3,4 @@
 
 DEBUG = true; // to enable debug-only features etc.
 DEBUG_URL = 'http://localhost:8080/genemania/json/'; // your local genemania instance service URL base
+DEBUG_DISABLE_URL_MOD = true; // prevent the url history from changing for queries
