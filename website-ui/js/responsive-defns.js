@@ -131,6 +131,15 @@
 
   responsive.defines( defns );
 
+  // fix: on mobile 100% viewport height isn't accurate and can cause overflow
+  window.addEventListener('resize', function(){
+    var h = window.innerHeight + 'px';
+
+    document.body.style.height = h;
+    document.documentElement.style.height = h;
+    window.scrollTo(0, 0);
+  });
+
   PubSub.subscribe( 'query.search', function(){
     responsive.restyle();
   } );
