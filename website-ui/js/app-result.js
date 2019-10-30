@@ -536,34 +536,15 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
       node.data('avgConndScore', avgConndScore);
     }
 
-    // instant result if all nodes have the default position
-    var defPos = initNodePos();
-    var allSamePos = true;
+    var newEles = cy.elements();
 
-    for( var i = 0; i < nodes.length; i++ ){
-      var n = nodes[i];
-      var pos = n.position();
-
-      if( pos.x !== defPos.x || pos.y !== defPos.y ){
-        allSamePos = false;
-        break;
-      }
-    }
-
-    if( allSamePos ){
-      nodes.addClass('hidden');
-    }
+    newEles.addClass('hidden');
 
     cy.endBatch(); // will trigger new stylesheet etc
 
     var $list = $('#network-list');
     var container = cy.container();
 
-    var lockedNodes = nodes.filter('[?oldEle][?query]').lock();
-
-    // cy.pon('layoutready').then(function(){
-    //   lockedNodes.unlock();
-    // });
 
     var delay = function( l ){
       return new Promise(function( resolve ){
@@ -575,46 +556,23 @@ function( $$search, $$user, ngCy, cyStylesheet, util, Result_genes, Result_netwo
 
       self.layoutResizeCyPre();
 
-      if( allSamePos ){
-        cy.pon('layoutready').then(function(){
-          nodes.removeClass('hidden');
-        });
-      }
+      cy.pon('layoutready').then(function(){
+        newEles.removeClass('hidden');
+      });
 
       return self.forceLayout({
-        animate: someOldEles,
-        fit: !someOldEles,
-        randomize: !someOldEles,
+        animate: false,
+        fit: true,
+        randomize: true,
         resizeCy: false
-      }).then(function(){
-        lockedNodes.unlock();
-
-        if( someOldEles ){
-
-          return delay(25).then(function(){
-            return self.fitGraph({
-              duration: 250,
-              resizeCy: false
-            });
-          }).then(function(){
-            return delay(25);
-          }).then(function(){
-            return self.forceLayout({
-              animate: true,
-              fit: true,
-              randomize: false,
-              maxSimulationTime: 1000,
-              resizeCy: false
-            });
-          });
-
-        }
       }).then(function(){
         self.layoutResizeCyPost();
       });
 
     } else {
       self.layoutResizeCyPre();
+
+      newEles.removeClass('hidden');
 
       return self.fitGraph({
         duration: 0,

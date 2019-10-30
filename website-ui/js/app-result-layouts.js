@@ -168,6 +168,7 @@ function( util ){ return function( Result ){
       fit: true,
       randomize: true,
       animate: true,
+      animationDuration: defaultDuration,
       nodeSpacing: 15,
       lengthFactor: 100,
       maxSimulationTime: 2000,
@@ -291,7 +292,7 @@ function( util ){ return function( Result ){
           fit: options.fit,
           animate: true,
           animationEasing: defaultEasing,
-          animationDuration: defaultDuration,
+          animationDuration: options.animationDuration,
           padding: defaultPadding
         });
 
