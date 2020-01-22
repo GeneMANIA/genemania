@@ -23,6 +23,7 @@ import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -49,7 +50,9 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 
+import org.cytoscape.util.swing.IconManager;
 import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.FileUtils;
 import org.genemania.plugin.Strings;
@@ -219,13 +222,29 @@ public class DownloadDialog extends JDialog {
 				}
 			};
 			table.setRowSelectionAllowed(true);
-			table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			
+			table.setDefaultRenderer(Boolean.class, new DefaultTableCellRenderer() {
 				@Override
-				public void valueChanged(ListSelectionEvent e) {
-					updateOptions();
-					validateState();
+				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+						boolean hasFocus, int row, int column) {
+					super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+					
+					if (Boolean.TRUE == value) {
+						this.setFont(uiUtils.getIconFont(14.0f));
+						this.setText(IconManager.ICON_CHECK);
+						this.setHorizontalAlignment(CENTER);
+					} else {
+						this.setText(null);
+					}
+					
+					return this;
 				}
+			});
+			
+			table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			table.getSelectionModel().addListSelectionListener(evt -> {
+				updateOptions();
+				validateState();
 			});
 		}
 		
