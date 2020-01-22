@@ -36,8 +36,8 @@ public class ImageCache {
 	private Map<String, Image> imageCache;
 	
 	public ImageCache() {
-		iconCache = new HashMap<String, ImageIcon>();
-		imageCache = new HashMap<String, Image>();
+		iconCache = new HashMap<>();
+		imageCache = new HashMap<>();
 	}
 	
 	public ImageIcon getIcon(String resourcePath) {

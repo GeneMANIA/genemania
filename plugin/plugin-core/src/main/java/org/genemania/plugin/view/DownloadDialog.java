@@ -48,8 +48,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import org.cytoscape.util.swing.IconManager;
@@ -144,9 +142,8 @@ public class DownloadDialog extends JDialog {
 				case 0:
 					return element.isInstalled();
 				case 1:
-					if (element.isActive()) {
+					if (element.isActive())
 						return String.format(Strings.downloadControllerModelElementActive_label, element.getName());
-					}
 					return String.format(Strings.downloadControllerModelElement_label, element.getName());
 				case 2:
 					return element.getDescription();
@@ -165,9 +162,8 @@ public class DownloadDialog extends JDialog {
 			}
 		};
 		
-		for (ModelElement item : items) {
+		for (ModelElement item : items)
 			model.add(item);
-		}
 		
 		addComponents(preamble);
 	}
@@ -260,7 +256,7 @@ public class DownloadDialog extends JDialog {
 			final JRadioButton allButton = new JRadioButton();
 			final JRadioButton openLicenseButton = new JRadioButton();
 			
-			optionMap = new HashMap<String, JRadioButton>();
+			optionMap = new HashMap<>();
 			optionMap.put("-core", coreButton); //$NON-NLS-1$
 			optionMap.put("", allButton); //$NON-NLS-1$
 			optionMap.put("-open_license", openLicenseButton); //$NON-NLS-1$
@@ -304,12 +300,7 @@ public class DownloadDialog extends JDialog {
 	private JRadioButton getNoSelectionButton() {
 		if (noSelectionButton == null) {
 			noSelectionButton = new JRadioButton();
-			noSelectionButton.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					validateState();
-				}
-			});
+			noSelectionButton.addActionListener(evt -> validateState());
 			noSelectionButton.setActionCommand("none"); //$NON-NLS-1$
 		}
 		
@@ -360,11 +351,13 @@ public class DownloadDialog extends JDialog {
 	}
 	
 	void updateOptions() {
-		int row = table.getSelectedRow();
+		int row = table != null ? table.getSelectedRow() : -1;
+		
 		if (row == -1) {
 			disableOptions();
 			return;
 		}
+		
 		ModelElement root = (ModelElement) model.get(row);
 		ModelElement[] children = root.getChildren();
 		enableOptions(root, children);
@@ -372,16 +365,18 @@ public class DownloadDialog extends JDialog {
 
 	String getLabel(String option, boolean isActive, boolean isInstalled, double megabytes) {
 		String description;
-		if (isActive) {
+		
+		if (isActive)
 			description = Strings.downloadDialogOptionPanelActive_label;
-		} else if (isInstalled) {
+		else if (isInstalled)
 			description = Strings.downloadDialogOptionPanelInstalled_label;
-		} else if (megabytes == 0) {
+		else if (megabytes == 0)
 			description = ""; //$NON-NLS-1$
-		} else {
+		else
 			description = String.format(Strings.downloadDialogOptionSize_label, megabytes);
-		}
+		
 		String template = Strings.get(String.format("downloadDialogOption%s", option)); //$NON-NLS-1$
+		
 		return String.format(template, description);
 	}
 	
@@ -393,6 +388,7 @@ public class DownloadDialog extends JDialog {
 			button.setEnabled(false);
 			button.invalidate();
 		}
+		
 		deselectAllOptions();
 		invalidate();
 		pack();
@@ -400,11 +396,13 @@ public class DownloadDialog extends JDialog {
 
 	private void enableOptions(ModelElement parent, ModelElement[] children) {
 		deselectAllOptions();
+		
 		if (children.length == 0) {
 			for (Entry<String, JRadioButton> entry : optionMap.entrySet()) {
 				JRadioButton button = entry.getValue();
 				String key = entry.getKey();
 				double size;
+				
 				if ("".equals(key)) { //$NON-NLS-1$
 					size = "".equals(key) ? computeSize(parent.getSize()) : 0; //$NON-NLS-1$
 					button.setEnabled(true);
@@ -413,11 +411,14 @@ public class DownloadDialog extends JDialog {
 					button.setEnabled(false);
 					size = 0;
 				}
+				
 				button.setText(getLabel(key, false, false, size));
 				button.invalidate();
 			}
+			
 			invalidate();
 			pack();
+			
 			return;
 		}
 
@@ -434,6 +435,7 @@ public class DownloadDialog extends JDialog {
 		for (ModelElement child : children) {
 			for (Entry<String, JRadioButton> entry : optionMap.entrySet()) {
 				String key = entry.getKey();
+				
 				if (child.getName().endsWith(key)) {
 					JRadioButton button = entry.getValue();
 					button.setText(getLabel(key, child.isActive(), child.isInstalled(), computeSize(child.getSize())));
@@ -443,6 +445,7 @@ public class DownloadDialog extends JDialog {
 				}
 			}
 		}
+		
 		invalidate();
 		pack();
 	}
@@ -454,9 +457,10 @@ public class DownloadDialog extends JDialog {
 	void validateState() {
 		boolean download = false;
 		ModelElement element = getSelection();
-		if (element != null) {
+		
+		if (element != null)
 			download = !element.isInstalled();
-		}
+		
 		getDownloadButton().setEnabled(download);
 		getSelectButton().setEnabled(element != null && !download);
 	}
@@ -477,40 +481,45 @@ public class DownloadDialog extends JDialog {
 	private void handleAction(Action action) {
 		this.action = action;
 		ModelElement element = getSelection();
-		if (element != null) {
+		
+		if (element != null)
 			dataSetId = element.getName();
-		}
+		
 		setVisible(false);
 	}
 	
 	private ModelElement getSelection() {
 		int row = getTable().getSelectedRow();
-		if (row == -1) {
+		
+		if (row == -1)
 			return null;
-		}
+		
 		ModelElement root = (ModelElement) model.get(row);
 		ModelElement[] children = root.getChildren();
-		if (children.length == 0) {
+		
+		if (children.length == 0)
 			return root;
-		}
 		
 		ButtonModel selection = optionGroup.getSelection();
-		if (selection == null) {
+		
+		if (selection == null)
 			return null;
-		}
+		
 		String selected = selection.getActionCommand();
+		
 		for (ModelElement child : children) {
 			Matcher matcher = DownloadController.optionPattern.matcher(child.getName());
+			
 			if (matcher.matches()) {
 				String action = matcher.group(2);
-				if (action == null) {
+				
+				if (action == null)
 					action = ""; //$NON-NLS-1$
-				}
-				if (action.equals(selected)) {
+				if (action.equals(selected))
 					return child;
-				}
 			}
 		}
+		
 		return null;
 	}
 
