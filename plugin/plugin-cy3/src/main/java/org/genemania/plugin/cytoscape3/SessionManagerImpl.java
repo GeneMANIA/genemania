@@ -86,24 +86,36 @@ public class SessionManagerImpl extends AbstractSessionManager
 			cytoscapeUtils.clearSavedSessionState();
 	}
 	
+	// TODO Do this when setting current network instead?
 	@Override
 	public void handleEvent(SessionLoadedEvent evt) {
 		// Don't want this to run on the same thread as the session load progress dialog 
 		// because there is risk of a UI deadlock between modal dialogs.
 		sessionLoadExecutor.submit(() -> {
-			String version = findLocalDataVersion(evt.getLoadedSession().getNetworks());
-			
-			if (version == null)
+			Set<CyNetwork> networks = evt.getLoadedSession().getNetworks();
+			boolean hasGeneMania = hasGeneManiaNetworks(networks);
+					
+			if (!hasGeneMania)
 				return; // The session does not contain GeneMANIA data, no need to reconstruct the networks.
 			
 			String path = cytoscapeUtils.getSessionProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY);
-			File dataSourcePath = path == null ? new File("gmdata-" + version): new File(path);
+			String localVersion = findLocalDataVersion(networks);
+			File dataSourcePath = null;
+			
+			if (path == null) {
+				if (localVersion != null)
+					dataSourcePath = new File("gmdata-" + localVersion);
+			} else {
+				dataSourcePath = new File(path);
+			}
+			
+			final File finalDataSourcePath = dataSourcePath;
 			
 			GeneManiaTask task = new GeneManiaTask(Strings.sessionChangeListener_title) {
 				@Override
 				protected void runTask() throws Throwable {
 					SessionChangeDelegate delegate =
-							new SessionChangeDelegate(dataSourcePath, plugin, progress, cytoscapeUtils);
+							new SessionChangeDelegate(finalDataSourcePath, plugin, progress, cytoscapeUtils);
 					delegate.invoke();
 					
 					CyNetwork currentNetwork = cytoscapeUtils.getCurrentNetwork();
@@ -265,6 +277,20 @@ public class SessionManagerImpl extends AbstractSessionManager
 		};		
 	}
 
+	private boolean hasGeneManiaNetworks(Set<CyNetwork> networks) {
+		for (CyNetwork net : networks) {
+			String version = cytoscapeUtils.getDataVersion(net);
+			
+			if (version != null)
+				return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Web versions (GeneMANIA networks created from the online search) are ignored.
+	 */
 	private String findLocalDataVersion(Set<CyNetwork> networks) {
 		for (CyNetwork net : networks) {
 			String version = cytoscapeUtils.getDataVersion(net);
