@@ -510,6 +510,7 @@ public class QueryBar extends JPanel {
 		private QuerySlider getGeneLimitSlider() {
 			if (geneLimitSlider == null) {
 				geneLimitSlider = new QuerySlider(0, 100, 20);
+				geneLimitSlider.setOpaque(false);
 			}
 			
 			return geneLimitSlider;
@@ -518,6 +519,7 @@ public class QueryBar extends JPanel {
 		private QuerySlider getAttrLimitSlider() {
 			if (attrLimitSlider == null) {
 				attrLimitSlider = new QuerySlider(0, 100, 10);
+				attrLimitSlider.setOpaque(false);
 			}
 			
 			return attrLimitSlider;

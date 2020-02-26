@@ -173,16 +173,15 @@ public class NetManiaPanel extends JPanel {
 	}
 	
 	private void addComponents() {
-		final JEditorPane descriptionPane =
-				uiUtils.createLinkEnabledEditorPane(this, Strings.luceneConfigNetManiaTab_label);
+		JEditorPane descriptionPane = uiUtils.createLinkEnabledEditorPane(this, Strings.luceneConfigNetManiaTab_label);
 		descriptionPane.setFont(descriptionPane.getFont().deriveFont(UiUtils.INFO_FONT_SIZE));
-		descriptionPane.setMargin(new Insets(5, 0, 20, 0));
+		descriptionPane.setMargin(new Insets(5, 0, 10, 0));
 		
-		final GroupLayout layout = new GroupLayout(this);
+		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		layout.setAutoCreateGaps(uiUtils.isWinLAF());
 		layout.setAutoCreateContainerGaps(true);
-		
+
 		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.CENTER, true)
 				.addComponent(descriptionPane, PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE)
 				.addComponent(getAvailablePanel(), DEFAULT_SIZE, DEFAULT_SIZE, Short.MAX_VALUE)
