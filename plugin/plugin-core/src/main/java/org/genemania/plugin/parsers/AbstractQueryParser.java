@@ -21,6 +21,8 @@ package org.genemania.plugin.parsers;
 
 import java.util.HashSet;
 import java.util.Set;
+//import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.Collections;
 
 import org.genemania.domain.Organism;
 import org.genemania.exception.DataStoreException;
@@ -38,8 +40,8 @@ public abstract class AbstractQueryParser implements IQueryParser {
 	};
 	
 	protected final DataSet data;
-//	protected final Set<Organism> organisms = new LinkedHashSet<>(); #  We don't care about insertion order of the organisms into the set - and regularly get ConcurrentModificationExceptions
-	protected final Set<Organism> organisms = new HashSet<>();
+//	protected final Set<Organism> organisms = new LinkedHashSet<>(); #  We don't care about insertion order of the organisms into the set only problem is regularly occuring ConcurrentModificationExceptions
+	protected final Set<Organism> organisms = Collections.synchronizedSet(new HashSet<>());
 
 	public AbstractQueryParser(Set<Organism> organisms) {
 		this.data = null;
@@ -69,31 +71,34 @@ public abstract class AbstractQueryParser implements IQueryParser {
 	public Organism parseOrganism(String name) throws DataStoreException {
 		String filtered = name.toLowerCase();
 		
-		if (organisms.isEmpty() && data != null) {
-			OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
-			organisms.addAll(mediator.getAllOrganisms());
-		}
+		synchronized (organisms) {
 		
-		Long taxonId = null;
-		
-		try {
-			taxonId = Long.parseLong(name);
-		} catch (NumberFormatException e) {
-		}
-		
-		for (Organism org : organisms) {
-			if (taxonId != null && taxonId == org.getTaxonomyId())
-				return org;
+			if (organisms.isEmpty() && data != null) {
+				OrganismMediator mediator = data.getMediatorProvider().getOrganismMediator();
+				organisms.addAll(mediator.getAllOrganisms());
+			}
 			
-			String organismName = org.getName();
+			Long taxonId = null;
 			
-			if (organismName != null && organismName.toLowerCase().equals(filtered))
-				return org;
+			try {
+				taxonId = Long.parseLong(name);
+			} catch (NumberFormatException e) {
+			}
 			
-			String organismAlias = org.getAlias();
-			
-			if (organismAlias != null && organismAlias.toLowerCase().equals(filtered))
-				return org;
+			for (Organism org : organisms) {
+				if (taxonId != null && taxonId == org.getTaxonomyId())
+					return org;
+				
+				String organismName = org.getName();
+				
+				if (organismName != null && organismName.toLowerCase().equals(filtered))
+					return org;
+				
+				String organismAlias = org.getAlias();
+				
+				if (organismAlias != null && organismAlias.toLowerCase().equals(filtered))
+					return org;
+			}
 		}
 		
 		return null;

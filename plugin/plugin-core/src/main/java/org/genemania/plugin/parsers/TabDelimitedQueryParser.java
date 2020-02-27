@@ -72,8 +72,7 @@ public class TabDelimitedQueryParser extends AbstractQueryParser {
 			Query query = new Query();
 			String organismData = in.readLine();
 			String filtered = organismData.toLowerCase();
-			Organism organism = null;
-			organism = parseOrganism(filtered);	
+			Organism organism = parseOrganism(filtered);
 //			try {
 //				organism = parseOrganism(filtered);	
 //			} catch (ConcurrentModificationException e) {
