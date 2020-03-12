@@ -53,8 +53,11 @@ import org.xml.sax.SAXException;
 
 public abstract class AbstractGeneMania implements GeneMania {
 	
-	private static final String SETTINGS_DIRECTORY = "genemania_plugin"; //$NON-NLS-1$
-	private static final String MIN_DATA_VERSION = "minDataVersion"; //$NON-NLS-1$
+	protected static final String SETTINGS_DIRECTORY = "genemania_plugin"; //$NON-NLS-1$
+
+	public static final String RELEASE_VERSION = "releaseVersion"; //$NON-NLS-1$
+	public static final String MIN_DATA_VERSION = "minDataVersion"; //$NON-NLS-1$
+	public static final String BUILD_NUMBER = "buildNumber"; //$NON-NLS-1$
 	
 	protected Component rootMenuItem;
 	protected JMenuItem showResultsMenu;
@@ -105,6 +108,10 @@ public abstract class AbstractGeneMania implements GeneMania {
 		return settingsDirectory;
 	}
 	
+	public String getVersion() {
+		return SCHEMA_VERSION;
+	}
+	
 	@Override
 	public DataSetManager getDataSetManager() {
 		return dataSetManager;
@@ -129,7 +136,6 @@ public abstract class AbstractGeneMania implements GeneMania {
 		return version.getBaseVersion().compareTo(minVersion) >= 0;
 	}
 
-	@Override
 	public void handleCheck() {
 		final boolean[] requiresConfiguration = new boolean[1];
 		GeneManiaTask task = new GeneManiaTask(Strings.dataUpdateCheck_title) {
@@ -142,7 +148,6 @@ public abstract class AbstractGeneMania implements GeneMania {
 		handleConfiguration(requiresConfiguration[0]);
 	}
 
-	@Override
 	public void handleSwitch() {
 		try {
 			chooseDataSet(cytoscapeUtils.getFrame());
@@ -151,7 +156,6 @@ public abstract class AbstractGeneMania implements GeneMania {
 		}
 	}
 
-	@Override
 	public void handleDownload() {
 		final boolean[] requiresConfiguration = new boolean[1];
 		GeneManiaTask task = new GeneManiaTask(Strings.dataUpdateDownload_title) {
@@ -220,26 +224,23 @@ public abstract class AbstractGeneMania implements GeneMania {
 
 	public boolean checkForUpdates(ProgressReporter progress) throws ApplicationException {
 		try {
-			List<String> dataSets = fileUtils.getCompatibleDataSets();
-			
-			if (dataSets.size() == 0)
+			List<String> dataSets = fileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, SCHEMA_VERSION);
+			if (dataSets.size() == 0) {
 				throw new ApplicationException(Strings.checkForUpdates_error);
-			
+			}
 			String url = dataSets.get(0);
 			String[] parts = url.split("/"); //$NON-NLS-1$
 			String dataId = parts[parts.length - 1];
 			
 			Pattern pattern = Pattern.compile("gmdata-(.*)"); //$NON-NLS-1$
 			Matcher matcher = pattern.matcher(dataId);
-			
 			if (!matcher.matches()) {
 				// This shouldn't happen...
 				throw new ApplicationException(Strings.checkForUpdates_error);
 			}
-			
 			Version version = Version.parse(matcher.group(1));
-			DataSet dataSet = dataSetManager.getDataSet();
 			
+			DataSet dataSet = dataSetManager.getDataSet();
 			if (dataSet == null) {
 				ChildProgressReporter childProgress = new ChildProgressReporter(progress);
 				initializeData(cytoscapeUtils.getFrame(), childProgress, false);
@@ -248,15 +249,12 @@ public abstract class AbstractGeneMania implements GeneMania {
 			
 			// Check if the latest version has been downloaded but not active
 			File latestDataSet = null;
-			
 			for (File path : dataSetManager.getDataSetPaths()) {
 				matcher = pattern.matcher(path.getName());
-				
-				if (!matcher.matches())
+				if (!matcher.matches()) {
 					continue;
-				
+				}
 				Version otherVersion = Version.parse(matcher.group(1));
-				
 				if (version.isEquivalentTo(otherVersion)) {
 					latestDataSet = path;
 					break;
@@ -265,10 +263,9 @@ public abstract class AbstractGeneMania implements GeneMania {
 			
 			if (latestDataSet != null || dataSet != null && dataSet.getVersion().isEquivalentTo(version)) {
 				JOptionPane.showMessageDialog(taskDispatcher.getTaskDialog(), Strings.checkForUpdatesOk_label, Strings.checkForUpdates_title, JOptionPane.INFORMATION_MESSAGE);
-				
-				if (dataSet == null)
+				if (dataSet == null) {
 					loadDataSet(latestDataSet, progress, false, false);
-				
+				}
 				return false;
 			}
 			
@@ -284,14 +281,14 @@ public abstract class AbstractGeneMania implements GeneMania {
 			String baseUrl;
 			
 			if (dataId == null) {
-				List<String> dataSets = fileUtils.getCompatibleDataSets();
+				List<String> dataSets = fileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, SCHEMA_VERSION);
 				
 				if (dataSets.size() == 0)
 					throw new ApplicationException(Strings.checkForUpdates_error);
 				
 				baseUrl = dataSets.get(0);
 			} else {
-				baseUrl = fileUtils.findDataSetBaseUrl(dataId);
+				baseUrl = fileUtils.findDataSetBaseUrl(FileUtils.DEFAULT_BASE_URL, dataId);
 			}
 			
 			URL url = new URL(String.format("%s.zip", baseUrl)); //$NON-NLS-1$
@@ -312,9 +309,10 @@ public abstract class AbstractGeneMania implements GeneMania {
 		fileUtils.unzip(path, path.getParentFile(), progress);
 		String fileName = path.getName();
 		int index = fileName.lastIndexOf("."); //$NON-NLS-1$
-		if (index > 0) {
+		
+		if (index > 0)
 			fileName = fileName.substring(0, index);
-		}
+		
 		return new File(String.format("%s%s%s", path.getParent(), File.separator, fileName)); //$NON-NLS-1$
 	}
 	
@@ -323,20 +321,15 @@ public abstract class AbstractGeneMania implements GeneMania {
     	extensions.add("xml"); //$NON-NLS-1$
     	
 		File dataSourcePath = dataSetManager.getDataSourcePath();
-    	File initialFile;
-		if (dataSourcePath != null && dataSourcePath.exists()) {
-			initialFile = dataSourcePath;
-		} else {
-			initialFile = fileUtils.getUserHome();
-		}
+    	File initialFile = (dataSourcePath != null && dataSourcePath.exists()) ? dataSourcePath : fileUtils.getUserHome();
 		File path = uiUtils.getFile(parent, Strings.changeData_title, initialFile, DataSetManager.DATA_FILE_NAME, extensions, FileSelectionMode.OPEN_FILE);
-		if (path == null) {
+		
+		if (path == null)
 			return;
-		}
 
-		if (DataSetManager.DATA_FILE_NAME.equals(path.getName())) {
+		if (DataSetManager.DATA_FILE_NAME.equals(path.getName()))
 			path = path.getParentFile();
-		}
+		
 		final File dataPath = path;
 		GeneManiaTask task = new GeneManiaTask(Strings.loadData_title) {
 			@Override
@@ -355,6 +348,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 				setDataSet(null, progress);
 			} else {
 				DataSet loadedData = dataSetManager.open(path);
+				
 				if (!isCompatible(loadedData.getVersion()) && promptToUpdate) {
 					try {
 						if (WrappedOptionPane.showConfirmDialog(taskDispatcher.getTaskDialog(), Strings.incompatibleData2_prompt, Strings.default_title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, WrappedOptionPane.DEFAULT_WIDTH) == JOptionPane.YES_OPTION) {
@@ -369,9 +363,8 @@ public abstract class AbstractGeneMania implements GeneMania {
 				}
 			}
 		} catch (SAXException e) {
-			if (reportErrors) {
+			if (reportErrors)
 				WrappedOptionPane.showConfirmDialog(taskDispatcher.getTaskDialog(), String.format(Strings.loadData_error, path.getPath()), Strings.loadData_title, JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, WrappedOptionPane.DEFAULT_WIDTH);
-			}
 		}
 	}
 
@@ -428,15 +421,17 @@ public abstract class AbstractGeneMania implements GeneMania {
 		};
 		taskDispatcher.executeTask(task, uiUtils.getFrame(parent), true, true);
 		LogUtils.log(getClass(), task.getLastError());
+		
 		if (requiresConfiguration[0]) {
 			DataSet data = dataSetManager.getDataSet();
-			if (data == null) {
+			
+			if (data == null)
 				return;
-			}
+			
 			IConfiguration config = data.getConfiguration();
-			if (config.hasUi()) {
+			
+			if (config.hasUi())
 				config.showUi(parent);
-			}
 		}
 	}
 	
@@ -444,13 +439,14 @@ public abstract class AbstractGeneMania implements GeneMania {
 		boolean requiresConfiguration = initializeData(progress, reportErrors);
 		if (requiresConfiguration) {
 			DataSet data = dataSetManager.getDataSet();
-			if (data == null) {
+			
+			if (data == null)
 				return;
-			}
+			
 			IConfiguration config = data.getConfiguration();
-			if (config.hasUi()) {
+			
+			if (config.hasUi())
 				config.showUi(parent);
-			}
 		}
 	}
 }

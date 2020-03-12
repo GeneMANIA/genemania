@@ -15,6 +15,10 @@ function( util ){ return function( Result ){
       this.collapseNetworks();
     } else {
       this.expandNetworks();
+
+      if( util.sidebarOverlapsSearch() && this.query.expanded ){
+        this.query.collapse();
+      }
     }
 
     PubSub.publish('result.toggleNetworksExpansion', this);

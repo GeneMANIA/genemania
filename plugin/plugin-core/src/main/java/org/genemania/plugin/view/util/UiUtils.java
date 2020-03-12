@@ -192,7 +192,7 @@ public class UiUtils {
 	
 	public JLabel createIconLabel(final String code, final float size, final Color color) {
 		final JLabel label = new JLabel(code);
-		label.setFont(iconManager.getIconFont(size));
+		label.setFont(getIconFont(size));
 		
 		if (color != null)
 			label.setForeground(color);
@@ -206,12 +206,16 @@ public class UiUtils {
 	
 	public JButton createIconButton(final String code, final float size, final Color color) {
 		final JButton button = new JButton(code);
-		button.setFont(iconManager.getIconFont(size));
+		button.setFont(getIconFont(size));
 		
 		if (color != null)
 			button.setForeground(color);
 		
 		return button;
+	}
+
+	public Font getIconFont(final float size) {
+		return iconManager.getIconFont(size);
 	}
 	
 	private Icon getIcon(String id) {

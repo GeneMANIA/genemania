@@ -42,92 +42,88 @@
     </div>
   </qtip>
 
-  <div class="graph-button activatable graph-button-row-5" on-tap="result.fitGraph()"><i class="fa fa-arrows-h fa-rotate-45"></i></div>
-
-  <div id="graph-button-info" class="graph-button activatable graph-button-row-7"><i class="fa fa-info-circle"></i></div>
+  <div id="graph-button-more" class="graph-button activatable graph-button-row-5"><i class="fa fa-ellipsis-v"></i></div>
   <qtip
-    qtip-target="graph-button-info"
-    qtip-id="graph-info"
+    qtip-target="graph-button-more"
+    qtip-id="graph-more"
     qtip-adjust-method="shift"
     qtip-adjust-resize="true"
-    qtip-pos-my="left center" qtip-pos-at="right center"
+    qtip-pos-my="left top" qtip-pos-at="right center"
     qtip-class="qtip-no-padding"
   >
-    <div class="graph-info-qtip-content">
-      <div class="info-section">
-        Showing {{result.query.maxGenes}} related genes,
-        with {{result.resultGenes.length}} total genes,
-        {{result.resultAttributeGroups.length}} attributes, and
-        and {{result.resultInteractions.length}} total links.
+    <div id="graph-more-qtip-content" class="graph-more-qtip-content">
+      <div class="graph-more-item activatable-bg" on-tap="result.fitGraph()">
+        <i class="fa fa-fw fa-arrows-h fa-rotate-45"></i> Fit to screen
       </div>
 
-      <div class="info-section search-genes-legend">
-        <span class="search-genes-legend-color"><span class="fa-stack"><i class="fa fa-square fa-stack-1x"></i><i class="fa fa-bars fa-stack-1x fa-rotate-315 search-genes-legend-stripe-icon"></i></span></span>
-        <span class="search-genes-legend-name">Genes you searched with are indicated with stripes</span>
+      <div class="graph-more-item">
+        <i class="fa fa-fw fa-save"></i> Save
       </div>
 
-      <div class="info-section">
-        <a target="_blank" href="http://apps.cytoscape.org/apps/genemania">Cytoscape app</a> |
-        <a target="_blank" href="http://pages.genemania.org/help/">Help</a> |
-        <a target="_blank" href="http://pages.genemania.org/contact/">Contact</a> |
-        <a target="_blank" href="http://pages.genemania.org/help/faq/#How_do_I_cite_GeneMANIA?">Cite</a> |
-        <a target="_blank" href="http://www.utoronto.ca/">&copy; UToronto</a>
-      </div>
-    </div>
-  </qtip>
-
-  <div id="graph-button-save" class="graph-button activatable graph-button-row-8"><i class="fa fa-save"></i></div>
-  <qtip
-    qtip-target="graph-button-save"
-    qtip-id="save-data"
-    qtip-adjust-method="shift"
-    qtip-adjust-resize="true"
-    qtip-pos-my="left center" qtip-pos-at="right center"
-    qtip-class="qtip-no-padding"
-  >
-    <div class="save-data-qtip-content">
-      <div class="save-data-option activatable-bg" on-tap="result.report()">
-        <i class="fa fa-file-pdf-o"></i> Report
+      <div class="graph-more-item save-data-option activatable-bg" on-tap="result.report()">
+        <i class="fa fa-fw fa-file-pdf-o"></i> Report <span class="small">PDF</span>
       </div>
 
-      <div class="save-data-option activatable-bg" on-tap="result.saveImage()">
-        <i class="fa fa-file-image-o"></i> Network image <br/> <span class="small">As shown</span>
+      <div class="graph-more-item save-data-option activatable-bg" on-tap="result.saveImage()">
+        <i class="fa fa-fw fa-file-image-o"></i> Network image <span class="small">As shown</span>
       </div>
 
-      <div class="save-data-option activatable-bg" on-tap="result.saveImage({ plainLabels: true })">
-        <i class="fa fa-file-image-o"></i> Network image <br/> <span class="small">With plain, top labels</span>
+      <div class="graph-more-item save-data-option activatable-bg" on-tap="result.saveImage({ plainLabels: true })">
+        <i class="fa fa-fw fa-file-image-o"></i> Network image <span class="small">Alternative</span>
       </div>
 
-      <div class="save-data-option activatable-bg" on-tap="result.saveText()">
-        <i class="fa fa-file-text-o"></i> Network
+      <div class="graph-more-item save-data-option activatable-bg" on-tap="result.saveText()">
+        <i class="fa fa-fw fa-file-text-o"></i> Network data <span class="small">From figure</span>
       </div>
 
-      <div class="save-data-option activatable-bg" on-tap="result.saveNetworks()">
-        <i class="fa fa-file-text-o"></i> Networks data
+      <div class="graph-more-item save-data-option activatable-bg" on-tap="result.saveNetworks()">
+        <i class="fa fa-fw fa-file-text-o"></i> Networks data
       </div>
 
-      <div class="save-data-option activatable-bg" on-tap="result.saveAttributes()">
-        <i class="fa fa-file-text-o"></i> Attributes data
+      <div class="graph-more-item save-data-option activatable-bg" on-tap="result.saveAttributes()">
+        <i class="fa fa-fw fa-file-text-o"></i> Attributes data
       </div>
 
-      <div class="save-data-option activatable-bg" on-tap="result.saveGenes()">
-        <i class="fa fa-file-text-o"></i> Genes data
+      <div class="graph-more-item save-data-option activatable-bg" on-tap="result.saveGenes()">
+        <i class="fa fa-fw fa-file-text-o"></i> Genes data
       </div>
 
-      <div class="save-data-option activatable-bg" on-tap="result.saveFunctions()">
-        <i class="fa fa-file-text-o"></i> Functions data
+      <div class="graph-more-item save-data-option activatable-bg" on-tap="result.saveFunctions()">
+        <i class="fa fa-fw fa-file-text-o"></i> Functions data
       </div>
 
-      <div class="save-data-option activatable-bg" on-tap="result.saveInteractions()">
-        <i class="fa fa-file-text-o"></i> Interactions data
+      <div class="graph-more-item save-data-option activatable-bg" on-tap="result.saveInteractions()">
+        <i class="fa fa-fw fa-file-text-o"></i> Interactions data
       </div>
 
-      <div class="save-data-option activatable-bg" on-tap="result.saveParamsText()">
-        <i class="fa fa-file-text-o"></i> Search parameters as text
+      <div class="graph-more-item save-data-option activatable-bg" on-tap="result.saveParamsText()">
+        <i class="fa fa-fw fa-file-text-o"></i> Search parameters <span class="small">Text</span>
       </div>
 
-      <div class="save-data-option activatable-bg" on-tap="result.saveParamsJson()">
-        <i class="fa fa-file-code-o"></i> Search parameters as JSON
+      <div class="graph-more-item save-data-option activatable-bg" on-tap="result.saveParamsJson()">
+        <i class="fa fa-fw fa-file-code-o"></i> Search parameters <span class="small">JSON</span>
+      </div>
+
+      <div class="graph-more-item graph-more-footer">
+        <div class="info-section">
+          Showing {{result.query.maxGenes}} related genes,
+          with {{result.resultGenes.length}} total genes,
+          {{result.resultAttributeGroups.length}} attributes, and
+          and {{result.resultInteractions.length}} total links.
+        </div>
+  
+        <div class="info-section search-genes-legend">
+          <span class="search-genes-legend-color"><span class="fa-stack"><i class="fa fa-square fa-stack-1x"></i><i class="fa fa-bars fa-stack-1x fa-rotate-315 search-genes-legend-stripe-icon"></i></span></span>
+          <span class="search-genes-legend-name">Genes you searched with are indicated with stripes</span>
+        </div>
+  
+        <div class="info-section">
+          <a target="_blank" href="http://apps.cytoscape.org/apps/genemania">Cytoscape app</a> |
+          <a target="_blank" href="http://pages.genemania.org/help/">Help</a> |
+          <a target="_blank" href="http://pages.genemania.org/contact/">Contact</a> |
+          <a target="_blank" href="http://pages.genemania.org/help/faq/#How_do_I_cite_GeneMANIA?">Cite</a> |
+          <a target="_blank" href="http://www.utoronto.ca/">&copy;&nbsp;UToronto</a>
+        </div>
       </div>
     </div>
   </qtip>

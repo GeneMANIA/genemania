@@ -28,7 +28,7 @@
         <!-- Oldest data set that works with this binary -->
         <minDataVersion>2010-08-25</minDataVersion>
          <!-- App version -->
-        <cytoscapeVersion>3.5.1</cytoscapeVersion>
+        <cytoscapeVersion>3.5.2</cytoscapeVersion>
         <!-- Cytoscape metadata -->
 		<cy3.version>3.7.0</cy3.version>
     </properties>

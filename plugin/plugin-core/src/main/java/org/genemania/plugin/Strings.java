@@ -260,7 +260,6 @@ public class Strings extends AbstractStrings {
 	public static String importCyNetworkHelp_label;
 	public static String importCyNetworkHelpEmpty_label;
 	public static String importCyNetworkTask_title;
-	public static String importCyNetworkExpressionNameColumn_label;
 	
 	public static String functionInfoPanelQValue_label;
 	public static String functionInfoPanelCoverage_label;

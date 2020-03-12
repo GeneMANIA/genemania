@@ -34,10 +34,16 @@ app.factory('util', [ function(){
     },
 
     isSmallScreen: function(){
-      var min = 550;
-      var $doc = $(document);
+      var minW = 800;
+      var minH = 600;
+      var docW = window.innerWidth;
+      var docH = window.innerHeight;
 
-      return $doc.width() < min || $doc.height() < min;
+      return docW < minW || docH < minH;
+    },
+
+    sidebarOverlapsSearch: function(){
+      return window.innerWidth < 550;
     }
   };
 } ]);

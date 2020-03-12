@@ -51,6 +51,18 @@
     },
 
     {
+      id: 'graph-more-qtip-content',
+      handler: function(){
+        var vp = document.body;
+
+        return [
+          { name: 'max-height', value: vp.clientHeight - 60 + 'px' }
+        ];
+      },
+      after: qtipFix
+    },
+
+    {
       selector: [
         '.query-genes-expander-expanded',
         '.query-genes-expander-expanded .query-genes-validation',
@@ -118,6 +130,15 @@
   }
 
   responsive.defines( defns );
+
+  // fix: on mobile 100% viewport height isn't accurate and can cause overflow
+  window.addEventListener('resize', function(){
+    var h = window.innerHeight + 'px';
+
+    document.body.style.height = h;
+    document.documentElement.style.height = h;
+    window.scrollTo(0, 0);
+  });
 
   PubSub.subscribe( 'query.search', function(){
     responsive.restyle();

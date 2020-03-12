@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
+  <meta name="viewport" content="initial-scale=1.0, width=device-width">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="format-detection" content="telephone=no">
@@ -30,7 +30,69 @@
   </script>
 
   <!-- inject:js -->
-  <script>document.write('<script src="' + tomcatContextPath() + 'js-build/all.min.js" async defer></'+'script>');</script>
+  <script src="js/debug/livereload.js"></script>
+  <script src="js/debug/debug.js"></script>
+  <script src="js/lib/jquery-2.1.1.js"></script>
+  <script src="js/lib/fastclick.js"></script>
+  <script src="js/lib/angular.js"></script>
+  <script src="js/lib/cytoscape.js"></script>
+  <script src="js/lib/FileSaver.js"></script>
+  <script src="js/lib/bindonce.js"></script>
+  <script src="js/lib/bluebird.js"></script>
+  <script src="js/lib/bluebird.js.conf.js"></script>
+  <script src="js/lib/dropbox.js"></script>
+  <script src="js/lib/jquery.autosize.js"></script>
+  <script src="js/lib/jquery.qtip.js"></script>
+  <script src="js/lib/jquery.velocity.js"></script>
+  <script src="js/lib/localforage.js"></script>
+  <script src="js/lib/lodash.js"></script>
+  <script src="js/lib/moment.js"></script>
+  <script src="js/lib/mousetrap.js"></script>
+  <script src="js/lib/numeral.js"></script>
+  <script src="js/lib/pdfmake.js"></script>
+  <script src="js/lib/pragmatic-angular.js"></script>
+  <script src="js/lib/pubsub.js"></script>
+  <script src="js/lib/rangeslider.js"></script>
+  <script src="js/lib/responsive.js"></script>
+  <script src="js/lib/uuid.js"></script>
+  <script src="js/lib/vfs_fonts.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/app-attributes.js"></script>
+  <script src="js/app-cy-stylesheet.js"></script>
+  <script src="js/app-cy.js"></script>
+  <script src="js/app-email.js"></script>
+  <script src="js/app-features.js"></script>
+  <script src="js/app-genes.js"></script>
+  <script src="js/app-io.js"></script>
+  <script src="js/app-listeners.js"></script>
+  <script src="js/app-logging.js"></script>
+  <script src="js/app-networks.js"></script>
+  <script src="js/app-organisms.js"></script>
+  <script src="js/app-popover.js"></script>
+  <script src="js/app-qtip.js"></script>
+  <script src="js/app-query-attributes.js"></script>
+  <script src="js/app-query-genes.js"></script>
+  <script src="js/app-query-history.js"></script>
+  <script src="js/app-query-networks.js"></script>
+  <script src="js/app-query.js"></script>
+  <script src="js/app-resources.js"></script>
+  <script src="js/app-result-functions.js"></script>
+  <script src="js/app-result-genes.js"></script>
+  <script src="js/app-result-highlight.js"></script>
+  <script src="js/app-result-layouts.js"></script>
+  <script src="js/app-result-networks.js"></script>
+  <script src="js/app-result-report.js"></script>
+  <script src="js/app-result-save.js"></script>
+  <script src="js/app-result-selected-info.js"></script>
+  <script src="js/app-result-shortcuts.js"></script>
+  <script src="js/app-result.js"></script>
+  <script src="js/app-search.js"></script>
+  <script src="js/app-stats.js"></script>
+  <script src="js/app-user.js"></script>
+  <script src="js/app-util.js"></script>
+  <script src="js/app-version.js"></script>
+  <script src="js/responsive-defns.js"></script>
   <!-- endinject -->
 
 </head>
@@ -593,7 +655,7 @@
   </div></div>
 
   <!-- inject:css -->
-  <script>document.write('<link rel="stylesheet" href="' + tomcatContextPath() + 'css-build/all.min.css" />');</script>
+  <link rel="stylesheet" href="css-build/all.css">
   <!-- endinject -->
 
 </body>

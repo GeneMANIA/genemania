@@ -21,6 +21,7 @@ package org.genemania.plugin.data.lucene.view;
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -408,6 +409,7 @@ public class ImportCyNetworkPanel extends JPanel {
 					uiUtils.packColumns(this);
 				}
 			};
+			expressionTable.getTableHeader().setPreferredSize(new Dimension());
 		}
 		
 		return expressionTable;
@@ -780,7 +782,7 @@ public class ImportCyNetworkPanel extends JPanel {
 	}
 
 	private void resetForm() {
-		 getNameTextField().setText(""); //$NON-NLS-1$
+		getNameTextField().setText(""); //$NON-NLS-1$
 		getDescriptionTextArea().setText(""); //$NON-NLS-1$
 	}
 	
@@ -825,14 +827,7 @@ public class ImportCyNetworkPanel extends JPanel {
 
 		@Override
 		public String getColumnName(int columnIndex) {
-			switch (columnIndex) {
-			case CHECK_COLUMN:
-				return ""; //$NON-NLS-1$
-			case NAME_COLUMN:
-				return Strings.importCyNetworkExpressionNameColumn_label;
-			default:
-				return null;
-			}
+			return null;
 		}
 
 		@Override

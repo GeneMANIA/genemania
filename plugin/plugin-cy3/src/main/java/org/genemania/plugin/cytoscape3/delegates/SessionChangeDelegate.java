@@ -62,9 +62,13 @@ public class SessionChangeDelegate implements Delegate {
 		try {
 			DataSet data = findDataSet(dataSetPath, dataSetManager);
 			
-			if (data == null) {
+			// When the session only has genemania networks from online searches, dataSetPath is null
+			if (data == null && dataSetPath != null) {
 				plugin.initializeData(progress, true);
 				data = dataSetManager.getDataSet();
+				
+				if (data == null)
+					throw new ApplicationException("Cannot load GeneMANIA data. Please download a data set and open this session again");
 			}
 			
 			SessionManager manager = plugin.getSessionManager();

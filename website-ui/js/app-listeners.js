@@ -159,7 +159,8 @@ app.directive('onHoverover', ['$parse', function ($parse) {
       if( evt.touches.length === 1 ){
         handler(scope, { $event: evt });
 
-        evt.preventDefault();
+        // preventDefault() kills scrolling so disable this for now
+        // evt.preventDefault();
       }
     });
 

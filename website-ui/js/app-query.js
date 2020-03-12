@@ -176,6 +176,12 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
 
   qfn.toggleExpand = function(){
     qfn.expanded = !qfn.expanded;
+
+    var result = this.result;
+
+    if( qfn.expanded && util.sidebarOverlapsSearch() && result && result.networksExpanded ){
+      result.collapseNetworks();
+    }
   };
 
 
@@ -383,7 +389,8 @@ function( $$organisms, $$networks, $$attributes, $$version, $$stats, util, $$gen
   qfn.updateLink = function(){
     var customized = this.areAdvancedOptionsCustomized();
 
-    var queryHistorySupported = window.history != null && window.history.pushState != null;
+    var debugDisableUrlMode = typeof DEBUG_DISABLE_URL_MOD != typeof undefined ? DEBUG_DISABLE_URL_MOD : false;
+    var queryHistorySupported = !debugDisableUrlMode && window.history != null && window.history.pushState != null;
 
     var params = this.params();
 
