@@ -99,7 +99,7 @@ import org.genemania.plugin.view.util.TextIcon;
 import org.genemania.plugin.view.util.UiUtils;
 import org.genemania.type.CombiningMethod;
 
-import com.sun.glass.events.KeyEvent;
+import java.awt.event.KeyEvent;
 
 @SuppressWarnings("serial")
 public class QueryBar extends JPanel {
