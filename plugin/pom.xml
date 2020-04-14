@@ -18,9 +18,6 @@
 
     <modules>
         <module>plugin-core</module>
-        <!-- <module>plugin-cy2-support</module>
-        <module>plugin-cy26-support</module>
-        <module>plugin-cy2</module> -->
         <module>plugin-cy3</module>
         <module>distribution</module>
     </modules>

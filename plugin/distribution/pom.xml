@@ -18,11 +18,6 @@
             <artifactId>plugin-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- <dependency>
-            <groupId>org.genemania</groupId>
-            <artifactId>plugin-cy2</artifactId>
-            <version>${project.version}</version>
-        </dependency> -->
     </dependencies>
     
     <build>
@@ -39,18 +34,18 @@
                             <goal>unpack</goal>
                         </goals>
                         <configuration>
-							<artifactItems>
-<!--                                 <artifactItem> -->
-<!--                                     <artifactId>mtj</artifactId> -->
-<!--                                     <groupId>no.uib.cipr</groupId> -->
-<!--                                     <version>0.9.9e</version> -->
-<!--                                     <type>jar</type> -->
-<!--                                     <outputDirectory>target/dependencies/ticket-1450</outputDirectory> -->
-<!--                                  </artifactItem> -->
+                            <artifactItems>
+                                <artifactItem>
+                                    <artifactId>mtj</artifactId>
+                                    <groupId>no.uib.cipr</groupId>
+                                    <version>0.9.9e</version>
+                                    <type>jar</type>
+                                    <outputDirectory>target/dependencies/ticket-1450</outputDirectory>
+                                 </artifactItem>
                                 <artifactItem>
                                     <artifactId>mtj</artifactId>
                                     <groupId>com.googlecode.matrix-toolkits-java</groupId>
-                                    <version>0.9.14</version>
+                                    <version>0.9.14b</version>
                                     <type>jar</type>
                                     <outputDirectory>target/dependencies/ticket-1472</outputDirectory>
                                  </artifactItem>
