@@ -22,8 +22,47 @@
     
     <build>
         <plugins>
+        	<!-- See ticket #1450 -->
+        	<plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-install-plugin</artifactId>
+              <version>2.5.2</version>
+              <executions>
+                  <execution>
+                      <id>install-external-mtj</id>
+                      <phase>clean</phase>
+                      <configuration>
+                          <file>${basedir}/lib/mtj-0.9.9e.jar</file>
+                          <repositoryLayout>default</repositoryLayout>
+                          <groupId>no.uib.cipr</groupId>
+                          <artifactId>mtj</artifactId>
+                          <version>0.9.9e</version>
+                          <packaging>jar</packaging>
+                          <generatePom>true</generatePom>
+                      </configuration>
+                      <goals>
+                          <goal>install-file</goal>
+                      </goals>
+                  </execution>
+                  <execution>
+                      <id>install-external-netlib</id>
+                      <phase>clean</phase>
+                      <configuration>
+                          <file>${basedir}/lib/mtj-0.9.14b.jar</file>
+                          <repositoryLayout>default</repositoryLayout>
+                          <groupId>com.googlecode.matrix-toolkits-java</groupId>
+                          <artifactId>mtj</artifactId>
+                          <version>0.9.14b</version>
+                          <packaging>jar</packaging>
+                          <generatePom>true</generatePom>
+                      </configuration>
+                      <goals>
+                          <goal>install-file</goal>
+                      </goals>
+                  </execution>
+              </executions>
+            </plugin>
             <plugin>
-            	<!-- See ticket #1450 -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
