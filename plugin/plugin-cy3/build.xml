@@ -14,18 +14,18 @@
     <property environment="env"/>
     
     <property name="build.dir" value="target"/>
-    <property name="cytoscape.app.dir" value="${cytoscape.home}/apps/installed"/>
+    <property name="netdx.deploy.dir" value="${netdx.home}"/>
 
     <target name="install">
-        <copy todir="${cytoscape.app.dir}" overwrite="true">
+        <copy todir="${netdx.deploy.dir}" overwrite="true">
             <fileset dir="${build.dir}" includes="*.jar"/>
         </copy>
     </target>
     
     <target name="info">
-        <echo>*******************************************************************</echo>
-        <echo>*   This script installs the GeneMANIA Cytoscape 3 app            *</echo>
-        <echo>*******************************************************************</echo>
+        <echo>******************************************************************</echo>
+        <echo>*  This script copies the GeneMANIA netDx jar to another folder  *</echo>
+        <echo>******************************************************************</echo>
     </target>
     
 </project>

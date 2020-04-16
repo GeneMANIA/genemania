@@ -8,7 +8,6 @@
         <relativePath>..</relativePath>
     </parent>
 
-    <groupId>org.genemania</groupId>
     <artifactId>genemania-common</artifactId>
     <packaging>jar</packaging>
     <name>GeneMANIA Common</name>
@@ -107,9 +106,10 @@
 			<version>1.2.17</version>
 		</dependency>
 		<dependency>
+			<!-- NOTE: this library may cause "illegal reflective access" warnings in Java 9+ -->
             <groupId>cglib</groupId>
             <artifactId>cglib-nodep</artifactId>
-            <version>2.2</version>
+            <version>3.3.0</version>
         </dependency>
 		<dependency>
             <groupId>commons-collections</groupId>
@@ -123,10 +123,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
             <plugin>

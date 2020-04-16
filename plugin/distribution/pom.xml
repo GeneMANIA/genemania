@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.genemania</groupId>
         <artifactId>plugin-parent</artifactId>
-        <version>3.5.0</version>
+        <version>3.5.0b</version>
         <relativePath>..</relativePath>
     </parent>
     
@@ -99,7 +99,7 @@
                     <archive>
                         <manifestFile>../src/etc/MANIFEST</manifestFile>
                     </archive>
-                    <finalName>genemania-cytoscape-plugin-${project.version}</finalName>
+                    <finalName>genemania-netdx-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptor>src/assemble/assembly.xml</descriptor>
                 </configuration>
