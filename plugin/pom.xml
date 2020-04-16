@@ -18,7 +18,6 @@
 
     <modules>
         <module>plugin-core</module>
-        <module>plugin-cy3</module>
         <module>distribution</module>
     </modules>
 
