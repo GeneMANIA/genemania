@@ -29,8 +29,18 @@ import org.genemania.util.ProgressReporter;
 
 public interface GeneMania {
 	
+	public static final String SCHEMA_VERSION = "1.1"; //$NON-NLS-1$
 	public static final String DEFAULT_NAMESPACE = "user"; //$NON-NLS-1$
+
+	public static final String DATA_SOURCE_PATH_PROPERTY = "genemania.datasource"; //$NON-NLS-1$
 	public static final String SETTINGS_PROPERTY = "genemania.plugin.settings"; //$NON-NLS-1$
+	
+	public static final String APP_CYPROPERTY_NAME = "GeneMANIA";
+	
+	public static final String ORGANISMS_API_URL = "api.organisms.url"; //$NON-NLS-1$
+	public static final String NETWORKS_API_URL = "api.networks.url"; //$NON-NLS-1$
+	public static final String VERSION_API_URL = "api.version.url"; //$NON-NLS-1$
+	public static final String SEARCH_API_URL = "api.search.url"; //$NON-NLS-1$
 	
 	void showResults();
 

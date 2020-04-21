@@ -27,6 +27,7 @@ import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.genemania.plugin.AbstractGeneMania;
 import org.genemania.plugin.FileUtils;
+import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.data.DataSet;
@@ -68,9 +69,9 @@ public class GeneManiaImpl extends AbstractGeneMania {
 			@Override
 			public void dataSetChanged(DataSet dataSet, ProgressReporter progress) {
 				if (dataSet == null)
-					cytoscapeUtils.removeSessionProperty(CytoscapeUtilsImpl.DATA_SOURCE_PATH_PROPERTY);
+					cytoscapeUtils.removeSessionProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY);
 				else
-					cytoscapeUtils.setSessionProperty(CytoscapeUtilsImpl.DATA_SOURCE_PATH_PROPERTY, dataSet.getBasePath());
+					cytoscapeUtils.setSessionProperty(GeneMania.DATA_SOURCE_PATH_PROPERTY, dataSet.getBasePath());
 			}
 		});
 	}

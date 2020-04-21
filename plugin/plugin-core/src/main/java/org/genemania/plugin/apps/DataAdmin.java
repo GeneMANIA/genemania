@@ -38,6 +38,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.genemania.exception.ApplicationException;
 import org.genemania.plugin.FileUtils;
+import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.data.DataDescriptor;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.data.lucene.LuceneDataSet;
@@ -170,14 +171,16 @@ public class DataAdmin extends AbstractPluginApp {
 		@Override
 		public void run() {
 			try {
-				Map<String, String> descriptions = fFileUtils.getDataSetDescriptions();
-				Map<String, Long> sizes = fFileUtils.getDataSetSizes();
-				List<String> dataSets = fFileUtils.getCompatibleDataSets();
+				Map<String, String> descriptions = fFileUtils.getDataSetDescriptions(FileUtils.DEFAULT_BASE_URL);
+				Map<String, Long> sizes = fFileUtils.getDataSetSizes(FileUtils.DEFAULT_BASE_URL);
+				List<String> dataSets = fFileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, GeneMania.SCHEMA_VERSION);
 				
+				System.out.printf("Data Set ID\tTotal Size\tDatabase Version\n"); //$NON-NLS-1$
 				for (String url : dataSets) {
 					String name = getDataSetId(url);
 					double size = sizes.get(name) / 1024.0;
 					String description = descriptions.get(name);
+					System.out.printf("%s\t%.2f MB\t%s\n", name, size, description); //$NON-NLS-1$
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -199,7 +202,7 @@ public class DataAdmin extends AbstractPluginApp {
 		@Override
 		public void run() {
 			try {
-				String baseUrl = fFileUtils.findDataSetBaseUrl(fId);
+				String baseUrl = fFileUtils.findDataSetBaseUrl(FileUtils.DEFAULT_BASE_URL, fId);
 				URL url = new URL(String.format("%s.zip", baseUrl)); //$NON-NLS-1$
 				fProgress.setStatus("Installing..."); //$NON-NLS-1$
 				fProgress.setMaximumProgress(2);
@@ -240,8 +243,7 @@ public class DataAdmin extends AbstractPluginApp {
 					throw new IllegalArgumentException(String.format("Usage: %s data-set-id", fName)); //$NON-NLS-1$
 				
 				String targetId = fArguments.get(1);
-				List<String> dataSets = fFileUtils.getCompatibleDataSets();
-				
+				List<String> dataSets = fFileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, GeneMania.SCHEMA_VERSION);
 				for (String url : dataSets) {
 					String id = getDataSetId(url);
 					

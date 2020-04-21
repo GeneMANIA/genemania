@@ -107,18 +107,6 @@ import org.genemania.util.ProgressReporter;
 
 public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements CytoscapeUtils, RowsSetListener {
 
-	public static final String APP_CYPROPERTY_NAME = "GeneMANIA";
-	
-	public static final String DATA_SOURCE_PATH_PROPERTY = "genemania.datasource"; //$NON-NLS-1$
-	
-	public static final String DATA_URL_PROPERTY = "data.url"; //$NON-NLS-1$
-	public static final String DATA_SCHEMA_VERSION_PROPERTY = "data.schema.version"; //$NON-NLS-1$
-	
-	public static final String ORGANISMS_API_URL = "api.organisms.url"; //$NON-NLS-1$
-	public static final String NETWORKS_API_URL = "api.networks.url"; //$NON-NLS-1$
-	public static final String VERSION_API_URL = "api.version.url"; //$NON-NLS-1$
-	public static final String SEARCH_API_URL = "api.search.url"; //$NON-NLS-1$
-	
 	private final CySwingApplication application;
 	private final CyApplicationManager applicationManager;
 	private final CyTableManager tableManager;
@@ -314,7 +302,8 @@ public class CytoscapeUtilsImpl extends AbstractCytoscapeUtils implements Cytosc
 		CyProperty<Properties> cyProps = null;
 		
 		try {
-			cyProps = serviceRegistrar.getService(CyProperty.class, "(cyPropertyName=" + APP_CYPROPERTY_NAME + ")");
+			cyProps = serviceRegistrar.getService(CyProperty.class,
+					"(cyPropertyName=" + GeneMania.APP_CYPROPERTY_NAME + ")");
 		} catch (Exception e) {
 			// Ignore...
 		}

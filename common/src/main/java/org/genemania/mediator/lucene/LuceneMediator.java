@@ -19,10 +19,12 @@
 
 package org.genemania.mediator.lucene;
 
+import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -192,6 +194,24 @@ public class LuceneMediator {
     public LuceneMediator(Searcher searcher, Analyzer analyzer) {
         this.searcher = searcher;
         this.analyzer = analyzer;
+        
+        // Hack to hide "illegal reflective access" warnings in Java 9+, caused by cglib.
+        // It is based on the fact that it is allowed for code running on classpath (i.e. from the unnamed module)
+        // to freely dynamically open packages of any module.
+        // It can be done only from the target module itself, or from the unnamed module.
+        try {
+			if (!this.getClass().getModule().isNamed())
+			    Console.class.getModule().addOpens(ClassLoader.class.getPackageName(), this.getClass().getModule());
+			
+			Method[] methods = ClassLoader.class.getDeclaredMethods();
+			
+			for (Method m : methods) {
+				if (m.getName().equals("defineClass"))
+					m.setAccessible(true);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
     }
 
     protected void search(String queryString, Collector results) {

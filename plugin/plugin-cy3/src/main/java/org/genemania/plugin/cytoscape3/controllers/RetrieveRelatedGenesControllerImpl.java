@@ -82,7 +82,6 @@ import org.genemania.plugin.Strings;
 import org.genemania.plugin.controllers.RetrieveRelatedGenesController;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.cytoscape.EdgeAttributeProvider;
-import org.genemania.plugin.cytoscape3.CytoscapeUtilsImpl;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.formatters.OrganismFormatter;
 import org.genemania.plugin.model.Group;
@@ -695,7 +694,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 				
 				progress.setProgress(++stage);
 				
-				String url = cytoscapeUtils.getPreference(CytoscapeUtilsImpl.SEARCH_API_URL);
+				String url = cytoscapeUtils.getPreference(GeneMania.SEARCH_API_URL);
 				
 				RequestBody body = RequestBody.create(JSON, jsonReq);
 				Request request = new Request.Builder()
@@ -785,7 +784,7 @@ public class RetrieveRelatedGenesControllerImpl implements RetrieveRelatedGenesC
 		}
 		
 		private void updateWebDataVersion() throws Exception {
-			String url = cytoscapeUtils.getPreference(CytoscapeUtilsImpl.VERSION_API_URL);
+			String url = cytoscapeUtils.getPreference(GeneMania.VERSION_API_URL);
 			
 			Request request = new Request.Builder()
 					.url(url)

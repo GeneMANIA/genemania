@@ -30,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.genemania.plugin.FileUtils;
+import org.genemania.plugin.GeneMania;
 import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetManager;
 
@@ -65,12 +66,11 @@ public class DownloadController {
 			activeDataId = data.getVersion().toString();
 		}
 		
-		Map<String, String> descriptions = fileUtils.getDataSetDescriptions();
-		Map<String, Long> sizes = fileUtils.getDataSetSizes();
-		List<String> dataSets = fileUtils.getCompatibleDataSets();
-		List<ModelElement> model = new ArrayList<>();
-		Map<String, List<ModelElement>> parents = new HashMap<>();
-		
+		Map<String, String> descriptions = fileUtils.getDataSetDescriptions(FileUtils.DEFAULT_BASE_URL);
+		Map<String, Long> sizes = fileUtils.getDataSetSizes(FileUtils.DEFAULT_BASE_URL);
+		List<String> dataSets = fileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, GeneMania.SCHEMA_VERSION);
+		List<ModelElement> model = new ArrayList<ModelElement>();
+		Map<String, List<ModelElement>> parents = new HashMap<String, List<ModelElement>>();
 		for (String url : dataSets) {
 			Matcher matcher = pattern.matcher(url);
 			

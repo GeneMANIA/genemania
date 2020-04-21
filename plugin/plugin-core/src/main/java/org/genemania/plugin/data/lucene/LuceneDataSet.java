@@ -407,8 +407,8 @@ public class LuceneDataSet extends DataSet {
 	}
 
 	public List<DataDescriptor> getAvailableDataDescriptors() throws IOException {
-		List<DataDescriptor> result = new ArrayList<>();
-		String baseUrl = fileUtils.findDataSetBaseUrl(getVersion().toString());
+		List<DataDescriptor> result = new ArrayList<DataDescriptor>();
+		String baseUrl = fileUtils.findDataSetBaseUrl(FileUtils.DEFAULT_BASE_URL, getVersion().toString());
 		InputStream stream = null;
 		
 		try {
@@ -575,7 +575,7 @@ public class LuceneDataSet extends DataSet {
 		progress.setStatus(String.format(Strings.installIndex_status, description));
 		
 		try {
-			String baseUrl = fileUtils.findDataSetBaseUrl(getVersion().toString());
+			String baseUrl = fileUtils.findDataSetBaseUrl(FileUtils.DEFAULT_BASE_URL, getVersion().toString());
 			URL indexUrl = new URL(String.format("%s/%s.zip", baseUrl, URLEncoder.encode(name, "utf-8"))); //$NON-NLS-1$ //$NON-NLS-2$
 			URL cacheUrl = new URL(String.format("%s/%s.cache.zip", baseUrl, URLEncoder.encode(name, "utf-8"))); //$NON-NLS-1$ //$NON-NLS-2$
 			
