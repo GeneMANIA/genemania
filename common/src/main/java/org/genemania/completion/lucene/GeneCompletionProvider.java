@@ -42,6 +42,7 @@ public class GeneCompletionProvider extends LuceneCompletionProvider {
 
 	// __[constructors]________________________________________________________
 	// Spring IOC support  
+	@SuppressWarnings("unused")
 	private GeneCompletionProvider() {
 		this(null, null);
 	}

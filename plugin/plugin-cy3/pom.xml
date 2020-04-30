@@ -157,6 +157,7 @@
 						<_include>../src/etc/MANIFEST</_include>
 						<_failok>true</_failok>
 					</instructions>
+					<finalName>genemania-cy3-${project.version}</finalName>
 				</configuration>
 			</plugin>
             <plugin>
@@ -176,6 +177,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
                 <executions>
                     <execution>
                         <phase>install</phase>
