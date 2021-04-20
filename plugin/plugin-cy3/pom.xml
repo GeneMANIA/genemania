@@ -3,7 +3,7 @@
 	<parent>
         <groupId>org.genemania</groupId>
         <artifactId>plugin-parent</artifactId>
-        <version>3.5.2</version>
+        <version>3.5.3</version>
         <relativePath>..</relativePath>
 	</parent>
     <properties>
@@ -11,7 +11,6 @@
 		<bundle.namespace>org.genemania.plugin.cytoscape3</bundle.namespace>
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<maven-pax-plugin.version>1.5</maven-pax-plugin.version>
-		<maven-bundle-plugin.version>3.0.0</maven-bundle-plugin.version>
 	</properties>
 
     <modelVersion>4.0.0</modelVersion>
@@ -141,7 +140,6 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>${maven-bundle-plugin.version}</version>
 				<configuration>
 					<instructions>
 					    <Bundle-Name>GeneMANIA</Bundle-Name>
@@ -159,6 +157,7 @@
 						<_include>../src/etc/MANIFEST</_include>
 						<_failok>true</_failok>
 					</instructions>
+					<finalName>genemania-cy3-${project.version}</finalName>
 				</configuration>
 			</plugin>
             <plugin>

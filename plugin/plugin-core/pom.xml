@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.genemania</groupId>
         <artifactId>plugin-parent</artifactId>
-        <version>3.5.2</version>
+        <version>3.5.3</version>
         <relativePath>..</relativePath>
     </parent>
 
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib-nodep</artifactId>
-            <version>2.2</version>
+            <version>3.3.0</version>
         </dependency>
         <dependency>
 			<groupId>net.sourceforge.zip64file</groupId>

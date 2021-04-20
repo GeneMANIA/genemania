@@ -153,7 +153,6 @@ public class FileUtils {
 		return buffer.toString();
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void unzip(File zipPath, File destination, ProgressReporter progress) throws IOException {
 		Zip64File file = new Zip64File(zipPath);
 		try {
