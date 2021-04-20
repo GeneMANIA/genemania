@@ -11,15 +11,12 @@
     </parent>
 
     <artifactId>plugin-parent</artifactId>
-    <version>3.5.2</version>
+    <version>3.5.3</version>
     <packaging>pom</packaging>
     <name>GeneMANIA Cytoscape App Parent</name>
 
     <modules>
         <module>plugin-core</module>
-        <!-- <module>plugin-cy2-support</module>
-        <module>plugin-cy26-support</module>
-        <module>plugin-cy2</module> -->
         <module>plugin-cy3</module>
         <module>distribution</module>
     </modules>
@@ -27,8 +24,8 @@
     <properties>
         <!-- Oldest data set that works with this binary -->
         <minDataVersion>2010-08-25</minDataVersion>
-         <!-- App version -->
-        <cytoscapeVersion>3.5.2</cytoscapeVersion>
+        <!-- App version -->
+        <cytoscapeVersion>3.5.3</cytoscapeVersion>
         <!-- Cytoscape metadata -->
 		<cy3.version>3.7.0</cy3.version>
     </properties>
@@ -94,11 +91,11 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
+				<groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -202,7 +199,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.0</version>
+            <version>4.13</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
