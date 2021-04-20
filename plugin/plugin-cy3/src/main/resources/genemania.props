@@ -1,6 +1,6 @@
-api.organisms.url = http://api.genemania.org/json/organisms
-api.networks.url = http://api.genemania.org/json/network_groups
-api.version.url = http://api.genemania.org/json/version
-api.search.url = http://api.genemania.org/json/search_results
+api.organisms.url = http://192.168.81.149:8081/genemania/json/organisms
+api.networks.url = http://192.168.81.149:8081/genemania/json/network_groups
+api.version.url = http://192.168.81.149:8081/genemania/json/version
+api.search.url = http://192.168.81.149:8081/genemania/json/search_results
 organisms.cache.expires.hours = 24
 search.timeout.seconds = 240

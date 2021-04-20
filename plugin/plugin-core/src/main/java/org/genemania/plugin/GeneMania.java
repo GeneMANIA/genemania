@@ -29,7 +29,7 @@ import org.genemania.util.ProgressReporter;
 
 public interface GeneMania {
 	
-	public static final String SCHEMA_VERSION = "1.1"; //$NON-NLS-1$
+	public static final String SCHEMA_VERSION = "dev"; //$NON-NLS-1$
 	public static final String DEFAULT_NAMESPACE = "user"; //$NON-NLS-1$
 
 	public static final String DATA_SOURCE_PATH_PROPERTY = "genemania.datasource"; //$NON-NLS-1$

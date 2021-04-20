@@ -51,7 +51,7 @@ import ch.enterag.utils.zip.Zip64File;
 public class FileUtils {
 	
 	// Old one was http://www.genemania.org/plugin
-	public static final String DEFAULT_BASE_URL = "http://plugin.genemania.org"; //$NON-NLS-1$
+	public static final String DEFAULT_BASE_URL = "http://192.168.81.239:9999"; //$NON-NLS-1$
 	
 	public static final String DESCRIPTION_FILE = "descriptions.txt"; //$NON-NLS-1$
 	public static final String SIZE_FILE = "sizes.txt"; //$NON-NLS-1$
