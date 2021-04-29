@@ -65,7 +65,7 @@ CACHEDIR=${DB_ROOT}/network_cache
 GENERICDB_DIR=${DB_ROOT}/generic_db
 
 LUCENE_INDEX_DIR=${BUILDDIR}/index/lucene_index
-GO_CATEGORIES_DIR=${DB_ROOT}/GoCategories
+GO_CATEGORIES_DIR=${DB_ROOT}/GO_CATEGORIES
 
 # Test whether we have GNU or BSD find
 FIND_OPTS=$(find -E . &> /dev/null && echo " -E")
