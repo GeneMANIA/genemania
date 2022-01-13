@@ -12,7 +12,8 @@
     <packaging>jar</packaging>
     <name>GeneMANIA Engine</name>
     <url>http://localhost:8080/genemania</url>
-    <repositories>
+    
+	<repositories>
         <repository>
             <id>genemania_maven_repo</id>
             <name>GeneMANIA Maven Project Repository</name>
@@ -30,22 +31,22 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math</artifactId>
-            <version>2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.7</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.genemania</groupId>
-            <artifactId>genemania-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math</artifactId>
+			<version>2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.7</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.genemania</groupId>
+			<artifactId>genemania-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
         <!-- if we want to use the bundled apps against a derby db, need
             these dependencies <dependency> <groupId>org.genemania</groupId> <artifactId>genemania-hibernate-support</artifactId>
             <version>0.1</version> </dependency> <dependency> <groupId>org.apache.derby</groupId>
@@ -58,27 +59,29 @@
 
         Fixed by using a local copy in ./lib with maven-install-plugin
         -->
-        <dependency>
-            <groupId>com.googlecode.matrix-toolkits-java</groupId>
-            <artifactId>mtj</artifactId>
-            <version>0.9.14d</version>
-        </dependency>
-	 <dependency>
-	       <groupId>com.googlecode.netlib-java</groupId>
-	       <artifactId>netlib-java</artifactId>
-	 	<version>0.9.3</version>
-	</dependency> 
-	<!-- <dependency>
-  		<groupId>com.github.fommil.netlib</groupId>
-  		<artifactId>all</artifactId>
-  		<version>1.1.2</version>
-  		<type>pom</type>
-	</dependency> -->
-	<dependency>
-		<groupId>net.sourceforge.f2j</groupId>
-		<artifactId>arpack_combined_all</artifactId>
-		<version>0.1</version>
-	</dependency>	
+		<dependency>
+			<groupId>com.googlecode.matrix-toolkits-java</groupId>
+			<artifactId>mtj</artifactId>
+			<version>0.9.14d</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.netlib-java</groupId>
+			<artifactId>netlib-java</artifactId>
+			<version>0.9.3</version>
+		</dependency>
+		<!--
+		<dependency>
+			<groupId>com.github.fommil.netlib</groupId>
+			<artifactId>all</artifactId>
+			<version>1.1.2</version>
+			<type>pom</type>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>net.sourceforge.f2j</groupId>
+			<artifactId>arpack_combined_all</artifactId>
+			<version>0.1</version>
+		</dependency>
         <dependency>
             <artifactId>opencsv</artifactId>
             <groupId>net.sf.opencsv</groupId>
@@ -106,113 +109,150 @@
             <!-- <scope>test</scope> -->
         </dependency>
     </dependencies>
-    <build>
+    
+	<build>
         <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-install-plugin</artifactId>
-              <version>2.5.2</version>
-              <executions>
-                  <execution>
-                      <id>install-external-mtj</id>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.2</version>
+				<executions>
+					<!-- Required by plugin-distribution: -->
+					<execution>
+						<id>install-external-mtj-0.9.9e</id>
+						<phase>clean</phase>
+						<configuration>
+							<file>${basedir}/lib/mtj-0.9.9e.jar</file>
+							<repositoryLayout>default</repositoryLayout>
+							<groupId>no.uib.cipr</groupId>
+							<artifactId>mtj</artifactId>
+							<version>0.9.9e</version>
+							<packaging>jar</packaging>
+							<generatePom>true</generatePom>
+						</configuration>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+					</execution>
+					<!-- Required by plugin-distribution: -->
+					<execution>
+                      <id>install-external-mtj-0.9.14b</id>
                       <phase>clean</phase>
                       <configuration>
-                          <file>${basedir}/lib/mtj-0.9.14d.jar</file>
+                          <file>${basedir}/lib/mtj-0.9.14b.jar</file>
                           <repositoryLayout>default</repositoryLayout>
                           <groupId>com.googlecode.matrix-toolkits-java</groupId>
                           <artifactId>mtj</artifactId>
-                          <version>0.9.14d</version>
+                          <version>0.9.14b</version>
                           <packaging>jar</packaging>
                           <generatePom>true</generatePom>
                       </configuration>
                       <goals>
                           <goal>install-file</goal>
                       </goals>
-                  </execution>
-		  <execution>
-                      <id>install-external-netlib</id>
-                      <phase>clean</phase>
-                      <configuration>
-                          <file>${basedir}/lib/netlib-java-0.9.3.jar</file>
-                          <repositoryLayout>default</repositoryLayout>
-                          <groupId>com.googlecode.netlib-java</groupId>
-                          <artifactId>netlib-java</artifactId>
-                          <version>0.9.3</version>
-                          <packaging>jar</packaging>
-                          <generatePom>true</generatePom>
-                      </configuration>
-                      <goals>
-                          <goal>install-file</goal>
-                      </goals>
-		  </execution> 
-                  <execution>
-                      <id>install-external-arpack</id>
-                      <phase>clean</phase>
-                      <configuration>
-                          <file>${basedir}/lib/arpack_combined_all-0.1.jar</file>
-                          <repositoryLayout>default</repositoryLayout>
-                          <groupId>net.sourceforge.f2j</groupId>
-                          <artifactId>arpack_combined_all</artifactId>
-                          <version>0.1</version>
-                          <packaging>jar</packaging>
-                          <generatePom>true</generatePom>
-                      </configuration>
-                      <goals>
-                          <goal>install-file</goal>
-                      </goals>
-                  </execution>
-              </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>11</source>
-                    <target>11</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.4.3</version>
-                <configuration>
-                    <argLine>-Xmx512m</argLine>
-                    <skip>false</skip>
-                    <testFailureIgnore>true</testFailureIgnore>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.mycila.maven-license-plugin</groupId>
-                <artifactId>maven-license-plugin</artifactId>
-                <version>1.9.0</version>
-                <configuration>
-                    <header>src/etc/header.txt</header>
-                    <strictCheck>true</strictCheck>
-                    <includes>
-                        <include>src/**/*.java</include>
-                        <include>src/**/*.py</include>
-                    </includes>
-                </configuration>
-            </plugin>
-        </plugins>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <excludes>
-                    <exclude>**/MATLAB/*</exclude>
-                </excludes>
-            </resource>
-        </resources>
-    </build>
+					</execution>
+					<!-- Required here: -->
+					<execution>
+						<id>install-external-mtj-0.9.14d</id>
+						<phase>clean</phase>
+						<configuration>
+							<file>${basedir}/lib/mtj-0.9.14d.jar</file>
+							<repositoryLayout>default</repositoryLayout>
+							<groupId>com.googlecode.matrix-toolkits-java</groupId>
+							<artifactId>mtj</artifactId>
+							<version>0.9.14d</version>
+							<packaging>jar</packaging>
+							<generatePom>true</generatePom>
+						</configuration>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+					</execution>
+					<!-- Required here: -->
+					<execution>
+						<id>install-external-netlib</id>
+						<phase>clean</phase>
+						<configuration>
+							<file>${basedir}/lib/netlib-java-0.9.3.jar</file>
+							<repositoryLayout>default</repositoryLayout>
+							<groupId>com.googlecode.netlib-java</groupId>
+							<artifactId>netlib-java</artifactId>
+							<version>0.9.3</version>
+							<packaging>jar</packaging>
+							<generatePom>true</generatePom>
+						</configuration>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>install-external-arpack</id>
+						<phase>clean</phase>
+						<configuration>
+							<file>${basedir}/lib/arpack_combined_all-0.1.jar</file>
+							<repositoryLayout>default</repositoryLayout>
+							<groupId>net.sourceforge.f2j</groupId>
+							<artifactId>arpack_combined_all</artifactId>
+							<version>0.1</version>
+							<packaging>jar</packaging>
+							<generatePom>true</generatePom>
+						</configuration>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<configuration>
+				<source>11</source>
+				<target>11</target>
+			</configuration>
+		</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-surefire-plugin</artifactId>
+			<version>2.4.3</version>
+			<configuration>
+				<argLine>-Xmx512m</argLine>
+				<skip>false</skip>
+				<testFailureIgnore>true</testFailureIgnore>
+			</configuration>
+		</plugin>
+		<plugin>
+			<artifactId>maven-assembly-plugin</artifactId>
+			<configuration>
+				<descriptorRefs>
+					<descriptorRef>jar-with-dependencies</descriptorRef>
+				</descriptorRefs>
+			</configuration>
+		</plugin>
+		<plugin>
+			<groupId>com.mycila.maven-license-plugin</groupId>
+			<artifactId>maven-license-plugin</artifactId>
+			<version>1.9.0</version>
+			<configuration>
+				<header>src/etc/header.txt</header>
+				<strictCheck>true</strictCheck>
+				<includes>
+					<include>src/**/*.java</include>
+					<include>src/**/*.py</include>
+				</includes>
+			</configuration>
+		</plugin>
+	</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>**/MATLAB/*</exclude>
+				</excludes>
+			</resource>
+		</resources>
+	</build>
     <reporting>
         <plugins>
             <plugin>

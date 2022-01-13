@@ -27,19 +27,13 @@
         <!-- App version -->
         <cytoscapeVersion>3.5.3</cytoscapeVersion>
         <!-- Cytoscape metadata -->
-		<cy3.version>3.7.0</cy3.version>
+		<cy3.version>3.9.0</cy3.version>
     </properties>
 
     <repositories>
         <repository>
-            <id>genemania_maven_repo</id>
-            <name>GeneMANIA Maven Project Repository</name>
-            <url>http://genemania.org/mvn/</url>
-        </repository>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven</name>
-            <url>http://download.java.net/maven/2/</url>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2/</url>
             <layout>default</layout>
         </repository>
         <repository>
@@ -51,7 +45,7 @@
                 <enabled>true</enabled>
             </releases>
             <name>Cytoscape Releases</name>
-            <url>http://code.cytoscape.org/nexus/content/repositories/releases/</url>
+            <url>https://nrnb-nexus.ucsd.edu/repository/cytoscape_releases/</url>
         </repository>
         <repository>
             <id>cytoscape_snapshots</id>
@@ -62,7 +56,7 @@
                 <enabled>false</enabled>
             </releases>
             <name>Cytoscape Snapshots</name>
-            <url>http://code.cytoscape.org/nexus/content/repositories/snapshots/</url>
+            <url>https://nrnb-nexus.ucsd.edu/repository/cytoscape_snapshots/</url>
         </repository>
         <repository>
             <id>cytoscape_third_party</id>
@@ -73,7 +67,7 @@
                 <enabled>true</enabled>
             </releases>
             <name>Cytoscape Third Party</name>
-            <url>http://code.cytoscape.org/nexus/content/repositories/thirdparty/</url>
+            <url>https://nrnb-nexus.ucsd.edu/repository/cytoscape_thirdparty/</url>
         </repository>
 	</repositories>
 
@@ -112,7 +106,7 @@
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
+			    <artifactId>buildnumber-maven-plugin</artifactId>
                 <configuration>
                     <format>{0,date,yyyyMMdd-HHmm}</format>
                     <items>
@@ -168,18 +162,18 @@
     </reporting>
 
     <dependencies>
-    		<!-- GeneMANIA -->
-        <dependency>
-            <groupId>org.genemania</groupId>
-            <artifactId>genemania-common</artifactId>
-            <version>3.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.genemania</groupId>
-            <artifactId>genemania-engine</artifactId>
-            <version>3.6.0</version>
-        </dependency>
-        	<!-- These need to be manually listed as dependencies or maven doesn't bundle the jar properly -->
+		<!-- GeneMANIA -->
+		<dependency>
+			<groupId>org.genemania</groupId>
+			<artifactId>genemania-common</artifactId>
+			<version>3.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.genemania</groupId>
+			<artifactId>genemania-engine</artifactId>
+			<version>3.6.0</version>
+		</dependency>
+        <!-- These need to be manually listed as dependencies or maven doesn't bundle the jar properly -->
 		<dependency>
 			<groupId>net.sourceforge.f2j</groupId>
 			<artifactId>arpack_combined_all</artifactId>
@@ -196,15 +190,15 @@
 			<version>0.9.14d</version>
 		</dependency>
 		<!-- Unit Tests -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13</version>
+			<scope>test</scope>
+		</dependency>
     </dependencies>
 
     <scm>
-        <developerConnection>scm:svn:file://${basedir}</developerConnection>
+        <developerConnection>scm:git:file://${basedir}</developerConnection>
     </scm>
 </project>
