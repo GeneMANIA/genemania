@@ -11,7 +11,7 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
 ### General
 
 **Requirements:**
- 1. JDK (v1.7; other vesions may work)
+ 1. JDK (v11; other vesions may work)
  1. Maven (v3.2+)
 
 **Projects:**
@@ -62,7 +62,7 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
 Follow these instructions to deploy your own external instance of GeneMANIA:
 
 **Requirements:**
- 1. JDK (v1.7+; other vesions may work)
+ 1. JDK (v11; other vesions may work)
  1. Maven (v3.2+)
  1. Tomcat (v8; other versions may work)
 
