@@ -18,7 +18,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <tomcat.version>7.0.42</tomcat.version>
-        <spring.version>3.1.2.RELEASE</spring.version>
+        <spring.version>3.2.5.RELEASE</spring.version>
     </properties>
 
     <build>
