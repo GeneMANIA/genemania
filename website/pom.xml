@@ -16,7 +16,7 @@
 	<properties>
 		<minification.extension>.release.min</minification.extension>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>4.3.20.RELEASE</spring.version>
+        <spring.version>5.2.21.RELEASE</spring.version>
 		<jackson.version>2.9.7</jackson.version>
 	</properties>
 	<pluginRepositories>
