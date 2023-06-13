@@ -53,10 +53,12 @@ import org.genemania.util.ApplicationConfig;
 public class LuceneConnector {
 
 	// __[static]______________________________________________________________
+
 	private static LuceneConnector instance = new LuceneConnector();
 	private static Logger LOG = Logger.getLogger(LuceneConnector.class);
 
 	// __[attributes]__________________________________________________________
+
 	private LuceneOrganismMediator organismMediator;
 	private LuceneGeneMediator geneMediator;
 	private LuceneNetworkMediator networkMediator;
@@ -68,10 +70,11 @@ public class LuceneConnector {
 	private Analyzer analyzer;
 
 	// __[constructors]________________________________________________________
+
 	private LuceneConnector() {
 		try {
-			String indexPath = ApplicationConfig.getInstance().getProperty(
-					Constants.CONFIG_PROPERTIES.LUCENE_INDEX_DIR);
+			var indexPath = ApplicationConfig.getInstance().getProperty(Constants.CONFIG_PROPERTIES.LUCENE_INDEX_DIR);
+
 			searcher = createSearcher(indexPath);
 			analyzer = LuceneMediator.createDefaultAnalyzer();
 			organismMediator = new LuceneOrganismMediator(searcher, analyzer);
@@ -84,14 +87,14 @@ public class LuceneConnector {
 			LOG.error(e);
 		}
 	}
-    
+
 	// __[public helpers]______________________________________________________
+	
 	public static LuceneConnector getInstance() {
 		return instance;
 	}
 
-	public List<InteractionNetworkGroup> findNetworkGroupsByOrganism(
-			long organismId) throws DataStoreException {
+	public List<InteractionNetworkGroup> findNetworkGroupsByOrganism(long organismId) throws DataStoreException {
 		return networkMediator.getNetworkGroupsByOrganism(organismId);
 	}
 
@@ -103,23 +106,19 @@ public class LuceneConnector {
 		return organismMediator.getOrganism(organismId);
 	}
 
-	public List<Gene> retrieveDefaultGenesFor(long organismId)
-			throws DataStoreException {
+	public List<Gene> retrieveDefaultGenesFor(long organismId) throws DataStoreException {
 		return organismMediator.getDefaultGenes(organismId);
 	}
 
-	public List<InteractionNetwork> retrieveDefaultNetworksFor(long organismId)
-			throws DataStoreException {
+	public List<InteractionNetwork> retrieveDefaultNetworksFor(long organismId) throws DataStoreException {
 		return organismMediator.getDefaultNetworks(organismId);
 	}
 
-	public List<Gene> findGenesBySymbol(long organismId,
-			List<String> geneSymbols) throws DataStoreException {
+	public List<Gene> findGenesBySymbol(long organismId, List<String> geneSymbols) throws DataStoreException {
 		return geneMediator.getGenes(geneSymbols, organismId);
 	}
 
-	public InteractionNetwork findNetworkById(long networkId)
-			throws DataStoreException {
+	public InteractionNetwork findNetworkById(long networkId) throws DataStoreException {
 		return networkMediator.getNetwork(networkId);
 	}
 
@@ -139,20 +138,19 @@ public class LuceneConnector {
 		return geneMediator.getNodeId(organismId, symbol);
 	}
 
-	public InteractionNetworkGroup getNetworkGroupByName(long organismId,
-			String groupName) {
+	public InteractionNetworkGroup getNetworkGroupByName(long organismId, String groupName) {
 		return networkMediator.getNetworkGroupByName(groupName, organismId);
 	}
-	
+
 	public Organism getOrganismForGroup(long id) throws DataStoreException {
 		return organismMediator.getOrganismForGroup(id);
 	}
-	
-	public InteractionNetworkGroup getGroupForNetwork(long networkId){
+
+	public InteractionNetworkGroup getGroupForNetwork(long networkId) {
 		return networkMediator.getNetworkGroupForNetwork(networkId);
 	}
-	
-	public boolean isValidNetwork(long organismId, long networkId){
+
+	public boolean isValidNetwork(long organismId, long networkId) {
 		return networkMediator.isValidNetwork(organismId, networkId);
 	}
 
@@ -173,55 +171,51 @@ public class LuceneConnector {
 	}
 
 	// __[private helpers]_____________________________________________________
-	private static Searcher createSearcher(String indexPath) throws IOException {
-		ArrayList<Searcher> searchers = new ArrayList<>();
-		File indices = new File(indexPath);
-		File[] fileList = indices.listFiles();
-		
-		if (fileList == null) {
-			throw new IOException(
-					String
-							.format(
-									"Unable to load indices from path '%s', not a directory or I/O error",
-									indexPath));
-		}
 
-		for (File file : fileList) {
+	private static Searcher createSearcher(String indexPath) throws IOException {
+		var searchers = new ArrayList<Searcher>();
+		var indices = new File(indexPath);
+		var fileList = indices.listFiles();
+
+		if (fileList == null)
+			throw new IOException(
+					String.format("Unable to load indices from path '%s', not a directory or I/O error", indexPath));
+
+		for (var file : fileList) {
 			try {
-				if (!LuceneMediator.indexExists(file)) {
+				if (!LuceneMediator.indexExists(file))
 					continue;
-				}
-				FSDirectory directory = FSDirectory.open(file);
+
+				var directory = FSDirectory.open(file);
 				searchers.add(new IndexSearcher(directory));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		if (searchers.size() == 0) {
+
+		if (searchers.size() == 0)
 			throw new IOException("No indices found");
-		}
-		return new MultiSearcher(searchers
-				.toArray(new Searchable[searchers.size()]));
+
+		return new MultiSearcher(searchers.toArray(new Searchable[searchers.size()]));
 	}
-    
-    public Attribute findAttribute(long organismId, long attributeId) {
-        return attributeMediator.findAttribute(organismId, attributeId);
-    }
-    
-    public boolean isValidAttribute(long organismId, long attributeId) {
-        return attributeMediator.isValidAttribute(organismId, attributeId);
-    }
-    
-    public List<Attribute> findAttributesByGroup(long organismId,
-            long attributeGroupId) {
-        return attributeMediator.findAttributesByGroup(organismId, attributeGroupId);
-    }
-    
-    public List<AttributeGroup> findAttributeGroupsByOrganism(long organismId) {
-        return attributeMediator.findAttributeGroupsByOrganism(organismId);
-    }
-    
-    public AttributeGroup findAttributeGroup(long organismId, long attributeGroupId) {
-        return attributeMediator.findAttributeGroup(organismId, attributeGroupId);
-    }
+
+	public Attribute findAttribute(long organismId, long attributeId) {
+		return attributeMediator.findAttribute(organismId, attributeId);
+	}
+
+	public boolean isValidAttribute(long organismId, long attributeId) {
+		return attributeMediator.isValidAttribute(organismId, attributeId);
+	}
+
+	public List<Attribute> findAttributesByGroup(long organismId, long attributeGroupId) {
+		return attributeMediator.findAttributesByGroup(organismId, attributeGroupId);
+	}
+
+	public List<AttributeGroup> findAttributeGroupsByOrganism(long organismId) {
+		return attributeMediator.findAttributeGroupsByOrganism(organismId);
+	}
+
+	public AttributeGroup findAttributeGroup(long organismId, long attributeGroupId) {
+		return attributeMediator.findAttributeGroup(organismId, attributeGroupId);
+	}
 }

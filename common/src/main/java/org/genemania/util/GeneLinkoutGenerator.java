@@ -182,9 +182,8 @@ public class GeneLinkoutGenerator {
          *  first to return a non-null linkout.  otherwise returns null
          */
         Linkout generate(Organism organism, Node node) {
-            if (node == null || node.getGenes() == null) {
+            if (node == null || node.getGenes() == null)
                 return null;
-            }
 
             for (Gene gene: node.getGenes()) {
                 Linkout linkout = generate(organism, gene);
@@ -215,18 +214,17 @@ public class GeneLinkoutGenerator {
 
         @Override
         Linkout generate(Organism organism, Gene gene) {
-            if (gene == null) {
+        	if (gene == null || gene.getNamingSource() == null)
                 return null;
-            }
 
-            if (gene.getNamingSource() == null) {
-                return null;
-            }
-
-            if (SOURCE_ENTREZ_GENE_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
-                String url = String.format(URL_TEMPLATE, gene.getSymbol());
-                return new Linkout(DISPLAY_NAME, url);
-            }
+            try {
+	            if (SOURCE_ENTREZ_GENE_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
+	                String url = String.format(URL_TEMPLATE, gene.getSymbol());
+	                return new Linkout(DISPLAY_NAME, url);
+	            }
+            } catch (Exception e) {
+            	e.printStackTrace();
+			}
 
             return null;
         }
@@ -242,18 +240,17 @@ public class GeneLinkoutGenerator {
 
         @Override
         Linkout generate(Organism organism, Gene gene) {
-            if (gene == null) {
+        	if (gene == null || gene.getNamingSource() == null)
                 return null;
-            }
 
-            if (gene.getNamingSource() == null) {
-                return null;
-            }
-
-            if (SOURCE_TAIR_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
-                String url = String.format(URL_TEMPLATE, gene.getSymbol());
-                return new Linkout(DISPLAY_NAME, url);
-            }
+			try {
+				if (SOURCE_TAIR_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
+					String url = String.format(URL_TEMPLATE, gene.getSymbol());
+					return new Linkout(DISPLAY_NAME, url);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
             return null;
         }
@@ -272,31 +269,32 @@ public class GeneLinkoutGenerator {
 
         @Override
         Linkout generate(Organism organism, Gene gene) {
-            if (gene == null) {
+        	if (gene == null || gene.getNamingSource() == null)
                 return null;
-            }
 
-            if (gene.getNamingSource() == null) {
-                return null;
-            }
+			try {
+				if (SOURCE_ENTREZ_GENE_NAME.equalsIgnoreCase(gene.getNamingSource().getName())) {
+					String symbol = gene.getSymbol();
+					
+					if (!symbol.startsWith("AT"))
+						return null;
+					
+					String url = String.format(URL_TEMPLATE, symbol);
+					return new Linkout(DISPLAY_NAME, url);
+				}
 
-            if (SOURCE_ENTREZ_GENE_NAME.equalsIgnoreCase(gene.getNamingSource().getName())) {
-                String symbol = gene.getSymbol();
-                if (!symbol.startsWith("AT")) {
-                    return null;
-                }
-                String url = String.format(URL_TEMPLATE, symbol);
-                return new Linkout(DISPLAY_NAME, url);
-            }
-
-            if (SOURCE_GENE_NAME.equalsIgnoreCase(gene.getNamingSource().getName())) {
-                String symbol = gene.getSymbol();
-                if (!symbol.startsWith("AT")) {
-                    return null;
-                }
-                String url = String.format(URL_TEMPLATE, symbol);
-                return new Linkout(DISPLAY_NAME, url);
-            }
+				if (SOURCE_GENE_NAME.equalsIgnoreCase(gene.getNamingSource().getName())) {
+					String symbol = gene.getSymbol();
+					
+					if (!symbol.startsWith("AT"))
+						return null;
+					
+					String url = String.format(URL_TEMPLATE, symbol);
+					return new Linkout(DISPLAY_NAME, url);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
             return null;
         }
@@ -331,20 +329,19 @@ public class GeneLinkoutGenerator {
 
         @Override
         Linkout generate(Organism organism, Gene gene) {
-            if (gene == null) {
+        	if (gene == null || gene.getNamingSource() == null)
                 return null;
-            }
 
-            if (gene.getNamingSource() == null) {
-                return null;
-            }
-
-            if (SOURCE_ENSEMBL_GENE_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
-                String organismName = organism.getAlias();
-                organismName = organismName.replace(" ", "_");
-                String url = String.format(URL_TEMPLATE, organismName, gene.getSymbol());
-                return new Linkout(DISPLAY_NAME, url);
-            }
+            try {
+	            if (SOURCE_ENSEMBL_GENE_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
+	                String organismName = organism.getAlias();
+	                organismName = organismName.replace(" ", "_");
+	                String url = String.format(URL_TEMPLATE, organismName, gene.getSymbol());
+	                return new Linkout(DISPLAY_NAME, url);
+	            }
+            } catch (Exception e) {
+            	e.printStackTrace();
+			}
 
             return null;
         }
@@ -358,20 +355,19 @@ public class GeneLinkoutGenerator {
 
         @Override
         Linkout generate(Organism organism, Gene gene) {
-            if (gene == null) {
+        	if (gene == null || gene.getNamingSource() == null)
                 return null;
-            }
 
-            if (gene.getNamingSource() == null) {
-                return null;
-            }
-
-            if (SOURCE_ENSEMBL_GENE_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
-                String organismName = organism.getAlias();
-                organismName = organismName.replace(" ", "_");
-                String url = String.format(URL_TEMPLATE, organismName, gene.getSymbol());
-                return new Linkout(DISPLAY_NAME, url);
-            }
+            try {
+	            if (SOURCE_ENSEMBL_GENE_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
+	                String organismName = organism.getAlias();
+	                organismName = organismName.replace(" ", "_");
+	                String url = String.format(URL_TEMPLATE, organismName, gene.getSymbol());
+	                return new Linkout(DISPLAY_NAME, url);
+	            }
+            } catch (Exception e) {
+            	e.printStackTrace();
+			}
 
             return null;
         }
@@ -387,23 +383,22 @@ public class GeneLinkoutGenerator {
 
         @Override
         Linkout generate(Organism organism, Gene gene) {
-            if (gene == null) {
+            if (gene == null || gene.getNamingSource() == null)
                 return null;
-            }
 
-            if (gene.getNamingSource() == null) {
-                return null;
-            }
-
-            if (SOURCE_ENSEMBL_GENE_NAME.equalsIgnoreCase(gene.getNamingSource().getName())) {
-                String url = String.format(URL_TEMPLATE, gene.getSymbol());
-                return new Linkout(DISPLAY_NAME, url);
-            }
-
-            if (SOURCE_GENE_NAME.equalsIgnoreCase(gene.getNamingSource().getName())) {
-                String url = String.format(URL_TEMPLATE, gene.getSymbol());
-                return new Linkout(DISPLAY_NAME, url);
-            }
+            try {
+	            if (SOURCE_ENSEMBL_GENE_NAME.equalsIgnoreCase(gene.getNamingSource().getName())) {
+	                String url = String.format(URL_TEMPLATE, gene.getSymbol());
+	                return new Linkout(DISPLAY_NAME, url);
+	            }
+	
+	            if (SOURCE_GENE_NAME.equalsIgnoreCase(gene.getNamingSource().getName())) {
+	                String url = String.format(URL_TEMPLATE, gene.getSymbol());
+	                return new Linkout(DISPLAY_NAME, url);
+	            }
+            } catch (Exception e) {
+            	e.printStackTrace();
+			}
 
             return null;
         }
@@ -419,18 +414,17 @@ public class GeneLinkoutGenerator {
 
         @Override
         Linkout generate(Organism organism, Gene gene) {
-            if (gene == null) {
+        	if (gene == null || gene.getNamingSource() == null)
                 return null;
-            }
 
-            if (gene.getNamingSource() == null) {
-                return null;
-            }
-
-            if (SOURCE_TAIR_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
-                String url = String.format(URL_TEMPLATE, gene.getSymbol());
-                return new Linkout(DISPLAY_NAME, url);
-            }
+            try {
+	            if (SOURCE_TAIR_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
+	                String url = String.format(URL_TEMPLATE, gene.getSymbol());
+	                return new Linkout(DISPLAY_NAME, url);
+	            }
+            } catch (Exception e) {
+            	e.printStackTrace();
+			}
 
             return null;
         }
@@ -446,18 +440,17 @@ public class GeneLinkoutGenerator {
 
         @Override
         Linkout generate(Organism organism, Gene gene) {
-            if (gene == null) {
+        	if (gene == null || gene.getNamingSource() == null)
                 return null;
-            }
 
-            if (gene.getNamingSource() == null) {
-                return null;
-            }
-
-            if (SOURCE_ENSEMBL_GENE_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
-                String url = String.format(URL_TEMPLATE, gene.getSymbol());
-                return new Linkout(DISPLAY_NAME, url);
-            }
+        	try {
+	            if (SOURCE_ENSEMBL_GENE_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
+	                String url = String.format(URL_TEMPLATE, gene.getSymbol());
+	                return new Linkout(DISPLAY_NAME, url);
+	            }
+	        } catch (Exception e) {
+	        	e.printStackTrace();
+			}
 
             return null;
         }
@@ -473,18 +466,17 @@ public class GeneLinkoutGenerator {
 
         @Override
         Linkout generate(Organism organism, Gene gene) {
-            if (gene == null) {
+        	if (gene == null || gene.getNamingSource() == null)
                 return null;
-            }
 
-            if (gene.getNamingSource() == null) {
-                return null;
-            }
-
-            if (SOURCE_ENSEMBL_GENE_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
-                String url = String.format(URL_TEMPLATE, gene.getSymbol());
-                return new Linkout(DISPLAY_NAME, url);
-            }
+        	try {
+	            if (SOURCE_ENSEMBL_GENE_ID.equalsIgnoreCase(gene.getNamingSource().getName())) {
+	                String url = String.format(URL_TEMPLATE, gene.getSymbol());
+	                return new Linkout(DISPLAY_NAME, url);
+	            }
+	        } catch (Exception e) {
+	        	e.printStackTrace();
+			}
 
             return null;
         }
@@ -499,9 +491,10 @@ public class GeneLinkoutGenerator {
         @Override
         Linkout generate(Organism organism, Node node) {
             Linkout linkout = entrez.generate(organism, node);
-            if (linkout == null) {
+            
+            if (linkout == null)
                 linkout = ensembl.generate(organism, node);
-            }
+            
             return linkout;
         }
     };

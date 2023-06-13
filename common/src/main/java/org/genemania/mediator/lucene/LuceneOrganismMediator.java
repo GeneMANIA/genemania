@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -36,43 +35,46 @@ import org.genemania.exception.DataStoreException;
 import org.genemania.mediator.NodeCursor;
 import org.genemania.mediator.OrganismMediator;
 
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.LazyLoader;
-
 public class LuceneOrganismMediator extends LuceneMediator implements OrganismMediator {
 
 	public LuceneOrganismMediator(Searcher searcher, Analyzer analyzer) {
 		super(searcher, analyzer);
 	}
 
+	@Override
 	public NodeCursor createNodeCursor(long organismId) {
-		final List<ObjectProvider<Document>> result = new ArrayList<ObjectProvider<Document>>();
+		var result = new ArrayList<ObjectProvider<Document>>();
+		
 		search(String.format("%s:%d", NODE_ORGANISM_ID, organismId), new AbstractCollector() {
-			@SuppressWarnings("unchecked")
 			@Override
-			public void handleHit(final int doc) {
-				result.add((ObjectProvider<Document>) Enhancer.create(ObjectProvider.class, new LazyLoader() {
-					public Object loadObject() throws Exception {
-						return new ObjectProvider<Document>(searcher.doc(doc));
-					}
-				}));
+			public void handleHit(int doc) {
+				try {
+					result.add(new ObjectProvider<Document>(searcher.doc(doc)));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
+				
 		return new LuceneNodeCursor(result);
 	}
 
+	@Override
 	public List<Organism> getAllOrganisms() {
 		return createOrganisms();
 	}
 
 	private List<Organism> createOrganisms() {
-		final List<Organism> result = new ArrayList<Organism>();
+		var result = new ArrayList<Organism>();
+		
 		search(String.format("%s:%s", LuceneMediator.TYPE, LuceneMediator.ORGANISM), new AbstractCollector() {
 			@Override
 			public void handleHit(int doc) {
 				try {
-					Document document = searcher.doc(doc);
-					result.add(createOrganism(document));
+					var document = searcher.doc(doc);
+					long organismId = Long.parseLong(document.get(ORGANISM_ID));
+					result.add(getOrganism(organismId));
 				} catch (CorruptIndexException e) {
 					log(e);
 				} catch (IOException e) {
@@ -80,18 +82,21 @@ public class LuceneOrganismMediator extends LuceneMediator implements OrganismMe
 				}
 			}
 		});
+		
 		return result;
 	}
 
+	@Override
 	public List<Gene> getDefaultGenes(long organismId) {
-		final Organism organism = createOrganism(organismId);
-		final List<Gene> result = new ArrayList<Gene>();
+		var organism = getOrganism(organismId);
+		var result = new ArrayList<Gene>();
+		
 		search(String.format("+%s:%s +%s:%s", LuceneMediator.GENE_ORGANISM_ID, String.valueOf(organismId), LuceneMediator.GENE_DEFAULT_SELECTED, String.valueOf(true)), new AbstractCollector() {
 			@Override
 			public void handleHit(int doc) {
 				try {
-					Document document = searcher.doc(doc);
-					result.add(createGene(document, null, organism, null));
+					var document = searcher.doc(doc);
+					result.add(createGene(document, null, organism));
 				} catch (CorruptIndexException e) {
 					log(e);
 				} catch (IOException e) {
@@ -99,24 +104,28 @@ public class LuceneOrganismMediator extends LuceneMediator implements OrganismMe
 				}
 			}
 		});
+		
 		return result;
 	}
 
+	@Override
 	public Organism getOrganism(long organismId) {
-		return createOrganism(organismId);
+		return super.getOrganism(organismId);
 	}
 
+	@Override
 	public List<?> hqlSearch(String queryString) {
 		return null;
 	}
 
+	@Override
 	public List<InteractionNetwork> getDefaultNetworks(long organismId) throws DataStoreException {
-		final Set<Long> groupIds = new HashSet<Long>();
+		var groupIds = new HashSet<Long>();
 		search(String.format("%s:%s", LuceneMediator.GROUP_ORGANISM_ID, String.valueOf(organismId)), new AbstractCollector() {
 			@Override
 			public void handleHit(int doc) {
 				try {
-					Document document = searcher.doc(doc);
+					var document = searcher.doc(doc);
 					groupIds.add(Long.parseLong(document.get(LuceneMediator.GROUP_ID)));
 				} catch (CorruptIndexException e) {
 					log(e);
@@ -126,13 +135,15 @@ public class LuceneOrganismMediator extends LuceneMediator implements OrganismMe
 			}
 		});
 
-		final List<InteractionNetwork> result = new ArrayList<InteractionNetwork>();
+		var result = new ArrayList<InteractionNetwork>();
+		
 		search(String.format("%s:%s", LuceneMediator.NETWORK_DEFAULT_SELECTED, String.valueOf(true)), new AbstractCollector() {
 			@Override
 			public void handleHit(int doc) {
 				try {
-					Document document = searcher.doc(doc);
+					var document = searcher.doc(doc);
 					long groupId = Long.parseLong(document.get(LuceneMediator.NETWORK_GROUP_ID));
+					
 					if (groupIds.contains(groupId)) {
 						result.add(createNetwork(document));
 					}
@@ -143,25 +154,29 @@ public class LuceneOrganismMediator extends LuceneMediator implements OrganismMe
 				}
 			}
 		});
+		
 		return result;
 	}
-	
+
+	@Override
 	public Organism getOrganismForGroup(long groupId) throws DataStoreException {
-        final Organism[] result = new Organism[1];
-        search(String.format("+%s:\"%d\"", LuceneMediator.GROUP_ID, groupId), new AbstractCollector() {
-            @Override
-            public void handleHit(int doc) {
-                try {
-                    Document document = searcher.doc(doc);
-                    long organismId = Long.parseLong(document.get(LuceneMediator.GROUP_ORGANISM_ID));
-					result[0] = createOrganism(organismId);
-                } catch (CorruptIndexException e) {
-                    log(e);
-                } catch (IOException e) {
-                    log(e);
-                }
-            }
-        });
-        return result[1];
+		var result = new Organism[1];
+		
+		search(String.format("+%s:\"%d\"", LuceneMediator.GROUP_ID, groupId), new AbstractCollector() {
+			@Override
+			public void handleHit(int doc) {
+				try {
+					var document = searcher.doc(doc);
+					long organismId = Long.parseLong(document.get(LuceneMediator.GROUP_ORGANISM_ID));
+					result[0] = getOrganism(organismId);
+				} catch (CorruptIndexException e) {
+					log(e);
+				} catch (IOException e) {
+					log(e);
+				}
+			}
+		});
+		
+		return result[1];
 	}
 }

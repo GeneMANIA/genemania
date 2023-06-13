@@ -30,6 +30,7 @@ public class LuceneNodeMediator extends LuceneMediator implements NodeMediator {
 		super(searcher, analyzer);
 	}
 
+	@Override
 	public Node getNode(long nodeId, long organismId) {
 		return createNode(nodeId, organismId);
 	}

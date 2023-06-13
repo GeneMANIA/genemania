@@ -24,10 +24,6 @@
  */
 package org.genemania.connector;
 
-import java.util.Collection;
-
-import org.genemania.domain.InteractionNetworkGroup;
-import org.genemania.domain.Organism;
 import org.genemania.exception.DataStoreException;
 
 import junit.framework.TestCase;
@@ -38,20 +34,22 @@ public class LuceneConnectorTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
+
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
-	
+
 	public void testFindOrganismById() {
 		try {
-			Organism organism = LuceneConnector.getInstance().findOrganismById(1);
+			var organism = LuceneConnector.getInstance().findOrganismById(1);
 			assertNotNull("organism", organism);
-			Collection<InteractionNetworkGroup> groups = organism.getInteractionNetworkGroups();
+
+			var groups = organism.getInteractionNetworkGroups();
 			assertNotNull("groups", groups);
 			assertTrue("group size", groups.size() > 0);
-			InteractionNetworkGroup firstGroup = groups.iterator().next();
+
+			var firstGroup = groups.iterator().next();
 			assertNotNull("first group", firstGroup);
 			assertNotNull("first group id", firstGroup.getId());
 			assertNotNull("first group name", firstGroup.getName());
@@ -60,5 +58,4 @@ public class LuceneConnectorTest extends TestCase {
 			fail(e.getMessage());
 		}
 	}
-	
 }

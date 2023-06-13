@@ -57,6 +57,7 @@ public class LuceneModelWriter implements IModelWriter {
 		exporter = new Generic2LuceneExporter();
 	}
 
+	@Override
 	public void close() throws ApplicationException {
 		try {
 			writer.commit();
@@ -66,6 +67,7 @@ public class LuceneModelWriter implements IModelWriter {
 		}
 	}
 	
+	@Override
 	public void addNetwork(InteractionNetwork network, InteractionNetworkGroup group) throws ApplicationException {
 		NetworkMetadata metadata = network.getMetadata();
 		try {
@@ -103,6 +105,7 @@ public class LuceneModelWriter implements IModelWriter {
 		}
 	}
 
+	@Override
 	public void addGroup(InteractionNetworkGroup group, Organism organism, String colour) throws ApplicationException {
 		try {
 			Map<String, String> colourMap = new HashMap<String, String>();
@@ -121,6 +124,7 @@ public class LuceneModelWriter implements IModelWriter {
 		}
 	}
 	
+	@Override
 	public void addOrganism(Organism organism) throws ApplicationException {
 		try {
 			Ontology ontology = organism.getOntology();
@@ -138,6 +142,7 @@ public class LuceneModelWriter implements IModelWriter {
 		}
 	}
 	
+	@Override
 	public void addNode(Node node, Organism organism) throws ApplicationException {
 		GeneData geneData = node.getGeneData();
 		try {
@@ -155,6 +160,7 @@ public class LuceneModelWriter implements IModelWriter {
 		}
 	}
 	
+	@Override
 	public void addGene(Gene gene) throws ApplicationException {
 		GeneNamingSource namingSource = gene.getNamingSource();
 		long namingSourceId = namingSource == null ? 0 : namingSource.getId();
@@ -188,6 +194,7 @@ public class LuceneModelWriter implements IModelWriter {
 		return value == null ? "" : value; //$NON-NLS-1$
 	}
 
+	@Override
 	public void addNamingSource(GeneNamingSource source) throws ApplicationException {
 		try {
 			exporter.exportNamingSource(writer, new String[] {
@@ -201,6 +208,7 @@ public class LuceneModelWriter implements IModelWriter {
 		}
 	}
 
+	@Override
 	public void deleteNetwork(InteractionNetwork network) throws ApplicationException {
 		try {
 			try {

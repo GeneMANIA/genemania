@@ -243,8 +243,18 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 		Collection<Gene> genes = node.getGenes();
 		
 		for (Gene gene : genes) {
-			GeneNamingSource source = gene.getNamingSource();
-			setAttribute(cyNetwork, cyNode, source.getName(), gene.getSymbol());
+			String name = null;
+			
+			try {
+				GeneNamingSource source = gene.getNamingSource();
+				name = source != null ? source.getName() : null;
+			} catch (Exception e) {
+				e.printStackTrace();
+				continue;
+			}
+			
+			if (name != null)
+				setAttribute(cyNetwork, cyNode, name, gene.getSymbol());
 		}
 	}
 

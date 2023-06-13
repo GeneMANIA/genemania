@@ -32,9 +32,9 @@ import java.io.Reader;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -447,7 +447,6 @@ public class ImportOrganismPanel extends JPanel {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
 	private void deleteOrganisms(LuceneDataSet data) {
 		int[] selection = getInstalledTable().getSelectedRows();
 		controller.deleteOrganisms(uiUtils.getFrame(this), data, installedModel, selection);
@@ -475,9 +474,8 @@ public class ImportOrganismPanel extends JPanel {
 				validator.setCurrentOrganism(null);
 			}
 			
-			if (dialog.isCanceled()) {
+			if (dialog.isCanceled())
 				return;
-			}
 			
 			organism.setName(dialog.getOrganismName());
 			organism.setAlias(dialog.getAlias());

@@ -131,14 +131,25 @@ public class NetworkUtils {
 	public Gene getPreferredGene(Node node) {
 		Gene best = null;
 		byte bestRank = Byte.MIN_VALUE;
-		Collection<Gene> genes = node.getGenes();
+		var genes = node.getGenes();
 		
-		for (Gene gene : genes) {
-			byte rank = gene.getNamingSource().getRank();
+		for (var gene : genes) {
+			var namingSource = gene.getNamingSource();
 			
-			if (rank > bestRank) {
-				best = gene;
-				bestRank = rank;
+			if (namingSource == null)
+				continue;
+			
+			try {
+				byte rank = namingSource.getRank();
+				
+				if (rank > bestRank) {
+					best = gene;
+					bestRank = rank;
+				}
+			} catch (Exception e) {
+				if (best == null)
+					best = gene;
+//				e.printStackTrace();
 			}
 		}
 		
@@ -159,7 +170,7 @@ public class NetworkUtils {
 		return values;
 	}
 	
-	public <T> List<T> createSortedList(final Map<T,Double> scoredMap) {
+	public <T> List<T> createSortedList(Map<T,Double> scoredMap) {
 		ArrayList<T> list = new ArrayList<>();
 		list.addAll(scoredMap.keySet());
 		Collections.sort(list, new Comparator<T>() {

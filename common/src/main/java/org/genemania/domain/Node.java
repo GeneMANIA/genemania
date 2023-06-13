@@ -26,6 +26,7 @@ import java.util.Collection;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -35,10 +36,10 @@ public class Node implements java.io.Serializable {
 
     private static final long serialVersionUID = 1381891291857803933L;
 
-    private long              id;
-    private String            name;
-    private Collection<Gene>  genes            = new ArrayList<Gene>(0);
-    private GeneData          geneData;
+    protected long id;
+    protected String name;
+	protected Collection<Gene> genes;
+	protected GeneData geneData;
 
     public Node() {
     }
@@ -67,7 +68,7 @@ public class Node implements java.io.Serializable {
 
     @JsonIgnore
     public Collection<Gene> getGenes() {
-        return this.genes;
+        return genes != null ? genes : new ArrayList<Gene>(0);
     }
 
     public void setGenes(Collection<Gene> genes) {
