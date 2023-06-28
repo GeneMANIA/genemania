@@ -193,7 +193,7 @@ public class LuceneMediator {
 	public static final String ATTRIBUTE_DESCRIPTION              = "at_description";
 	
 	private Map<Long, Organism> organismMap = new WeakHashMap<>(12);
-
+	
 	public LuceneMediator(Searcher searcher, Analyzer analyzer) {
         this.searcher = searcher;
         this.analyzer = analyzer;
@@ -399,7 +399,7 @@ public class LuceneMediator {
 	protected Gene createGene(Document document, Node node, Organism organism) {
 		long organismId = organism != null ? organism.getId() : Long.parseLong(document.get(GENE_ORGANISM_ID));
 
-		return new GeneProxy(organismId, document);
+		return node != null ? new GeneProxy(organismId, node, document) : new GeneProxy(organismId, document);
 	}
 	
 	protected Organism getOrganism(long organismId) {
@@ -941,6 +941,8 @@ public class LuceneMediator {
 	
 	private class OrganismProxy extends Organism {
 
+		private static final long serialVersionUID = 1101664334832757016L;
+		
 		private final long ontologyId;
 
 		private OrganismProxy(Document document) {
@@ -982,6 +984,8 @@ public class LuceneMediator {
 	
 	private class NodeProxy extends Node {
 		
+		private static final long serialVersionUID = 1548481382163136316L;
+		
 		private final long organismId;
 		private final Document document;
 		
@@ -1017,6 +1021,10 @@ public class LuceneMediator {
 	
 	private class GeneProxy extends Gene {
 		
+		private static final long serialVersionUID = -1302165245706925466L;
+
+		private Node node;
+		
 		private final long organismId;
 		
 		private final long nodeId;
@@ -1030,6 +1038,15 @@ public class LuceneMediator {
 			defaultSelected = Boolean.parseBoolean(document.get(GENE_DEFAULT_SELECTED));
 			nodeId = Long.parseLong(document.get(GENE_NODE_ID));
 			namingSourceId = Long.parseLong(document.get(GENE_NAMINGSOURCE_ID));
+		}
+		
+		private GeneProxy(long organismId, Node node, Document document) {
+			this(organismId, document);
+			
+			if (node == null || node.getId() != nodeId)
+				throw new IllegalArgumentException("Invalid Node object");
+			
+			this.node = node;
 		}
 		
 		@Override
@@ -1061,6 +1078,8 @@ public class LuceneMediator {
 	}
 	
 	private class GeneDataProxy extends GeneData {
+		
+		private static final long serialVersionUID = 3788456533570151808L;
 		
 		private final String namingSourceId;
 		
