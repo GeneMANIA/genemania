@@ -37,13 +37,13 @@
             <groupId>org.cytoscape</groupId>
             <artifactId>swing-application-api</artifactId>
             <version>${cy3.version}</version>
-             <scope>provided</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>swing-util-api</artifactId>
             <version>${cy3.version}</version>
-             <scope>provided</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>

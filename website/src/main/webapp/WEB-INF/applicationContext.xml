@@ -160,34 +160,6 @@
 	<bean id="attributeGroupDao" class="org.genemania.dao.impl.LuceneAttributeGroupDao" />
 	<bean id="attributeDao" class="org.genemania.dao.impl.LuceneAttributeDao" />
 
-	<!-- JMS -->
-
-	<bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-        <property name="brokerURL" value="${brokerUrl}" />
-    </bean>
-
-    <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
-        <property name="connectionFactory" ref="jmsConnectionFactory"/>
-    </bean>
-
-    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-        <property name="connectionFactory" ref="pooledConnectionFactory" />
-    </bean>
-
-	<!-- old, separate worker config -->
-	<!--
- 	<bean id="engineConnector" class="org.genemania.connector.JmsEngineConnector">
-		<property name="jmsTemplate" ref="jmsTemplate" />
-        <property name="requestQueueName" value="${genemaniaMqRequests}" />
-        <property name="responseQueueName" value="${genemaniaMqReplies}" />
-		<property name="organismDao" ref="organismDao" />
-		<property name="nodeDao" ref="nodeDao" />
-		<property name="networkDao" ref="networkDao" />
-        <property name="timeoutMillis" value="${engineTimeoutMillis}" />
-        <property name="messageExpirationMillis" value="${messageExpirationMillis}" />
-	</bean>
-	-->
-
 	<!-- new, integrated worker config -->
 	<bean id="engineConnector" class="org.genemania.connector.SyncWorkerConnector">
 		<property name="organismDao" ref="organismDao" />

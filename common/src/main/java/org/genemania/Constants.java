@@ -69,7 +69,6 @@ public class Constants {
 		public static final int INVALID_LUCENE_INDEX = 19;
 		public static final int EMPTY_GENE_LIST = 20;
 		public static final int EMPTY_NETWORK_LIST = 21;
-		
 	}
 
 	public class KEYS {
@@ -81,33 +80,17 @@ public class Constants {
 		public static final String USER_NETWORKS_IN_SESSION = "user networks in session";
 		public static final String ORGANISM_USER_NETWORKS_MAP = "organism user networks map";
 		public static final String ORGANISMS_CACHE = "organisms cache";
-		
 	}
 	
 	public class CONFIG_PROPERTIES {
 		
-		public static final String CACHE_DIR = "cachedir";
-		public static final String GRAPH_CACHE_DIR = "graphcachedir";
-		public static final String REPORTS_DIR = "reportsdir";
-		public static final String UPLOADS_DIR = "uploadsdir";
-		public static final String GENE_INDEX_DIR = "geneindexdir";
-		public static final String APPLICATION_VER = "applicationVer";
-		public static final String DATABASE_VER = "databaseVer";
-		public static final String FEEDBACK_EMAIL_TEMPLATE_FILENAME = "feedbackEmailTemplate";
+		public static final String LUCENE_INDEX_DIR = "luceneIndexDir";
+		public static final String NETWORK_CACHE_DIR = "networkCacheDir";
 		public static final String FEEDBACK_FROM = "feedbackFrom";
-		public static final String FEEDBACK_TO = "feedbackTo";
 		public static final String FEEDBACK_EMAIL_HOST = "feedbackEmailHost";
-		public static final String FEEDBACK_EMAIL_PORT = "feedbackEmailPort";
 		public static final String SPARSIFICATION = "sparsification";
-		public static final String MAX_USER_NETWORKS_PER_SESSION = "maxUserNetworksPerSession";
-		public static final String TEST_HOST = "testHost";
-
 		public static final String ENRICHMENT_MIN_CATEGORIES = "enrichmentMinCategories";
-		public static final String ENRICHMENT_ONTOLOGY = "enrichmentOntology";
 		public static final String ENRICHMENT_Q_VAL_THRESHOLD = "enrichmentQValThreshold";
-
-		public static final String DATA_STORE_TYPE = "dataStoreType";
-		
 	}
 	
 }

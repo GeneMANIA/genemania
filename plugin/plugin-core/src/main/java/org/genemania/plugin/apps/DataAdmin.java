@@ -90,7 +90,7 @@ public class DataAdmin extends AbstractPluginApp {
 		Logger.getLogger("org.genemania.plugin").setLevel(Level.WARN); //$NON-NLS-1$
 		Logger.getLogger("org.genemania").setLevel(Level.ERROR); //$NON-NLS-1$
 
-		Map<String, Class<? extends Command>> commands = new HashMap<String, Class<? extends Command>>();
+		Map<String, Class<? extends Command>> commands = new HashMap<>();
 		commands.put("list", ListDataSetCommand.class); //$NON-NLS-1$
 		commands.put("install", InstallDataSetCommand.class); //$NON-NLS-1$
 		commands.put("list-data", ListDescriptorsCommand.class); //$NON-NLS-1$
@@ -123,6 +123,7 @@ public class DataAdmin extends AbstractPluginApp {
 	}
 	
 	static abstract class Command {
+		
 		static final Pattern DATA_SET_PATTERN = Pattern.compile(".*?gmdata-(.*?)"); //$NON-NLS-1$
 
 		protected List<String> fArguments;
@@ -162,6 +163,7 @@ public class DataAdmin extends AbstractPluginApp {
 	}
 	
 	static class ListDataSetCommand extends Command {
+		
 		public ListDataSetCommand(String name) {
 			super(name);
 		}
@@ -208,22 +210,25 @@ public class DataAdmin extends AbstractPluginApp {
 				fProgress.setProgress(progress);
 				ChildProgressReporter childProgress = new ChildProgressReporter(fProgress);
 				File dataZipFile;
+				
 				try {
 					childProgress.setStatus(String.format("Downloading %s", url)); //$NON-NLS-1$
 					dataZipFile = fFileUtils.download(url, new File("."), childProgress); //$NON-NLS-1$
 				} finally {
 					childProgress.close();
 				}
-				if (dataZipFile == null) {
+				
+				if (dataZipFile == null)
 					return;
-				}
 				
 				childProgress = new ChildProgressReporter(fProgress);
+				
 				try {
 					fFileUtils.unzip(dataZipFile, dataZipFile.getParentFile(), childProgress);
 				} finally {
 					childProgress.close();
 				}
+				
 				dataZipFile.delete();
 				fProgress.setStatus("Done."); //$NON-NLS-1$
 			} catch (IOException e) {
@@ -234,27 +239,29 @@ public class DataAdmin extends AbstractPluginApp {
 		@Override
 		public void validate() throws IllegalArgumentException {
 			try {
-				if (fArguments.size() < 2) {
+				if (fArguments.size() < 2)
 					throw new IllegalArgumentException(String.format("Usage: %s data-set-id", fName)); //$NON-NLS-1$
-				}
+				
 				String targetId = fArguments.get(1);
 				List<String> dataSets = fFileUtils.getCompatibleDataSets(FileUtils.DEFAULT_BASE_URL, GeneMania.SCHEMA_VERSION);
 				for (String url : dataSets) {
 					String id = getDataSetId(url);
+					
 					if (targetId.equals(id)) {
 						fId = id;
 						return;
 					}
 				}
+				
 				throw new IllegalArgumentException(String.format("Data set with ID='%s' doesn't exist", targetId)); //$NON-NLS-1$
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
-
 	}
 
 	static class ListDescriptorsCommand extends Command {
+		
 		public ListDescriptorsCommand(String name) {
 			super(name);
 		}
@@ -309,15 +316,16 @@ public class DataAdmin extends AbstractPluginApp {
 		
 		public InstallDescriptorsCommand(String name) {
 			super(name);
-			fDescriptors = new HashSet<DataDescriptor>();
+			fDescriptors = new HashSet<>();
 		}
 
 		@Override
 		public void run() {
 			fProgress.setStatus("Installing..."); //$NON-NLS-1$
 			fProgress.setMaximumProgress(fDescriptors.size());
-			List<DataDescriptor> sorted = new ArrayList<DataDescriptor>(fDescriptors);
+			List<DataDescriptor> sorted = new ArrayList<>(fDescriptors);
 			Collections.sort(sorted);
+			
 			for (DataDescriptor descriptor : sorted) {
 				try {
 					ChildProgressReporter childProgress = new ChildProgressReporter(fProgress);
@@ -330,6 +338,7 @@ public class DataAdmin extends AbstractPluginApp {
 					throw new RuntimeException(e);
 				}
 			}
+			
 			fProgress.setProgress(fDescriptors.size());
 			fProgress.setStatus("Done."); //$NON-NLS-1$
 		}
@@ -400,7 +409,7 @@ public class DataAdmin extends AbstractPluginApp {
 
 		public UninstallDescriptorsCommand(String name) {
 			super(name);
-			fDescriptors = new ArrayList<DataDescriptor>();
+			fDescriptors = new ArrayList<>();
 		}
 
 		@Override

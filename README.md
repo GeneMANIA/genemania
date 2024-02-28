@@ -11,13 +11,12 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
 ### General
 
 **Requirements:**
- 1. JDK (v1.7; other vesions may work)
+ 1. JDK (v11; other vesions may work)
  1. Maven (v3.2+)
 
 **Projects:**
  1. `common` : common APIs used amongst the projects
  1. `engine` : the GeneMANIA algorithm engine
- 1. `broker` : for communicating between the website and workers that use the engine
  1. `website` : the website backend (webservices etc)
  1. `adminweb` : the administrative interface for editing data used in the website
  1. `plugin` : the Cytoscape plugin/app
@@ -63,7 +62,7 @@ GeneMANIA helps you predict the function of your favourite genes and gene sets.
 Follow these instructions to deploy your own external instance of GeneMANIA:
 
 **Requirements:**
- 1. JDK (v1.7+; other vesions may work)
+ 1. JDK (v11; other vesions may work)
  1. Maven (v3.2+)
  1. Tomcat (v8; other versions may work)
 

@@ -8,7 +8,6 @@
         <relativePath>..</relativePath>
     </parent>
 
-	<groupId>org.genemania</groupId>
 	<artifactId>genemania-website</artifactId>
 	<packaging>war</packaging>
 	<name>GeneMANIA Website</name>
@@ -186,7 +185,7 @@
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib-nodep</artifactId>
-			<version>3.1</version>
+			<version>3.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
@@ -201,11 +200,6 @@
 		<dependency>
 			<groupId>org.genemania</groupId>
 			<artifactId>genemania-engine</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.genemania</groupId>
-			<artifactId>genemania-broker</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -255,8 +249,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>11</source>
+					<target>11</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -405,16 +399,13 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<genemaniaGeneIndexDir>${env.HOME}/genemania/genemania-data/index</genemaniaGeneIndexDir>
+				<luceneIndexDir>${env.HOME}/genemania/genemania-data/lucene_index</luceneIndexDir>
+				<networkCacheDir>${env.HOME}/genemania/genemania-data/network_cache</networkCacheDir>
 				<genemaniaDbHost>localhost</genemaniaDbHost>
 				<genemaniaDbName>genemania</genemaniaDbName>
-				<genemaniaGraphCacheDir>${env.HOME}/genemania/apache-tomcat/webapps/genemania/WEB-INF/classes</genemaniaGraphCacheDir>
 				<genemaniaHost>http://localhost:8080/genemania</genemaniaHost>
 				<deployDir>${env.HOME}/genemania/apache-tomcat/webapps/genemania</deployDir>
 				<GA_ACCT_NR>GOOGLE_ANALYTICS_TOKEN_GOES_HERE</GA_ACCT_NR>
-                <brokerUrl>failover://(tcp://localhost:61616)?timeout=600000</brokerUrl>
-				<genemaniaMqRequests>gm_requests</genemaniaMqRequests>
-				<genemaniaMqReplies>gm_replies</genemaniaMqReplies>
 				<sahiTestsWorkingDirectory>${env.HOME}/genemania/qa</sahiTestsWorkingDirectory>
 				<emailRecipient>genemania.local@gmail.com</emailRecipient>
 				<emailPassword>SET_ME_IF_YOU_WANT_EMAIL</emailPassword>

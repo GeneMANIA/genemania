@@ -57,12 +57,12 @@ public class LuceneConnector {
 	private static Logger LOG = Logger.getLogger(LuceneConnector.class);
 
 	// __[attributes]__________________________________________________________
-	private LuceneOrganismMediator organismMediator = null;
-	private LuceneGeneMediator geneMediator = null;
-	private LuceneNetworkMediator networkMediator = null;
-	private LuceneNodeMediator nodeMediator = null;
-	private LuceneStatsMediator statsMediator = null;
-	private LuceneAttributeMediator attributeMediator = null;
+	private LuceneOrganismMediator organismMediator;
+	private LuceneGeneMediator geneMediator;
+	private LuceneNetworkMediator networkMediator;
+	private LuceneNodeMediator nodeMediator;
+	private LuceneStatsMediator statsMediator;
+	private LuceneAttributeMediator attributeMediator;
 
 	private Searcher searcher;
 	private Analyzer analyzer;
@@ -71,7 +71,7 @@ public class LuceneConnector {
 	private LuceneConnector() {
 		try {
 			String indexPath = ApplicationConfig.getInstance().getProperty(
-					Constants.CONFIG_PROPERTIES.GENE_INDEX_DIR);
+					Constants.CONFIG_PROPERTIES.LUCENE_INDEX_DIR);
 			searcher = createSearcher(indexPath);
 			analyzer = LuceneMediator.createDefaultAnalyzer();
 			organismMediator = new LuceneOrganismMediator(searcher, analyzer);
@@ -174,9 +174,10 @@ public class LuceneConnector {
 
 	// __[private helpers]_____________________________________________________
 	private static Searcher createSearcher(String indexPath) throws IOException {
-		ArrayList<Searcher> searchers = new ArrayList<Searcher>();
+		ArrayList<Searcher> searchers = new ArrayList<>();
 		File indices = new File(indexPath);
 		File[] fileList = indices.listFiles();
+		
 		if (fileList == null) {
 			throw new IOException(
 					String

@@ -52,8 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class UploadNetworkServiceImpl implements UploadNetworkService {
 
-	private static Logger LOG = Logger
-			.getLogger(UploadNetworkServiceImpl.class);
+	private static Logger LOG = Logger.getLogger(UploadNetworkServiceImpl.class);
 
 	@Autowired
 	EngineConnector engineConnector;
@@ -68,9 +67,10 @@ public class UploadNetworkServiceImpl implements UploadNetworkService {
 	NetworkService networkService;
 
 	private static class NetworkData {
+		
 		// __[attributes]___________________________________________________________
 		private String normalizedData;
-		private Set<String> invalidInteractions = new HashSet<String>();
+		private Set<String> invalidInteractions = new HashSet<>();
 		private NormalizationResult normalizationResult;
 		private DataImportSettings dataImportSettings;
 		private long organismId;
@@ -195,8 +195,7 @@ public class UploadNetworkServiceImpl implements UploadNetworkService {
 		requestDto.setNamespace(network.getSessionId());
 		requestDto.setOrganismId(network.getOrganismId());
 		requestDto.setSparsification(Integer.parseInt(ApplicationConfig
-				.getInstance().getProperty(
-						Constants.CONFIG_PROPERTIES.SPARSIFICATION)));
+				.getInstance().getProperty(Constants.CONFIG_PROPERTIES.SPARSIFICATION)));
 		requestDto.setData(network.getNormalizedData());
 		requestDto.setNetworkId(network.getId());
 
@@ -217,8 +216,7 @@ public class UploadNetworkServiceImpl implements UploadNetworkService {
 		long normInteractionCount = network.getNormalizationResult()
 				.getTotalEntries();
 		long duplicateInteractions = normInteractionCount - interactionCount;
-		long invalidInteractions = network.getNormalizationResult()
-				.getDroppedEntries();
+		long invalidInteractions = network.getNormalizationResult().getDroppedEntries();
 
 		// log the processing stats
 		LOG.info(String.format(
@@ -241,7 +239,7 @@ public class UploadNetworkServiceImpl implements UploadNetworkService {
 		Set<String> ints = network.getInvalidInteractions();
 		String[] sortedInts = ints.toArray(new String[0]);
 		Arrays.sort(sortedInts);
-		List<String> intsList = new LinkedList<String>();
+		List<String> intsList = new LinkedList<>();
 		for (String str : sortedInts) {
 			intsList.add(str);
 		}

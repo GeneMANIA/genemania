@@ -35,6 +35,7 @@ import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetManager;
 
 public class DownloadController {
+	
 	public static Pattern optionPattern = Pattern.compile("(\\d+-\\d+-\\d+)(-.+)?"); //$NON-NLS-1$
 
 	private final DataSetManager dataSetManager;
@@ -50,7 +51,8 @@ public class DownloadController {
 		Pattern pattern = Pattern.compile(".*?gmdata-(.*?)"); //$NON-NLS-1$
 
 		List<File> paths = dataSetManager.getDataSetPaths();
-		Set<String> alreadyInstalled = new HashSet<String>();
+		Set<String> alreadyInstalled = new HashSet<>();
+		
 		for (File file : paths) {
 			Matcher matcher = pattern.matcher(file.getName());
 			if (matcher.matches()) {
@@ -71,6 +73,7 @@ public class DownloadController {
 		Map<String, List<ModelElement>> parents = new HashMap<String, List<ModelElement>>();
 		for (String url : dataSets) {
 			Matcher matcher = pattern.matcher(url);
+			
 			if (matcher.matches()) {
 				String dataId = matcher.group(1);
 				String description = descriptions.get(dataId);
@@ -87,7 +90,7 @@ public class DownloadController {
 					if (parents.containsKey(parent)) {
 						children = parents.get(parent);
 					} else {
-						children = new ArrayList<ModelElement>();
+						children = new ArrayList<>();
 						parents.put(parent, children);
 					}
 					children.add(element);
@@ -112,6 +115,7 @@ public class DownloadController {
 	}
 	
 	public static class ModelElement implements Comparable<ModelElement> {
+		
 		private static final ModelElement[] NO_CHILDREN = new ModelElement[0];
 		private String name;
 		private String description;

@@ -19,10 +19,12 @@
 
 package org.genemania.mediator.lucene;
 
+import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,9 +32,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.LazyLoader;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LowerCaseFilter;
@@ -45,6 +44,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.PhraseQuery;
@@ -52,7 +52,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.genemania.domain.Gene;
@@ -68,6 +67,9 @@ import org.genemania.domain.OntologyCategory;
 import org.genemania.domain.Organism;
 import org.genemania.domain.Statistics;
 import org.genemania.domain.Tag;
+
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.LazyLoader;
 
 public class LuceneMediator {
     private static final String DEFAULT_FIELD                     = "all";
@@ -192,6 +194,24 @@ public class LuceneMediator {
     public LuceneMediator(Searcher searcher, Analyzer analyzer) {
         this.searcher = searcher;
         this.analyzer = analyzer;
+        
+        // Hack to hide "illegal reflective access" warnings in Java 9+, caused by cglib.
+        // It is based on the fact that it is allowed for code running on classpath (i.e. from the unnamed module)
+        // to freely dynamically open packages of any module.
+        // It can be done only from the target module itself, or from the unnamed module.
+        try {
+			if (!this.getClass().getModule().isNamed())
+			    Console.class.getModule().addOpens(ClassLoader.class.getPackageName(), this.getClass().getModule());
+			
+			Method[] methods = ClassLoader.class.getDeclaredMethods();
+			
+			for (Method m : methods) {
+				if (m.getName().equals("defineClass"))
+					m.setAccessible(true);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
     }
 
     protected void search(String queryString, Collector results) {
