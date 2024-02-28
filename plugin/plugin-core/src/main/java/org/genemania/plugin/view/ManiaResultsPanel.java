@@ -46,8 +46,8 @@ import org.genemania.plugin.cytoscape.CytoscapeUtils;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
-import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.selection.SelectionListener;
+import org.genemania.plugin.selection.SessionManager;
 import org.genemania.plugin.view.components.BaseInfoPanel;
 import org.genemania.plugin.view.util.UiUtils;
 

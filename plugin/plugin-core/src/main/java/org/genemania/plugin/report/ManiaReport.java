@@ -104,6 +104,7 @@ public class ManiaReport {
 		final Map<Gene, Double> scores = options.getScores();
 		List<Gene> genes = new ArrayList<Gene>(scores.keySet());
 		Collections.sort(genes, new Comparator<Gene>() {
+			@Override
 			public int compare(Gene gene1, Gene gene2) {
 				return scores.get(gene2).compareTo(scores.get(gene1));
 			}
@@ -129,6 +130,7 @@ public class ManiaReport {
 		}
 		
 		Collections.sort(result, new Comparator<Network<?>>() {
+			@Override
 			public int compare(Network<?> network1, Network<?> network2) {
 				// Sort by group weight first
 				Group<?, ?> group1 = options.getGroup(network1);

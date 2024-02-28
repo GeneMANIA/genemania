@@ -68,6 +68,7 @@ public class TextReportExporter implements ReportExporter {
 		geneCache = new HashMap<Long, Gene>();
 	}
 	
+	@Override
 	public void export(ManiaReport report, OutputStream stream) {
 		PrintWriter writer = new PrintWriter(stream);
 		try {
@@ -90,6 +91,7 @@ public class TextReportExporter implements ReportExporter {
 		writer.println("Gene\tGO ids"); //$NON-NLS-1$
 		List<GeneEntry> genes = new ArrayList<GeneEntry>(report.getGenes());
 		Collections.sort(genes, new Comparator<GeneEntry>() {
+			@Override
 			public int compare(GeneEntry o1, GeneEntry o2) {
 				return o1.getGene().getSymbol().compareToIgnoreCase(o2.getGene().getSymbol());
 			}
@@ -106,6 +108,7 @@ public class TextReportExporter implements ReportExporter {
 				}
 				List<AnnotationEntry> sortedAnnotations = new ArrayList<AnnotationEntry>(annotations);
 				Collections.sort(sortedAnnotations, new Comparator<AnnotationEntry>() {
+					@Override
 					public int compare(AnnotationEntry o1, AnnotationEntry o2) {
 						return o1.getName().compareToIgnoreCase(o2.getName());
 					}
@@ -185,6 +188,7 @@ public class TextReportExporter implements ReportExporter {
 		
 		List<InteractionNetwork> keys = new ArrayList<InteractionNetwork>(networkWeights.keySet());
 		Collections.sort(keys, new Comparator<InteractionNetwork>() {
+			@Override
 			public int compare(InteractionNetwork o1, InteractionNetwork o2) {
 				InteractionNetworkGroup group1 = options.getInteractionNetworkGroup(o1.getId());
 				InteractionNetworkGroup group2 = options.getInteractionNetworkGroup(o2.getId());
@@ -200,6 +204,7 @@ public class TextReportExporter implements ReportExporter {
 			
 			List<Interaction> interactions = new ArrayList<Interaction>(network.getInteractions());
 			Collections.sort(interactions, new Comparator<Interaction>() {
+				@Override
 				public int compare(Interaction o1, Interaction o2) {
 					Gene gene1 = findGene(o1.getFromNode(), options);
 					Gene gene2 = findGene(o2.getFromNode(), options);
@@ -311,6 +316,7 @@ public class TextReportExporter implements ReportExporter {
 		filterAttributes(networks, viewState);
 		
 		Collections.sort(networks, new Comparator<Network<?>>() {
+			@Override
 			public int compare(Network<?> network1, Network<?> network2) {
 				Group<?, ?> group1 = getGroup(network1, viewState);
 				Group<?, ?> group2 = getGroup(network2, viewState);

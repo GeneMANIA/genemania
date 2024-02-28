@@ -242,6 +242,9 @@ public abstract class AbstractCytoscapeUtils implements CytoscapeUtils {
 	private void exportSynonyms(CyNetwork cyNetwork, CyNode cyNode, Node node) {
 		Collection<Gene> genes = node.getGenes();
 		
+		if (genes == null)
+			return;
+		
 		for (Gene gene : genes) {
 			String name = null;
 			

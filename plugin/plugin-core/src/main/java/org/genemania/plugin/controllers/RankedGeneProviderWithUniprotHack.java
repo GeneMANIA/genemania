@@ -40,20 +40,25 @@ public class RankedGeneProviderWithUniprotHack extends RankedGeneProvider {
 		int acRank = Integer.MIN_VALUE;
 		int idRank = Integer.MIN_VALUE;
 		int rank = 0;
-		for (GeneNamingSource source : namingSourcePreferences) {
-			if (source.getName().equals(UNIPROT_ID)) {
-				idRank = rank;
-			} else if (source.getName().equals(UNIPROT_AC)) {
-				acRank = rank;
+		
+		if (namingSourcePreferences != null) {
+			for (GeneNamingSource source : namingSourcePreferences) {
+				if (source.getName().equals(UNIPROT_ID)) {
+					idRank = rank;
+				} else if (source.getName().equals(UNIPROT_AC)) {
+					acRank = rank;
+				}
+				rank++;
 			}
-			rank++;
 		}
+		
 		comparisonModifier = idRank >= acRank ? 1 : -1;
 	}
 
 	@Override
 	protected Comparator<Gene> createComparator() {
 		return new Comparator<Gene>() {
+			@Override
 			public int compare(Gene gene1, Gene gene2) {
 				GeneNamingSource source1 = gene1.getNamingSource();
 				GeneNamingSource source2 = gene2.getNamingSource();
