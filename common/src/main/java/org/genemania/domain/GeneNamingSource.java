@@ -72,4 +72,8 @@ public class GeneNamingSource implements java.io.Serializable {
         this.shortName = shortName;
     }
 
+    @Override
+    public String toString() {
+    	return name;
+    }
 }

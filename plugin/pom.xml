@@ -105,24 +105,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-			    <artifactId>buildnumber-maven-plugin</artifactId>
-                <configuration>
-                    <format>{0,date,yyyyMMdd-HHmm}</format>
-                    <items>
-                        <item>timestamp</item>
-                    </items>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>com.mycila.maven-license-plugin</groupId>
                 <artifactId>maven-license-plugin</artifactId>
                 <configuration>

@@ -30,12 +30,14 @@ import org.apache.lucene.search.Searcher;
 import org.genemania.domain.GeneNamingSource;
 
 public class LuceneNamingSourceMediator extends LuceneMediator {
+	
 	public LuceneNamingSourceMediator(Searcher searcher, Analyzer analyzer) {
 		super(searcher, analyzer);
 	}
 	
 	public List<GeneNamingSource> getAllNamingSources() {
-		final List<GeneNamingSource> result = new ArrayList<GeneNamingSource>();
+		var result = new ArrayList<GeneNamingSource>();
+		
 		search(String.format("%s:%s", TYPE, NAMINGSOURCE), new AbstractCollector() {
 			@Override
 			public void handleHit(int doc) {
@@ -46,11 +48,14 @@ public class LuceneNamingSourceMediator extends LuceneMediator {
 				}
 			}
 		});
+		
 		Collections.sort(result, new Comparator<GeneNamingSource>() {
+			@Override
 			public int compare(GeneNamingSource source1, GeneNamingSource source2) {
 				return source2.getRank() - source1.getRank();
 			}
 		});
+		
 		return result;
 	}
 }

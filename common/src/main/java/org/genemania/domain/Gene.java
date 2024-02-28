@@ -28,13 +28,13 @@ public class Gene implements java.io.Serializable {
 
     private static final long serialVersionUID = -5362571815869848425L;
     
-    private long              id;
-    private String            symbol;
-    private String            symbolType;
-    private GeneNamingSource  namingSource;
-    private Node              node;
-    private Organism          organism;
-    private boolean           defaultSelected;
+	protected long id;
+	protected String symbol;
+	protected String symbolType;
+	protected GeneNamingSource namingSource;
+	protected Node node;
+	protected Organism organism;
+	protected boolean defaultSelected;
 
     public Gene() {
     }
@@ -170,7 +170,4 @@ public class Gene implements java.io.Serializable {
 				+ ", organism=" + organism + ", symbol=" + symbol
 				+ ", symbolType=" + symbolType + "]";
 	}
-    
-    
-
 }

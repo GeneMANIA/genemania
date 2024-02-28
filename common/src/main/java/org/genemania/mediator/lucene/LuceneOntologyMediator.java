@@ -34,20 +34,23 @@ public class LuceneOntologyMediator extends LuceneMediator implements OntologyMe
 		super(searcher, analyzer);
 	}
 
+	@Override
 	public Ontology getOntology(long ontologyId) throws DataStoreException {
 		return createOntology(ontologyId);
 	}
 
+	@Override
 	public OntologyCategory getCategory(long categoryId) throws DataStoreException {
 		return createOntologyCategory(categoryId);
 	}
 	
+	@Override
 	public List hqlSearch(String queryString) {
 		return null;
 	}
 
+	@Override
 	public OntologyCategory getCategory(String name) throws DataStoreException {
 		return createOntologyCategory(name);
 	}
-
 }

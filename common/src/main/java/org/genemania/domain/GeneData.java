@@ -28,10 +28,10 @@ public class GeneData implements java.io.Serializable {
 
     private static final long serialVersionUID = -2633519861894626072L;
     
-    private long              id;
-    private String            description;
-    private String            externalId;
-    private GeneNamingSource  linkoutSource;
+	protected long id;
+	protected String description;
+	protected String externalId;
+	protected GeneNamingSource linkoutSource;
 
     public GeneData() {
     }
@@ -77,5 +77,9 @@ public class GeneData implements java.io.Serializable {
     public void setLinkoutSource(GeneNamingSource linkoutSource) {
         this.linkoutSource = linkoutSource;
     }
-
+    
+    @Override
+    public String toString() {
+    	return externalId;
+    }
 }

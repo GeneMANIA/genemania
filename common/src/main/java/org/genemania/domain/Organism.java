@@ -34,14 +34,14 @@ public class Organism implements java.io.Serializable {
 
 	private static final long serialVersionUID = -2062779451690027505L;
 
-	private long id;
-	private String name;
-	private String description;
-	private Collection<InteractionNetworkGroup> interactionNetworkGroups = new ArrayList<InteractionNetworkGroup>(0);
-	private String alias;
-	private Ontology ontology;
-	private long taxonomyId;
-	private Collection<Gene> defaultGenes;
+	protected long id;
+	protected String name;
+	protected String description;
+	protected Collection<InteractionNetworkGroup> interactionNetworkGroups;
+	protected String alias;
+	protected Ontology ontology;
+	protected long taxonomyId;
+	protected Collection<Gene> defaultGenes;
 
 	public Organism() {
 	}
@@ -92,7 +92,7 @@ public class Organism implements java.io.Serializable {
 
 	@JsonIgnore
 	public Collection<InteractionNetworkGroup> getInteractionNetworkGroups() {
-		return this.interactionNetworkGroups;
+		return interactionNetworkGroups != null ? interactionNetworkGroups : new ArrayList<>(0);
 	}
 
 	public void setInteractionNetworkGroups(Collection<InteractionNetworkGroup> interactionNetworkGroups) {
