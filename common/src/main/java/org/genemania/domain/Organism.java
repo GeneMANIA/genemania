@@ -37,7 +37,7 @@ public class Organism implements java.io.Serializable {
 	protected long id;
 	protected String name;
 	protected String description;
-	protected Collection<InteractionNetworkGroup> interactionNetworkGroups;
+	protected Collection<InteractionNetworkGroup> interactionNetworkGroups = new ArrayList<>(0);
 	protected String alias;
 	protected Ontology ontology;
 	protected long taxonomyId;
@@ -92,7 +92,7 @@ public class Organism implements java.io.Serializable {
 
 	@JsonIgnore
 	public Collection<InteractionNetworkGroup> getInteractionNetworkGroups() {
-		return interactionNetworkGroups != null ? interactionNetworkGroups : new ArrayList<>(0);
+		return interactionNetworkGroups;
 	}
 
 	public void setInteractionNetworkGroups(Collection<InteractionNetworkGroup> interactionNetworkGroups) {

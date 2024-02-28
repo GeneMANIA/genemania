@@ -38,7 +38,7 @@ public class Node implements java.io.Serializable {
 
     protected long id;
     protected String name;
-	protected Collection<Gene> genes;
+	protected Collection<Gene> genes = new ArrayList<Gene>(0);
 	protected GeneData geneData;
 
     public Node() {
@@ -68,7 +68,7 @@ public class Node implements java.io.Serializable {
 
     @JsonIgnore
     public Collection<Gene> getGenes() {
-        return genes != null ? genes : new ArrayList<Gene>(0);
+        return genes;
     }
 
     public void setGenes(Collection<Gene> genes) {
