@@ -39,7 +39,6 @@ import org.genemania.plugin.LogUtils;
 import org.genemania.plugin.NetworkUtils;
 import org.genemania.plugin.Strings;
 import org.genemania.plugin.cytoscape.CytoscapeUtils;
-import org.genemania.plugin.data.DataSet;
 import org.genemania.plugin.data.DataSetManager;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
@@ -47,7 +46,6 @@ import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 import org.genemania.plugin.report.CytoscapeTextReportExporter;
 import org.genemania.plugin.report.ManiaReport;
-import org.genemania.plugin.report.TextReportExporter;
 import org.genemania.plugin.view.AttributesDialog;
 import org.genemania.plugin.view.util.FileSelectionMode;
 import org.genemania.plugin.view.util.UiUtils;
@@ -80,7 +78,7 @@ public class ManiaResultsController {
 		cytoscapeUtils.expandAttributes(cyNetwork, options, attributes);
 	}
 	
-	public void exportReport(Component parent, ViewState viewState) throws ApplicationException {
+	public void exportReport(Component parent, CyNetwork cyNetwork, ViewState viewState) throws ApplicationException {
 		SearchResult options = viewState.getSearchResult();
 		Set<String> extensions = new HashSet<>();
 		extensions.add("txt"); //$NON-NLS-1$
@@ -97,11 +95,12 @@ public class ManiaResultsController {
 			FileOutputStream stream = new FileOutputStream(file);
 			
 			try {
-				DataSet data = dataSetManager.getDataSet();
+				var data = dataSetManager.getDataSet();
 				List<GeneNamingSource> preferences = Collections.emptyList();
-				IGeneProvider provider = new RankedGeneProviderWithUniprotHack(data.getAllNamingSources(), preferences);
-				TextReportExporter exporter = new CytoscapeTextReportExporter(provider, networkUtils);
-				ManiaReport report = new ManiaReport(viewState, data);
+				var provider = data != null ? new RankedGeneProviderWithUniprotHack(data.getAllNamingSources(), preferences) : null;
+				var exporter = new CytoscapeTextReportExporter(provider, networkUtils);
+				var version = cytoscapeUtils.getDataVersion(cyNetwork);
+				var report = new ManiaReport(viewState, data, version);
 				exporter.export(report, stream);
 				stream.flush();
 			} finally {

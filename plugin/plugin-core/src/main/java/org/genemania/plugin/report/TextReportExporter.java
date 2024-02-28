@@ -243,11 +243,17 @@ public class TextReportExporter implements ReportExporter {
 			return options.getGene(node.getId());
 		}
 		
-		Gene gene = geneCache.get(node.getId());
+		var gene = geneCache.get(node.getId());
+		
 		if (gene == null) {
-			gene = geneProvider.getGene(node);
+			if (geneProvider != null)
+				gene = geneProvider.getGene(node);
+			else
+				gene = options.getGene(node.getId());
+			
 			geneCache.put(node.getId(), gene);
 		}
+		
 		return gene;
 	}
 	

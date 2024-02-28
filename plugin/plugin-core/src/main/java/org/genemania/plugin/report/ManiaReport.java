@@ -30,27 +30,33 @@ import org.apache.log4j.Logger;
 import org.genemania.domain.Gene;
 import org.genemania.domain.OntologyCategory;
 import org.genemania.exception.DataStoreException;
-import org.genemania.mediator.OntologyMediator;
 import org.genemania.plugin.data.DataSet;
-import org.genemania.plugin.model.AnnotationEntry;
 import org.genemania.plugin.model.Group;
 import org.genemania.plugin.model.Network;
 import org.genemania.plugin.model.SearchResult;
 import org.genemania.plugin.model.ViewState;
 
 public class ManiaReport {
-	private final List<GeneEntry> genes;
-	private final List<Network<?>> networks;
+	
+	private List<GeneEntry> genes;
+	private List<Network<?>> networks;
+	private ViewState options;
+	private List<Group<?, ?>> groups;
+	private Map<String, OntologyCategory> categories;
+	
 	private final DataSet data;
-	private final ViewState options;
-	private final List<Group<?, ?>> groups;
-	private final Map<String, OntologyCategory> categories;
-
+	private final String dataVersion;
+	
 	public ManiaReport(ViewState options, DataSet data) {
+		this(options, data, data.getVersion().toString());
+	}
+	
+	public ManiaReport(ViewState options, DataSet data, String dataVersion) {
 		this.options = options;
 		this.data = data;
+		this.dataVersion = dataVersion;
 		
-		SearchResult result = options.getSearchResult();
+		var result = options.getSearchResult();
 		groups = computeGroups(options);
 		networks = populateNetworks(options, groups);
 		genes = populateGenes(result);
@@ -73,17 +79,22 @@ public class ManiaReport {
 	}
 
 	private Map<String, OntologyCategory> populateCategories(SearchResult options) {
-		HashMap<String, OntologyCategory> result = new HashMap<String, OntologyCategory>();
-		OntologyMediator mediator = data.getMediatorProvider().getOntologyMediator();
-		for (AnnotationEntry annotation : options.getEnrichmentSummary()) {
-			String name = annotation.getName();
-			try {
-				result.put(name, mediator.getCategory(name));
-			} catch (DataStoreException e) {
-				Logger logger = Logger.getLogger(getClass());
-				logger.error(String.format("Can't find category: %s", name, e)); //$NON-NLS-1$
+		var result = new HashMap<String, OntologyCategory>();
+		
+		if (data != null) {
+			var mediator = data.getMediatorProvider().getOntologyMediator();
+			
+			for (var annotation : options.getEnrichmentSummary()) {
+				String name = annotation.getName();
+				try {
+					result.put(name, mediator.getCategory(name));
+				} catch (DataStoreException e) {
+					Logger logger = Logger.getLogger(getClass());
+					logger.error(String.format("Can't find category: %s", name, e)); //$NON-NLS-1$
+				}
 			}
 		}
+		
 		return result;
 	}
 
@@ -147,7 +158,7 @@ public class ManiaReport {
 	}
 	
 	public String getDataVersion() {
-		return data.getVersion().toString();
+		return dataVersion;
 	}
 
 	public ViewState getViewState() {

@@ -198,7 +198,8 @@ public class ManiaResultsPanel extends JPanel {
 	
 	protected void handleExportButton() {
 		try {
-			controller.exportReport(this, options);
+			CyNetwork cyNetwork = cytoscapeUtils.getCurrentNetwork();
+			controller.exportReport(this, cyNetwork, options);
 		} catch (ApplicationException e) {
 			LogUtils.log(getClass(), e);
 		}
