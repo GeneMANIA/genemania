@@ -27,6 +27,7 @@ import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Image;
 import java.awt.SystemColor;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -256,6 +257,16 @@ public class UiUtils {
 		while (parent != null) {
 			if (parent instanceof Frame) {
 				return (Frame) parent;
+			}
+			parent = parent.getParent();
+		}
+		return null;
+	}
+	
+	public Window getWindow(Component parent) {
+		while (parent != null) {
+			if (parent instanceof Window) {
+				return (Window) parent;
 			}
 			parent = parent.getParent();
 		}

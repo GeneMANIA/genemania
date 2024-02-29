@@ -22,7 +22,7 @@ package org.genemania.plugin.data.lucene.view;
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
 
-import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -52,7 +52,7 @@ public class EditNetworkDialog extends AbstractEditDialog {
 	private final JTextArea descriptionField;
 	private final JTextField groupNameField;
 	
-	public EditNetworkDialog(final Frame owner, final UiUtils uiUtils) {
+	public EditNetworkDialog(Window owner, UiUtils uiUtils) {
 		super(owner, Strings.editNetwork_title, true);
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		

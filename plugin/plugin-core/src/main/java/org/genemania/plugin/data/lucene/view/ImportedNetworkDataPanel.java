@@ -289,7 +289,7 @@ public class ImportedNetworkDataPanel extends JPanel {
 
 	private void deleteNetworks(DataSet data) {
 		int[] selection = getInstalledTable().getSelectedRows();
-		controller.deleteNetworks(uiUtils.getFrame(this), data, installedModel, selection);
+		controller.deleteNetworks(uiUtils.getWindow(this), data, installedModel, selection);
 //		installedModel.removeRows(selection);
 	}
 
@@ -299,7 +299,7 @@ public class ImportedNetworkDataPanel extends JPanel {
 		for (int index : selection) {
 			final UserNetworkEntry entry = installedModel.get(index);
 			final InteractionNetwork network = entry.network;
-			final EditNetworkDialog dialog = new EditNetworkDialog(uiUtils.getFrame(this), uiUtils);
+			final EditNetworkDialog dialog = new EditNetworkDialog(uiUtils.getWindow(this), uiUtils);
 			dialog.setLocationByPlatform(true);
 			dialog.setOrganism(entry.organism);
 			dialog.setGroup(entry.group);
@@ -323,7 +323,7 @@ public class ImportedNetworkDataPanel extends JPanel {
 				group.setDescription(""); //$NON-NLS-1$
 			}
 			
-			controller.updateNetwork(uiUtils.getFrame(this), data, network, group, dialog.getColor());
+			controller.updateNetwork(uiUtils.getWindow(this), data, network, group, dialog.getColor());
 		}
 	}
 
@@ -338,7 +338,7 @@ public class ImportedNetworkDataPanel extends JPanel {
 		settings.setSource(file.getName());
 		DataFileType type = getImportPanel().getType();
 		
-		controller.importNetwork(uiUtils.getFrame(this), data, settings, networkFile, type);
+		controller.importNetwork(uiUtils.getWindow(this), data, settings, networkFile, type);
 		uiUtils.packColumns(getInstalledTable());
 		getImportPanel().clear();
 	}

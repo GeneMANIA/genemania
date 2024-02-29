@@ -106,7 +106,7 @@ public class NetManiaPanel extends JPanel {
 			}
 		};
 		
-		taskDispatcher.executeTask(task, uiUtils.getFrame(this), true, true);
+		taskDispatcher.executeTask(task, uiUtils.getWindow(this), true, true);
 		LogUtils.log(getClass(), task.getLastError());
 		
 		populate(data);
@@ -168,7 +168,7 @@ public class NetManiaPanel extends JPanel {
 			}
 		};
 		
-		taskDispatcher.executeTask(task, uiUtils.getFrame(this), true, true);
+		taskDispatcher.executeTask(task, uiUtils.getWindow(this), true, true);
 		LogUtils.log(getClass(), task.getLastError());
 	}
 	

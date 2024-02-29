@@ -18,7 +18,7 @@
  */
 package org.genemania.plugin.data.lucene.controllers;
 
-import java.awt.Frame;
+import java.awt.Window;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.Set;
@@ -100,7 +100,7 @@ public class ImportOrganismController {
 		};
 	}
 
-	public void deleteOrganisms(Frame parent, final LuceneDataSet data, final DynamicTableModel<Organism> installedModel, final int[] selection) {
+	public void deleteOrganisms(Window parent, LuceneDataSet data, DynamicTableModel<Organism> installedModel, int[] selection) {
 		GeneManiaTask task = new GeneManiaTask(Strings.importOrganismDelete_title) {
 			@Override
 			protected void runTask() throws Throwable {
@@ -116,7 +116,7 @@ public class ImportOrganismController {
 		
 	}
 
-	public void updateOrganism(Frame parent, final DataSet data, final Organism organism) {
+	public void updateOrganism(Window parent, DataSet data, Organism organism) {
 		GeneManiaTask task = new GeneManiaTask(Strings.importOrganismUpdate_title) {
 			@Override
 			protected void runTask() throws Throwable {
@@ -134,7 +134,7 @@ public class ImportOrganismController {
 		LogUtils.log(getClass(), task.getLastError());
 	}
 	
-	public void importOrganism(final Frame parent, final DataSet data, final Reader reader, final Organism organism) {
+	public void importOrganism(Window parent, final DataSet data, final Reader reader, final Organism organism) {
 		GeneManiaTask task = new GeneManiaTask(Strings.importOrganismImport_title) {
 			@Override
 			protected void runTask() throws Throwable {

@@ -136,6 +136,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 		return version.getBaseVersion().compareTo(minVersion) >= 0;
 	}
 
+	@Override
 	public void handleCheck() {
 		final boolean[] requiresConfiguration = new boolean[1];
 		GeneManiaTask task = new GeneManiaTask(Strings.dataUpdateCheck_title) {
@@ -144,10 +145,11 @@ public abstract class AbstractGeneMania implements GeneMania {
 				requiresConfiguration[0] = checkForUpdates(progress);
 			}
 		};
-		taskDispatcher.executeTask(task, uiUtils.getFrame(cytoscapeUtils.getFrame()), true, true);
+		taskDispatcher.executeTask(task, cytoscapeUtils.getFrame(), true, true);
 		handleConfiguration(requiresConfiguration[0]);
 	}
 
+	@Override
 	public void handleSwitch() {
 		try {
 			chooseDataSet(cytoscapeUtils.getFrame());
@@ -156,6 +158,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 		}
 	}
 
+	@Override
 	public void handleDownload() {
 		final boolean[] requiresConfiguration = new boolean[1];
 		GeneManiaTask task = new GeneManiaTask(Strings.dataUpdateDownload_title) {
@@ -337,7 +340,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 				loadDataSet(dataPath, progress, false, true);
 			}
 		};
-		taskDispatcher.executeTask(task, uiUtils.getFrame(parent), true, true);
+		taskDispatcher.executeTask(task, uiUtils.getWindow(parent), true, true);
 		LogUtils.log(getClass(), task.getLastError());
 	}
 	
@@ -419,7 +422,7 @@ public abstract class AbstractGeneMania implements GeneMania {
 				requiresConfiguration[0] = initializeData(progress, reportErrors);
 			}
 		};
-		taskDispatcher.executeTask(task, uiUtils.getFrame(parent), true, true);
+		taskDispatcher.executeTask(task, uiUtils.getWindow(parent), true, true);
 		LogUtils.log(getClass(), task.getLastError());
 		
 		if (requiresConfiguration[0]) {

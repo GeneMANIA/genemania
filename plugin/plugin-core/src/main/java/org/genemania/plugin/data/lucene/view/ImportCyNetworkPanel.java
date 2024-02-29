@@ -740,7 +740,7 @@ public class ImportCyNetworkPanel extends JPanel {
 			}
 
 		};
-		taskDispatcher.executeTask(task, uiUtils.getFrame(this), true, true);
+		taskDispatcher.executeTask(task, uiUtils.getWindow(this), true, true);
 	}
 	
 	protected void handleCoexpressionNetwork(DataImportSettings settings, CyNetwork cyNetwork, String idAttribute, List<String> expressionAttributes, Writer writer, ProgressReporter progress) {

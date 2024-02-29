@@ -19,7 +19,7 @@
 package org.genemania.plugin.data.lucene.view;
 
 import java.awt.Component;
-import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -36,8 +36,8 @@ public abstract class AbstractEditDialog extends JDialog {
 	private boolean canceled;
 	private JButton saveButton;
 
-	public AbstractEditDialog(Frame owner, String title, boolean modality) {
-		super(owner, title, modality);
+	public AbstractEditDialog(Window owner, String title, boolean modal) {
+		super(owner, title, (modal ? ModalityType.APPLICATION_MODAL : ModalityType.MODELESS));
 		canceled = true;
 	}
 

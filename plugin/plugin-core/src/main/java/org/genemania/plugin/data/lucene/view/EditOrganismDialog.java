@@ -21,7 +21,7 @@ package org.genemania.plugin.data.lucene.view;
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
 
-import java.awt.Frame;
+import java.awt.Window;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -46,8 +46,8 @@ public class EditOrganismDialog extends AbstractEditDialog {
 	private final JTextArea descriptionField;
 	private final OrganismValidator validator;
 
-	public EditOrganismDialog(Frame frame, UiUtils uiUtils, OrganismValidator validator) {
-		super(frame, Strings.editOrganism_title, true);
+	public EditOrganismDialog(Window owner, UiUtils uiUtils, OrganismValidator validator) {
+		super(owner, Strings.editOrganism_title, true);
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		
 		this.validator = validator;

@@ -24,8 +24,10 @@ import static javax.swing.GroupLayout.PREFERRED_SIZE;
 
 import java.awt.Container;
 import java.awt.Dialog;
+import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Window;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
@@ -96,7 +98,7 @@ public class CompletionTransferHandler extends TransferHandler {
 			}
 		};
 		
-		Frame parent = uiUtils.getFrame(comp);
+		Window parent = uiUtils.getWindow(comp);
 		taskDispatcher.executeTask(task, parent, true, true);
 		
 		if (result[0] != null && result[0].hasIssues()) {
@@ -111,10 +113,10 @@ public class CompletionTransferHandler extends TransferHandler {
 		
 		while (parent != null) {
 			if (parent instanceof Frame) {
-				dialog = new JDialog((Frame) parent, true);
+				dialog = new JDialog((Frame) parent, ModalityType.APPLICATION_MODAL);
 				break;
 			} else if (parent instanceof Dialog) {
-				dialog = new JDialog((Dialog) parent, true);
+				dialog = new JDialog((Dialog) parent, ModalityType.APPLICATION_MODAL);
 				break;
 			}
 			parent = parent.getParent();

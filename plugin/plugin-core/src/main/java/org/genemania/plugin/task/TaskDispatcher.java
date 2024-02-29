@@ -44,7 +44,7 @@ public class TaskDispatcher {
 		this.uiUtils = uiUtils;
 	}
 	
-	public void executeTask(final GeneManiaTask task, Window owner, boolean modal, boolean cancelable) {
+	public void executeTask(GeneManiaTask task, Window owner, boolean modal, boolean cancelable) {
 		synchronized (mutex) {
 			if (taskDialog != null) {
 				throw new RuntimeException();
@@ -108,6 +108,7 @@ public class TaskDispatcher {
 			this.task = task;
 		}
 		
+		@Override
 		public void run() {
 			task.setProgressReporter(taskDialog);
 			task.run();

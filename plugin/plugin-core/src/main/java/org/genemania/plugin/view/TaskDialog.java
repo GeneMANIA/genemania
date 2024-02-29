@@ -62,13 +62,13 @@ public class TaskDialog extends JDialog implements ProgressReporter {
 	private final UiUtils uiUtils;
 
 	public TaskDialog(Frame owner, String title, boolean modal, boolean cancelable, UiUtils uiUtils) {
-		super(owner, title, modal);
+		super(owner, title, (modal ? ModalityType.APPLICATION_MODAL : ModalityType.MODELESS));
 		this.uiUtils = uiUtils;
 		initialize(cancelable);		
 	}
 
 	public TaskDialog(Dialog owner, String title, boolean modal, boolean cancelable, UiUtils uiUtils) {
-		super(owner, title, modal);
+		super(owner, title, (modal ? ModalityType.APPLICATION_MODAL : ModalityType.MODELESS));
 		this.uiUtils = uiUtils;
 		initialize(cancelable);
 	}
@@ -106,6 +106,7 @@ public class TaskDialog extends JDialog implements ProgressReporter {
 		
 		cancelButton = new JButton(Strings.taskDialogCancelButton_label);
 		cancelButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				isCanceled = true;
 			}
@@ -115,6 +116,7 @@ public class TaskDialog extends JDialog implements ProgressReporter {
 		final TaskDialog dialog = this;
 		closeButton = new JButton(Strings.taskDialogCloseButton_label);
 		closeButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				dialog.setVisible(false);
 			}
@@ -145,6 +147,7 @@ public class TaskDialog extends JDialog implements ProgressReporter {
 		
 		add(panel, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(16, 16, 16, 16), 0, 0));
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				while (!isCanceled) {
 					updateMemoryUsage();
@@ -170,37 +173,45 @@ public class TaskDialog extends JDialog implements ProgressReporter {
 		invalidate();
 	}
 	
+	@Override
 	public int getMaximumProgress() {
 		return maximumProgress;
 	}
 
+	@Override
 	public int getProgress() {
 		return progress;
 	}
 
+	@Override
 	public String getStatus() {
 		return status;
 	}
 
+	@Override
 	public boolean isCanceled() {
 		return isCanceled;
 	}
 
+	@Override
 	public void setMaximumProgress(final int maximum) {
 		maximumProgress = maximum;
 		progressBar.setMaximum(maximum);
 	}
 
+	@Override
 	public void setProgress(final int progress) {
 		this.progress = progress;
 		progressBar.setIndeterminate(false);
 		progressBar.setValue(progress);
 	}
 
+	@Override
 	public void setStatus(final String status) {
 		if (!SwingUtilities.isEventDispatchThread()) {
 			try {
 				SwingUtilities.invokeAndWait(new Runnable() {
+					@Override
 					public void run() {
 						setStatus(status);
 					}
@@ -215,14 +226,17 @@ public class TaskDialog extends JDialog implements ProgressReporter {
 		statusLabel.setText(status);
 	}
 
+	@Override
 	public String getDescription() {
 		return description;
 	}
 
+	@Override
 	public void setDescription(final String description) {
 		if (!SwingUtilities.isEventDispatchThread()) {
 			try {
 				SwingUtilities.invokeAndWait(new Runnable() {
+					@Override
 					public void run() {
 						setDescription(description);
 					}

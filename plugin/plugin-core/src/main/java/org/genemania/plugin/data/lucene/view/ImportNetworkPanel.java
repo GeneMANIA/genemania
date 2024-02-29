@@ -293,7 +293,7 @@ public class ImportNetworkPanel extends JPanel {
 			}
 		};
 		
-		taskDispatcher.executeTask(task, uiUtils.getFrame(this), true, false);
+		taskDispatcher.executeTask(task, uiUtils.getWindow(this), true, false);
 	}
 	
 	private void addComponents() {
@@ -386,7 +386,7 @@ public class ImportNetworkPanel extends JPanel {
 			index++;
 		}
 		
-		OrganismChoice choice = (OrganismChoice) JOptionPane.showInputDialog(uiUtils.getFrame(this), Strings.importNetworkDisambiguateMessage, Strings.importNetworkDisambiguateTitle, JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+		OrganismChoice choice = (OrganismChoice) JOptionPane.showInputDialog(uiUtils.getWindow(this), Strings.importNetworkDisambiguateMessage, Strings.importNetworkDisambiguateTitle, JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
 		
 		if (choice == null)
 			return null;
@@ -514,7 +514,7 @@ public class ImportNetworkPanel extends JPanel {
 		File file;
 		
 		try {
-			file = uiUtils.getFile(uiUtils.getFrame(this), Strings.importNetworkFile_title, initialFile, Strings.importNetworkPanelTypeDescription_label, extensions, FileSelectionMode.OPEN_FILE);
+			file = uiUtils.getFile(uiUtils.getWindow(this), Strings.importNetworkFile_title, initialFile, Strings.importNetworkPanelTypeDescription_label, extensions, FileSelectionMode.OPEN_FILE);
 		} catch (ApplicationException e) {
 			LogUtils.log(getClass(), e);
 			return;

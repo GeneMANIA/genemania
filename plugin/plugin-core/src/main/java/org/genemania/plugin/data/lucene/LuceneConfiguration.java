@@ -23,6 +23,7 @@ import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
 
 import java.awt.Dialog;
+import java.awt.Dialog.ModalityType;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -88,9 +89,9 @@ public class LuceneConfiguration extends Configuration {
 	@SuppressWarnings("serial")
 	public void showUi(Window parent) {
 		if (parent instanceof Frame) {
-			dialog = new JDialog((Frame) parent, true);
+			dialog = new JDialog(parent, ModalityType.APPLICATION_MODAL);
 		} else if (parent instanceof Dialog) {
-			dialog = new JDialog((Dialog) parent, true);
+			dialog = new JDialog(parent, ModalityType.APPLICATION_MODAL);
 		} else {
 			return;
 		}

@@ -228,7 +228,7 @@ public class CompletionPanel extends JPanel {
 
 	public JDialog getProposalDialog() {
 		if (proposalDialog == null) {
-			proposalDialog = new JDialog(uiUtils.getFrame(this), false);
+			proposalDialog = new JDialog(uiUtils.getWindow(this));
 			proposalDialog.setUndecorated(true);
 			proposalDialog.setAlwaysOnTop(true);
 			

@@ -391,7 +391,7 @@ public class ImportOrganismPanel extends JPanel {
 		File file;
 		
 		try {
-			file = uiUtils.getFile(uiUtils.getFrame(this), Strings.importNetworkFile_title, initialFile, Strings.importNetworkPanelTypeDescription_label, extensions, FileSelectionMode.OPEN_FILE);
+			file = uiUtils.getFile(uiUtils.getWindow(this), Strings.importNetworkFile_title, initialFile, Strings.importNetworkPanelTypeDescription_label, extensions, FileSelectionMode.OPEN_FILE);
 		} catch (ApplicationException e) {
 			LogUtils.log(getClass(), e);
 			return;
@@ -416,7 +416,7 @@ public class ImportOrganismPanel extends JPanel {
 			organism.setDescription(descriptionField.getText());
 			
 			Reader reader = new FileReader(fileField.getText());
-			controller.importOrganism(uiUtils.getFrame(this), data, reader, organism);
+			controller.importOrganism(uiUtils.getWindow(this), data, reader, organism);
 			resetFields();
 		} catch (ApplicationException e) {
 			LogUtils.log(getClass(), e);
@@ -449,7 +449,7 @@ public class ImportOrganismPanel extends JPanel {
 
 	private void deleteOrganisms(LuceneDataSet data) {
 		int[] selection = getInstalledTable().getSelectedRows();
-		controller.deleteOrganisms(uiUtils.getFrame(this), data, installedModel, selection);
+		controller.deleteOrganisms(uiUtils.getWindow(this), data, installedModel, selection);
 	}
 	
 	private void editOrganisms(DataSet data) {
@@ -461,7 +461,7 @@ public class ImportOrganismPanel extends JPanel {
 			
 			try {
 				validator.setCurrentOrganism(organism);
-				dialog = new EditOrganismDialog(uiUtils.getFrame(this), uiUtils, validator);
+				dialog = new EditOrganismDialog(uiUtils.getWindow(this), uiUtils, validator);
 				dialog.setLocationByPlatform(true);
 				dialog.setOrganismName(organism.getName());
 				dialog.setAlias(organism.getAlias());
@@ -481,7 +481,7 @@ public class ImportOrganismPanel extends JPanel {
 			organism.setAlias(dialog.getAlias());
 			organism.setTaxonomyId(dialog.getTaxonomyId());
 			organism.setDescription(dialog.getDescription());
-			controller.updateOrganism(uiUtils.getFrame(this), data, organism);
+			controller.updateOrganism(uiUtils.getWindow(this), data, organism);
 		}
 	}
 
