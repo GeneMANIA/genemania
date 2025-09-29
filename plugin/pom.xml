@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>plugin-parent</artifactId>
-    <version>3.5.3</version>
+    <version>3.5.4</version>
     <packaging>pom</packaging>
     <name>GeneMANIA Cytoscape App Parent</name>
 
@@ -25,7 +25,7 @@
         <!-- Oldest data set that works with this binary -->
         <minDataVersion>2010-08-25</minDataVersion>
         <!-- App version -->
-        <cytoscapeVersion>3.5.3</cytoscapeVersion>
+        <cytoscapeVersion>${project.version}</cytoscapeVersion>
         <!-- Cytoscape metadata -->
 		<cy3.version>3.9.0</cy3.version>
     </properties>

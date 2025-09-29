@@ -3,7 +3,7 @@
 	<parent>
         <groupId>org.genemania</groupId>
         <artifactId>plugin-parent</artifactId>
-        <version>3.5.3</version>
+        <version>3.5.4</version>
         <relativePath>..</relativePath>
 	</parent>
     <properties>
@@ -180,7 +180,7 @@
                 <version>1.7</version>
                 <executions>
                     <execution>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <configuration>
                             <target>
                                 <!-- Will run build.xml in same folder -->

@@ -322,7 +322,7 @@ public class QueryBar extends JPanel {
 			
 			queryTextArea.getActionMap().put(ENTER_ACTION_KEY, new AbstractAction() {
 				@Override
-				public void actionPerformed(ActionEvent e) {System.out.println("\n\nENTER");
+				public void actionPerformed(ActionEvent e) {
 					QueryBar.this.firePropertyChange(
 							NetworkSearchTaskFactory.SEARCH_REQUESTED_PROPERTY, null, null);
 				}
